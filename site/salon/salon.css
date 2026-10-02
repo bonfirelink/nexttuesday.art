@@ -14,6 +14,7 @@
   --ground: #e6e6e8;
   --ink: #2b2d3e;
   --red: #e5174a;
+  --red-text: #c0103a; /* 4.5:1+ on --ground; --red is for large type and shapes */
   --white: #fff;
   --muted: #53566b;
   --strip: rgba(255, 255, 255, 0.68);
@@ -397,7 +398,7 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
 .entry .meta { font-style: italic; color: var(--muted); margin: 0.15em 0 0; font-size: 0.9375rem; }
 .entry .line { margin: 0.5em 0 0; max-width: 46ch; }
 .entry .cat { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 0.9375rem; }
-.entry.rave h3 { color: var(--red); text-shadow: 0.05em 0.05em 0 var(--shadow); text-transform: uppercase; letter-spacing: -0.02em; }
+.entry.rave h3 { color: var(--red-text); text-shadow: 0.05em 0.05em 0 var(--shadow); text-transform: uppercase; letter-spacing: -0.02em; }
 @media (min-width: 760px) {
   .entry { grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1.1fr) 4rem; }
   .entry .tag { grid-row: 1; }

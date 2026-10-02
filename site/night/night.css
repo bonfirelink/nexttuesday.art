@@ -403,7 +403,7 @@ main {
 
 .label .mark {
   margin-right: 0.6em;
-  color: var(--fire);
+  color: var(--fire-text);
 }
 
 .statement {
