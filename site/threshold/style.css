@@ -65,23 +65,31 @@ body {
   outline-offset: 4px;
 }
 
-/* A faint paper grain; it never takes clicks. */
-body::after {
+/* Paper grain, laid under the page's content; it never takes clicks and
+   never sits above anything fixed. */
+.page::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 10;
+  z-index: -1;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.13;
   mix-blend-mode: multiply;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .15 0 0 0 0 .15 0 0 0 0 .19 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .page {
   position: relative;
+  max-width: none;
+  padding: 0 0 5rem;
+}
+
+.page > * {
   max-width: calc(var(--measure) + 2 * var(--gutter));
-  margin: 0 auto;
-  padding: 0 var(--gutter) 5rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 }
 
 /* ---------- Masthead: a small heptagram and the way between the pages. */
@@ -89,8 +97,8 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.9rem;
-  padding: 1.1rem 0 0;
+  gap: 0.45rem;
+  padding-top: 0.9rem;
 }
 
 .masthead .home {
@@ -156,7 +164,7 @@ h2 {
 }
 
 .title {
-  font-size: clamp(2.6rem, 17vw, 4.5rem);
+  font-size: clamp(2.6rem, 17vw, 5rem);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   text-align: center;
@@ -172,7 +180,7 @@ h2 {
 }
 
 .lede {
-  margin: 1.4rem auto 0;
+  margin: 1.2rem auto 0;
   max-width: 30rem;
   font-size: var(--size-lede);
   font-style: italic;
@@ -231,6 +239,9 @@ a:focus-visible {
 .onward {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  text-align: left;
   gap: 0.6rem;
   margin-top: 0.4rem;
   padding: 0.4rem 0;
@@ -244,6 +255,7 @@ a:focus-visible {
 }
 
 .onward svg {
+  flex: none;
   width: 14px;
   height: 14px;
   color: var(--fire);
@@ -395,7 +407,7 @@ html:not(.js) .needs-js,
 
 /* ---------- The home threshold: the figure constructs itself, then breathes. */
 .threshold {
-  padding-top: 1.5rem;
+  padding-top: 0.75rem;
   min-height: calc(100svh - 7rem);
   display: flex;
   flex-direction: column;
@@ -403,8 +415,8 @@ html:not(.js) .needs-js,
 }
 
 .threshold .plate {
-  margin-top: 0.5rem;
-  width: min(100%, 22rem);
+  margin-top: 0.25rem;
+  width: min(100%, 19.5rem);
 }
 
 .threshold .plate figcaption {
@@ -412,7 +424,7 @@ html:not(.js) .needs-js,
 }
 
 .threshold .title {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   max-width: 40rem;
 }
 
@@ -936,7 +948,7 @@ details.wink p {
   }
 
   .threshold .plate {
-    width: min(100%, 23rem);
+    width: min(100%, 22rem);
   }
 
   .threshold .title {
@@ -959,6 +971,16 @@ details.wink p {
 
   .sec {
     margin-top: 7rem;
+  }
+}
+
+@media (max-width: 359px) {
+  .title.wide {
+    letter-spacing: 0.04em;
+  }
+
+  .title.long {
+    letter-spacing: 0;
   }
 }
 
