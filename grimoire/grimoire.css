@@ -102,14 +102,16 @@ b, strong { font-weight: 400; color: var(--fire-hi); }
 .mast a:hover { color: var(--fire-hi); }
 .mast .name { color: var(--bone); font-weight: 500; white-space: nowrap; }
 .mast .name .mark { color: var(--fire); margin-right: 0.5em; }
-.rite-skip { color: var(--dim); white-space: nowrap; }
+.rite-skip { color: var(--dim); white-space: nowrap; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; padding: 0.6rem 0; }
 .rite-skip:hover { color: var(--fire-hi); }
+.js .stage .rite-skip { position: absolute; top: 0.5rem; right: var(--gutter); z-index: 2; }
+html:not(.js) .rite-skip { display: block; margin: 0 0 1rem; }
 
 /* The sigil */
 pre[data-sigil] {
   display: block;
   margin: 0 auto;
-  width: min(100%, 50svh, 520px);
+  width: min(100%, 44svh, 520px);
   aspect-ratio: 1;
   overflow: hidden;
   font-family: var(--mono);
@@ -137,8 +139,8 @@ pre[data-sigil].fire { color: var(--fire); }
   min-height: 100svh;
   align-content: center;
 }
-.js .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.lines { display: grid; align-content: start; min-height: 5.2em; }
+.js .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; padding-top: 3.2rem; padding-bottom: calc(1rem + 64px); } /* the bottom 64px stay clear for the variants bar */
+.lines { display: grid; align-content: start; min-height: 4.4em; }
 .line {
   margin: 0;
   font-size: clamp(1.9rem, 1.3rem + 2.6vw, 3.4rem);
@@ -272,9 +274,7 @@ h2.big .caps { letter-spacing: 0.04em; }
 #correspondences { padding-bottom: 0; }
 #correspondences .corr { margin-bottom: 0; }
 .corr .g { width: 2.2rem; color: var(--fire); font-size: 1.1rem; padding-right: 0; }
-.corr .n a { text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
-.corr .n a::after { content: ""; position: absolute; inset: 0; }
-.corr tr { position: relative; }
+.corr .n a { display: inline-block; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; white-space: nowrap; padding: 0.85rem 0; margin: -0.85rem 0; }
 .corr tr:hover { background: linear-gradient(90deg, var(--fire-dim), transparent 70%); }
 .corr tr:hover .n a { color: var(--fire-hi); }
 .corr .c { color: var(--dim); white-space: nowrap; }
@@ -288,9 +288,9 @@ h2.big .caps { letter-spacing: 0.04em; }
 .corr-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.3rem;
+  gap: 0.5rem 1.1rem;
   padding: 1.5rem var(--gutter) 0;
-  max-width: var(--measure);
+  max-width: 40rem;
   margin: 0 auto;
   font-family: var(--mono);
   font-size: var(--label);

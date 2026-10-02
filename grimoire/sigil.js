@@ -186,7 +186,7 @@
     var cols = +pre.getAttribute("data-cols") || 84;
     var still = matchMedia("(prefers-reduced-motion: reduce)");
     var rows = 0, aspect = 0.6;
-    var pose = { phi: 0.6, alpha: 0.62, spin: 0.3, ax: -0.5, ay: 0.4 };
+    var pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, raf = 0, last = 0, acc = 0;
 
     function fit() {
@@ -220,7 +220,7 @@
         pose.spin += dt * 0.22 * speed;
         pose.ax += dt * 0.35 * speed;
         pose.ay += dt * 0.6 * speed;
-        pose.alpha = 0.62 + 0.2 * Math.sin(acc * 0.4);
+        pose.alpha = 0.52 + 0.14 * Math.sin(acc * 0.4);
       }
       if (speed > 1) speed = Math.max(1, speed - dt * 2.5);
       if (acc >= 1 / 30) { acc = acc % (1 / 30); draw(); }
@@ -242,7 +242,7 @@
       var dx = e.clientX - lastX, dy = e.clientY - lastY;
       lastX = e.clientX; lastY = e.clientY;
       pose.phi += dx * 0.01; pose.spin += dx * 0.004;
-      pose.alpha = Math.max(0.3, Math.min(1.4, pose.alpha + dy * 0.006));
+      pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + dy * 0.006));
       pose.ay += dx * 0.01; pose.ax += dy * 0.01;
       if (still.matches) draw();
     });
@@ -270,6 +270,8 @@
     draw();
     pre.classList.add("live");
     start();
+    // the probe ran on the fallback mono; refit once the real face is in
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fit(); draw(); });
   }
 
   function init() {
