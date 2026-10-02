@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Next Tuesday Society</title>
+<meta name="description" content="Punks, dreamers and conspirators, drawing circles in Geneva. Every Tuesday, somewhere. Whoever comes is the right people...">
+<meta name="theme-color" content="#f0435a">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f0435a'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%233326d4' stroke-width='6'/%3E%3Cpath d='M16 11l4 7h-8z' fill='%23ffb21a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral: #f0435a; --fire: #e51d47; --blue: #3326d4; --ink: #1d1570;
+    --lav: #b9b0f2; --gold: #ffb21a; --light: #fdedf0;
+    --display: "Syne", system-ui, sans-serif; --mono: "Space Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--coral); }
+  body { margin: 0; min-height: 100vh; background: var(--coral); color: var(--ink); font-family: var(--display); font-size: 1.1rem; line-height: 1.45; overflow-x: hidden; }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 5; opacity: .32; mix-blend-mode: multiply;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .4 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px dashed var(--gold); outline-offset: 5px; }
+  main { max-width: 32rem; margin: 0 auto; padding: 0 16px; text-align: center; }
+  .label { font-family: var(--mono); font-size: .68rem; letter-spacing: .34em; text-transform: uppercase; }
+  header { padding: 2rem 0 1.2rem; }
+
+  .portal { display: block; width: 100%; max-width: 420px; margin: 0 auto; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .portal svg { display: block; width: 100%; height: auto; }
+  .spin { transform-box: fill-box; transform-origin: center; animation: spin 80s linear infinite; }
+  .spin.r { animation-duration: 120s; animation-direction: reverse; }
+  .knot { transform-box: view-box; transform-origin: 200px 215px; transition: transform 2.4s cubic-bezier(.6,0,.2,1); }
+  .lit .knot { transform: rotate(60deg); }
+  .tet { transition: filter 2s; }
+  .lit .tet { filter: drop-shadow(0 0 10px var(--gold)); }
+  .tw { transform-box: fill-box; transform-origin: center; animation: tw 4s ease-in-out infinite; }
+  .tw.b { animation-delay: -2s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes tw { 50% { transform: scale(.6); opacity: .6; } }
+
+  .call { font-family: var(--mono); font-size: .9rem; margin: 1.6rem 0 .6rem; }
+  h1 { font-weight: 800; font-size: clamp(2rem, 9vw, 3rem); line-height: 1.02; letter-spacing: -.02em; color: var(--light); margin: 0 0 1.8rem; text-shadow: 3px 3px 0 var(--blue); }
+  .card { background: var(--blue); color: var(--light); border: 2px solid var(--gold); padding: 1.1rem 1.2rem; margin: 0 6px 0 0; box-shadow: 6px 6px 0 var(--ink); text-align: left; }
+  .card p { margin: 0; }
+  .secret { display: grid; margin: 2rem 0 0; min-height: 3.4em; }
+  .secret > * { grid-area: 1 / 1; margin: 0; }
+  .whisper { white-space: pre-line; font-weight: 600; font-size: 1.2rem; opacity: 0; transform: scale(.96); transition: opacity 2s, transform 2s; }
+  .lit .whisper { opacity: 1; transform: none; }
+  .hint { padding-top: .8em; transition: opacity 1s; }
+  .lit .hint { opacity: 0; }
+
+  .after { padding: 18vh 0 3rem; }
+  .omen { font-size: 1.3rem; background: var(--lav); border: 2px solid var(--ink); padding: 1.4rem 1rem; margin: 0 6px 3.5rem 0; box-shadow: 6px 6px 0 var(--blue); }
+  .omen b { display: block; font-weight: 800; font-size: clamp(2.2rem, 11vw, 3.4rem); letter-spacing: .04em; line-height: 1.1; color: var(--fire); text-transform: uppercase; }
+  .contact { list-style: none; padding: 0; margin: 0 0 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
+  .contact a { display: inline-block; font-family: var(--mono); font-size: .75rem; text-decoration: none; padding: .45rem .8rem; border-radius: 99px; background: var(--ink); color: var(--light); }
+  .contact a:hover, .contact a:focus-visible { background: var(--gold); color: var(--ink); }
+  .sign { font-weight: 600; margin: 0; }
+
+  .fade { opacity: 0; animation: in 1.8s ease forwards; animation-delay: var(--t, 0s); }
+  @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .spin, .tw { animation: none; }
+    .fade { animation: none; opacity: 1; }
+    .knot, .whisper { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="label fade">Next Tuesday Society</header>
+
+  <button class="portal fade" style="--t:.3s" type="button" aria-label="Turn the portal" aria-controls="whisper">
+    <svg viewBox="0 0 400 400" aria-hidden="true">
+      <defs>
+        <pattern id="s" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="9" height="9" fill="#3326d4"/><rect width="4" height="9" fill="#8a7ff5"/></pattern>
+        <pattern id="s2" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#f0435a"/><rect width="4" height="8" fill="#5b4ee6"/></pattern>
+        <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0v20" fill="none" stroke="#ffb21a" stroke-width="2"/></pattern>
+        <linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b4ee6"/><stop offset="1" stop-color="#f0435a"/></linearGradient>
+        <linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset=".3" stop-color="#3326d4"/><stop offset="1" stop-color="#8b3bc9"/></linearGradient>
+        <path id="st" d="M0-14 3-3 14 0 3 3 0 14-3 3-14 0-3-3z"/>
+      </defs>
+      <rect x="140" y="20" width="110" height="92" fill="#a49cf0"/>
+      <path d="M195 40 205 82 178 48 216 67 174 67 212 48 185 82Z" fill="none" stroke="#ece8ff" stroke-width="1.5"/>
+      <rect x="28" y="112" width="62" height="170" fill="url(#v)"/>
+      <path d="M36 122h46v20H44v20h30v20H44v20h38v20H52v20h22v20H40" fill="none" stroke="#ffb21a" stroke-width="3"/>
+      <rect x="62" y="40" width="86" height="112" fill="url(#s2)" stroke="#ffb21a" stroke-width="3"/>
+      <use href="#st" x="105" y="96" fill="#ffb21a" class="tw b"/>
+      <path d="M300 64a40 40 0 0 0 80 0" fill="none" stroke="#c9bdff" stroke-width="16"/>
+      <rect x="296" y="222" width="84" height="118" fill="url(#v)"/><rect x="296" y="222" width="84" height="118" fill="url(#g)"/>
+      <rect x="30" y="292" width="112" height="86" fill="url(#v)"/>
+      <path d="M142 378 30 300M142 378 30 330M142 378 30 360M142 378 60 292M142 378 100 292M142 378 142 292" stroke="#ffb21a" stroke-width="2"/>
+      <path d="M22 300a48 48 0 0 1 96 0h-12a36 36 0 0 0-72 0h-12m24 0a24 24 0 0 1 48 0h-12a12 12 0 0 0-24 0z" fill="#3326d4"/>
+      <rect x="120" y="344" width="260" height="34" fill="url(#s)" opacity=".85"/>
+      <circle cx="200" cy="215" r="104" fill="none" stroke="url(#t)" stroke-width="74"/>
+      <g class="spin" fill="none" stroke="#7266f2" stroke-width="1.6">
+        <circle cx="200" cy="215" r="80" stroke-dasharray="16 7 4 11"/>
+        <circle cx="200" cy="215" r="92" stroke-dasharray="9 12 22 5"/>
+        <circle cx="200" cy="215" r="104" stroke-dasharray="28 6 7 9"/>
+        <circle cx="200" cy="215" r="116" stroke-dasharray="12 9 5 14"/>
+        <circle cx="200" cy="215" r="128" stroke-dasharray="20 5 9 8"/>
+      </g>
+      <g class="spin r" fill="none" stroke="#f0435a" stroke-width="1.2" opacity=".7">
+        <circle cx="200" cy="215" r="86" stroke-dasharray="3 18 11 22"/>
+        <circle cx="200" cy="215" r="110" stroke-dasharray="6 26 14 19"/>
+      </g>
+      <g class="knot" fill="none" stroke="#ffb21a" stroke-width="3.5">
+        <circle cx="200" cy="175" r="64"/><circle cx="235" cy="235" r="64"/><circle cx="165" cy="235" r="64"/>
+      </g>
+      <g class="tet"><path d="M200 190 225 236H175Z" fill="#3326d4"/><path d="M200 190 200 222 175 236Z" fill="#6d62f5"/><path d="M200 190 200 222 225 236Z" fill="#4a3de8"/></g>
+      <circle cx="342" cy="126" r="24" fill="url(#s)"/>
+      <circle cx="120" cy="262" r="28" fill="url(#s)"/>
+      <circle cx="58" cy="252" r="10" fill="#5b4ee6"/>
+      <circle cx="338" cy="300" r="11" fill="#e3dcff"/>
+      <use href="#st" x="330" y="40" fill="#ffb21a" class="tw"/>
+      <use href="#st" x="262" y="330" fill="#e3dcff" class="tw b"/>
+    </svg>
+  </button>
+
+  <p class="call label fade" style="--t:1s">Children of the night...</p>
+  <h1 class="fade" style="--t:1.6s">We tell ourselves stories until they come true.</h1>
+  <div class="card fade" style="--t:2.4s"><p>Punks, dreamers and conspirators, drawing circles in Geneva. Every Tuesday, somewhere. Whoever comes is the right people.</p></div>
+  <div class="secret">
+    <p class="hint label fade" style="--t:3.6s" aria-hidden="true">turn the portal</p>
+    <p class="whisper" id="whisper" aria-live="polite"></p>
+  </div>
+
+  <section class="after">
+    <p class="omen">The embers remember...<b>November</b></p>
+    <ul class="contact">
+      <li><a href="https://instagram.com/next.tuesday.society" rel="noopener">instagram</a></li>
+      <li><a href="https://soundcloud.com/bonfire-link" rel="noopener">soundcloud</a></li>
+      <li><a href="mailto:ome@nexttuesday.art">ome@nexttuesday.art</a></li>
+    </ul>
+    <p class="sign">🪬 Know thyself</p>
+  </section>
+</main>
+<script>
+  document.querySelector('.portal').addEventListener('click', function () {
+    document.body.classList.add('lit');
+    document.getElementById('whisper').textContent = 'Hey you, seeker, riding chaos...\ncome next Tuesday. We’ll conspire.';
+  });
+</script>
+</body>
+</html>
