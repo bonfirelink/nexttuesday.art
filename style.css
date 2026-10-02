@@ -1,41 +1,44 @@
-/* Next Tuesday Society, v1.
-   The look lives in the custom properties below: swap colours and fonts here
-   to re-skin every page. The accents come from the portal teaser: ultramarine,
-   fire red, lavender, gold. Text colours (--ink, --heading, --muted, --link,
-   --fire-text) are at least 4.5:1 on --paper, --card and --tint (WCAG AA).
-   --fire, --gold and --lav fall below that, so they only draw shapes:
-   shadows, borders, the mark, never text. */
+/* Next Tuesday Society.
+   A ritual object on light paper: a bold, well-constructed emblem (ring,
+   heptagram, vesica) set against fine construction lines. Palette after
+   bonfire.link: charcoal for ink and heavy shapes, fire red as the one strong
+   accent, violet-grey for secondary lines. The look lives in the custom
+   properties below.
+   Text colours (--ink, --muted, --fire-text) are at least 4.5:1 on --paper
+   and --tint (WCAG AA). --fire and --smoke fall below that, so they only draw
+   shapes and lines, never body text. */
 :root {
-  --paper: #f5f1ea;
-  --card: #fffdf8;
-  --tint: #ebe7fb;
-  --ink: #1c1838;
-  --heading: #1d1570;
-  --muted: #5b5670;
-  --link: #3326d4;
-  --fire-text: #c0142f;
-  --rule: #d8d0c3;
+  --paper: #f8f4f0;
+  --tint: #fdedf0;
+  --ink: #2e2e3a;
+  --muted: #5f5f78;
+  --fire-text: #c0143a;
 
-  --blue: #3326d4;
   --fire: #e51d47;
-  --lav: #b9b0f2;
-  --gold: #ffb21a;
+  --smoke: #7c7c97;
+  --hair: rgba(124, 124, 151, 0.45);
 
   --font-text: "EB Garamond", Garamond, "Times New Roman", serif;
-  --font-display: "Syne", "Helvetica Neue", Arial, sans-serif;
-  --font-label: "Space Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-display: "Cinzel", "Trajan Pro", Garamond, serif;
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 
   --size-text: 1.1875rem;
   --size-lede: 1.5rem;
-  --size-title: clamp(2.25rem, 10vw, 3.5rem);
-  --size-label: 0.75rem;
+  --size-title: clamp(2.2rem, 10.6vw, 3.6rem);
+  --size-label: 0.8125rem;
 
-  --edge: 2px solid var(--heading);
-  --shadow: 6px 6px 0;
+  --rule: 2px solid var(--ink);
+
+  /* A section glyph: a vesica piscis, its lens filled with fire. */
+  --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E%3Cpath d='M0-5.2A6 6 0 0 1 0 5.2 6 6 0 0 1 0-5.2Z' fill='%23e51d47'/%3E%3Cg fill='none' stroke='%232e2e3a' stroke-width='1.6'%3E%3Ccircle cx='-3' r='6'/%3E%3Ccircle cx='3' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  /* A four-point star, for links that lead onward. */
+  --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24'%3E%3Cpath d='M0-12 2.4-2.4 12 0 2.4 2.4 0 12-2.4 2.4-12 0-2.4-2.4Z' fill='%23e51d47'/%3E%3C/svg%3E");
+  /* The colophon's seal: the emblem in miniature, on paper so the rule stops at it. */
+  --seal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-24 -14 48 28'%3E%3Crect x='-24' y='-14' width='48' height='28' fill='%23f8f4f0'/%3E%3Ccircle r='11.5' fill='none' stroke='%232e2e3a' stroke-width='2.6'/%3E%3Cpath d='M0-5.2A6 6 0 0 1 0 5.2 6 6 0 0 1 0-5.2Z' fill='%23e51d47'/%3E%3Cg fill='none' stroke='%232e2e3a' stroke-width='1.3'%3E%3Ccircle cx='-3' r='6'/%3E%3Ccircle cx='3' r='6'/%3E%3C/g%3E%3C/svg%3E");
 
   --measure: 34rem;
   --gutter: 16px;
+  --emblem: 120px;
 }
 
 *,
@@ -50,6 +53,7 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   background: var(--paper);
   color: var(--ink);
@@ -62,32 +66,73 @@ body {
   overflow-x: hidden;
 }
 
-/* A band of portal stripes along the top edge. */
-body::before {
-  content: "";
-  display: block;
-  height: 8px;
-  background: repeating-linear-gradient(115deg, var(--blue) 0 7px, var(--lav) 7px 14px);
-}
-
-/* A faint riso grain over everything; it never takes clicks. */
+/* A faint paper grain over everything; it never takes clicks. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 10;
   pointer-events: none;
-  opacity: 0.06;
+  opacity: 0.045;
   mix-blend-mode: multiply;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .4 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .18 0 0 0 0 .18 0 0 0 0 .23 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The sigil: fine construction lines radiating from the emblem. Its centre
+   sits on the emblem's centre (page padding + half the emblem); its box clips
+   it, so it never widens the page. */
+.sigil {
+  --size: 30rem;
+  --top: 2rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--top) + var(--emblem) / 2 + var(--size) / 2);
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(#000 40%, transparent 88%);
+  mask-image: linear-gradient(#000 40%, transparent 88%);
+}
+
+.sigil svg {
+  position: absolute;
+  top: calc(var(--top) + var(--emblem) / 2 - var(--size) / 2);
+  left: 50%;
+  width: var(--size);
+  height: var(--size);
+  margin-left: calc(var(--size) / -2);
+}
+
+.sigil svg * {
+  fill: none;
+  stroke: var(--smoke);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.sigil .construct {
+  stroke-dasharray: 2 6;
+  opacity: 0.5;
+}
+
+.sigil .rings,
+.sigil .seed {
+  opacity: 0.42;
+}
+
+.sigil .ticks {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-dasharray: 1 15.23;
+  opacity: 0.4;
 }
 
 .page {
+  position: relative;
   max-width: calc(var(--measure) + 2 * var(--gutter));
   margin: 0 auto;
   padding: 2rem var(--gutter) 3rem;
-  min-height: calc(100vh - 8px);
-  min-height: calc(100svh - 8px);
   display: flex;
   flex-direction: column;
 }
@@ -96,32 +141,63 @@ main {
   flex: 1;
 }
 
-/* Header: the mark, and the way home on inner pages. */
+/* Header: the emblem, and the way home on inner pages. */
 .masthead {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.7rem;
+  gap: 1rem;
   margin-bottom: 3.5rem;
 }
 
 .mark {
-  width: 40px;
-  height: 40px;
+  width: var(--emblem);
+  height: var(--emblem);
   flex: none;
-  overflow: visible;
 }
 
-.mark .knot {
+.mark .disc {
+  fill: var(--paper);
+}
+
+.mark .rim {
   fill: none;
-  stroke: var(--blue);
-  stroke-width: 1.8;
-  transform-box: view-box;
-  transform-origin: 16px 16.5px;
-  animation: turn 90s linear infinite;
+  stroke: var(--ink);
+  stroke-width: 8;
 }
 
-.mark .tet {
+.mark .inner {
+  fill: none;
+  stroke: var(--smoke);
+  stroke-width: 1.5;
+}
+
+.mark .hept {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linejoin: miter;
+}
+
+.mark .nodes {
   fill: var(--fire);
+}
+
+.mark .vc {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.mark .lens {
+  fill: var(--fire);
+}
+
+/* The one slow movement: the heptagram turns once in seven minutes. */
+.mark .turn {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: turn 420s linear infinite;
 }
 
 @keyframes turn {
@@ -131,70 +207,81 @@ main {
 }
 
 .masthead a {
-  color: var(--heading);
+  color: var(--ink);
   text-decoration: none;
-  font-family: var(--font-label);
+  font-family: var(--font-display);
   font-size: var(--size-label);
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
 .masthead a:hover,
 .masthead a:focus-visible {
-  color: var(--link);
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
+  color: var(--fire-text);
 }
 
-/* Type. */
+/* Type. The title block is centred under the emblem; the text below is not. */
+main > .eyebrow,
+main > h1,
+main > .lede {
+  text-align: center;
+}
+
 .eyebrow {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.75rem;
   color: var(--fire-text);
-  font-family: var(--font-label);
+  font-family: var(--font-display);
   font-size: var(--size-label);
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 
 h1 {
-  margin: 0 0 1.25rem;
-  color: var(--heading);
+  margin: 0 0 1.1rem;
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: var(--size-title);
   font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  text-shadow: 3px 3px 0 var(--lav);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
 }
 
-/* Syne 800 is wide: a one-word caps title must fit a 288px phone column
-   without breaking mid-word. */
+/* A one-word caps title, spaced like an inscription; it must fit a 288px
+   phone column without breaking mid-word. */
 h1.caps {
-  font-size: clamp(1.75rem, 8.4vw, 3rem);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.08em;
 }
 
 h2 {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin: 3.5rem 0 1rem;
-  color: var(--heading);
-  font-family: var(--font-label);
+  gap: 0.7rem;
+  margin: 3.5rem 0 1.1rem;
+  color: var(--ink);
+  font-family: var(--font-display);
   font-size: var(--size-label);
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
-/* A small fire-red diamond before each section label. */
+/* Each section label: a glyph, then a fine line running to the margin. */
 h2::before {
   content: "";
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex: none;
-  background: var(--fire);
-  transform: rotate(45deg);
+  background: var(--glyph) center / contain no-repeat;
+}
+
+h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hair);
 }
 
 p {
@@ -202,17 +289,18 @@ p {
 }
 
 .lede {
-  margin-bottom: 2.25rem;
+  margin: 0 auto 2.75rem;
+  max-width: 26rem;
   font-size: var(--size-lede);
   font-style: italic;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 a {
-  color: var(--link);
+  color: var(--fire-text);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.2em;
 }
 
 a:hover {
@@ -220,41 +308,49 @@ a:hover {
 }
 
 a:focus-visible {
-  outline: 2px dashed var(--fire);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
-  border-radius: 2px;
 }
 
-/* The initiatives on the home page: hard-edged cards, each wholly a link. */
+/* The initiatives on the home page: double-ruled plates, each wholly a link.
+   On hover a plate fills solid with charcoal. */
 .initiatives {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
   margin: 0;
-  padding: 0 6px 6px 0;
+  padding: 0;
   list-style: none;
 }
 
 .initiatives li {
   position: relative;
-  padding: 1.1rem 1.2rem 1.2rem;
-  background: var(--card);
-  border: var(--edge);
-  box-shadow: var(--shadow) var(--blue);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.initiatives li:nth-child(2n + 1) {
-  box-shadow: var(--shadow) var(--fire);
+  padding: 1.2rem 1.35rem 1.25rem;
+  background: var(--paper);
+  border: var(--rule);
+  outline: 1px solid var(--hair);
+  outline-offset: -7px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .initiatives a {
-  color: var(--heading);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
-  line-height: 1.1;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
   text-decoration: none;
+}
+
+.initiatives a::before {
+  content: "";
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: none;
+  background: var(--star) center / contain no-repeat;
 }
 
 .initiatives a::after {
@@ -268,41 +364,41 @@ a:focus-visible {
 }
 
 .initiatives li:focus-within {
-  outline: 2px dashed var(--fire);
-  outline-offset: 5px;
-}
-
-.initiatives li:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 var(--blue);
-}
-
-.initiatives li:nth-child(2n + 1):hover {
-  box-shadow: 8px 8px 0 var(--fire);
-}
-
-.initiatives li:hover a {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.15em;
+  outline: 2px solid var(--fire);
+  outline-offset: 3px;
 }
 
 .initiatives p {
-  margin: 0.35rem 0 0;
+  margin: 0.4rem 0 0 1.45rem;
   color: var(--muted);
+}
+
+.initiatives li:hover {
+  background: var(--ink);
+  outline-color: rgba(248, 244, 240, 0.3);
+}
+
+.initiatives li:hover a {
+  color: var(--paper);
+}
+
+.initiatives li:hover p {
+  color: #d6d3e0;
 }
 
 .quiet {
   color: var(--muted);
+  font-style: italic;
 }
 
-/* A block that asks for a reply: contact on the home page, venues on EMBERS. */
+/* A block that asks for a reply: a solid frame on the fire tint. */
 .panel {
-  margin: 3.5rem 6px 0 0;
-  padding: 1.2rem 1.2rem 0.3rem;
+  margin: 3.75rem 0 0;
+  padding: 1.4rem 1.35rem 0.5rem;
   background: var(--tint);
-  border: var(--edge);
-  box-shadow: var(--shadow) var(--heading);
+  border: var(--rule);
+  outline: 1px solid var(--hair);
+  outline-offset: -7px;
 }
 
 .panel h2 {
@@ -310,45 +406,76 @@ a:focus-visible {
 }
 
 /* A link that stands alone as the page's way onward. */
-.pill,
-.colophon a {
-  display: inline-block;
-  padding: 0.5rem 0.95rem;
-  border-radius: 99px;
-  background: var(--heading);
-  color: var(--paper);
-  font-family: var(--font-label);
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  text-decoration: none;
+.onward {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-decoration-color: var(--fire);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
 }
 
-.pill:hover,
-.pill:focus-visible,
-.colophon a:hover,
-.colophon a:focus-visible {
-  background: var(--gold);
-  color: var(--heading);
+.onward::before {
+  content: "";
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: none;
+  background: var(--star) center / contain no-repeat;
 }
 
-/* Footer: contact, then the signature, always last. */
+.onward:hover {
+  color: var(--fire-text);
+}
+
+/* Footer: a sealed rule, quiet links, then the signature, always last. */
 .colophon {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 4.5rem;
-  padding-top: 1.5rem;
-  border-top: var(--edge);
+  align-items: baseline;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+  margin-top: 4rem;
   font-size: 1.0625rem;
+}
+
+.colophon::before {
+  content: "";
+  flex-basis: 100%;
+  height: 28px;
+  margin-bottom: 1rem;
+  background:
+    var(--seal) center / 48px 28px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) center / 100% 2px no-repeat;
 }
 
 .colophon p {
   margin: 0;
 }
 
+.colophon a {
+  color: var(--ink);
+  text-decoration-color: var(--smoke);
+}
+
+.colophon a:hover {
+  color: var(--fire-text);
+  text-decoration-color: currentColor;
+}
+
+.colophon p:not(:first-of-type):not(.signature)::before {
+  content: "\00B7";
+  margin-right: 0.7rem;
+  color: var(--muted);
+}
+
 .colophon .signature {
   flex-basis: 100%;
-  margin-top: 1.25rem;
+  margin-top: 1.1rem;
   color: var(--muted);
   font-style: italic;
 }
@@ -359,25 +486,32 @@ a:focus-visible {
 }
 
 @media (min-width: 40rem) {
+  :root {
+    --emblem: 152px;
+  }
+
   .page {
     padding-top: 4rem;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .sigil {
+    --size: 46rem;
+    --top: 4rem;
   }
 
   .masthead {
-    margin-bottom: 5rem;
+    margin-bottom: 4rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mark .knot {
+  .mark .turn {
     animation: none;
   }
 
   .initiatives li {
     transition: none;
-  }
-
-  .initiatives li:hover {
-    transform: none;
   }
 }
