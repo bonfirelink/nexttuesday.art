@@ -1,0 +1,430 @@
+/* SALON: the poster designer's grid.
+   The NOT NOT PHILO posters' system, carried across the site: pale grey
+   ground, a neo-grotesque set flush left on a Swiss grid, one huge
+   extra-bold red key word per page with a crisp charcoal misregistration,
+   italic sublines on a translucent white strip, and red-over-charcoal
+   label bars for everything that labels (nav, sections, dates). Engraved
+   line plates sit behind at low contrast; the impossible object on the
+   home page is drawn at full contrast, as the one intricate thing.
+   Text contrast on the ground: ink 10.9:1, muted 5.6:1, white on red 4.6:1,
+   red on ground 3.8:1 (large text only). On the night (EMBERS): pale ink
+   10.9:1, muted 6.6:1. */
+
+:root {
+  --ground: #e6e6e8;
+  --ink: #2b2d3e;
+  --red: #e5174a;
+  --white: #fff;
+  --muted: #53566b;
+  --strip: rgba(255, 255, 255, 0.68);
+  --strip-ink: #2b2d3e;
+  --shadow: #2b2d3e;   /* the misregistered plate under bars and key words */
+  --off: 4px;          /* the misregistration, at label scale */
+  --plate: 0.16;       /* opacity of engraved plates */
+  --font: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --serif: "Old Standard TT", "Times New Roman", Times, serif;
+  --gutter: clamp(16px, 4vw, 56px);
+  --max: 1240px;
+  color-scheme: light;
+}
+
+.night {
+  --ground: #2b2d3e;
+  --ink: #e6e6e8;
+  --muted: #b9bbcb;
+  --strip: rgba(255, 255, 255, 0.9);
+  --shadow: #e6e6e8;
+  --plate: 0.34;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-color: var(--ink) var(--ground);
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  /* The variant switcher pill sits in the bottom 64px. */
+  padding-bottom: 64px;
+}
+
+::selection { background: var(--red); color: #fff; }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+a { color: inherit; }
+img, canvas, svg { display: block; max-width: 100%; }
+p { margin: 0 0 1em; }
+h1, h2, h3 { margin: 0; font-weight: 700; line-height: 1.1; }
+
+/* Cross-page: a short crossfade, the masthead held still. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.22s; }
+.mast { view-transition-name: mast; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+.wrap {
+  width: min(100% - 2 * var(--gutter), var(--max));
+  margin-inline: auto;
+}
+
+/* ---- Label bars: red over charcoal, printed slightly out of register. ---- */
+.bar {
+  position: relative;
+  display: inline-block;
+  padding: 0.32em 0.62em 0.36em;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  /* The charcoal plate, printed a little up and left of the red. */
+  box-shadow: calc(-1 * var(--off)) calc(-1 * var(--off)) 0 0 var(--shadow);
+}
+.bar-sm { font-size: 0.8125rem; --off: 3px; padding: 0.28em 0.5em 0.32em; }
+.bar-lg { font-size: 1.0625rem; --off: 5px; }
+a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * var(--off) - 1px) calc(-1 * var(--off) - 1px) 0 0 var(--shadow); }
+
+/* A section mark: ∴ before the label. */
+.bar.sec-label { text-transform: uppercase; letter-spacing: 0.04em; white-space: normal; line-height: 1.3; }
+
+/* ---- Masthead ---- */
+.mast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 2rem;
+  padding-top: calc(var(--off) + 20px);
+  padding-bottom: 8px;
+}
+.mast .brand { font-size: 0.9375rem; }
+.mast .brand small {
+  display: block;
+  margin-top: 0.55em;
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 clamp(0.8rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+  font-size: clamp(0.8125rem, 0.7rem + 0.5vw, 0.9375rem);
+  letter-spacing: 0.01em;
+}
+.menu a { text-decoration: none; padding: 0.3em 0; min-height: 44px; display: inline-flex; align-items: center; white-space: nowrap; }
+.menu a:hover { color: var(--red); }
+.menu a[aria-current="page"] { color: var(--red); text-shadow: 0.07em 0.07em 0 var(--shadow); }
+.night .menu a:hover, .night .menu a[aria-current="page"] {
+  color: var(--ink);
+  text-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.25em;
+}
+
+/* ---- The poster stack ---- */
+.poster { position: relative; }
+.stack, .volume { container-type: inline-size; }
+.pre {
+  display: block;
+  font-weight: 400;
+  font-size: clamp(1.35rem, 1rem + 2.2vw, 2.4rem);
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 0.1em;
+}
+.pre.caps { text-transform: uppercase; font-weight: 300; letter-spacing: 0.08em; }
+.key {
+  display: block;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 0.88;
+  color: var(--red);
+  text-shadow: 0.045em 0.045em 0 var(--shadow);
+  /* Never wider than its column: about 0.7em per capital at this weight. */
+  font-size: min(var(--key-size, clamp(3.4rem, 0.5rem + 17vw, 9.5rem)), calc(138cqi / var(--chars, 7)));
+  margin: 0.04em 0 0.08em;
+}
+.night .key, .night .big-line { color: var(--ink); text-shadow: 0.045em 0.045em 0 var(--red); }
+.night .onward a, .night .more a, .night .reveal summary { color: var(--ink); }
+.key.second { font-size: calc(var(--key-size, clamp(3.4rem, 0.5rem + 17vw, 9.5rem)) * 0.5); letter-spacing: -0.02em; margin-top: 0.1em; }
+.key.lower { text-transform: none; letter-spacing: -0.02em; }
+.strip {
+  display: inline;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.0625rem, 0.9rem + 0.9vw, 1.5rem);
+  line-height: 1.6;
+  background: var(--strip);
+  color: var(--strip-ink);
+  padding: 0.12em 0.45em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.strip u { text-decoration-thickness: 0.07em; text-underline-offset: 0.12em; }
+.whisper {
+  font-size: 0.875rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-top: 1.4em;
+}
+
+/* ---- Home hero ---- */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-top: 2rem;
+  min-height: calc(100svh - 140px);
+  align-content: end;
+  gap: 1rem;
+}
+.entity {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  justify-self: end;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.entity:active { cursor: grabbing; }
+.entity img, .entity canvas { width: 100%; height: 100%; }
+.entity canvas { position: absolute; inset: 0; }
+.entity[data-live] img { visibility: hidden; }
+.fig {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  margin: 0.2em 0 0;
+  text-align: right;
+}
+.fig b { font-style: normal; font-weight: 400; }
+.hero .stack { position: relative; z-index: 1; padding-bottom: 1rem; }
+.hero .stack > .strip-wrap { display: block; max-width: 30ch; margin-top: 0.6rem; }
+
+@media (min-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+    gap: 2rem;
+    min-height: calc(100svh - 120px);
+  }
+  .entity { width: min(100%, 620px); margin: 0; }
+  .hero .stack { margin-top: 0; }
+}
+@media (max-width: 759px) {
+  .hero { min-height: 0; margin-top: 0.5rem; align-content: start; }
+  .entity { order: -1; width: min(100%, 400px); margin: 0 0 -28% auto; }
+  .entity .fig { display: none; }
+  .hero .stack { margin-top: 0; }
+}
+
+/* ---- Sections on the grid ---- */
+.sec {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem 2rem;
+  padding: 3.5rem 0 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  position: relative;
+}
+.sec .label { align-self: start; }
+.sec .body { max-width: 62ch; }
+.sec .body > :last-child { margin-bottom: 0; }
+.lead { font-size: clamp(1.25rem, 1rem + 1.1vw, 1.75rem); line-height: 1.35; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 0.9em; }
+.big-line {
+  font-weight: 900;
+  font-size: clamp(2rem, 1rem + 5vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--red);
+  text-shadow: 0.045em 0.045em 0 var(--shadow);
+  margin: 0.4em 0 0.5em;
+}
+.sec .onward { margin-top: 1.4em; }
+.onward a, .more a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: var(--red);
+}
+.onward a:hover, .more a:hover { color: var(--red); }
+@media (min-width: 900px) {
+  .sec { grid-template-columns: 3fr 7fr 2fr; padding-top: 4.5rem; }
+}
+
+/* A line revealed on tap. */
+.reveal { margin-top: 1.4em; }
+.reveal summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--red);
+  text-underline-offset: 0.22em;
+  min-height: 44px;
+  line-height: 44px;
+}
+.reveal summary:hover { color: var(--red); }
+.reveal summary::-webkit-details-marker { display: none; }
+.reveal[open] summary { color: var(--muted); text-decoration: none; }
+.reveal p { margin: 0.2em 0 0; }
+
+/* ---- The night band (EMBERS on the home page), and the night page ---- */
+.band {
+  background: var(--ground);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.band.full { margin-top: 3.5rem; padding: 3.5rem 0 3rem; }
+.plate {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--plate);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.plate.rings { background-image: url("/salon/plate-rings.svg"); }
+.plate.fire { background-image: url("/salon/plate-fire.svg"); background-size: auto 115%; background-position: right 8% top; }
+.night { --plate: 0.5; }
+.plate.sphere { background-image: url("/salon/plate-sphere.svg"); }
+.plate.cube { background-image: url("/salon/plate-cube.svg"); }
+.plate.cross { background-image: url("/salon/plate-cross.svg"); background-size: 900px; background-repeat: repeat; }
+.band .sec { border-top-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+.sec.flush { border-top: 0; padding-top: 0; }
+
+/* ---- Page heads (sub pages) ---- */
+.head {
+  position: relative;
+  padding: 2.5rem 0 2rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+.head .stack { max-width: 40ch; }
+.head .plate { inset: -2rem 0 0; }
+.head .strip-wrap { display: block; margin-top: 0.6rem; max-width: 36ch; }
+.head .lede { margin-top: 1.4rem; }
+
+/* ---- Volumes as a poster series (NOT NOT PHILO) ---- */
+.volumes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.volume {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: calc(var(--off) + 1.4rem) 1.4rem 1.6rem;
+  background: var(--ground);
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 420px;
+  --key-size: clamp(2.4rem, 1.6rem + 3.8vw, 3.6rem);
+}
+.volume .plate { opacity: 0.2; background-size: cover; }
+.volume .bar { align-self: flex-start; }
+.volume .pre { margin-top: 1.8rem; font-size: 1.125rem; }
+.volume .key { margin-bottom: 0.3em; }
+.volume .strip-wrap { display: block; margin-top: auto; }
+.volume .strip { font-size: 1.0625rem; }
+.volume .note { font-size: 0.9375rem; color: var(--muted); margin: 1rem 0 0; }
+@media (min-width: 760px) {
+  .volumes { grid-template-columns: repeat(3, 1fr); }
+  .volume { min-height: 480px; }
+}
+
+/* ---- Events as a catalogue ---- */
+.group { padding: 3rem 0 0; }
+.catalogue { list-style: none; margin: 1.6rem 0 0; padding: 0; }
+.entry {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem 1.5rem;
+  padding: 1.4rem 0 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  align-items: start;
+}
+.entry .tag { justify-self: start; margin-top: var(--off); }
+.entry h3 { font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem); letter-spacing: -0.015em; line-height: 1.15; }
+.entry .meta { font-style: italic; color: var(--muted); margin: 0.15em 0 0; font-size: 0.9375rem; }
+.entry .line { margin: 0.5em 0 0; max-width: 46ch; }
+.entry .cat { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 0.9375rem; }
+.entry.rave h3 { color: var(--red); text-shadow: 0.05em 0.05em 0 var(--shadow); text-transform: uppercase; letter-spacing: -0.02em; }
+@media (min-width: 760px) {
+  .entry { grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1.1fr) 4rem; }
+  .entry .tag { grid-row: 1; }
+  .entry .title { grid-column: 2; grid-row: 1; }
+  .entry .line { grid-column: 3; grid-row: 1; margin: 0.15em 0 0; }
+  .entry .cat { grid-column: 4; grid-row: 1; text-align: right; }
+}
+
+/* ---- Genres, as a row of small bars ---- */
+.chips { display: flex; flex-wrap: wrap; gap: 0.9rem 0.7rem; margin: 1rem 0 1.2rem; padding: 0; list-style: none; padding-top: var(--off); }
+
+/* ---- Colophon ---- */
+.colophon {
+  margin-top: 4rem;
+  padding: 2.5rem 0 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  display: grid;
+  gap: 1.2rem;
+  align-items: end;
+}
+.colophon .mail { font-weight: 700; text-decoration: none; }
+.colophon .mail:hover { color: var(--red); }
+.colophon .ig { justify-self: start; margin-top: var(--off); }
+.signoff {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.0625rem;
+  margin: 1.2rem 0 0;
+  color: var(--ink);
+}
+@media (min-width: 760px) {
+  .colophon { grid-template-columns: 1fr auto; }
+  .colophon .ig { grid-column: 2; grid-row: 1; justify-self: end; }
+  .signoff { grid-column: 1 / -1; }
+}
+
