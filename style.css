@@ -1,0 +1,216 @@
+/* Next Tuesday Society, v1.
+   The look lives in the custom properties below: swap colours and fonts here
+   to re-skin every page. Contrast of --ink, --muted and --accent on --paper
+   is at least 4.5:1 (WCAG AA for body text). */
+:root {
+  --paper: #f5f1ea;
+  --ink: #1f1c19;
+  --muted: #5e574f;
+  --accent: #9a2c1e;
+  --rule: #d8d0c3;
+
+  --font-text: "EB Garamond", Garamond, "Times New Roman", serif;
+  --font-label: "EB Garamond", Garamond, "Times New Roman", serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  --size-text: 1.1875rem;
+  --size-lede: 1.5rem;
+  --size-title: clamp(2.25rem, 9vw, 3.25rem);
+  --size-label: 0.8125rem;
+
+  --measure: 34rem;
+  --gutter: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--size-text);
+  line-height: 1.6;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+
+.page {
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: 2.5rem var(--gutter) 3rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Header: the mark, and the way home on inner pages. */
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 4rem;
+}
+
+.mark {
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+  flex: none;
+}
+
+.masthead a {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-label);
+  font-size: var(--size-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.masthead a:hover,
+.masthead a:focus-visible {
+  color: var(--accent);
+}
+
+/* Type. */
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-family: var(--font-label);
+  font-size: var(--size-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 1.25rem;
+  font-size: var(--size-title);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+
+h1.caps {
+  letter-spacing: 0.08em;
+}
+
+h2 {
+  margin: 3.5rem 0 1rem;
+  color: var(--muted);
+  font-family: var(--font-label);
+  font-size: var(--size-label);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+p {
+  margin: 0 0 1.1rem;
+}
+
+.lede {
+  margin-bottom: 2.25rem;
+  font-size: var(--size-lede);
+  font-style: italic;
+  line-height: 1.35;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* The initiatives on the home page. */
+.initiatives {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.initiatives li {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.initiatives a {
+  font-size: 1.375rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.initiatives a:hover,
+.initiatives a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.initiatives p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+.quiet {
+  color: var(--muted);
+}
+
+/* Footer: contact, then the signature, always last. */
+.colophon {
+  margin-top: 4.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1.0625rem;
+}
+
+.colophon p {
+  margin: 0 0 0.4rem;
+}
+
+.colophon .signature {
+  margin-top: 1.5rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.emoji {
+  font-family: var(--font-emoji);
+  font-style: normal;
+}
+
+@media (min-width: 40rem) {
+  .page {
+    padding-top: 4.5rem;
+  }
+
+  .masthead {
+    margin-bottom: 5.5rem;
+  }
+}
