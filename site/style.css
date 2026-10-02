@@ -1,22 +1,38 @@
 /* Next Tuesday Society, v1.
    The look lives in the custom properties below: swap colours and fonts here
-   to re-skin every page. Contrast of --ink, --muted and --accent on --paper
-   is at least 4.5:1 (WCAG AA for body text). */
+   to re-skin every page. The accents come from the portal teaser: ultramarine,
+   fire red, lavender, gold. Text colours (--ink, --heading, --muted, --link,
+   --fire-text) are at least 4.5:1 on --paper, --card and --tint (WCAG AA).
+   --fire, --gold and --lav fall below that, so they only draw shapes:
+   shadows, borders, the mark, never text. */
 :root {
   --paper: #f5f1ea;
-  --ink: #1f1c19;
-  --muted: #5e574f;
-  --accent: #9a2c1e;
+  --card: #fffdf8;
+  --tint: #ebe7fb;
+  --ink: #1c1838;
+  --heading: #1d1570;
+  --muted: #5b5670;
+  --link: #3326d4;
+  --fire-text: #c0142f;
   --rule: #d8d0c3;
 
+  --blue: #3326d4;
+  --fire: #e51d47;
+  --lav: #b9b0f2;
+  --gold: #ffb21a;
+
   --font-text: "EB Garamond", Garamond, "Times New Roman", serif;
-  --font-label: "EB Garamond", Garamond, "Times New Roman", serif;
+  --font-display: "Syne", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "Space Mono", ui-monospace, Menlo, Consolas, monospace;
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 
   --size-text: 1.1875rem;
   --size-lede: 1.5rem;
-  --size-title: clamp(2.25rem, 9vw, 3.25rem);
-  --size-label: 0.8125rem;
+  --size-title: clamp(2.25rem, 10vw, 3.5rem);
+  --size-label: 0.75rem;
+
+  --edge: 2px solid var(--heading);
+  --shadow: 6px 6px 0;
 
   --measure: 34rem;
   --gutter: 16px;
@@ -43,14 +59,35 @@ body {
   font-kerning: normal;
   text-rendering: optimizeLegibility;
   overflow-wrap: break-word;
+  overflow-x: hidden;
+}
+
+/* A band of portal stripes along the top edge. */
+body::before {
+  content: "";
+  display: block;
+  height: 8px;
+  background: repeating-linear-gradient(115deg, var(--blue) 0 7px, var(--lav) 7px 14px);
+}
+
+/* A faint riso grain over everything; it never takes clicks. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .4 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .page {
   max-width: calc(var(--measure) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 2.5rem var(--gutter) 3rem;
-  min-height: 100vh;
-  min-height: 100svh;
+  padding: 2rem var(--gutter) 3rem;
+  min-height: calc(100vh - 8px);
+  min-height: calc(100svh - 8px);
   display: flex;
   flex-direction: column;
 }
@@ -63,61 +100,101 @@ main {
 .masthead {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 4rem;
+  gap: 0.7rem;
+  margin-bottom: 3.5rem;
 }
 
 .mark {
-  width: 22px;
-  height: 22px;
-  color: var(--accent);
+  width: 40px;
+  height: 40px;
   flex: none;
+  overflow: visible;
+}
+
+.mark .knot {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 1.8;
+  transform-box: view-box;
+  transform-origin: 16px 16.5px;
+  animation: turn 90s linear infinite;
+}
+
+.mark .tet {
+  fill: var(--fire);
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .masthead a {
-  color: var(--ink);
+  color: var(--heading);
   text-decoration: none;
   font-family: var(--font-label);
   font-size: var(--size-label);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .masthead a:hover,
 .masthead a:focus-visible {
-  color: var(--accent);
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
 }
 
 /* Type. */
 .eyebrow {
-  margin: 0 0 0.75rem;
-  color: var(--muted);
+  margin: 0 0 0.9rem;
+  color: var(--fire-text);
   font-family: var(--font-label);
   font-size: var(--size-label);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 h1 {
   margin: 0 0 1.25rem;
+  color: var(--heading);
+  font-family: var(--font-display);
   font-size: var(--size-title);
-  font-weight: 400;
-  line-height: 1.05;
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-shadow: 3px 3px 0 var(--lav);
+}
+
+/* Syne 800 is wide: a one-word caps title must fit a 288px phone column
+   without breaking mid-word. */
+h1.caps {
+  font-size: clamp(1.75rem, 8.4vw, 3rem);
   letter-spacing: 0.01em;
 }
 
-h1.caps {
-  letter-spacing: 0.08em;
-}
-
 h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin: 3.5rem 0 1rem;
-  color: var(--muted);
+  color: var(--heading);
   font-family: var(--font-label);
   font-size: var(--size-label);
-  font-weight: 400;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+/* A small fire-red diamond before each section label. */
+h2::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  background: var(--fire);
+  transform: rotate(45deg);
 }
 
 p {
@@ -132,7 +209,7 @@ p {
 }
 
 a {
-  color: var(--accent);
+  color: var(--link);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
@@ -143,38 +220,75 @@ a:hover {
 }
 
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px dashed var(--fire);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
-/* The initiatives on the home page. */
+/* The initiatives on the home page: hard-edged cards, each wholly a link. */
 .initiatives {
+  display: grid;
+  gap: 1.25rem;
   margin: 0;
-  padding: 0;
+  padding: 0 6px 6px 0;
   list-style: none;
-  border-top: 1px solid var(--rule);
 }
 
 .initiatives li {
-  padding: 1.1rem 0;
-  border-bottom: 1px solid var(--rule);
+  position: relative;
+  padding: 1.1rem 1.2rem 1.2rem;
+  background: var(--card);
+  border: var(--edge);
+  box-shadow: var(--shadow) var(--blue);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.initiatives li:nth-child(2n + 1) {
+  box-shadow: var(--shadow) var(--fire);
 }
 
 .initiatives a {
-  font-size: 1.375rem;
-  letter-spacing: 0.08em;
+  color: var(--heading);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
   text-decoration: none;
 }
 
-.initiatives a:hover,
+.initiatives a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
 .initiatives a:focus-visible {
+  outline: none;
+}
+
+.initiatives li:focus-within {
+  outline: 2px dashed var(--fire);
+  outline-offset: 5px;
+}
+
+.initiatives li:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--blue);
+}
+
+.initiatives li:nth-child(2n + 1):hover {
+  box-shadow: 8px 8px 0 var(--fire);
+}
+
+.initiatives li:hover a {
   text-decoration: underline;
-  text-decoration-thickness: 1px;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
 }
 
 .initiatives p {
-  margin: 0.2rem 0 0;
+  margin: 0.35rem 0 0;
   color: var(--muted);
 }
 
@@ -182,20 +296,59 @@ a:focus-visible {
   color: var(--muted);
 }
 
+/* A block that asks for a reply: contact on the home page, venues on EMBERS. */
+.panel {
+  margin: 3.5rem 6px 0 0;
+  padding: 1.2rem 1.2rem 0.3rem;
+  background: var(--tint);
+  border: var(--edge);
+  box-shadow: var(--shadow) var(--heading);
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+/* A link that stands alone as the page's way onward. */
+.pill,
+.colophon a {
+  display: inline-block;
+  padding: 0.5rem 0.95rem;
+  border-radius: 99px;
+  background: var(--heading);
+  color: var(--paper);
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.pill:hover,
+.pill:focus-visible,
+.colophon a:hover,
+.colophon a:focus-visible {
+  background: var(--gold);
+  color: var(--heading);
+}
+
 /* Footer: contact, then the signature, always last. */
 .colophon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-top: 4.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+  border-top: var(--edge);
   font-size: 1.0625rem;
 }
 
 .colophon p {
-  margin: 0 0 0.4rem;
+  margin: 0;
 }
 
 .colophon .signature {
-  margin-top: 1.5rem;
+  flex-basis: 100%;
+  margin-top: 1.25rem;
   color: var(--muted);
   font-style: italic;
 }
@@ -207,10 +360,24 @@ a:focus-visible {
 
 @media (min-width: 40rem) {
   .page {
-    padding-top: 4.5rem;
+    padding-top: 4rem;
   }
 
   .masthead {
-    margin-bottom: 5.5rem;
+    margin-bottom: 5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark .knot {
+    animation: none;
+  }
+
+  .initiatives li {
+    transition: none;
+  }
+
+  .initiatives li:hover {
+    transform: none;
   }
 }
