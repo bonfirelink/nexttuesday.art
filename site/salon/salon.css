@@ -132,11 +132,8 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   letter-spacing: 0.01em;
 }
 .menu a { text-decoration: none; padding: 0.3em 0; min-height: 44px; display: inline-flex; align-items: center; white-space: nowrap; }
-.menu a:hover { color: var(--red); }
-.menu a[aria-current="page"] { color: var(--red); text-shadow: 0.07em 0.07em 0 var(--shadow); }
-.night .menu a:hover, .night .menu a[aria-current="page"] {
+.menu a:hover, .menu a[aria-current="page"] {
   color: var(--ink);
-  text-shadow: none;
   text-decoration: underline;
   text-decoration-color: var(--red);
   text-decoration-thickness: 3px;
@@ -197,10 +194,11 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   display: grid;
   grid-template-columns: 1fr;
   margin-top: 2rem;
-  min-height: calc(100svh - 140px);
-  align-content: end;
   gap: 1rem;
+  isolation: isolate;
+  overflow: hidden;
 }
+.hero .plate.rings { inset: 0; opacity: 0.11; background-size: 115%; background-position: 78% 40%; }
 .entity {
   position: relative;
   width: min(100%, 560px);
@@ -233,14 +231,16 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     align-items: end;
     gap: 2rem;
-    min-height: calc(100svh - 120px);
+    margin-top: clamp(2rem, 7vh, 4.5rem);
+    padding-bottom: 1rem;
   }
   .entity { width: min(100%, 620px); margin: 0; }
   .hero .stack { margin-top: 0; }
 }
 @media (max-width: 759px) {
-  .hero { min-height: 0; margin-top: 0.5rem; align-content: start; }
-  .entity { order: -1; width: min(100%, 400px); margin: 0 0 -28% auto; }
+  .hero { margin-top: 0.5rem; align-content: start; }
+  .entity { order: -1; width: min(100%, 400px); margin: 0 0 -9% auto; }
+  .hero .plate.rings { background-position: 100% 0; background-size: 160%; }
   .entity .fig { display: none; }
   .hero .stack { margin-top: 0; }
 }
@@ -260,8 +260,8 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
 .lead { font-size: clamp(1.25rem, 1rem + 1.1vw, 1.75rem); line-height: 1.35; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 0.9em; }
 .big-line {
   font-weight: 900;
-  font-size: clamp(2rem, 1rem + 5vw, 4.5rem);
-  line-height: 0.95;
+  font-size: clamp(1.75rem, 1rem + 3.2vw, 3.25rem);
+  line-height: 1;
   letter-spacing: -0.03em;
   text-transform: uppercase;
   color: var(--red);
@@ -276,7 +276,7 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   text-underline-offset: 0.22em;
   text-decoration-color: var(--red);
 }
-.onward a:hover, .more a:hover { color: var(--red); }
+.onward a:hover, .more a:hover { text-decoration-thickness: 3px; }
 @media (min-width: 900px) {
   .sec { grid-template-columns: 3fr 7fr 2fr; padding-top: 4.5rem; }
 }
@@ -296,7 +296,7 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   min-height: 44px;
   line-height: 44px;
 }
-.reveal summary:hover { color: var(--red); }
+.reveal summary:hover { text-decoration-thickness: 3px; }
 .reveal summary::-webkit-details-marker { display: none; }
 .reveal[open] summary { color: var(--muted); text-decoration: none; }
 .reveal p { margin: 0.2em 0 0; }
@@ -321,7 +321,13 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   background-size: cover;
 }
 .plate.rings { background-image: url("/salon/plate-rings.svg"); }
-.plate.fire { background-image: url("/salon/plate-fire.svg"); background-size: auto 115%; background-position: right 8% top; }
+.plate.fire {
+  background-image: url("/salon/plate-fire.svg");
+  background-size: cover;
+  background-position: right top;
+  -webkit-mask-image: linear-gradient(to right, transparent 22%, #000 62%);
+  mask-image: linear-gradient(to right, transparent 22%, #000 62%);
+}
 .night { --plate: 0.5; }
 .plate.sphere { background-image: url("/salon/plate-sphere.svg"); }
 .plate.cube { background-image: url("/salon/plate-cube.svg"); }
@@ -413,7 +419,7 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   align-items: end;
 }
 .colophon .mail { font-weight: 700; text-decoration: none; }
-.colophon .mail:hover { color: var(--red); }
+.colophon .mail:hover { text-decoration: underline; text-decoration-color: var(--red); text-decoration-thickness: 3px; text-underline-offset: 0.22em; }
 .colophon .ig { justify-self: start; margin-top: var(--off); }
 .signoff {
   font-family: var(--serif);
