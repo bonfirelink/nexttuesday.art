@@ -1,0 +1,381 @@
+/* GRIMOIRE, the initiation.
+   Black ground, phosphor-bone text, fire red as the only colour. Two voices:
+   a monospace for the hacker layer (labels, tables, the ledger, the sigil
+   itself) and a 17th-century serif for the incantations and the body, after
+   the engraved plates on the mood board. The sigil is characters in a <pre>,
+   so it stays crisp at every size and reads with JS off.
+   Text colours: --bone on --ink is 15.4:1, --dim 6.6:1, --fire-hi 5.6:1.
+   --fire (4.3:1) only draws marks, rules and type at 24px or larger. */
+:root {
+  --ink: #0a0a0a;
+  --bone: #e9e2cf;
+  --dim: #9c9684;
+  --hair: rgba(233, 226, 207, 0.16);
+  --hair-strong: rgba(233, 226, 207, 0.38);
+  --fire: #e51d47;
+  --fire-hi: #ff3b63;
+  --fire-dim: rgba(229, 29, 71, 0.22);
+
+  --serif: "IM Fell DW Pica", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --mono: "Red Hat Mono", ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  --text: 1.1875rem;
+  --label: 0.75rem;
+  --gutter: clamp(16px, 5vw, 32px);
+  --measure: 36rem;
+  --step: 60svh;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--ink);
+  color: var(--bone);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--hair-strong) var(--ink);
+  scrollbar-width: thin;
+}
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: var(--serif);
+  font-size: var(--text);
+  line-height: 1.5;
+  overflow-x: clip;
+  background: var(--ink);
+}
+::selection { background: var(--fire); color: var(--ink); }
+:focus-visible { outline: 1.5px solid var(--fire-hi); outline-offset: 4px; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: var(--hair-strong); }
+::-webkit-scrollbar-track { background: var(--ink); }
+
+/* Film grain, after the risograph pins. Fixed, under the pointer, no UI. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.88 0 0 0 0 0.8 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body > * { position: relative; z-index: 1; }
+
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 220ms ease-out both fade-out; }
+::view-transition-new(root) { animation: 320ms ease-out both fade-in; }
+@keyframes fade-out { to { opacity: 0; filter: blur(4px); } }
+@keyframes fade-in { from { opacity: 0; filter: blur(4px); } }
+
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--fire); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { color: var(--fire-hi); }
+em, i { font-style: italic; }
+b, strong { font-weight: 400; color: var(--fire-hi); }
+.emoji { font-family: var(--emoji); font-style: normal; }
+
+.mono, .label, .mast, .corr, .ledger, .legend, .colophon, .rite-skip { font-family: var(--mono); }
+.label {
+  font-size: var(--label);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  font-weight: 500;
+}
+
+/* Masthead */
+.mast {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1.1rem var(--gutter) 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+.mast a { text-decoration: none; }
+.mast a:hover { color: var(--fire-hi); }
+.mast .name { color: var(--bone); font-weight: 500; white-space: nowrap; }
+.mast .name .mark { color: var(--fire); margin-right: 0.5em; }
+.rite-skip { color: var(--dim); white-space: nowrap; }
+.rite-skip:hover { color: var(--fire-hi); }
+
+/* The sigil */
+pre[data-sigil] {
+  display: block;
+  margin: 0 auto;
+  width: min(100%, 50svh, 520px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-weight: 400;
+  line-height: 1;
+  font-size: 4.2px;
+  color: var(--bone);
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  text-rendering: optimizeSpeed;
+}
+pre[data-sigil]:active { cursor: grabbing; }
+pre[data-sigil].fire { color: var(--fire); }
+
+/* The rite: a sticky stage; the incantation advances with the scroll. */
+.rite { position: relative; }
+.js .rite { min-height: calc(100svh + 6 * var(--step)); }
+.stage {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 2rem;
+  padding: 1rem var(--gutter) 2rem;
+  min-height: 100svh;
+  align-content: center;
+}
+.js .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.lines { display: grid; align-content: start; min-height: 5.2em; }
+.line {
+  margin: 0;
+  font-size: clamp(1.9rem, 1.3rem + 2.6vw, 3.4rem);
+  line-height: 1.12;
+  font-style: italic;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+.js .line {
+  grid-area: 1 / 1;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(0.4em);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.js .line.on { opacity: 1; filter: blur(0); transform: none; pointer-events: auto; }
+.js .line.gone { transform: translateY(-0.3em); transition-duration: 0.35s; }
+html:not(.js) .line { margin-bottom: 1.2em; }
+.line .mark { color: var(--fire); font-style: normal; font-family: var(--mono); font-size: 0.75em; display: block; margin-bottom: 0.35em; }
+.line .fire { color: var(--fire-hi); }
+.line .caps { font-style: normal; letter-spacing: 0.04em; }
+.line .quiet { display: block; font-size: 0.5em; font-style: normal; font-family: var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-top: 1.2em; }
+
+@media (min-width: 760px) {
+  .stage {
+    grid-template-columns: minmax(300px, 460px) 1fr;
+    grid-template-rows: none;
+    align-items: center;
+    align-content: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-top: 3rem;
+  }
+  pre[data-sigil] { width: min(100%, 76svh, 520px); }
+  .line { max-width: 20ch; }
+}
+
+/* The plain pages below the incantation */
+.page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 3rem;
+}
+.page p { margin: 0 0 1em; max-width: 36rem; }
+.page section { padding: 3.5rem 0 1rem; }
+.page section + section { border-top: 1px solid var(--hair); }
+h1, h2, h3 { font-weight: 400; margin: 0; }
+h1 {
+  font-size: clamp(2.3rem, 1.6rem + 4vw, 4.6rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  margin: 0.4em 0 0.35em;
+  text-wrap: balance;
+}
+h1 .mark, h2 .mark { color: var(--fire); font-family: var(--mono); }
+h2 {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0 0 1.4rem;
+}
+h2 .mark { margin-right: 0.6em; }
+h2.big {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 1.4rem + 2.8vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--bone);
+  margin-bottom: 1rem;
+  text-wrap: balance;
+}
+h2.big .caps { letter-spacing: 0.04em; }
+.lede {
+  font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem);
+  line-height: 1.18;
+  font-style: italic;
+  text-wrap: balance;
+  margin: 0 0 1.2em;
+}
+.lede .caps { font-style: normal; letter-spacing: 0.04em; }
+.whisper {
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--dim);
+  letter-spacing: 0.02em;
+}
+.onward { font-family: var(--mono); font-size: 0.9375rem; letter-spacing: 0.02em; }
+.onward::before { content: "✴︎ "; color: var(--fire); }
+.bar {
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0 0 2rem;
+}
+.bar .mark { color: var(--fire); }
+
+/* The secret: a line that shows itself on hover, tap or focus */
+.secret { display: block; margin: 0 0 1em; }
+.secret summary { list-style: none; cursor: pointer; display: inline; font-family: var(--mono); font-size: 0.9375rem; color: var(--dim); text-decoration: underline dotted var(--fire); text-underline-offset: 0.2em; }
+.secret summary::-webkit-details-marker { display: none; }
+.secret summary:hover, .secret summary:focus-visible { color: var(--fire-hi); }
+.secret[open] summary { color: var(--dim); }
+.secret .answer { display: inline; margin-left: 0.4em; }
+
+/* Table of correspondences */
+.corr {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  margin: 0 0 1rem;
+}
+.corr caption {
+  text-align: left;
+  font-size: var(--label);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 0 0 1rem;
+  font-weight: 500;
+}
+.corr caption .mark { color: var(--fire); }
+.corr td, .corr th { padding: 0.85rem 0.6rem 0.85rem 0; vertical-align: baseline; text-align: left; font-weight: 400; }
+.corr tr { border-top: 1px solid var(--hair); }
+#correspondences { padding-bottom: 0; }
+#correspondences .corr { margin-bottom: 0; }
+.corr .g { width: 2.2rem; color: var(--fire); font-size: 1.1rem; padding-right: 0; }
+.corr .n a { text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.corr .n a::after { content: ""; position: absolute; inset: 0; }
+.corr tr { position: relative; }
+.corr tr:hover { background: linear-gradient(90deg, var(--fire-dim), transparent 70%); }
+.corr tr:hover .n a { color: var(--fire-hi); }
+.corr .c { color: var(--dim); white-space: nowrap; }
+.corr .w { color: var(--dim); text-align: right; font-size: 0.8125rem; }
+@media (max-width: 519px) {
+  .corr .w { display: none; }
+  .corr .c { font-size: 0.8125rem; }
+}
+
+/* Correspondences row on the other pages */
+.corr-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.3rem;
+  padding: 1.5rem var(--gutter) 0;
+  max-width: var(--measure);
+  margin: 0 auto;
+  font-family: var(--mono);
+  font-size: var(--label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+  list-style: none;
+}
+.corr-row a { text-decoration: none; color: var(--dim); }
+.corr-row a:hover { color: var(--fire-hi); }
+.corr-row .g { color: var(--fire); margin-right: 0.4em; }
+.corr-row [aria-current] { color: var(--bone); }
+
+/* The ledger */
+.ledger { list-style: none; margin: 0 0 1rem; padding: 0; font-size: 0.9375rem; }
+.ledger li {
+  display: grid;
+  align-content: start;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "date moon" "title title" "place place" "line line";
+  gap: 0.15rem 1rem;
+  padding: 1rem 0 1.1rem;
+  border-top: 1px solid var(--hair);
+}
+.ledger li:last-child { border-bottom: 1px solid var(--hair); }
+.ledger .date { grid-area: date; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.8125rem; }
+.ledger .moon { grid-area: moon; color: var(--dim); font-size: 0.8125rem; letter-spacing: 0.06em; text-align: right; }
+.ledger .moon abbr { text-decoration: none; }
+.ledger .title { grid-area: title; font-family: var(--serif); font-size: 1.35rem; line-height: 1.15; margin-top: 0.25rem; }
+.ledger .title .g { color: var(--fire); font-family: var(--mono); font-size: 0.85em; margin-right: 0.45em; }
+.ledger .place { grid-area: place; color: var(--dim); font-size: 0.8125rem; }
+.ledger .note { grid-area: line; font-family: var(--serif); font-style: italic; font-size: 1.0625rem; line-height: 1.35; margin-top: 0.3rem; max-width: 34rem; }
+.ledger li.now .date { color: var(--fire-hi); }
+@media (min-width: 640px) {
+  .ledger li {
+    grid-template-columns: 8.5rem 2.5rem 1fr;
+    grid-template-areas: "date moon title" "date moon place" "date moon line";
+    gap: 0.15rem 1rem;
+  }
+  .ledger .moon { text-align: left; }
+  .ledger .title { margin-top: 0; }
+  .ledger .date { padding-top: 0.3rem; }
+  .ledger .moon { padding-top: 0.3rem; }
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin: 0 0 1.6rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+.legend .g { color: var(--fire); margin-right: 0.4em; }
+
+/* Volumes (NOT NOT PHILO) */
+.volumes { list-style: none; margin: 0; padding: 0; }
+.volumes li { padding: 1.2rem 0; border-top: 1px solid var(--hair); }
+.volumes li:last-child { border-bottom: 1px solid var(--hair); }
+.volumes .vol { font-family: var(--mono); font-size: var(--label); letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin: 0 0 0.4rem; }
+.volumes .vol .mark { color: var(--fire); }
+.volumes h3 { font-size: 1.6rem; line-height: 1.1; margin: 0 0 0.4rem; }
+.volumes .q { font-style: italic; font-size: 1.25rem; line-height: 1.3; margin: 0 0 0.5rem; }
+.volumes p:last-child { margin-bottom: 0; }
+
+.genres { font-family: var(--mono); font-size: 0.875rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); line-height: 1.9; }
+.genres .mark { color: var(--fire); }
+
+/* Colophon */
+.colophon {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2.5rem var(--gutter) 5.5rem; /* the bottom 64px stay clear for the variants bar */
+  border-top: 1px solid var(--hair);
+  font-size: 0.875rem;
+  color: var(--dim);
+}
+.colophon p { margin: 0 0 0.6rem; }
+.colophon a { text-decoration: none; color: var(--bone); }
+.colophon a:hover { color: var(--fire-hi); }
+.colophon .sign { font-family: var(--serif); font-size: 1.25rem; color: var(--bone); margin-top: 1.8rem; }
+.colophon .sign .emoji { margin-right: 0.3em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .line, ::view-transition-old(root), ::view-transition-new(root) { transition: none; animation: none; }
+}
