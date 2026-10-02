@@ -151,18 +151,17 @@ a:hover {
 }
 
 .nav {
-  display: grid;
-  grid-template-columns: auto auto;
-  justify-content: start;
-  gap: 0 0.1rem;
-  margin: 0 -0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.2rem;
+  margin: 0 -0.4rem;
   padding: 0;
   list-style: none;
 }
 
 .nav a {
   display: block;
-  padding: 0.6rem 0.45rem;
+  padding: 0.45rem 0.4rem;
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 0.7rem;
@@ -217,8 +216,8 @@ a:hover {
   cursor: grab;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
-  -webkit-mask-image: linear-gradient(#000 70%, transparent 100%);
-  mask-image: linear-gradient(#000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(#000 78%, transparent 100%);
+  mask-image: linear-gradient(#000 78%, transparent 100%);
 }
 
 .hearth:active {
@@ -252,6 +251,14 @@ a:hover {
 
 .hero-text > * {
   pointer-events: auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.hero-text,
+.hearth {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .display {
@@ -276,6 +283,10 @@ a:hover {
 
 .hero h1.display {
   font-size: clamp(2.5rem, 12.6vw, 6rem);
+}
+
+.hero h1.display.long {
+  font-size: clamp(2rem, 9.4vw, 6rem);
 }
 
 .hero h1.display .lit,
@@ -535,7 +546,7 @@ main {
   mask-size: 600px 900px;
   -webkit-mask-repeat: repeat;
   mask-repeat: repeat;
-  opacity: 0.35;
+  opacity: 0.5;
 }
 
 .band::after {
@@ -543,7 +554,7 @@ main {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(70% 70% at 50% 50%, rgba(11, 7, 9, 0.2), var(--night) 100%);
+  background: radial-gradient(75% 75% at 50% 50%, rgba(11, 7, 9, 0.1), var(--night) 100%);
 }
 
 /* Genres and names: red caps, right-aligned, after the flyer. */
@@ -622,9 +633,7 @@ main {
 
 .wall {
   position: relative;
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 var(--gutter) 2rem;
+  padding: 0 calc(var(--bar) + var(--gutter) + 1rem) 2rem var(--gutter);
 }
 
 .wall h2 {
@@ -655,7 +664,7 @@ main {
   background:
     radial-gradient(120% 90% at 100% 0%, rgba(42, 10, 34, 0.85), transparent 60%),
     var(--plum-deep);
-  border: 1px solid rgba(229, 29, 71, 0.18);
+  border: 1px solid rgba(229, 29, 71, 0.1);
   overflow: hidden;
   transition: border-color 220ms ease-out, transform 320ms cubic-bezier(0.2, 0, 0, 1), box-shadow 320ms ease-out;
 }
@@ -678,7 +687,7 @@ main {
   mask-size: 420px 630px;
   -webkit-mask-position: 40% 20%;
   mask-position: 40% 20%;
-  opacity: 0.16;
+  opacity: 0.3;
   pointer-events: none;
 }
 
@@ -707,22 +716,12 @@ main {
   padding: 1.1rem 1.1rem 1.2rem;
 }
 
-.poster .kind {
+.poster h3 {
   margin: 0 0 0.8rem;
   font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fire-text);
-}
-
-.poster h3 {
-  margin: 0 0 0.7rem;
-  font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(1.05rem, 0.9rem + 0.8vw, 1.35rem);
-  line-height: 1.12;
+  font-size: clamp(1.4rem, 1.1rem + 1.4vw, 1.9rem);
+  line-height: 1.05;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--cream);
@@ -735,15 +734,14 @@ main {
 
 .poster.gathering h3 {
   color: var(--cream);
-  text-shadow: none;
-  filter: url("#hollow-thin");
+  filter: url("#hollow");
 }
 
 .poster .line {
   margin: 0 0 auto;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--cream);
+  color: var(--ash);
 }
 
 .poster .place {
@@ -752,6 +750,10 @@ main {
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   color: var(--ash);
+}
+
+.poster .place .kind {
+  color: var(--fire-text);
 }
 
 /* ---------- The volumes (NOT NOT PHILO) ---------- */
@@ -821,11 +823,6 @@ main {
     --bar: 40px;
   }
 
-  .nav {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
   .nav a {
     padding: 0.6rem 0.55rem;
     font-size: 0.72rem;
@@ -836,7 +833,8 @@ main {
     padding-right: calc(var(--bar) + var(--gutter) + 1rem);
   }
 
-  .hero h1.display {
+  .hero h1.display,
+  .hero h1.display.long {
     font-size: clamp(3.4rem, 7.2vw, 6rem);
   }
 

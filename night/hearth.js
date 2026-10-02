@@ -161,12 +161,13 @@
             // Lit faces (normal towards the viewer) stay calm; turned ones seethe.
             let a = Math.max(0, Math.min(1, 0.95 - nf[2] * 0.75));
             a = a * a * (3 - 2 * a);
-            const k = a * e;
+            // Stoking heats every face, lit ones included, so a tap always shows.
+            const k = Math.min(1, a * e + heat * 0.45 * e);
             y += Math.sin(sxp * o.wave - t * o.speed + i * 0.7) * amp * k;
             // Heat climbs the ramp with k, and the whole solid runs hotter when stoked.
-            const hk = Math.min(1, k * (0.75 + heat * 0.6) + heat * 0.12 * e);
+            const hk = Math.min(1, k * (0.75 + heat * 0.6) + heat * 0.2 * e);
             bucket = k < 0.03 ? -1 : Math.min(RAMP.length - 1, Math.floor(hk * (RAMP.length - 1) + 0.5));
-            if (hk > 0.55 && hot.length < 240 && Math.random() < 0.08) hot.push(sxp, y, hk);
+            if (hk > 0.5 && hot.length < 240 && Math.random() < 0.08) hot.push(sxp, y, hk);
           }
           if (prev !== -2) {
             const path = bucket < 0 ? basePath : paths[bucket];
