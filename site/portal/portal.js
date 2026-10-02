@@ -52,6 +52,7 @@
     btn.addEventListener("pointercancel", release);
     btn.addEventListener("pointerleave", release);
     btn.addEventListener("click", () => { if (held) { held = false; return; } toggle(); });
+    btn.addEventListener("contextmenu", (e) => e.preventDefault());
 
     set(window.scrollY);
   }
@@ -123,7 +124,8 @@
               if (gap < edge) edge = gap;
             }
             let e = Math.max(0, Math.min(1, edge / fade)); e = e * (2 - e);
-            let a = Math.max(0, Math.min(1, 0.95 - nf[2] * 0.75)); a = a * a * (3 - 2 * a);
+            // faces square to the viewer glow gold; grazing ones run white-hot
+            let a = Math.max(0, Math.min(1, 0.5 + (1 - nf[2]) * 0.7)); a = a * a * (3 - 2 * a);
             const k = a * e;
             y += Math.sin(sxp * WAVE - t * 5 + i * 0.7) * amp * k;
             bucket = k < 0.04 ? 0 : k < 0.4 ? 1 : k < 0.75 ? 2 : 3;

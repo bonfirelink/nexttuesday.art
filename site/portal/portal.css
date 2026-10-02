@@ -48,6 +48,7 @@ body::after {
 }
 ::selection { background: var(--gold); color: var(--ink); }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; border-radius: 2px; }
+.field-gold :focus-visible, .field-coral :focus-visible { outline-color: var(--ink); }
 a { color: var(--cobalt); text-decoration-color: color-mix(in srgb, var(--cobalt) 45%, transparent); text-underline-offset: .18em; text-decoration-thickness: 1.5px; transition: text-decoration-color .2s; }
 a:hover { text-decoration-color: currentColor; }
 img, svg { display: block; max-width: 100%; }
@@ -68,7 +69,7 @@ strong { font-weight: 600; }
 .wordmark:hover { color: var(--cobalt); }
 .mast nav { display: flex; flex-wrap: wrap; gap: .2rem 1.25rem; }
 .mast nav a { font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; padding: .35rem 0; border-bottom: 1.5px solid transparent; }
-@media (max-width: 599px) { .mast nav { width: 100%; justify-content: space-between; gap: .2rem .5rem; } .mast nav a { font-size: .66rem; letter-spacing: .1em; } }
+@media (max-width: 599px) { .mast nav { width: 100%; justify-content: space-between; gap: .2rem .5rem; } .mast nav a { font-size: .7rem; letter-spacing: .08em; padding: .55rem 0; } }
 .mast nav a:hover, .mast nav a[aria-current="page"] { border-bottom-color: currentColor; }
 .field-coral .mast, .field-coral .mast a { color: var(--ink); }
 .field-cobalt .mast, .field-cobalt .mast a { color: var(--bone); }
