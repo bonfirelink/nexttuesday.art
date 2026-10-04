@@ -83,11 +83,9 @@
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
   --dur-night: 1.8s;
-  /* night-fall: grounds switch at the start, with the text. The tokens switch
-     the moment data-theme flips, so night text lands at once; any ground still
-     on its way from day sits under it at under AA (even 94% of the way leaves
-     the key word at 2.6:1). */
-  --ease-night: steps(1, jump-start);
+  /* night-fall: how grounds cross from day to night (the text is dimmed
+     through the dusk meanwhile, see section 11) */
+  --ease-night: ease;
 
   /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
@@ -312,16 +310,26 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
 /* ---------- 11. night-fall ---------- */
 /* A page with data-nts-nightfall starts in its world's day tokens when the
    visitor arrived from home (html[data-theme="day"]) and crosses to night
-   when scrolled. World kits define both sets. The crossing keeps AA on every
-   frame: text is never interpolated (it switches with the tokens, at the
-   start), and grounds and lines switch with it (--ease-night). Variant
-   transitions on other properties keep running over --dur-night. A surface a variant adds to the crossing
-   should use the same easing, or it fades from day under night text. */
+   when scrolled. World kits define both sets. The crossing is a dusk, so no
+   text is ever readable at mid contrast: nts.js dims the text first
+   (html[data-dusk="in"], a quarter of --dur-night), flips the tokens while it
+   is dim, the grounds and lines cross over --dur-night on --ease-night, and
+   as they settle (0.65 in) the text returns in its night colours
+   (data-dusk="out"), readable only once the ground is there.
+   Text colour itself is never interpolated. */
 html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .band, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
   transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease;
   transition-timing-function: var(--ease-night);
 }
 html[data-nightfall] { transition: background-color var(--dur-night) ease; transition-timing-function: var(--ease-night); }
+/* the dusk: what carries text dims out and comes back. !important because it
+   must beat draw-in, reveals and variants' own opacity and transitions, and
+   only for the length of the dusk. */
+html[data-dusk] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) {
+  transition: opacity calc(var(--dur-night) * .25) ease !important;
+}
+html[data-dusk="in"] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) { opacity: 0 !important; }
+html[data-dusk="out"] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) { transition-duration: calc(var(--dur-night) * .35) !important; }
 /* links' hover fades would otherwise carry their colour across too. :where()
    keeps these at the specificity of the rules they amend, so a variant's own
    transitions still win. */

@@ -192,15 +192,19 @@ consumes it; failing that it accepts a same-origin referrer equal to the
 page's parent folder. Anything else (direct landing, reload, reduced
 motion) is night. The crossing: the first real scroll past a third of the
 viewport sets `data-theme="night"` and dispatches `nts:night` on `window`;
-it never goes back. The crossing keeps AA on every frame: text is never
-interpolated (it switches with the tokens, at once), and grounds and lines
-on body, header, footer, `.sect`, `.hero`, `.band`, `.lift` and ledger rows
-switch with it, at the start (`--ease-night`). Even a ground 94% of the
-way to night leaves a colour near its threshold under AA, so there is no
-partial fade. A surface you add to the crossing gets
+it never goes back. The crossing is a dusk, so no text is readable at mid
+contrast: `nts.js` sets `html[data-dusk="in"]` and the text dims out over a
+quarter of `--dur-night`; the tokens flip while it is dim (that is when
+`nts:night` fires); grounds and lines on body, header, footer, `.sect`,
+`.hero`, `.band`, `.lift` and ledger rows cross over `--dur-night` on
+`--ease-night`; at 0.65 of the crossing `data-dusk="out"` brings the text
+back in its night colours. Text colour is never interpolated. A surface you
+add to the crossing gets
 `transition: background-color var(--dur-night) var(--ease-night)` and no
-`color` in its transition; a ground that fades from day with plain `ease`
-sits under night text at under AA for most of the crossing. The EMBERS and INTERSECT kits ship a day
+`color` in its transition. Set `--dur-night` on `html[data-nightfall]` for
+a slower fall (Quiet: 3.6s). A variant that runs its own crossing sets
+`transition-duration: 0s` on `html[data-nightfall]`: nts.js then flips at
+once, with no dusk, and the variant catches `nts:night` (Tide's wave). The EMBERS and INTERSECT kits ship a day
 set (`html[data-theme="day"] [data-world=…]`) and NOT NOT PHILO a night set
 (`html[data-nightfall][data-theme="night"] [data-world="philo"]`), so any
 world page can fall.

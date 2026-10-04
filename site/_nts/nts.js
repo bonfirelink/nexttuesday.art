@@ -52,11 +52,29 @@
   /* night-fall: the crossing */
   if (d.hasAttribute("data-nightfall") && d.getAttribute("data-theme") === "day") {
     var start = scrollY, armed = false, fell = false;
+    var flip = function () {
+      d.setAttribute("data-theme", "night");
+      dispatchEvent(new CustomEvent("nts:night"));
+    };
+    /* dusk: the text dims (html[data-dusk="in"]), the tokens flip while it is
+       dim, the grounds cross over --dur-night, and the text returns in its
+       night colours as they settle ("out"). A variant that runs its own
+       crossing sets transition-duration: 0s on html[data-nightfall]; then
+       the flip is immediate and there is no dusk. */
     var fall = function () {
       if (fell) return;
       fell = true;
-      d.setAttribute("data-theme", "night");
-      dispatchEvent(new CustomEvent("nts:night"));
+      var t = getComputedStyle(d).transitionDuration.split(",")[0].trim();
+      var dur = parseFloat(t) * (/ms$/.test(t) ? 1 : 1000);
+      if (!dur) { flip(); return; }
+      d.setAttribute("data-dusk", "in");
+      setTimeout(function () {
+        flip();
+        setTimeout(function () {
+          d.setAttribute("data-dusk", "out");
+          setTimeout(function () { d.removeAttribute("data-dusk"); }, dur * 0.4);
+        }, dur * 0.65);
+      }, dur * 0.25);
     };
     var watch = function () {
       if (!armed) { armed = true; start = scrollY; return; }
