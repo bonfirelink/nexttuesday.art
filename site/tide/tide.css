@@ -297,7 +297,9 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .embers-venues .prose p { font-size: 1.1rem; }
 
 /* NOT NOT PHILO */
+/* the key word at 3:1 on both grounds: a touch of ink by day (4.6:1), the night accent by night (3.9:1) */
 html:not([data-theme="night"]) .philo-key { color: color-mix(in srgb, var(--philo-red) 84%, var(--philo-ink)); }
+html[data-theme="night"] .philo-key { color: var(--w-accent); }
 .philo-hero .stack { display: grid; gap: .5rem; justify-items: start; }
 .philo-hero h1 { margin: .4rem 0 .6rem; }
 .philo-hero .entity { width: min(100%, 30rem); margin-inline: auto; }
