@@ -53,7 +53,7 @@
 html:not(.js) .turn .hint { display: none; }
 html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .titlepage { display: grid; justify-items: center; gap: clamp(.9rem, 2.5vh, 1.4rem); }
-.titlepage h1 { font-size: clamp(2.1rem, 8.6vw, 4.4rem); letter-spacing: .09em; line-height: 1.08; max-width: 9ch; }
+.titlepage h1 { font-size: clamp(2.1rem, 8.6vw, 4.4rem); letter-spacing: .09em; line-height: 1.12; max-width: 9ch; }
 .titlepage .incant { max-width: 24ch; margin: 0; }
 .titlepage .label { margin: 0; color: var(--w-muted); font-family: var(--font-fell); font-weight: 400; font-size: 1rem; letter-spacing: .22em; }
 @media (min-width: 900px) {
@@ -96,7 +96,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 }
 .idx-world [data-nts-fragment="intersect"] { padding: 0; }
 .idx-sigil { grid-area: sig; width: 2.2rem; height: 2.2rem; margin-top: .35em; transform-origin: center; transition: color 1s ease, filter 1s ease, transform 1.2s var(--ease-out); }
-.idx-name { grid-area: name; font-family: var(--font-fell); font-size: clamp(1.9rem, 8.4vw, 4.4rem); line-height: 1; letter-spacing: .01em; text-wrap: balance; transition: transform var(--dur-lift) var(--ease-lift); }
+.idx-name { grid-area: name; font-family: var(--font-fell); font-size: clamp(1.9rem, 8.4vw, 4.4rem); line-height: 1.04; letter-spacing: .01em; text-wrap: balance; transition: transform var(--dur-lift) var(--ease-lift); }
 .idx-whisper { grid-area: whisper; font-family: var(--font-fell); font-style: italic; font-size: 1.1rem; line-height: 1.35; color: var(--w-muted); max-width: 26ch; transition: color 1s ease, transform var(--dur-lift) var(--ease-lift); }
 .idx-go { grid-area: go; display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--w-accent-text); opacity: 0; transition: opacity .8s ease, transform var(--dur-lift) var(--ease-lift), color 1s ease; }
 .idx-go::after { content: "→"; font-family: var(--font-sans); }
