@@ -20,7 +20,7 @@
 
 /* ---------- grounds and cuts ---------- */
 :root { --cut: var(--w-fg); --cut-gap: clamp(1.75rem, 4.5vw, 3rem); }
-.cut { position: relative; }
+.cut { position: relative; isolation: isolate; }
 .cut::before { content: ""; position: absolute; inset: 0 calc(50% - 50vw); background: var(--ground, transparent); z-index: -1; pointer-events: none; }
 html[data-nightfall] .cut::before { transition: background-color var(--dur-night) ease; }
 .sect.cut, .sect + .sect.cut { padding-top: 0; }
