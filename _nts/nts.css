@@ -1,0 +1,355 @@
+/* Next Tuesday Society: the shared layer.
+   Tokens, the skeleton (header, footer), type, the section grammar, the
+   ledger, and the CSS side of the behaviours (lift, draw-in, night-fall).
+   World kits (worlds/*.css) only redefine the --w-* tokens and add their own
+   entity; they never redefine what is below the tokens block.
+
+   Contrast, body text: ink on paper 15.8:1; ink-soft on paper 6.1:1;
+   ink on coral 5.0:1; coral-ink on paper 5.1:1; cobalt on paper 7.2:1.
+   Coral itself (3.1:1 on paper) only draws marks, fields and type at 24px+. */
+
+/* ---------- 1. tokens ---------- */
+:root {
+  /* NTS palette */
+  --nts-paper: #f4ecdc;
+  --nts-paper-2: #ebe1cc;
+  --nts-ink: #1a1530;
+  --nts-ink-soft: #5b5577;
+  --nts-coral: #f04a3a;
+  --nts-coral-ink: #c42b1f;
+  --nts-coral-deep: #d63a2b;
+  --nts-gold: #f5b31b;
+  --nts-cobalt: #2f3fd9;
+  --nts-cobalt-tint: #cfcbf2;
+  --nts-line: rgba(26, 21, 48, 0.18);
+  --nts-line-strong: rgba(26, 21, 48, 0.42);
+
+  /* the worlds, for use outside their pages (ledger marks, fragments) */
+  --embers-night: #0b0709;
+  --embers-plum: #2a0a22;
+  --embers-fire: #e51d47;
+  --embers-fire-text: #c0103a;
+  --embers-ember: #f2591b;
+  --embers-cream: #ffe9d0;
+  --philo-ground: #e6e6e8;
+  --philo-ink: #2b2d3e;
+  --philo-red: #e5174a;
+  --philo-red-text: #c0103a;
+  --intersect-black: #0a0a0a;
+  --intersect-phosphor: #e9e2cf;
+  --intersect-fire: #ff3b63;
+  --intersect-fire-text: #c8103a;
+
+  /* the world the page is in: NTS by default. World kits set these; the
+     skeleton reads only these. */
+  --w-bg: var(--nts-paper);
+  --w-bg-2: var(--nts-paper-2);
+  --w-fg: var(--nts-ink);
+  --w-muted: var(--nts-ink-soft);
+  --w-accent: var(--nts-coral);
+  --w-accent-text: var(--nts-coral-ink);
+  --w-link: var(--nts-cobalt);
+  --w-line: var(--nts-line);
+  --w-line-strong: var(--nts-line-strong);
+  --w-selection: var(--nts-gold);
+  --w-selection-fg: var(--nts-ink);
+  --w-bar-bg: rgba(244, 236, 220, 0.86);
+  --w-bar-fg: var(--nts-ink);
+  --w-sigil: "nts";
+
+  /* type: three families across the whole site */
+  --font-fell: "IM Fell DW Pica", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Red Hat Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --text: 1.0625rem;
+  --measure: 38rem;
+
+  /* space */
+  --gutter: clamp(16px, 5vw, 48px);
+  --wrap: 72rem;
+  --section: clamp(3.5rem, 9vw, 7rem);
+  --bar-h: 3.25rem;
+
+  /* motion. --ease-lift is the chooser's card lift, kept exactly. */
+  --ease-lift: ease;
+  --dur-lift: 250ms;
+  --lift-y: -4px;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-turn: cubic-bezier(.65, 0, .15, 1);
+  --dur-draw: 1.6s;
+  --dur-night: 1.8s;
+}
+
+/* ---------- 2. ground ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  background: var(--w-bg);
+  color: var(--w-fg);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-color: var(--w-line-strong) var(--w-bg);
+  scrollbar-width: thin;
+  scroll-padding-top: calc(var(--bar-h) + 1rem);
+  accent-color: var(--w-accent);
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--w-bg);
+  color: var(--w-fg);
+  font-family: var(--font-sans);
+  font-size: var(--text);
+  line-height: 1.55;
+  font-kerning: normal;
+  overflow-x: clip;
+  padding-bottom: 72px; /* the switcher pill owns the bottom 64px */
+}
+::selection { background: var(--w-selection); color: var(--w-selection-fg); }
+:focus-visible { outline: 2px solid var(--w-accent-text); outline-offset: 4px; border-radius: 2px; }
+::-webkit-scrollbar { width: 9px; }
+::-webkit-scrollbar-thumb { background: var(--w-line-strong); border-radius: 9px; }
+::-webkit-scrollbar-track { background: var(--w-bg); }
+a { color: var(--w-link); text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: .18em; text-decoration-thickness: 1px; transition: color 160ms, text-decoration-color 160ms; }
+a:hover { text-decoration-color: currentColor; }
+img, svg, canvas { display: block; max-width: 100%; }
+p { margin: 0 0 1em; text-wrap: pretty; }
+em { font-style: italic; }
+strong { font-weight: 600; }
+.emoji { font-family: var(--font-emoji); font-style: normal; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; }
+.prose { max-width: var(--measure); }
+.prose > :last-child { margin-bottom: 0; }
+
+/* ---------- 3. type ---------- */
+h1, h2, h3, .fell { font-family: var(--font-fell); font-weight: 400; line-height: 1.02; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 10vw, 5.5rem); letter-spacing: .01em; }
+h2 { font-size: clamp(1.9rem, 5.5vw, 3rem); }
+h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
+.caps { text-transform: uppercase; letter-spacing: .06em; }
+.incant { font-family: var(--font-fell); font-style: italic; font-size: clamp(1.25rem, 3.4vw, 1.75rem); line-height: 1.3; }
+.lede { font-size: clamp(1.15rem, 2.6vw, 1.35rem); line-height: 1.45; }
+.label { font-family: var(--font-sans); font-weight: 600; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; font-variation-settings: "wdth" 100; }
+.whisper { font-family: var(--font-fell); font-style: italic; color: var(--w-muted); font-size: 1.05rem; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.mark { color: var(--w-accent); font-family: var(--font-fell); }
+
+/* ---------- 4. sigils ---------- */
+.nts-sigil { width: 1.5em; height: 1.5em; flex: none; color: var(--w-accent); overflow: visible; }
+.nts-sigil use { stroke-linecap: round; }
+.nts-sigil.lg { width: 3.5rem; height: 3.5rem; }
+.nts-sigil.xl { width: clamp(4.5rem, 14vw, 7rem); height: clamp(4.5rem, 14vw, 7rem); }
+.sigil-embers { color: var(--embers-fire); }
+.sigil-philo { color: var(--philo-red); }
+.sigil-intersect { color: var(--intersect-fire-text); }
+.sigil-nts { color: var(--nts-coral); }
+
+/* ---------- 5. the skeleton: header ---------- */
+.nts-header {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--w-bar-bg);
+  color: var(--w-bar-fg);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid transparent;
+  transition: border-color 400ms, background-color var(--dur-night), color var(--dur-night);
+}
+.nts-header.is-scrolled { border-bottom-color: var(--w-line); }
+.nts-header .bar {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem 1rem;
+  min-height: var(--bar-h);
+}
+.nts-header a { color: inherit; text-decoration: none; }
+.nts-home { display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 0; min-height: 44px; }
+.nts-home .nts-sigil { width: 1.75rem; height: 1.75rem; color: var(--w-accent); transition: transform 2.2s var(--ease-turn); }
+.nts-home:hover .nts-sigil, .nts-home:focus-visible .nts-sigil { transform: rotate(51.43deg); }
+.nts-home .wordmark { font-family: var(--font-fell); font-size: 1.2rem; line-height: 1; white-space: nowrap; padding-top: .1em; }
+.nts-nav { display: flex; gap: 0 clamp(.6rem, 2.5vw, 1.6rem); margin: 0; padding: 0; list-style: none; }
+.nts-nav a {
+  display: inline-flex; align-items: center; gap: .4rem;
+  min-height: 44px; padding: .2rem 0;
+  font-weight: 600; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 200ms, color 200ms;
+}
+.nts-nav a:hover, .nts-nav a:focus-visible { border-bottom-color: currentColor; }
+.nts-nav a[aria-current="page"] { border-bottom-color: var(--w-accent); }
+.nts-nav .nts-sigil { width: 1.1rem; height: 1.1rem; display: none; }
+.nts-nav a[aria-current="page"] .nts-sigil { display: block; }
+@media (max-width: 639px) {
+  .nts-home .wordmark { display: none; }
+  .nts-nav { flex: 1; justify-content: space-between; margin-left: .25rem; }
+  .nts-nav a { font-size: .66rem; letter-spacing: .06em; font-variation-settings: "wdth" 84; }
+  .nts-nav .nts-sigil { display: none !important; }
+}
+@media (max-width: 339px) { .nts-nav a { font-size: .6rem; letter-spacing: .03em; font-variation-settings: "wdth" 75; } }
+
+/* ---------- 6. the skeleton: footer ---------- */
+.nts-footer {
+  margin-top: var(--section);
+  border-top: 1px solid var(--w-line);
+  padding: clamp(2.5rem, 6vw, 4rem) 0 1.5rem;
+  color: var(--w-fg);
+  transition: background-color var(--dur-night), color var(--dur-night), border-color var(--dur-night);
+}
+.nts-footer .cols { display: grid; gap: 2rem 3rem; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .nts-footer .cols { grid-template-columns: 1.3fr 1fr 1fr; } }
+.nts-footer h2 { font-size: 1.35rem; margin-bottom: .6rem; }
+.nts-footer p { margin: 0 0 .35rem; }
+.nts-footer .label { color: var(--w-muted); margin-bottom: .7rem; }
+.nts-footer a { color: inherit; }
+.nts-footer ul { list-style: none; margin: 0; padding: 0; }
+.nts-footer li { margin: 0 0 .5rem; }
+.nts-footer .worlds li a { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; min-height: 32px; }
+.nts-footer .worlds li a:hover span { text-decoration: underline; text-underline-offset: .18em; }
+.nts-footer .worlds .nts-sigil { width: 1.35rem; height: 1.35rem; }
+.nts-footer .sign { margin-top: clamp(2rem, 5vw, 3rem); padding-top: 1.25rem; border-top: 1px solid var(--w-line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 2rem; align-items: baseline; }
+.nts-footer .sign .small { font-size: .85rem; color: var(--w-muted); }
+.nts-footer .signoff { font-family: var(--font-fell); font-size: 1.25rem; margin: 0; }
+.nts-footer .signoff .emoji { margin-right: .35em; }
+
+/* ---------- 7. section grammar ---------- */
+.sect { padding: var(--section) 0; }
+.sect + .sect { padding-top: 0; }
+.sect-head { display: flex; align-items: center; gap: .9rem; margin-bottom: 1.25rem; }
+.sect-head .mark { font-size: 1.6rem; line-height: 1; }
+.sect-head h2 { margin: 0; }
+.sect-head .nts-sigil { width: 2.25rem; height: 2.25rem; }
+.rule { border: 0; height: 1px; background: var(--w-line); margin: 0; }
+.rule.draw { transform-origin: left; }
+.band { background: var(--band-bg, var(--nts-coral)); color: var(--band-fg, var(--nts-ink)); }
+.band a { color: inherit; }
+.band ::selection { background: var(--nts-ink); color: var(--nts-paper); }
+.band :focus-visible { outline-color: var(--nts-ink); }
+.band.gold { --band-bg: var(--nts-gold); --band-fg: var(--nts-ink); }
+.band.cobalt { --band-bg: var(--nts-cobalt); --band-fg: var(--nts-paper); }
+.band.ink { --band-bg: var(--nts-ink); --band-fg: var(--nts-paper); }
+.band.ink ::selection { background: var(--nts-gold); color: var(--nts-ink); }
+.band.ink :focus-visible { outline-color: var(--nts-gold); }
+
+/* a link that leads somewhere, with the ✴︎ mark */
+.go { display: inline-flex; align-items: center; gap: .55rem; font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; color: var(--w-accent-text); min-height: 44px; }
+.go .nts-sigil { width: .9rem; height: .9rem; color: currentColor; transition: transform 500ms var(--ease-out); }
+.go:hover .nts-sigil, .go:focus-visible .nts-sigil { transform: rotate(90deg) scale(1.15); }
+.go::after { content: "→"; font-family: var(--font-sans); transition: transform 300ms var(--ease-out); }
+.go:hover::after, .go:focus-visible::after { transform: translateX(4px); }
+.band .go { color: inherit; }
+
+/* a reveal on tap: the whisper */
+details.reveal { margin-top: .5rem; }
+details.reveal summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; color: var(--w-accent-text); font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; }
+details.reveal summary::-webkit-details-marker { display: none; }
+details.reveal summary::before { content: "✴︎"; font-family: var(--font-fell); font-size: 1.1em; transition: transform 500ms var(--ease-out); }
+details.reveal[open] summary::before { transform: rotate(180deg); }
+details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style: italic; font-size: 1.2rem; }
+
+/* ---------- 8. the lift (the chooser's card lift, shared) ---------- */
+.lift {
+  display: block; position: relative; text-decoration: none; color: inherit;
+  border: 1px solid var(--w-line); border-radius: 14px;
+  background: var(--card-bg, color-mix(in srgb, var(--w-bg) 70%, var(--w-bg-2)));
+  transition: transform var(--dur-lift) var(--ease-lift), border-color var(--dur-lift), background-color var(--dur-lift), box-shadow var(--dur-lift) var(--ease-lift);
+}
+.lift:hover, .lift:focus-visible { transform: translateY(var(--lift-y)); border-color: var(--w-accent); box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--w-fg) 55%, transparent); }
+.lift:active { transform: scale(.99); box-shadow: none; }
+.lift:focus-visible { outline-offset: 3px; }
+
+/* ---------- 9. the ledger ---------- */
+.ledger { list-style: none; margin: 0; padding: 0; }
+.ledger-group { margin: 0 0 clamp(2rem, 5vw, 3rem); }
+.ledger-group > h2, .ledger-group > h3 { display: flex; align-items: center; gap: .8rem; margin: 0 0 1rem; font-size: clamp(1.5rem, 4vw, 2rem); }
+.ledger-group > h2::after, .ledger-group > h3::after { content: ""; flex: 1; height: 1px; background: var(--w-line); }
+.ledger li { position: relative; display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: .25rem 1rem; padding: 1.1rem 0; border-top: 1px solid var(--w-line); }
+.ledger li:last-child { border-bottom: 1px solid var(--w-line); }
+.ledger .nts-sigil { width: 1.9rem; height: 1.9rem; margin-top: .15rem; grid-row: span 3; }
+.ledger .when { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--w-muted); }
+.ledger .what { font-family: var(--font-fell); font-size: 1.35rem; line-height: 1.15; margin: 0; }
+.ledger .what a { color: inherit; text-decoration: none; }
+.ledger .what a:hover { text-decoration: underline; text-underline-offset: .15em; text-decoration-color: var(--w-accent); }
+.ledger .where { font-size: .9rem; color: var(--w-muted); margin: 0; }
+.ledger .line { margin: .3rem 0 0; font-size: .98rem; max-width: 44rem; }
+.ledger .kind { display: inline-block; font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding: .15em .5em .1em; border-radius: 3px; margin-left: .5rem; vertical-align: .15em; color: var(--kind-fg, var(--w-fg)); background: var(--kind-bg, var(--w-line)); }
+.ledger li[data-world="embers"] { --kind-bg: var(--embers-fire); --kind-fg: #fff; }
+.ledger li[data-world="philo"] { --kind-bg: var(--philo-red); --kind-fg: #fff; }
+.ledger li[data-world="intersect"] { --kind-bg: var(--intersect-black); --kind-fg: var(--intersect-phosphor); }
+.ledger li[data-world="nts"] { --kind-bg: var(--nts-coral); --kind-fg: var(--nts-ink); }
+.ledger li.upcoming .when { color: var(--w-accent-text); }
+@media (min-width: 720px) {
+  .ledger li { grid-template-columns: 2.5rem 11rem minmax(0, 1fr); align-items: start; }
+  .ledger .nts-sigil { grid-row: span 2; }
+  .ledger .when { padding-top: .35rem; grid-row: span 2; }
+  .ledger .what, .ledger .where, .ledger .line { grid-column: 3; }
+}
+
+/* ---------- 10. draw-in (Threshold's build-up, on entering view) ---------- */
+/* Only when JS is there to add .is-in; otherwise everything is simply drawn. */
+.js [data-nts-draw] svg, .js svg[data-nts-draw] { --draw-delay: 0ms; }
+.js [data-nts-draw]:not(.is-in) .nts-sigil use, .js .nts-sigil[data-nts-draw]:not(.is-in) use,
+.js [data-nts-draw]:not(.is-in) .drawn, .js [data-nts-draw]:not(.is-in) .drawn * { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js [data-nts-draw].is-in .nts-sigil use, .js .nts-sigil[data-nts-draw].is-in use,
+.js [data-nts-draw].is-in .drawn, .js [data-nts-draw].is-in .drawn * { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-draw) var(--ease-out) var(--draw-delay); }
+.js [data-nts-draw="fade"]:not(.is-in) { opacity: 0; transform: translateY(8px); }
+.js [data-nts-draw="fade"].is-in { opacity: 1; transform: none; transition: opacity 700ms ease var(--draw-delay), transform 900ms var(--ease-out) var(--draw-delay); }
+.js .rule.draw:not(.is-in) { transform: scaleX(0); }
+.js .rule.draw.is-in { transform: scaleX(1); transition: transform 1.2s var(--ease-out) var(--draw-delay); }
+.js [data-nts-draw] .nts-sigil .dot, .js .nts-sigil[data-nts-draw] .dot { transition: opacity 400ms ease calc(var(--draw-delay) + var(--dur-draw)); }
+
+/* ---------- 11. night-fall ---------- */
+/* A page with data-nts-nightfall starts in its world's day tokens when the
+   visitor arrived from home (html[data-theme="day"]) and crosses to night
+   when scrolled. The crossing is a colour transition on the surfaces that
+   carry the tokens. World kits define both sets. */
+html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
+  transition: background-color var(--dur-night) ease, color var(--dur-night) ease, border-color var(--dur-night) ease;
+}
+html[data-nightfall] { transition: background-color var(--dur-night) ease; }
+
+/* ---------- 12. the mega-sigil ---------- */
+.mega { position: relative; width: 100%; aspect-ratio: 1; }
+.mega svg { width: 100%; height: 100%; overflow: visible; }
+.mega [class^="l-"] { transform-box: fill-box; transform-origin: center; }
+.mega .l-ticks { animation: turn 240s linear infinite; }
+.mega .l-hept { animation: turn 170s linear infinite reverse; }
+.mega .l-waves { animation: turn 220s linear infinite; }
+.mega .l-knot { animation: turn 95s linear infinite; }
+.mega .l-stars { animation: turn 130s linear infinite reverse; }
+.mega .tet { transform-box: fill-box; transform-origin: center; transition: transform 2.2s var(--ease-turn); }
+.mega .hole { opacity: 0; transition: opacity 1.6s ease .6s; }
+.mega.is-aligned [class^="l-"] { animation: none; transition: transform 2.2s var(--ease-turn); }
+.mega.is-aligned .hole { opacity: 1; }
+.mega.is-aligned .tet { transform: rotate(180deg); }
+.mega .multiply { mix-blend-mode: multiply; }
+.mega .misreg { transform: translate(5px, -4px); }
+@keyframes turn { to { transform: rotate(360deg); } }
+/* the small details draw themselves in, once, on arrival; the figure itself
+   is there from the first frame */
+.js .mega .l-hept path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.6s var(--ease-out) .2s forwards; }
+.js .mega .l-ticks circle { opacity: 0; animation: appear 1.2s ease .9s forwards; }
+.js .mega .l-ticks circle + circle { animation-delay: 1.4s; }
+.js .mega .l-stars use { opacity: 0; transform-box: fill-box; transform-origin: center; animation: pop 900ms var(--ease-out) forwards; }
+.js .mega .l-stars use:nth-child(2) { animation-delay: 1.6s; }
+.js .mega .l-stars use:nth-child(3) { animation-delay: 1.9s; }
+.js .mega .l-stars use:nth-child(4) { animation-delay: 2.2s; }
+.js .mega .l-stars use:nth-child(5) { animation-delay: 2.5s; }
+.js .mega .l-knot circle { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.2s var(--ease-out) 1s forwards; }
+.js .mega .l-knot circle:nth-child(3) { animation-delay: 1.3s; }
+.js .mega .l-knot circle:nth-child(4) { animation-delay: 1.6s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+@keyframes pop { from { opacity: 0; transform: scale(.2) rotate(-45deg); } to { opacity: 1; transform: none; } }
+.mega-btn { appearance: none; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; color: inherit; width: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; border-radius: 50%; }
+.mega-btn:focus-visible { outline-offset: 10px; }
+
+/* ---------- 13. reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .mega [class^="l-"] { animation: none !important; }
+  .js .mega .l-hept path, .js .mega .l-knot circle { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .js .mega .l-ticks circle, .js .mega .l-stars use { opacity: 1; }
+  .js [data-nts-draw]:not(.is-in) .nts-sigil use, .js .nts-sigil[data-nts-draw]:not(.is-in) use, .js [data-nts-draw]:not(.is-in) .drawn, .js [data-nts-draw]:not(.is-in) .drawn * { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .js [data-nts-draw="fade"]:not(.is-in) { opacity: 1; transform: none; }
+  .js .rule.draw:not(.is-in) { transform: none; }
+  .lift:hover, .lift:focus-visible { transform: none; }
+}
