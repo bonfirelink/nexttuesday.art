@@ -24,19 +24,6 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
   .tuesdays .sigil-stage { display: grid; place-items: center; grid-column: 2; grid-row: 1 / span 2; }
   .tuesdays .sigil-stage .nts-sigil { width: min(100%, 16rem); height: auto; aspect-ratio: 1; }
 }
-.initiative { display: grid; gap: 1.5rem 3rem; align-items: center; }
-.initiative .frag { width: min(100%, 17rem); aspect-ratio: 1; overflow: hidden; border-radius: 14px; --card-bg: transparent; }
-.initiative .frag > div { border-radius: inherit; }
-.initiative .frag:hover, .initiative .frag:focus-visible { box-shadow: 0 16px 32px -18px rgba(26, 21, 48, .6); }
-.initiative[data-world-of="embers"] .frag { --frag-bg: var(--embers-night); border-color: transparent; }
-.initiative[data-world-of="philo"] .frag { --frag-bg: var(--philo-ground); }
-.initiative[data-world-of="intersect"] .frag { --frag-bg: var(--intersect-black); border-color: transparent; }
-@media (min-width: 760px) {
-  .initiative { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); }
-  .initiative .frag { width: 100%; }
-  .initiative:nth-of-type(odd) { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); }
-  .initiative:nth-of-type(odd) .frag { order: 2; }
-}
 .words { padding: clamp(3rem, 8vw, 6rem) 0; position: relative; overflow: hidden; }
 .words .wrap { position: relative; }
 .words-grid { display: grid; gap: 1.5rem 3rem; }

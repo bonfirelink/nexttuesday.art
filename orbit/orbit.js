@@ -3,7 +3,8 @@
      compass   .compass shows once the orrery has scrolled away, and its
                data-near names the body whose section holds the middle of
                the viewport (sections carry data-orbit-body); a tap goes
-               back to the sun
+               back to the sun (a plain #top link: the stylesheet
+               scrolls smoothly when motion is welcome)
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
                "orb", so it grows into the world page's entity; coming back,
@@ -11,7 +12,6 @@
    Everything checks prefers-reduced-motion. */
 (function () {
   "use strict";
-  var still = matchMedia("(prefers-reduced-motion: reduce)");
 
   /* compass */
   var compass = document.querySelector(".compass");
@@ -31,10 +31,6 @@
       });
     }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
     document.querySelectorAll("[data-orbit-body]").forEach(function (s) { near.observe(s); });
-    compass.addEventListener("click", function (e) {
-      e.preventDefault();
-      scrollTo({ top: 0, behavior: still.matches ? "auto" : "smooth" });
-    });
   }
 
   /* falling in, and back */
