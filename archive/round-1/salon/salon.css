@@ -321,18 +321,18 @@ a.bar:hover, a.bar:focus-visible { background: #d71941; box-shadow: calc(-1 * va
   background-position: center;
   background-size: cover;
 }
-.plate.rings { background-image: url("/salon/plate-rings.svg"); }
+.plate.rings { background-image: url("/archive/round-1/salon/plate-rings.svg"); }
 .plate.fire {
-  background-image: url("/salon/plate-fire.svg");
+  background-image: url("/archive/round-1/salon/plate-fire.svg");
   background-size: cover;
   background-position: right top;
   -webkit-mask-image: linear-gradient(to right, transparent 22%, #000 62%);
   mask-image: linear-gradient(to right, transparent 22%, #000 62%);
 }
 .night { --plate: 0.5; }
-.plate.sphere { background-image: url("/salon/plate-sphere.svg"); }
-.plate.cube { background-image: url("/salon/plate-cube.svg"); }
-.plate.cross { background-image: url("/salon/plate-cross.svg"); background-size: 900px; background-repeat: repeat; }
+.plate.sphere { background-image: url("/archive/round-1/salon/plate-sphere.svg"); }
+.plate.cube { background-image: url("/archive/round-1/salon/plate-cube.svg"); }
+.plate.cross { background-image: url("/archive/round-1/salon/plate-cross.svg"); background-size: 900px; background-repeat: repeat; }
 .band .sec { border-top-color: color-mix(in srgb, var(--ink) 35%, transparent); }
 .sec.flush { border-top: 0; padding-top: 0; }
 

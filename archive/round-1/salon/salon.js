@@ -3,7 +3,7 @@
    screen, and closes again. A drag turns it by hand. Without JavaScript the
    page shows entity.svg, the same drawing at the closed pose; with
    prefers-reduced-motion the canvas draws that one frame and stops. */
-import { frame, CLOSED } from '/salon/entity.js';
+import { frame, CLOSED } from '/archive/round-1/salon/entity.js';
 
 const host = document.querySelector('.entity');
 if (host) {
