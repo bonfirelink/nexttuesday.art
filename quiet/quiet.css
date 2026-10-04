@@ -55,7 +55,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .titlepage { display: grid; justify-items: center; gap: clamp(.9rem, 2.5vh, 1.4rem); }
 .titlepage h1 { font-size: clamp(2.1rem, 8.6vw, 4.4rem); letter-spacing: .09em; line-height: 1.08; max-width: 9ch; }
 .titlepage .incant { max-width: 24ch; margin: 0; }
-.titlepage .label { margin: 0; color: var(--w-muted); }
+.titlepage .label { margin: 0; color: var(--w-muted); font-family: var(--font-fell); font-weight: 400; font-size: 1rem; letter-spacing: .22em; }
 @media (min-width: 900px) {
   .opening { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; column-gap: clamp(2rem, 7vw, 7rem); min-height: calc(100svh - var(--bar-h)); padding-block: 2rem 3rem; }
   .folio { justify-items: center; }
@@ -96,11 +96,16 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 }
 .idx-world [data-nts-fragment="intersect"] { padding: 0; }
 .idx-sigil { grid-area: sig; width: 2.2rem; height: 2.2rem; margin-top: .35em; transform-origin: center; transition: color 1s ease, filter 1s ease, transform 1.2s var(--ease-out); }
-.idx-name { grid-area: name; font-family: var(--font-fell); font-size: clamp(1.9rem, 8.4vw, 4.4rem); line-height: 1; letter-spacing: .01em; text-wrap: balance; transition: transform 1s var(--ease-out); }
-.idx-whisper { grid-area: whisper; font-family: var(--font-fell); font-style: italic; font-size: 1.1rem; line-height: 1.35; color: var(--w-muted); max-width: 26ch; transition: color 1s ease; }
-.idx-go { grid-area: go; display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--w-accent-text); opacity: 0; transform: translateY(4px); transition: opacity .8s ease, transform .9s var(--ease-out), color 1s ease; }
+.idx-name { grid-area: name; font-family: var(--font-fell); font-size: clamp(1.9rem, 8.4vw, 4.4rem); line-height: 1; letter-spacing: .01em; text-wrap: balance; transition: transform var(--dur-lift) var(--ease-lift); }
+.idx-whisper { grid-area: whisper; font-family: var(--font-fell); font-style: italic; font-size: 1.1rem; line-height: 1.35; color: var(--w-muted); max-width: 26ch; transition: color 1s ease, transform var(--dur-lift) var(--ease-lift); }
+.idx-go { grid-area: go; display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--w-accent-text); opacity: 0; transition: opacity .8s ease, transform var(--dur-lift) var(--ease-lift), color 1s ease; }
 .idx-go::after { content: "→"; font-family: var(--font-sans); }
-.idx-line:focus-visible { outline-offset: 0; }
+.idx-line:focus-visible { outline-offset: 0; outline-color: var(--wake-accent-text); }
+/* the poster's material behind NOT NOT PHILO's line: engraved rings and the red rule */
+.idx-line[data-world-of="philo"] .idx-world { border-top: 3px solid var(--philo-red); background-image: repeating-radial-gradient(circle at 82% 50%, rgba(43, 45, 62, .14) 0 1px, transparent 1px 9px); }
+/* while quiet.js manages the index, a sleeping line's fragment is out of the
+   document, so the kits' own observers pause it; it comes back before the wake */
+.idx.is-managed .idx-world:not(.is-shown) > [data-nts-fragment] { display: none; }
 /* awake: reached for */
 .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) { color: var(--wake-fg); }
 .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-world { opacity: 1; transition-duration: .7s; }
@@ -108,17 +113,20 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-whisper { color: var(--wake-muted); }
 .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-sigil { color: var(--wake-accent); filter: drop-shadow(var(--wake-glow)); transform: scale(1.1); }
 .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-go { opacity: 1; transform: none; color: var(--wake-accent-text); }
-.idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-name { transform: translateX(.08em); }
-.idx-line:active .idx-name { transform: translateX(.08em) scale(.995); }
+/* the chooser's lift, on the line's type: ease, 250ms, -4px */
+.idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) :is(.idx-name, .idx-whisper, .idx-go) { transform: translateY(var(--lift-y)); }
+.idx-line:active :is(.idx-name, .idx-whisper, .idx-go) { transform: scale(.995); }
 /* with scripts off the index still reads: the stills sit quietly on the right */
 html:not(.js) .idx-world { opacity: 1; background: transparent; }
 html:not(.js) .idx-world > [data-nts-fragment] { opacity: .5; }
+html:not(.js) .idx-world [data-nts-fragment="intersect"] { color: var(--nts-ink); }
 @media (min-width: 900px) {
-  .idx-line { grid-template-columns: 3rem minmax(0, 1.15fr) minmax(0, 1fr) auto; grid-template-areas: "sig name whisper go"; column-gap: clamp(1rem, 3vw, 2.5rem); align-items: baseline; padding: clamp(1.75rem, 3.5vw, 2.6rem) clamp(10rem, 16vw, 15rem) clamp(1.75rem, 3.5vw, 2.6rem) 0; }
-  .idx-sigil { width: 2.6rem; height: 2.6rem; align-self: center; margin-top: 0; }
-  .idx-name { font-size: clamp(3rem, 5.4vw, 4.6rem); }
-  .idx-whisper { font-size: 1.3rem; max-width: 34ch; }
-  .idx-go { margin-top: 0; }
+  .idx-line { grid-template-columns: 3rem minmax(0, 1fr) auto; grid-template-areas: "sig name go" "sig whisper go"; column-gap: clamp(1rem, 3vw, 2.5rem); row-gap: .6rem; align-items: start; padding: clamp(1.75rem, 3.5vw, 2.6rem) clamp(9rem, 14vw, 13rem) clamp(1.75rem, 3.5vw, 2.6rem) 1.25rem; }
+  .idx-sigil { width: 2.6rem; height: 2.6rem; margin-top: .3em; }
+  .idx-name { font-size: clamp(2.8rem, 4.6vw, 4.2rem); text-wrap: nowrap; }
+  .idx-whisper { font-size: 1.3rem; max-width: 36ch; }
+  .idx-go { margin-top: 0; align-self: center; }
+  .idx-world { inset: 0 -1.25rem; border-radius: 3px; }
   .idx-world > [data-nts-fragment] { transform: translateX(14%) scale(1.02); }
   .idx-line:is(:hover, :focus-visible, .is-awake, .is-pressed) .idx-world > [data-nts-fragment] { transform: translateX(6%); }
 }
