@@ -88,7 +88,8 @@
 @keyframes bead-pop { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
 
 /* the key under the sky */
-.orrery-key { display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem 1.1rem; margin: 0; padding: 0; list-style: none; }
+.orrery-key { display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem 1.1rem; margin: 0; padding: 0; list-style: none; max-width: 21rem; }
+@media (min-width: 600px) { .orrery-key { max-width: none; } }
 .orrery-key a { display: inline-flex; align-items: center; gap: .45rem; min-height: 40px; text-decoration: none; color: var(--w-muted); font-family: var(--font-sans); font-weight: 600; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; }
 .orrery-key a:hover, .orrery-key a:focus-visible { color: var(--w-fg); }
 .orrery-key .nts-sigil { width: 1.1rem; height: 1.1rem; }
@@ -142,15 +143,17 @@
 
 /* scrolling travels: as a world comes into view its body grows, its
    ground blooms out from the body, and its words arrive. Scroll-driven,
-   so it never takes the scroll away; where unsupported, every world is
-   simply there. */
+   so it never takes the scroll away. Only with scripts (html.js), so a
+   page rendered without a scroll position, with scripts off or on paper,
+   has every world simply there. */
 @supports (animation-timeline: view()) {
-  .world::before { animation: bloom linear both; animation-timeline: view(); animation-range: entry 0% entry 60%; }
-  .orb-stage { animation: orb-grow linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
-  .world .prose { animation: arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 85%; }
-  .leg { animation: leg-draw linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
-  .sky { animation: sky-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 50% 0; }
+  .js .world::before { animation: bloom linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+  .js .orb-stage { animation: orb-grow linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  .js .world .prose { animation: arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 85%; }
+  .js .leg { animation: leg-draw linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  .js .sky { animation: sky-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 50% 0; }
 }
+@media print { .world::before, .orb-stage, .world .prose, .leg, .sky, .orrery .orbit, .bead, .orb-orbit, .orb-orbit .face { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
 @keyframes bloom { from { clip-path: circle(0% at var(--bloom-at)); } to { clip-path: circle(150% at var(--bloom-at)); } }
 @keyframes orb-grow { from { transform: scale(.6); opacity: .55; } to { transform: none; opacity: 1; } }
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
