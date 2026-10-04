@@ -57,6 +57,8 @@ html[data-theme="day"] [data-world="embers"], html[data-theme="day"][data-world=
   color: var(--w-fg);
   transition: text-shadow var(--dur-night), color var(--dur-night);
 }
+/* night-fall keeps AA on every frame: the colour switches with the tokens, the glow fades */
+:where(html[data-nightfall][data-theme="night"]) .embers-display { transition: text-shadow var(--dur-night); }
 .embers-display .hollow {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--w-accent);
