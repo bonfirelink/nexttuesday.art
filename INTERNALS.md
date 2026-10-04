@@ -195,8 +195,9 @@ viewport sets `data-theme="night"` and dispatches `nts:night` on `window`;
 it never goes back. The crossing keeps AA on every frame: text is never
 interpolated (it switches with the tokens, at once), and grounds and lines
 on body, header, footer, `.sect`, `.hero`, `.band`, `.lift` and ledger rows
-jump most of the way to night and settle over `--dur-night` on
-`--ease-night`. A surface you add to the crossing gets
+switch with it, at the start (`--ease-night`). Even a ground 94% of the
+way to night leaves a colour near its threshold under AA, so there is no
+partial fade. A surface you add to the crossing gets
 `transition: background-color var(--dur-night) var(--ease-night)` and no
 `color` in its transition; a ground that fades from day with plain `ease`
 sits under night text at under AA for most of the crossing. The EMBERS and INTERSECT kits ship a day

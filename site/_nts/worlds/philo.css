@@ -101,7 +101,7 @@ html[data-nightfall][data-theme="night"] .philo-strip { background: rgba(230, 23
 html[data-nightfall][data-theme="night"] .volume { background: #1f2130; color: var(--w-fg); }
 .volume .num { font-family: var(--font-fell); font-size: 2.4rem; line-height: 1; color: var(--w-muted); margin: 0 0 .6rem; }
 .volume .num small { font-family: var(--font-sans); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; vertical-align: .9em; margin-left: .4em; }
-.volume h3 { font-family: var(--font-sans); font-weight: 900; text-transform: uppercase; letter-spacing: -.01em; line-height: .95; font-size: clamp(1.7rem, 5vw, 2.1rem); color: var(--philo-red); text-shadow: -2px -2px 0 var(--philo-shadow); margin: 0 0 .7rem; }
+.volume h3 { font-family: var(--font-sans); font-weight: 900; text-transform: uppercase; letter-spacing: -.01em; line-height: .95; font-size: clamp(1.7rem, 5vw, 2.1rem); color: var(--philo-red-key); text-shadow: -2px -2px 0 var(--philo-shadow); margin: 0 0 .7rem; }
 .volume .q { font-family: var(--font-fell); font-style: italic; font-size: 1.2rem; line-height: 1.3; margin: 0 0 .5rem; }
 .volume .l { font-size: .95rem; color: var(--w-muted); margin: 0 0 .8rem; }
 .volume .when { font-family: var(--font-mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--w-muted); margin: 0; }

@@ -38,7 +38,10 @@ html { scroll-padding-top: var(--bar-h); }
 .plate-edge { display: flex; align-items: center; height: var(--peek); flex: none; }
 .plate-edge .nts-sigil { width: 1.3rem; height: 1.3rem; }
 .plate-text > :last-child { margin-bottom: 0; }
-html[data-nightfall] .plate { transition: background-color var(--dur-night) ease, color var(--dur-night) ease; }
+html[data-nightfall] .plate { transition: background-color var(--dur-night) var(--ease-night); }
+/* the philo hero's text column is a .stack too: by night it takes the world's ground */
+html[data-nightfall] .plate-hero .hero-text.stack { transition: background-color var(--dur-night) var(--ease-night); }
+html[data-nightfall][data-theme="night"] .plate-hero .hero-text.stack { background: var(--w-bg); }
 
 /* the plate beneath settles back as the next one covers it */
 .slot:not(:last-child) .plate::after {
