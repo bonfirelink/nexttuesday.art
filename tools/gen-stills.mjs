@@ -3,7 +3,7 @@
    Writes, in site/_nts/parts/:
      still-philo.svg          the impossible triangle at its closed pose
      still-intersect.txt      the ASCII tetrahedron, 84 columns
-     still-intersect-sm.txt   the same at 34 columns, for fragments
+     still-intersect-sm.txt   the same at 48 columns, for fragments
    The SVG uses the --penrose-* custom properties with fallbacks, so the
    same still follows day and night once inlined. tools/sync.mjs inlines
    these into the pages. */
@@ -58,7 +58,7 @@ const tetra = ascii.figure('tetra');
 const out = {
   'still-philo.svg': philoStill(),
   'still-intersect.txt': ascii.render(tetra, 84, Math.round(84 * 0.6), 0.6, pose),
-  'still-intersect-sm.txt': ascii.render(tetra, 34, Math.round(34 * 0.6), 0.6, pose),
+  'still-intersect-sm.txt': ascii.render(tetra, 48, Math.round(48 * 0.6), 0.6, pose),
 };
 for (const [name, text] of Object.entries(out)) {
   writeFileSync(join(parts, name), text);

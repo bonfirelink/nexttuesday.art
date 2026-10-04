@@ -13,7 +13,7 @@
      <!-- nts:mega-sigil -->…<!-- /nts:mega-sigil --> the mega-sigil SVG
      <!-- nts:events -->…<!-- /nts:events -->        the ledger, upcoming then past
      <!-- nts:events upcoming -->, <!-- nts:events past -->, <!-- nts:events world=embers -->,
-     <!-- nts:events upcoming limit=3 -->              subsets (same close marker)
+     <!-- nts:events upcoming limit=3 heading=none -->  subsets (same close marker; heading=h2|h3|none)
      <!-- nts:still embers|philo|intersect -->…<!-- /nts:still -->  a still frame
    Attributes:
      data-nts-copy="key"      the element's inner HTML becomes copy.json[key]
@@ -90,9 +90,10 @@ function ledger(prefix, opts) {
       const kind = `<span class="kind">${e.kind}</span>`;
       const title = e.link ? `<a href="${prefix}${e.link}">${esc(e.title)}</a>` : esc(e.title);
       const where = e.place ? `<p class="where">${esc(e.place)}</p>` : '';
-      return `<li class="${status}" data-world="${e.world}" id="ev-${e.id}">${sigil(SITE.worlds[e.world].sigil)}<p class="when">${esc(e.display_date)}</p><p class="what">${title}${kind}</p>${where}<p class="line">${esc(e.line)}</p></li>`;
+      return `<li class="${status}" data-of="${e.world}" id="ev-${e.id}">${sigil(SITE.worlds[e.world].sigil)}<p class="when">${esc(e.display_date)}</p><p class="what">${title}${kind}</p>${where}<p class="line">${esc(e.line)}</p></li>`;
     }).join('\n');
-    out += `<section class="ledger-group" id="${status}"><${H}>${esc(label)}</${H}><ul class="ledger">\n${lis}\n</ul></section>\n`;
+    const head = H === 'none' ? '' : `<${H}>${esc(label)}</${H}>`;
+    out += `<section class="ledger-group" id="${status}" aria-label="${esc(label)}">${head}<ul class="ledger">\n${lis}\n</ul></section>\n`;
   }
   return out.trim();
 }

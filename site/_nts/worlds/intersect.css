@@ -72,5 +72,6 @@ html[data-nightfall][data-theme="day"] pre[data-nts-ascii].is-live { text-shadow
 
 /* the fragment */
 [data-nts-fragment="intersect"] { position: relative; aspect-ratio: 1; width: 100%; background: var(--frag-bg, #0a0a0a); color: #e9e2cf; overflow: hidden; border-radius: inherit; display: grid; place-items: center; padding: 8%; }
+[data-nts-fragment="intersect"] .still { width: 100%; height: 100%; display: grid; place-items: center; }
 [data-nts-fragment="intersect"] pre { margin: 0; width: 100%; aspect-ratio: 1; font-family: var(--font-mono); line-height: 1; white-space: pre; overflow: hidden; font-size: 4px; }
 [data-nts-fragment="intersect"] pre.is-live { text-shadow: 0 0 5px rgba(233, 226, 207, .35); }
