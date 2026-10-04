@@ -38,34 +38,37 @@
 .orrery .r-philo { stroke-opacity: .55; stroke-dasharray: .004 .011; }
 .orrery .r-intersect { stroke-opacity: .6; stroke-dasharray: .0005 .0075; stroke-width: 1.6; }
 .orrery .r-frame { stroke-opacity: .32; stroke-dasharray: .03 .006 .003 .006; }
-.orrery .sun-grain { position: absolute; left: 24.4%; top: 24.4%; width: 51.2%; height: 51.2%; border-radius: 50%; background: var(--orbit-noise) center / 220px 220px; mix-blend-mode: multiply; opacity: .28; pointer-events: none; }
+.orrery .sun-grain { position: absolute; left: 24.4%; top: 24.4%; width: 51.2%; height: 51.2%; border-radius: 50%; background: var(--orbit-noise) center / 220px 220px; mix-blend-mode: multiply; opacity: .42; pointer-events: none; }
 .orrery .sun { position: absolute; left: 25%; top: 25%; width: 50%; color: var(--nts-ink); }
 .orrery .sun:focus-visible { outline-color: var(--nts-ink); outline-offset: 6px; }
-.orrery .orbit { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; rotate: var(--a); animation: turn var(--p) linear infinite; }
+/* the pivot: a zero-size point that turns; what rides it sits at --r
+   straight up and turns back the other way, so it stays upright */
+.pivot { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; rotate: var(--a, 20deg); animation: turn var(--p, 80s) linear infinite; }
+.pivot > * { position: absolute; left: 0; top: calc(-1 * var(--r, 50cqi)); rotate: calc(-1 * var(--a, 20deg)); animation: turn var(--p, 80s) linear infinite reverse; }
+.trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--w-fg) 50%, transparent); transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease; }
+.trace-bead .nts-sigil { width: 1.5rem; height: 1.5rem; }
 .orrery .o-star { --r: 27.2cqi; --a: var(--a-star); --p: var(--p-star); }
-.orrery .o-embers { --r: 33cqi; --a: var(--a-embers); --p: var(--p-embers); }
-.orrery .o-philo { --r: 39.2cqi; --a: var(--a-philo); --p: var(--p-philo); }
-.orrery .o-intersect { --r: 42cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
+.orrery .o-embers { --r: 31.5cqi; --a: var(--a-embers); --p: var(--p-embers); }
+.orrery .o-philo { --r: 36cqi; --a: var(--a-philo); --p: var(--p-philo); }
+.orrery .o-intersect { --r: 40cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
 .bead {
-  position: absolute; left: 0; top: calc(-1 * var(--r)); width: var(--bead); height: var(--bead);
+  width: var(--bead); height: var(--bead);
   margin: calc(var(--bead) / -2) 0 0 calc(var(--bead) / -2);
   display: grid; place-items: center; pointer-events: auto; text-decoration: none;
-  rotate: calc(-1 * var(--a));
-  animation: turn var(--p) linear infinite reverse;
   -webkit-tap-highlight-color: transparent;
 }
 .bead .face {
   width: 100%; aspect-ratio: 1; height: auto; border-radius: 50%; display: grid; place-items: center;
   background: var(--bead-bg, var(--nts-paper)); border: 1px solid var(--bead-line, var(--nts-line-strong));
-  box-shadow: 0 6px 14px -8px rgba(26, 21, 48, .55);
+  box-shadow: 0 0 0 3px var(--nts-paper), 0 6px 14px -8px rgba(26, 21, 48, .55);
   transition: transform var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift), border-color var(--dur-lift);
 }
 .bead .nts-sigil { width: 58%; height: auto; aspect-ratio: 1; color: var(--bead-fg); }
-.bead:hover .face, .bead:focus-visible .face { transform: translateY(var(--lift-y)); box-shadow: 0 12px 22px -10px rgba(26, 21, 48, .65); border-color: var(--bead-fg); }
+.bead:hover .face, .bead:focus-visible .face { transform: translateY(var(--lift-y)); box-shadow: 0 0 0 3px var(--nts-paper), 0 12px 22px -10px rgba(26, 21, 48, .65); border-color: var(--bead-fg); }
 .bead:active .face { transform: scale(.97); box-shadow: none; }
 .bead:focus-visible { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; border-radius: 50%; }
 .bead[data-body="embers"] { --bead-bg: var(--embers-night); --bead-fg: var(--embers-fire); --bead-line: rgba(229, 29, 71, .55); }
-.bead[data-body="embers"] .face { box-shadow: 0 6px 14px -8px rgba(26, 21, 48, .55), 0 0 18px -4px rgba(229, 29, 71, .45); }
+.bead[data-body="embers"] .face { box-shadow: 0 0 0 3px var(--nts-paper), 0 6px 14px -8px rgba(26, 21, 48, .55), 0 0 18px -4px rgba(229, 29, 71, .45); }
 .bead[data-body="philo"] { --bead-bg: var(--philo-ground); --bead-fg: var(--philo-red); --bead-line: rgba(43, 45, 62, .6); }
 .bead[data-body="intersect"] { --bead-bg: var(--intersect-black); --bead-fg: var(--intersect-phosphor); --bead-line: rgba(233, 226, 207, .4); }
 .bead[data-body="star"] { --bead-bg: transparent; --bead-line: transparent; --bead-fg: var(--nts-gold); }
@@ -75,22 +78,21 @@
 
 /* arrival: the sun is whole from the first frame; the orbits and their
    bodies draw themselves in behind the sigil's own build-up */
-.js .orrery .r-embers { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.6s var(--ease-out) .5s forwards; }
-.js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 0; animation: appear 1.4s ease forwards; }
-.js .orrery .r-philo { animation-delay: 1.1s; }
-.js .orrery .r-intersect { animation-delay: 1.5s; }
-.js .orrery .r-frame { animation-delay: 2s; }
-.js .bead .face { animation: bead-pop 900ms var(--ease-out) backwards; }
-.js .o-star .face { animation-delay: 1.3s; }
-.js .o-embers .face { animation-delay: 1.7s; }
-.js .o-philo .face { animation-delay: 2.1s; }
-.js .o-intersect .face { animation-delay: 2.5s; }
-@keyframes bead-pop { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
+.js .orrery .r-embers { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.4s var(--ease-out) .3s forwards; }
+.js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 0; animation: appear 1.2s ease forwards; }
+.js .orrery .r-philo { animation-delay: .6s; }
+.js .orrery .r-intersect { animation-delay: .9s; }
+.js .orrery .r-frame { animation-delay: 1.3s; }
+.js .bead .face { animation: bead-pop 500ms var(--ease-out) backwards; }
+.js .o-philo .face { animation-delay: 80ms; }
+.js .o-intersect .face { animation-delay: 160ms; }
+.js .o-star .face { animation-delay: 240ms; }
+@keyframes bead-pop { from { transform: scale(.5); } to { transform: none; } }
 
 /* the key under the sky */
 .orrery-key { display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem 1.1rem; margin: 0; padding: 0; list-style: none; max-width: 21rem; }
 @media (min-width: 600px) { .orrery-key { max-width: none; } }
-.orrery-key a { display: inline-flex; align-items: center; gap: .45rem; min-height: 40px; text-decoration: none; color: var(--w-muted); font-family: var(--font-sans); font-weight: 600; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; }
+.orrery-key a { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; text-decoration: none; color: var(--w-muted); font-family: var(--font-sans); font-weight: 600; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; }
 .orrery-key a:hover, .orrery-key a:focus-visible { color: var(--w-fg); }
 .orrery-key .nts-sigil { width: 1.1rem; height: 1.1rem; }
 
@@ -116,15 +118,15 @@
 .world::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--w-bg); clip-path: circle(150% at var(--bloom-at)); }
 .world ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
 .world-grid { display: grid; gap: clamp(1.75rem, 5vw, 3rem); justify-items: center; }
-.orb-stage { width: min(100% - 3.5rem, 22rem); }
+.orb-stage { width: min(100% - 5rem, 22rem); }
 .orb { display: block; position: relative; aspect-ratio: 1; border-radius: 50%; border: 0; background: transparent; --card-bg: transparent; container-type: inline-size; -webkit-tap-highlight-color: transparent; }
 .orb > [data-nts-fragment] { border-radius: 50%; --frag-bg: var(--w-bg-2); box-shadow: inset 0 0 0 1px var(--w-line); }
-.orb::before { content: ""; position: absolute; inset: -6%; border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
+.orb::before { content: ""; position: absolute; inset: -.6rem; border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
 .orb:hover, .orb:focus-visible { box-shadow: 0 18px 36px -18px color-mix(in srgb, var(--w-fg) 55%, transparent); }
 .orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
-.orb-orbit { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; rotate: var(--a); animation: turn var(--p) linear infinite; }
-.orb-orbit .face { position: absolute; left: 0; top: -56cqi; width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--w-fg) 50%, transparent); rotate: calc(-1 * var(--a)); animation: turn var(--p) linear infinite reverse; }
-.orb-orbit .nts-sigil { width: 1.75rem; height: 1.75rem; }
+.orb-orbit { --r: calc(50cqi + .6rem); }
+.orb-orbit .trace-bead { width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; }
+.orb-orbit .trace-bead .nts-sigil { width: 1.75rem; height: 1.75rem; }
 .world[data-world="embers"] .orb-orbit { --a: 320deg; --p: 90s; }
 .world[data-world="philo"] .orb-orbit { --a: 40deg; --p: 110s; }
 .world[data-world="intersect"] .orb-orbit { --a: 230deg; --p: 130s; }
@@ -135,6 +137,7 @@
 .world[data-world="philo"] h2 { font-family: var(--font-sans); font-weight: 800; letter-spacing: -.02em; text-transform: uppercase; color: var(--w-accent-text); }
 .world[data-world="intersect"] { font-family: var(--font-fell); font-size: 1.15rem; }
 .world[data-world="intersect"] .go { font-family: var(--font-mono); letter-spacing: .1em; }
+@media (min-width: 900px) { .leg { height: 5rem; } .tuesdays.sect { padding-bottom: calc(var(--section) * .55); } }
 @media (min-width: 760px) {
   .world-grid { grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); align-items: center; column-gap: clamp(2.5rem, 6vw, 5rem); }
   .world { --bloom-at: 22% 50%; }
@@ -153,7 +156,7 @@
   .js .leg { animation: leg-draw linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
   .js .sky { animation: sky-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 50% 0; }
 }
-@media print { .world::before, .orb-stage, .world .prose, .leg, .sky, .orrery .orbit, .bead, .orb-orbit, .orb-orbit .face { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
+@media print { .world::before, .orb-stage, .world .prose, .leg, .sky, .pivot, .pivot > * { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
 @keyframes bloom { from { clip-path: circle(0% at var(--bloom-at)); } to { clip-path: circle(150% at var(--bloom-at)); } }
 @keyframes orb-grow { from { transform: scale(.6); opacity: .55; } to { transform: none; opacity: 1; } }
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
@@ -167,22 +170,22 @@
   background: color-mix(in srgb, var(--nts-paper) 94%, transparent); border: 1px solid var(--nts-line-strong);
   box-shadow: 0 10px 22px -12px rgba(26, 21, 48, .6);
   display: grid; place-items: center; color: var(--nts-ink);
-  opacity: 0; transform: translateY(10px) scale(.9); pointer-events: none;
-  transition: opacity .5s ease, transform .6s var(--ease-out);
+  opacity: 0; visibility: hidden; transform: translateY(10px) scale(.9); pointer-events: none;
+  transition: opacity .5s ease, transform .6s var(--ease-out), visibility 0s .5s;
   -webkit-tap-highlight-color: transparent;
 }
-.compass.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.compass.is-on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
 html:not(.js) .compass { display: none; }
 .compass:focus-visible { outline-offset: 3px; }
 .compass .c-sun { width: 18px; height: 18px; color: var(--nts-coral); animation: turn 170s linear infinite reverse; grid-area: 1 / 1; }
 .compass .c-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--nts-line); }
-.compass .c-orbit { position: absolute; left: 50%; top: 50%; width: 0; height: 0; rotate: var(--a); animation: turn var(--p) linear infinite; }
 .compass .c-embers { --a: var(--a-embers); --p: var(--p-embers); --c: var(--embers-fire); }
 .compass .c-philo { --a: var(--a-philo); --p: var(--p-philo); --c: var(--philo-red); }
 .compass .c-intersect { --a: var(--a-intersect); --p: var(--p-intersect); --c: var(--intersect-fire-text); }
 .compass .c-star { --a: var(--a-star); --p: var(--p-star); --c: var(--nts-gold); }
-.compass .c-dot { position: absolute; left: 0; top: -19px; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--nts-ink); opacity: .45; transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
-.compass .c-needle { position: absolute; left: 0; top: -17px; height: 17px; width: 1px; margin-left: -.5px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
+.compass .c-orbit { --r: 19px; }
+.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
+.compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
 .compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: scale(1.9); }
 .compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; transform: none; }
 .compass[data-near="sun"] .c-sun { filter: drop-shadow(0 0 4px rgba(240, 74, 58, .6)); }
@@ -193,20 +196,21 @@ html:not(.js) .compass { display: none; }
 .hero .entity { position: relative; }
 .trace { position: absolute; left: 50%; top: 50%; width: calc(min(100%, 92svh) - 2.6rem); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; container-type: inline-size; }
 .trace .trace-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--w-line-strong); }
-.trace-orbit { position: absolute; left: 50%; top: 50%; width: 0; height: 0; rotate: var(--a, 20deg); animation: turn var(--p, 80s) linear infinite; }
-.trace-bead { position: absolute; left: 0; top: calc(-1 * var(--r, 50cqi)); width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--w-fg) 50%, transparent); rotate: calc(-1 * var(--a, 20deg)); animation: turn var(--p, 80s) linear infinite reverse; transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease; }
-.trace-bead .nts-sigil { width: 1.5rem; height: 1.5rem; }
 .embers-hero .trace { width: calc(min(100%, 70svh) - 2.6rem); }
+.embers-hero .trace-orbit { --a: 215deg; }
 .intersect-hero .trace { width: calc(min(100%, 48svh, 520px) - 2.6rem); }
+.events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
-.events-hero .mini-orrery { position: relative; width: min(60%, 12rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.3rem auto; container-type: inline-size; }
-.events-hero .mini-orrery > .nts-sigil { width: 42%; height: 42%; }
+.events-hero .mini-orrery { position: relative; width: min(64%, 13rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.5rem auto 2.5rem; container-type: inline-size; }
+.events-hero .mini-orrery .sun-disc { position: absolute; left: 32%; top: 32%; width: 36%; height: 36%; border-radius: 50%; background: var(--nts-coral); }
+.events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--nts-ink); }
 .events-hero .mini-ring { position: absolute; inset: calc(50% - var(--r)); border-radius: 50%; border: 1px dashed var(--w-line); }
+.events-hero .mini-orrery .pivot > a { pointer-events: auto; }
+.events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: transform var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift); }
+.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { transform: translateY(var(--lift-y)); box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--w-fg) 55%, transparent); border-color: var(--w-accent); }
 .events-hero .o1, .events-hero .ring-1 { --r: 26cqi; --a: var(--a-embers); --p: var(--p-embers); }
 .events-hero .o2, .events-hero .ring-2 { --r: 38cqi; --a: var(--a-philo); --p: var(--p-philo); }
 .events-hero .o3, .events-hero .ring-3 { --r: 50cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
-.events-hero .mini-orrery .trace-bead { width: 2rem; height: 2rem; margin: -1rem 0 0 -1rem; }
-.events-hero .mini-orrery .trace-bead .nts-sigil { width: 1.2rem; height: 1.2rem; }
 @media (min-width: 900px) { .events-hero .mini-orrery { width: min(100%, 18rem); } }
 
 /* ---------- falling in: cross-document view transitions ---------- */
@@ -223,7 +227,8 @@ html:not(.js) .compass { display: none; }
 
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .orrery .orbit, .bead, .orb-orbit, .orb-orbit .face, .compass .c-sun, .compass .c-orbit, .trace-orbit, .trace-bead { animation: none !important; }
+  .pivot, .pivot > *, .compass .c-sun { animation: none !important; }
+  .events-hero .mini-orrery a.trace-bead:hover { transform: none; }
   .js .orrery .r-embers { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 1; animation: none; }
   .js .bead .face { animation: none; }
