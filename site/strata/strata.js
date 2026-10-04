@@ -18,7 +18,8 @@
     var raf = 0;
     var fit = function () {
       raf = 0;
-      var room = innerHeight - barTop();
+      // the bottom 64px belong to the switcher pill: a tall plate pins above them
+      var room = innerHeight - barTop() - 64;
       plates.forEach(function (p) {
         var over = p.offsetHeight - room;
         if (over > 0) { p.style.setProperty("--plate-top", (barTop() - over) + "px"); p.classList.add("is-tall"); }
