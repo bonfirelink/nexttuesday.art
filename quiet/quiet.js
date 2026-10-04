@@ -57,7 +57,7 @@
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { e.target.__set("scroll", e.isIntersecting && touch.matches); });
-    }, { rootMargin: "-40% 0px -40% 0px", threshold: 0 });
+    }, { rootMargin: "-49% 0px -49% 0px", threshold: 0 });
     lines.forEach(function (l) { io.observe(l); });
   }
 
