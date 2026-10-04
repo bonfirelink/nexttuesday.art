@@ -35,6 +35,10 @@
   --philo-ink: #2b2d3e;
   --philo-red: #e5174a;
   --philo-red-text: #c0103a;
+  /* the key word's red: the posters' red nudged (dE 1) so it holds 3:1 on its
+     own charcoal plate and on the grey (3.05, 3.57); --philo-red stays put
+     because white on the bar needs it that dark */
+  --philo-red-key: #e81e4c;
   --intersect-black: #0a0a0a;
   --intersect-phosphor: #e9e2cf;
   --intersect-fire: #ff3b63;
@@ -79,6 +83,10 @@
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
   --dur-night: 1.8s;
+  /* night-fall: the ground starts most of the way to night and settles.
+     The tokens switch the moment data-theme flips, so night text lands at
+     once; a ground that started from day would sit under it at under AA. */
+  --ease-night: linear(.94, 1);
 
   /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
@@ -303,12 +311,21 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
 /* ---------- 11. night-fall ---------- */
 /* A page with data-nts-nightfall starts in its world's day tokens when the
    visitor arrived from home (html[data-theme="day"]) and crosses to night
-   when scrolled. The crossing is a colour transition on the surfaces that
-   carry the tokens. World kits define both sets. */
+   when scrolled. World kits define both sets. The crossing keeps AA on every
+   frame: text is never interpolated (it switches with the tokens, at the
+   start), and grounds and lines jump most of the way and settle over
+   --dur-night on --ease-night. A surface a variant adds to the crossing
+   should use the same easing, or it fades from day under night text. */
 html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .band, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
-  transition: background-color var(--dur-night) ease, color var(--dur-night) ease, border-color var(--dur-night) ease;
+  transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease;
+  transition-timing-function: var(--ease-night);
 }
-html[data-nightfall] { transition: background-color var(--dur-night) ease; }
+html[data-nightfall] { transition: background-color var(--dur-night) ease; transition-timing-function: var(--ease-night); }
+/* links' hover fades would otherwise carry their colour across too. :where()
+   keeps these at the specificity of the rules they amend, so a variant's own
+   transitions still win. */
+:where(html[data-nightfall][data-theme="night"]) a { transition: text-decoration-color 160ms; }
+:where(html[data-nightfall][data-theme="night"]) .nts-nav a { transition: border-color 200ms; }
 
 /* ---------- 12. the mega-sigil ---------- */
 .mega { position: relative; width: 100%; aspect-ratio: 1; }

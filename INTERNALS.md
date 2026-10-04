@@ -100,7 +100,9 @@ NTS palette: paper `#f4ecdc`, paper-2 `#ebe1cc`, ink `#1a1530`, ink-soft
 paper), coral-ink `#c42b1f` (coral for small text, 4.8:1), gold `#f5b31b`,
 cobalt `#2f3fd9`. Worlds: EMBERS night `#0b0709`, fire `#e51d47`, ember
 `#f2591b`, cream `#ffe9d0`; NOT NOT PHILO ground `#e6e6e8`, ink `#2b2d3e`,
-red `#e5174a`; INTERSECT black `#0a0a0a`, phosphor `#e9e2cf`, fire-hi
+red `#e5174a`, key red `#e81e4c` (`--philo-red-key`, only for `.philo-key`:
+3:1 on the grey and on the word's own charcoal plate; `--philo-red` stays,
+since white on the bar needs it that dark); INTERSECT black `#0a0a0a`, phosphor `#e9e2cf`, fire-hi
 `#ff3b63`.
 
 The skeleton reads only the `--w-*` tokens: `--w-bg`, `--w-bg-2`, `--w-fg`,
@@ -121,7 +123,7 @@ nothing else. Classes: `.fell`, `.caps`, `.incant`, `.lede`, `.label`,
 Space: `--gutter` (16px floor), `--wrap` 72rem, `--section`, `--bar-h`.
 Motion: `--ease-lift`/`--dur-lift`/`--lift-y` (the chooser's card lift,
 exactly: `ease`, 250ms, -4px), `--ease-out`, `--ease-turn`, `--dur-draw`,
-`--dur-night`.
+`--dur-night`, `--ease-night` (the night-fall crossing, below).
 
 ## Components
 
@@ -190,9 +192,14 @@ consumes it; failing that it accepts a same-origin referrer equal to the
 page's parent folder. Anything else (direct landing, reload, reduced
 motion) is night. The crossing: the first real scroll past a third of the
 viewport sets `data-theme="night"` and dispatches `nts:night` on `window`;
-it never goes back. Colours cross over `--dur-night` on body, header,
-footer, `.sect`, `.hero`, `.lift`, ledger rows; add your own surfaces to
-that transition in your flow CSS. The EMBERS and INTERSECT kits ship a day
+it never goes back. The crossing keeps AA on every frame: text is never
+interpolated (it switches with the tokens, at once), and grounds and lines
+on body, header, footer, `.sect`, `.hero`, `.band`, `.lift` and ledger rows
+jump most of the way to night and settle over `--dur-night` on
+`--ease-night`. A surface you add to the crossing gets
+`transition: background-color var(--dur-night) var(--ease-night)` and no
+`color` in its transition; a ground that fades from day with plain `ease`
+sits under night text at under AA for most of the crossing. The EMBERS and INTERSECT kits ship a day
 set (`html[data-theme="day"] [data-world=…]`) and NOT NOT PHILO a night set
 (`html[data-nightfall][data-theme="night"] [data-world="philo"]`), so any
 world page can fall.
