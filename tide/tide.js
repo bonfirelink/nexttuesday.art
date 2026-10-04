@@ -44,6 +44,34 @@
     }
   }
 
+  /* the header takes the world whose water line has passed under it (home) */
+  var sects = [].slice.call(document.querySelectorAll("body[data-nts-home] .tide-sect"));
+  if (sects.length) {
+    var header = document.querySelector(".nts-header");
+    var meta = document.querySelector('meta[name="theme-color"]');
+    var paper = meta ? meta.getAttribute("content") : "";
+    var colours = { embers: "#0b0709", philo: "#e6e6e8", intersect: "#0a0a0a", words: "#f04a3a" };
+    var worldOf = function (s) { return s.getAttribute("data-world") || (s.classList.contains("words") ? "words" : ""); };
+    var current = "", busy = false;
+    var place = function () {
+      busy = false;
+      var barH = header ? header.offsetHeight : 52, under = "";
+      sects.forEach(function (s) {
+        var zone = s.querySelector(".tide-zone");
+        var top = zone ? zone.getBoundingClientRect().top + 44 : s.getBoundingClientRect().top;
+        if (top <= barH) under = worldOf(s);
+      });
+      if (under === current) return;
+      current = under;
+      if (under) document.body.setAttribute("data-tide-world", under); else document.body.removeAttribute("data-tide-world");
+      if (meta) meta.setAttribute("content", colours[under] || paper);
+    };
+    var onScroll = function () { if (!busy) { busy = true; requestAnimationFrame(place); } };
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll);
+    place();
+  }
+
   /* night rises */
   if (d.hasAttribute("data-nightfall") && d.getAttribute("data-theme") === "day" && !still) {
     var caught = false;

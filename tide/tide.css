@@ -9,7 +9,9 @@
    instead of crossfading, so text never sits on a half-mixed ground. */
 
 :root {
-  --tide-h: clamp(7.5rem, 22svh, 12rem);   /* the water zone above a section */
+  --tide-deep: clamp(7.5rem, 22svh, 12rem);    /* the water zone above a world */
+  --tide-shallow: clamp(5rem, 13svh, 7.5rem);  /* and above a calm stretch */
+  --tide-h: var(--tide-deep);
   --ripple-h: 4.25rem;                     /* the rippled approach above the edge */
   --wave-top: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='48' viewBox='0 0 240 48'%3E%3Cpath d='M0 24C20 10 40 10 60 24S100 38 120 24 160 10 180 24 220 38 240 24V48H0Z'/%3E%3C/svg%3E");
   --wave-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='48' viewBox='0 0 240 48'%3E%3Cpath d='M0 0H240V24C220 38 200 38 180 24S140 10 120 24 80 38 60 24 20 10 0 24Z'/%3E%3C/svg%3E");
@@ -63,7 +65,7 @@
 @keyframes tide-surface { from { transform: translateY(18%); opacity: .15; } to { transform: none; opacity: 1; } }
 
 /* each world's water carries its texture */
-[data-world="philo"] .tide .water::before, .philo-next .tide .water::before {
+.philo-volumes .tide .water::before, .philo-next .tide .water::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .14;
   background: repeating-radial-gradient(circle at 50% 100%, var(--w-fg) 0 1px, transparent 1px 9px);
   -webkit-mask-image: radial-gradient(ellipse at 50% 100%, #000 20%, transparent 70%); mask-image: radial-gradient(ellipse at 50% 100%, #000 20%, transparent 70%);
@@ -76,9 +78,7 @@
   -webkit-mask: var(--wave-top) 0 0 / 240px 48px repeat-x; mask: var(--wave-top) 0 0 / 240px 48px repeat-x;
 }
 [data-world="intersect"] .tide .ripples, .intersect-corr .tide .ripples { -webkit-mask-image: var(--ripple-dash); mask-image: var(--ripple-dash); }
-[data-world="intersect"] .tide .water::after, .intersect-corr .tide .water::after, .night-tide.grainy .water::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .14; mix-blend-mode: screen; background-image: var(--grain-img);
-}
+.night-tide.grainy .water::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .1; mix-blend-mode: screen; background-image: var(--grain-img); }
 
 /* ---------- reduced motion, scripts off: the line is simply there ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -110,6 +110,10 @@ html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall
   mask-position: 0 0, 0 47px, 0 100%;
   mask-repeat: repeat-x, no-repeat, repeat-x;
 }
+.night-tide .water::before { content: ""; position: absolute; inset: 0; pointer-events: none; }
+[data-world="embers"] .night-tide .water::before { background: var(--embers-fire); opacity: .14; -webkit-mask: var(--ripple-line) 0 0 / 120px 14px repeat; mask: var(--ripple-line) 0 0 / 120px 14px repeat; }
+[data-world="philo"] .night-tide .water::before { opacity: .16; background: repeating-radial-gradient(circle at 50% 40%, var(--philo-ground) 0 1px, transparent 1px 10px); -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 100%); mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 100%); }
+[data-world="philo"] .night-tide .water::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 48px; z-index: -1; background: var(--philo-red); transform: translate(-5px, -4px); -webkit-mask: var(--wave-top) 0 0 / 240px 48px repeat-x; mask: var(--wave-top) 0 0 / 240px 48px repeat-x; }
 @keyframes night-rise { from { transform: translateY(100%); } to { transform: translateY(-100%); } }
 
 /* ---------- between pages: the tide wipes the new page in ---------- */
@@ -188,14 +192,24 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
   .turn { text-align: left; }
 }
 
+/* ---------- home: the header takes the world whose water has reached it ---------- */
+/* tide.js sets data-tide-world on body as each water line passes under the
+   bar; the bar snaps with it rather than crossfading, so its text never sits
+   on a mixed ground. */
+body[data-nts-home] .nts-header { transition: border-color 400ms; }
+body[data-tide-world="embers"] .nts-header { --w-bar-bg: rgba(11, 7, 9, .9); --w-bar-fg: var(--embers-cream); --w-accent: var(--embers-fire); --w-line: rgba(229, 29, 71, .28); }
+body[data-tide-world="philo"] .nts-header { --w-bar-bg: rgba(230, 230, 232, .92); --w-bar-fg: var(--philo-ink); --w-accent: var(--philo-red); --w-line: rgba(43, 45, 62, .2); }
+body[data-tide-world="intersect"] .nts-header { --w-bar-bg: rgba(10, 10, 10, .9); --w-bar-fg: var(--intersect-phosphor); --w-accent: var(--intersect-fire); --w-line: rgba(233, 226, 207, .16); }
+body[data-tide-world="words"] .nts-header { --w-bar-bg: rgba(240, 74, 58, .94); --w-bar-fg: var(--nts-ink); --w-accent: var(--nts-ink); --w-line: rgba(26, 21, 48, .25); }
+
 /* ---------- home: the sections, each one a stretch of the tide ---------- */
 .tide-sect { position: relative; padding: clamp(2rem, 6vw, 4rem) 0; }
 .tide-sect:not(.band) { background: var(--w-bg); color: var(--w-fg); }
 .tide-sect > .wrap, .tide-sect > .intersect-grain ~ .wrap { position: relative; z-index: 1; }
 .before-tide { padding-bottom: calc(var(--tide-next, var(--tide-h)) + clamp(1.5rem, 4vw, 3rem)) !important; }
 /* the calm stretches take a shallower water */
-#field, .words { --tide-next: clamp(5rem, 13svh, 7.5rem); }
-.words, .yet { --tide-h: clamp(5rem, 13svh, 7.5rem); }
+#field { --tide-next: var(--tide-shallow); }
+.words { --tide-h: var(--tide-shallow); --tide-next: var(--tide-deep); }
 .tuesdays { padding-top: clamp(2.5rem, 7vw, 5rem); }
 .tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--nts-coral-ink); }
 .tuesdays .sigil-stage { display: none; }
@@ -242,17 +256,17 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 /* NOT NOT PHILO: grey paper and rings; the poster red printed off register */
 .initiative[data-world="philo"] .frag { border-radius: 0; }
 .initiative[data-world="philo"] .rise { position: relative; isolation: isolate; }
-.initiative[data-world="philo"] .rise::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: var(--plate); pointer-events: none; background: repeating-radial-gradient(circle at 50% 50%, var(--w-fg) 0 1px, transparent 1px 9px); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%); mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%); }
+.initiative[data-world="philo"] .rise::before { content: ""; position: absolute; inset: calc(-1 * var(--tide-h)) 0 0; z-index: -1; opacity: var(--plate); pointer-events: none; background: repeating-radial-gradient(circle at 50% 62%, var(--w-fg) 0 1px, transparent 1px 9px); -webkit-mask-image: radial-gradient(ellipse 60% 52% at 50% 62%, #000 40%, transparent 100%); mask-image: radial-gradient(ellipse 60% 52% at 50% 62%, #000 40%, transparent 100%); }
 .initiative[data-world="philo"] .go.lift { border-radius: 0; }
 .initiative[data-world="philo"] h2 { position: relative; }
 /* INTERSECT: grain, phosphor, the mono */
 .initiative[data-world="intersect"] .tide { --tide-ink: var(--intersect-fire-text); }
-.initiative[data-world="intersect"] .intersect-grain { z-index: 0; }
+.initiative[data-world="intersect"] .intersect-grain { z-index: 0; top: calc(-1 * var(--tide-h)); }
 .initiative[data-world="intersect"] .go.lift { font-family: var(--font-mono); border-radius: 4px; }
 .initiative[data-world="intersect"] .prose p { font-size: 1.15rem; }
 
 /* words: a coral wave between the black and the paper */
-.words { padding: clamp(2.5rem, 7vw, 5rem) 0; }
+.words { padding: clamp(2rem, 5vw, 4rem) 0; }
 .words .tide { --tide-water: var(--nts-coral); --tide-ink: var(--nts-paper); }
 .words .wrap { position: relative; z-index: 1; }
 .words-grid { display: grid; gap: 1.5rem 3rem; }
