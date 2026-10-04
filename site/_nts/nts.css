@@ -79,6 +79,9 @@
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
   --dur-night: 1.8s;
+
+  /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
+  --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
 }
 
 /* ---------- 2. ground ---------- */
@@ -241,7 +244,7 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
 details.reveal { margin-top: .5rem; }
 details.reveal summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; color: var(--w-accent-text); font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; }
 details.reveal summary::-webkit-details-marker { display: none; }
-details.reveal summary::before { content: "✴︎"; font-family: var(--font-fell); font-size: 1.1em; transition: transform 500ms var(--ease-out); }
+details.reveal summary::before { content: ""; width: .9em; height: .9em; background: currentColor; -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; transition: transform 500ms var(--ease-out); }
 details.reveal[open] summary::before { transform: rotate(180deg); }
 details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style: italic; font-size: 1.2rem; }
 
@@ -302,7 +305,7 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
    visitor arrived from home (html[data-theme="day"]) and crosses to night
    when scrolled. The crossing is a colour transition on the surfaces that
    carry the tokens. World kits define both sets. */
-html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
+html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .band, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
   transition: background-color var(--dur-night) ease, color var(--dur-night) ease, border-color var(--dur-night) ease;
 }
 html[data-nightfall] { transition: background-color var(--dur-night) ease; }

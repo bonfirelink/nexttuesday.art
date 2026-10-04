@@ -58,7 +58,7 @@ const tetra = ascii.figure('tetra');
 const out = {
   'still-philo.svg': philoStill(),
   'still-intersect.txt': ascii.render(tetra, 84, Math.round(84 * 0.6), 0.6, pose),
-  'still-intersect-sm.txt': ascii.render(tetra, 48, Math.round(48 * 0.6), 0.6, pose),
+  'still-intersect-sm.txt': ascii.render(tetra, 48, Math.round(48 * 0.6), 0.6, pose, 1.25),
 };
 for (const [name, text] of Object.entries(out)) {
   writeFileSync(join(parts, name), text);

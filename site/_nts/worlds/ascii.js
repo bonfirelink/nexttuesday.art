@@ -93,9 +93,9 @@
   }
   /* One frame as a string. cols/rows: the cell grid; aspect: cell width over
      height; pose: {phi, alpha, spin} for flat figures, {ax, ay} for solids. */
-  function render(fig, cols, rows, aspect, pose) {
+  function render(fig, cols, rows, aspect, pose, zoom) {
     var pts = fig.pts, n = pts.length / 6, faceEnd = fig.faceEnd || 0;
-    var K2 = 6, K1 = 0.9 * (cols / 2) * K2, cx = cols / 2, cy = rows / 2;
+    var K2 = 6, K1 = (zoom || 0.9) * (cols / 2) * K2, cx = cols / 2, cy = rows / 2;
     var L = norm([0.25, 0.55, -0.8]);
     var zb = new Float32Array(cols * rows), chars = new Array(cols * rows), k, m;
     for (k = 0; k < cols * rows; k++) chars[k] = " ";
@@ -153,7 +153,7 @@
       var ratio = cw / 100 || 0.6, fs = w / cols / ratio;
       pre.style.fontSize = fs + "px"; aspect = ratio; rows = Math.round(cols * ratio); pre.style.height = rows * fs + "px";
     }
-    function draw() { pre.textContent = render(fig, cols, rows, aspect, pose); }
+    function draw() { pre.textContent = render(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9); }
     function frame(t) {
       raf = 0;
       if (!visible || document.hidden) return;
@@ -177,6 +177,14 @@
       var release = function () { dragging = false; speed = 1; };
       pre.addEventListener("pointerup", release); pre.addEventListener("pointercancel", release); pre.addEventListener("lostpointercapture", release);
       pre.stoke = function () { speed = 4; };
+      pre.addEventListener("keydown", function (e) {
+        var k = e.key, d = k === "ArrowLeft" ? -1 : k === "ArrowRight" ? 1 : 0, v = k === "ArrowUp" ? -1 : k === "ArrowDown" ? 1 : 0;
+        if (!d && !v) return;
+        e.preventDefault();
+        pose.phi += d * 0.25; pose.spin += d * 0.1; pose.ay += d * 0.25; pose.ax += v * 0.25;
+        pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + v * 0.08));
+        if (still.matches) draw();
+      });
     }
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); else stop(); }, { threshold: 0.05 }).observe(pre);
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else start(); });

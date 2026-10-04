@@ -81,7 +81,8 @@
   document.querySelectorAll(".mega-btn").forEach(function (btn) {
     var mega = btn.querySelector(".mega");
     if (!mega) return;
-    var turn = btn.parentElement && btn.parentElement.querySelector(".turn");
+    var scope = btn.closest("section, header, main") || document;
+    var turn = scope.querySelector(".turn");
     var layers = mega.querySelectorAll("[class^='l-']");
     var aligned = false, timer = 0;
     function angleOf(el) {
