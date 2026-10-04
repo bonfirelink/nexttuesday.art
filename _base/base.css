@@ -28,8 +28,8 @@
 .turn { position: relative; min-height: 3.4em; display: grid; width: min(100%, 30rem); }
 .turn > * { grid-area: 1 / 1; margin: 0; }
 .turn .hint { color: var(--nts-coral-ink); transition: opacity .6s; }
-.turn .hint::before { content: "✴︎ "; font-family: var(--font-fell); }
-.turn .hint::after { content: " ✴︎"; font-family: var(--font-fell); }
+.turn .hint { display: inline-flex; align-items: center; justify-content: center; gap: .6em; }
+.turn .hint::before, .turn .hint::after { content: ""; width: .9em; height: .9em; background: currentColor; -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; }
 .turn .secret { opacity: 0; transform: translateY(6px); transition: opacity 1.4s ease .9s, transform 1.4s var(--ease-out) .9s; font-size: clamp(1.15rem, 3.2vw, 1.5rem); }
 .turn.is-open .hint { opacity: 0; }
 .turn.is-open .secret { opacity: 1; transform: none; }
@@ -45,6 +45,14 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 
 /* ---------- home: sections ---------- */
 .tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--nts-coral-ink); }
+.tuesdays .sigil-stage { display: none; }
+@media (min-width: 760px) {
+  .tuesdays { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: 1.5rem 3rem; align-items: center; }
+  .tuesdays .sect-head { grid-column: 1; }
+  .tuesdays .prose { grid-column: 1; }
+  .tuesdays .sigil-stage { display: grid; place-items: center; grid-column: 2; grid-row: 1 / span 2; }
+  .tuesdays .sigil-stage .nts-sigil { width: min(100%, 16rem); height: auto; aspect-ratio: 1; }
+}
 .initiative { display: grid; gap: 1.5rem 3rem; align-items: center; }
 .initiative .frag { width: min(100%, 17rem); aspect-ratio: 1; overflow: hidden; border-radius: 14px; --card-bg: transparent; }
 .initiative .frag > div { border-radius: inherit; }
@@ -85,10 +93,11 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .embers-hero .hearth-stage { width: min(100%, 34rem); margin-inline: auto; }
 .embers-hero .hint { font-family: var(--font-mono); font-size: .8rem; color: var(--w-muted); margin: .25rem 0 1.5rem; }
 .embers-hero .hint .cue { color: var(--w-accent-text); }
-@media (min-width: 900px) { .embers-hero { padding-right: 5rem; } .embers-hero .hearth-stage { width: 100%; } }
+@media (min-width: 900px) { .embers-hero { padding-right: 5rem; } .embers-hero .hearth-stage { width: 100%; } .embers-hero .hero-text { container-type: inline-size; } .embers-hero h1.embers-display { font-size: min(7rem, 16cqi); } }
 .embers-body .genres { margin: 1.25rem 0; }
-.embers-summon { padding: clamp(2.5rem, 6vw, 4rem) 0; }
-.embers-summon .embers-display { font-size: clamp(1.6rem, 6.4vw, 3.6rem); line-height: 1.05; letter-spacing: 0; max-width: 20ch; }
+.embers-summon { --band-bg: var(--embers-fire); --band-fg: #0b0709; padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.embers-summon .embers-display { font-size: clamp(1.6rem, 6.4vw, 3.6rem); line-height: 1.05; letter-spacing: 0; max-width: 20ch; text-shadow: none; color: inherit; }
+.embers-summon ::selection { background: #0b0709; color: var(--embers-cream); }
 .embers-venues .prose p { font-size: 1.1rem; }
 
 /* NOT NOT PHILO */
@@ -114,6 +123,9 @@ html[data-nightfall][data-theme="night"] .philo-next { --band-bg: var(--philo-re
 .intersect-link { font-family: var(--font-mono); font-size: .9rem; margin-top: 1rem; }
 
 /* EVENTS */
+.events-hero { min-height: 0; padding-bottom: 1rem; }
+.events-hero .entity { display: none; }
+@media (min-width: 900px) { .events-hero { min-height: 0; } .events-hero .entity { display: block; } }
 .events-hero h1 { font-size: clamp(3rem, 14vw, 7rem); line-height: .9; }
 .events-hero .lede { max-width: 32ch; }
 .events-hero .sigils { display: flex; gap: .9rem; margin-top: .5rem; }

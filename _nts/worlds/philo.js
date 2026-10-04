@@ -103,6 +103,13 @@
       const release = () => { hand.active = false; };
       host.addEventListener("pointerup", release);
       host.addEventListener("pointercancel", release);
+      host.addEventListener("keydown", (e) => {
+        const d = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0, v = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0;
+        if (!d && !v) return;
+        e.preventDefault();
+        hand.dTheta += d * 0.35; hand.dPsi += v * 0.3;
+        if (reduce.matches) draw({ ...CLOSED, theta: hand.dTheta, psi: hand.dPsi });
+      });
     }
   }
   document.querySelectorAll(".nts-penrose").forEach((h) => mount(h, false));

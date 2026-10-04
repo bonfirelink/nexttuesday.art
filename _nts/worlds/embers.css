@@ -100,4 +100,5 @@ html[data-theme="day"] [data-world="embers"], html[data-theme="day"][data-world=
 /* genre tags, set like the flyer's bottom-right block */
 .genres { display: flex; flex-wrap: wrap; gap: .4rem .9rem; margin: 0; padding: 0; list-style: none; }
 .genres li { font-family: var(--font-sans); font-variation-settings: "wdth" 112; font-weight: 600; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; color: var(--w-accent-text); }
-.genres li::before { content: "✴︎ "; color: var(--w-muted); font-family: var(--font-fell); }
+.genres li { display: inline-flex; align-items: center; gap: .45em; }
+.genres li::before { content: ""; width: .8em; height: .8em; background: var(--w-muted); -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; }
