@@ -29,9 +29,8 @@ html { scroll-padding-top: var(--bar-h); }
   display: flex; flex-direction: column;
   background: var(--w-bg); color: var(--w-fg);
   border-radius: var(--plate-r) var(--plate-r) 0 0;
-  box-shadow: 0 -14px 36px -18px rgba(26, 21, 48, .5), 0 -1px 0 color-mix(in srgb, var(--w-fg) 14%, transparent);
+  box-shadow: 0 -16px 40px -18px rgba(26, 21, 48, .55), 0 -1px 0 color-mix(in srgb, var(--w-fg) 30%, transparent);
   transform-origin: 50% 100%;
-  will-change: transform;
 }
 .slot:last-child .plate { min-height: calc(100svh - var(--bar-h)); }
 .plate-in { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; flex: 1; display: flex; flex-direction: column; padding-bottom: clamp(2rem, 5svh, 3.5rem); }
@@ -44,11 +43,11 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 /* the plate beneath settles back as the next one covers it */
 .slot:not(:last-child) .plate::after {
   content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none;
-  border-radius: inherit; background: var(--nts-ink); opacity: 0;
+  border-radius: inherit; background: color-mix(in srgb, var(--nts-ink) 72%, var(--w-bg)); opacity: 0;
 }
 @keyframes settle { to { transform: scale(.92); visibility: hidden; } }
 @keyframes settle-still { to { visibility: hidden; } }
-@keyframes dim { to { opacity: .55; } }
+@keyframes dim { to { opacity: .5; } }
 @supports (animation-timeline: view()) and (timeline-scope: --a) {
   .slot:not(:last-child) .plate, .slot:not(:last-child) .plate::after {
     animation-timing-function: linear; animation-fill-mode: both; animation-duration: auto;
@@ -67,16 +66,19 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 }
 @supports not ((animation-timeline: view()) and (timeline-scope: --a)) {
   .js .slot:not(:last-child) .plate { transform: scale(calc(1 - var(--cover, 0) * .08)); }
-  .js .slot:not(:last-child) .plate::after { opacity: calc(var(--cover, 0) * .55); }
+  .js .slot:not(:last-child) .plate::after { opacity: calc(var(--cover, 0) * .5); }
   .js .plate.is-under { visibility: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .slot:not(:last-child) .plate { animation-name: settle-still; transform: none !important; }
 }
+/* scripts off: no --plate-top for tall plates, so the plates simply follow one another */
+html:not(.js) .slot:not(:last-child) .plate { position: relative; top: auto; }
+html:not(.js) .slot:not(:last-child) .plate, html:not(.js) .slot:not(:last-child) .plate::after { animation: none; }
 
 /* ---------- home: the door plate ---------- */
 .plate-door .threshold { padding: clamp(.75rem, 2svh, 2rem) 0 0; gap: clamp(1rem, 3svh, 2rem); flex: 1; align-content: center; }
-.plate-door .door { width: min(100%, 30rem, calc(46svh / 1.18)); }
+.plate-door .door { width: min(100%, 30rem, calc(44svh / 1.18)); }
 .plate-door .intro { gap: clamp(.5rem, 1.6svh, 1.1rem); }
 .plate-door .intro h1 { font-size: clamp(2.2rem, min(10.5vw, 5.8svh), 5.5rem); }
 @media (min-width: 900px) {
@@ -87,7 +89,9 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 /* ---------- home: Tuesdays ---------- */
 .plate-tuesdays { background: var(--nts-paper-2); --w-accent-text: color-mix(in srgb, var(--nts-coral-ink) 84%, var(--nts-ink)); }
 .plate-tuesdays .cta { color: var(--w-accent-text); }
-.plate-tuesdays .tuesdays { gap: 1rem; justify-content: center; }
+.plate-tuesdays .tuesdays { gap: 1rem; }
+.plate-tuesdays .plate-in > .plate-edge + * { margin-top: auto; }
+.plate-tuesdays .plate-in > :last-child { margin-bottom: auto; }
 .plate-tuesdays .sigil-stage { display: grid; place-items: center; margin: clamp(.5rem, 3svh, 2rem) 0 clamp(.75rem, 3svh, 1.5rem); }
 .plate-tuesdays .sigil-stage .nts-sigil { width: clamp(5rem, 18svh, 9rem); height: auto; aspect-ratio: 1; }
 .plate-tuesdays h2 { font-size: clamp(2.4rem, 9vw, 4rem); margin-bottom: .75rem; }
@@ -167,7 +171,7 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 .plate-volume .volume .l { font-size: 1.02rem; }
 .plate-volume .philo-venue { text-align: center; width: min(100%, 34rem); margin: 1rem auto 0; }
 .plate-volume h2 { width: min(100%, 34rem); margin-inline: auto; }
-@media (min-width: 900px) { .plate-volume .volume, .plate-volume h2, .plate-volume .philo-venue { width: min(100%, 40rem); } }
+@media (min-width: 900px) { .plate-volume .volume, .plate-volume h2, .plate-volume .philo-venue { width: min(100%, 48rem); } }
 
 /* INTERSECT */
 .plate .intersect-hero .entity { width: min(100%, 30rem, 46svh); }
