@@ -191,7 +191,7 @@
       var pre = host.querySelector("pre");
       if (!pre) { pre = document.createElement("pre"); pre.setAttribute("aria-hidden", "true"); host.appendChild(pre); }
       host.classList.add("is-live");
-      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 34, true);
+      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 48, true);
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

@@ -55,6 +55,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 @media (min-width: 760px) {
   .initiative { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); }
   .initiative .frag { width: 100%; }
+  .initiative:nth-of-type(odd) { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); }
   .initiative:nth-of-type(odd) .frag { order: 2; }
 }
 .words { padding: clamp(3rem, 8vw, 6rem) 0; position: relative; overflow: hidden; }
@@ -82,7 +83,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 /* EMBERS */
 .embers-hero { padding-bottom: 0; }
 .embers-hero .hearth-stage { width: min(100%, 34rem); margin-inline: auto; }
-.embers-hero .hint { font-family: var(--font-mono); font-size: .8rem; color: var(--w-muted); margin: .25rem 0 0; }
+.embers-hero .hint { font-family: var(--font-mono); font-size: .8rem; color: var(--w-muted); margin: .25rem 0 1.5rem; }
 .embers-hero .hint .cue { color: var(--w-accent-text); }
 @media (min-width: 900px) { .embers-hero { padding-right: 5rem; } .embers-hero .hearth-stage { width: 100%; } }
 .embers-body .genres { margin: 1.25rem 0; }
