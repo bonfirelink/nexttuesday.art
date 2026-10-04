@@ -35,7 +35,7 @@ html { scroll-padding-top: var(--bar-h); }
 }
 .slot:last-child .plate { min-height: calc(100svh - var(--bar-h)); }
 .plate-in { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; flex: 1; display: flex; flex-direction: column; padding-bottom: clamp(2rem, 5svh, 3.5rem); }
-.plate-in.hero { display: grid; }
+.plate-in.hero, .plate-in.threshold { display: grid; }
 .plate-edge { display: flex; align-items: center; height: var(--peek); flex: none; }
 .plate-edge .nts-sigil { width: 1.3rem; height: 1.3rem; }
 .plate-text > :last-child { margin-bottom: 0; }
@@ -76,15 +76,17 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 
 /* ---------- home: the door plate ---------- */
 .plate-door .threshold { padding: clamp(.75rem, 2svh, 2rem) 0 0; gap: clamp(1rem, 3svh, 2rem); flex: 1; align-content: center; }
-.plate-door .door { width: min(100%, 30rem, calc(48svh / 1.18)); }
-.plate-door .intro h1 { font-size: clamp(2.2rem, min(10.5vw, 6.2svh), 5.5rem); }
+.plate-door .door { width: min(100%, 30rem, calc(46svh / 1.18)); }
+.plate-door .intro { gap: clamp(.5rem, 1.6svh, 1.1rem); }
+.plate-door .intro h1 { font-size: clamp(2.2rem, min(10.5vw, 5.8svh), 5.5rem); }
 @media (min-width: 900px) {
   .plate-door .threshold { min-height: 0; padding-block: 1rem 0; }
   .plate-door .door { width: min(100%, 36rem, 72svh); }
 }
 
 /* ---------- home: Tuesdays ---------- */
-.plate-tuesdays { background: var(--nts-paper-2); }
+.plate-tuesdays { background: var(--nts-paper-2); --w-accent-text: color-mix(in srgb, var(--nts-coral-ink) 84%, var(--nts-ink)); }
+.plate-tuesdays .cta { color: var(--w-accent-text); }
 .plate-tuesdays .tuesdays { gap: 1rem; justify-content: center; }
 .plate-tuesdays .sigil-stage { display: grid; place-items: center; margin: clamp(.5rem, 3svh, 2rem) 0 clamp(.75rem, 3svh, 1.5rem); }
 .plate-tuesdays .sigil-stage .nts-sigil { width: clamp(5rem, 18svh, 9rem); height: auto; aspect-ratio: 1; }
@@ -115,6 +117,7 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 .plate-world[data-world="philo"] .philo-key { font-size: inherit; }
 .plate-world[data-world="intersect"] h2 { font-family: var(--font-fell); font-size: clamp(2rem, 7.6vw, 3.4rem); }
 .plate-world[data-world="intersect"] .line { font-size: 1.05rem; }
+.plate-world[data-world="intersect"] .frag { width: min(100%, 34svh, 24rem); }
 .plate-world[data-world="intersect"] .go { font-family: var(--font-mono); }
 @media (min-width: 900px) {
   .plate-world .plate-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); grid-template-rows: auto 1fr; column-gap: clamp(2rem, 6vw, 6rem); align-items: center; }
@@ -135,7 +138,8 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 
 /* ---------- world pages: the hero plate and the plates after it ---------- */
 .plate .hero { padding-top: clamp(.5rem, 2svh, 1.5rem); padding-bottom: 0; flex: 1; align-content: center; }
-.plate-body .plate-in { padding-top: clamp(1rem, 3svh, 2rem); }
+.plate-body .plate-in > .plate-edge + * { margin-top: auto; padding-top: clamp(.5rem, 2svh, 1.5rem); }
+.plate-body .plate-in > :last-child { margin-bottom: auto; }
 .plate-body .sect-head { margin-top: clamp(.5rem, 2svh, 1.5rem); }
 .plate.band { background: var(--band-bg, var(--nts-coral)); color: var(--band-fg, var(--nts-ink)); }
 .plate.band .plate-edge .nts-sigil { color: currentColor; }
@@ -153,7 +157,8 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 
 /* NOT NOT PHILO: the volumes pile up as poster plates */
 .plate .philo-hero .entity { width: min(100%, 30rem, 46svh); }
-.plate-volume .plate-in { justify-content: center; }
+.plate-volume .plate-in > :nth-child(2) { margin-top: auto; }
+.plate-volume .plate-in > :last-child { margin-bottom: auto; }
 .plate-volume .volumes { display: block; }
 .plate-volume .volume { width: min(100%, 34rem); margin: clamp(1rem, 3svh, 2rem) auto 0; padding: clamp(1.5rem, 4svh, 2.5rem) clamp(1.25rem, 5vw, 2.5rem) clamp(1.75rem, 4svh, 2.75rem); }
 .plate-volume .volume .num { font-size: clamp(3rem, 9svh, 5rem); }
@@ -161,7 +166,8 @@ html[data-nightfall] .plate { transition: background-color var(--dur-night) ease
 .plate-volume .volume .q { font-size: clamp(1.3rem, 4.4vw, 1.7rem); }
 .plate-volume .volume .l { font-size: 1.02rem; }
 .plate-volume .philo-venue { text-align: center; width: min(100%, 34rem); margin: 1rem auto 0; }
-@media (min-width: 900px) { .plate-volume .volume { width: min(100%, 40rem); } }
+.plate-volume h2 { width: min(100%, 34rem); margin-inline: auto; }
+@media (min-width: 900px) { .plate-volume .volume, .plate-volume h2, .plate-volume .philo-venue { width: min(100%, 40rem); } }
 
 /* INTERSECT */
 .plate .intersect-hero .entity { width: min(100%, 30rem, 46svh); }
