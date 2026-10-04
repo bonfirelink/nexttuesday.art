@@ -187,6 +187,8 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .embers-summon ::selection { background: #0b0709; color: var(--embers-cream); }
 .embers-venues .prose p { font-size: 1.1rem; }
 [data-world="embers"] .cut-line.rule { background: var(--w-accent); }
+[data-world="embers"] .cut.alt { --ground: var(--embers-plum); }
+html[data-theme="day"] [data-world="embers"] .cut.alt { --ground: var(--w-bg-2); }
 
 /* NOT NOT PHILO: the cut is a red line with its charcoal plate off register */
 .philo-hero .stack { display: grid; gap: .5rem; justify-items: start; }
@@ -200,6 +202,8 @@ html[data-nightfall][data-theme="night"] .philo-next { --band-bg: var(--philo-re
 .philo-next .prose a { color: inherit; }
 .philo-venue { color: var(--w-muted); margin-top: 1rem; font-size: .95rem; }
 [data-world="philo"] .cut-line.rule { height: 3px; background: var(--philo-red); box-shadow: 0 -4px 0 -1px var(--philo-shadow); margin-top: 4px; }
+[data-world="philo"] .cut.alt { --ground: #fff; }
+html[data-nightfall][data-theme="night"] [data-world="philo"] .cut.alt { --ground: var(--w-bg-2); }
 [data-world="philo"] .volumes .volume { transition: transform var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift); }
 
 /* INTERSECT */
@@ -211,6 +215,7 @@ html[data-nightfall][data-theme="night"] .philo-next { --band-bg: var(--philo-re
 .intersect-body .prose p { font-size: 1.15rem; }
 .intersect-whisper { font-family: var(--font-fell); font-style: italic; color: var(--w-muted); font-size: 1.25rem; margin: 1.5rem 0 0; }
 .intersect-link { font-family: var(--font-mono); font-size: .9rem; margin-top: 1rem; }
+[data-world="intersect"] .cut.alt { --ground: #141412; }
 [data-world="intersect"] .cut-line.rule { height: 0; background: none; border-top: 2px dashed var(--w-line-strong); }
 
 /* EVENTS */
