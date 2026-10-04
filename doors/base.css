@@ -26,7 +26,7 @@
 :root { --cut: var(--w-fg); --cut-gap: clamp(1.75rem, 4.5vw, 3rem); }
 .cut { position: relative; isolation: isolate; }
 .cut::before { content: ""; position: absolute; inset: 0 calc(50% - 50vw); background: var(--ground, transparent); z-index: -1; pointer-events: none; }
-html[data-nightfall] .cut::before { transition: background-color var(--dur-night) ease; }
+html[data-nightfall] .cut::before { transition: background-color var(--dur-night) var(--ease-night); }
 .sect.cut, .sect + .sect.cut { padding-top: 0; }
 .cut.alt { --ground: var(--w-bg-2); }
 .cut-line.rule { height: 2px; background: var(--cut); margin: 0 0 var(--cut-gap); }

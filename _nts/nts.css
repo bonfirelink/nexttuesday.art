@@ -83,10 +83,11 @@
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
   --dur-night: 1.8s;
-  /* night-fall: the ground starts most of the way to night and settles.
-     The tokens switch the moment data-theme flips, so night text lands at
-     once; a ground that started from day would sit under it at under AA. */
-  --ease-night: linear(.94, 1);
+  /* night-fall: grounds switch at the start, with the text. The tokens switch
+     the moment data-theme flips, so night text lands at once; any ground still
+     on its way from day sits under it at under AA (even 94% of the way leaves
+     the key word at 2.6:1). */
+  --ease-night: steps(1, jump-start);
 
   /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
@@ -313,8 +314,8 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
    visitor arrived from home (html[data-theme="day"]) and crosses to night
    when scrolled. World kits define both sets. The crossing keeps AA on every
    frame: text is never interpolated (it switches with the tokens, at the
-   start), and grounds and lines jump most of the way and settle over
-   --dur-night on --ease-night. A surface a variant adds to the crossing
+   start), and grounds and lines switch with it (--ease-night). Variant
+   transitions on other properties keep running over --dur-night. A surface a variant adds to the crossing
    should use the same easing, or it fades from day under night text. */
 html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .band, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
   transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease;

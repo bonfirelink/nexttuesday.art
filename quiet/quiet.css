@@ -184,7 +184,10 @@ html[data-nightfall] { --dur-night: 3.6s; }
 .embers-summon .embers-display { font-size: clamp(1.6rem, 6.4vw, 3.6rem); line-height: 1.05; letter-spacing: 0; max-width: 20ch; text-shadow: none; color: inherit; margin-inline: auto; text-align: center; }
 .embers-summon ::selection { background: #0b0709; color: var(--embers-cream); }
 .embers-venues .prose p { font-size: 1.1rem; }
-html[data-nightfall] .nts-hearth, html[data-nightfall] .embers-bar, html[data-nightfall] .genres li, html[data-nightfall] .embers-display { transition-duration: var(--dur-night); }
+html[data-nightfall] .nts-hearth, html[data-nightfall] .embers-display { transition-duration: var(--dur-night); }
+/* text switches with its ground; grounds take the shared crossing */
+html[data-nightfall] .embers-bar { transition: background-color var(--dur-night) var(--ease-night), border-color var(--dur-night) var(--ease-night); }
+html[data-nightfall] .genres li { transition: none; }
 
 /* NOT NOT PHILO: the poster, with room to read */
 [data-world="philo"] { --measure: 42rem; --text: 1.125rem; }
