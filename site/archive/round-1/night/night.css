@@ -34,7 +34,7 @@
   --gutter: 16px;
   --measure: 36rem;
   --bar: 34px;
-  --topo: url("/night/topo.svg");
+  --topo: url("/archive/round-1/night/topo.svg");
 }
 
 @view-transition {
