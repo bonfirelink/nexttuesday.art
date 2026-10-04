@@ -1,5 +1,5 @@
 (function(){
-var V=[["I","Threshold","threshold"],["II","Night","night"],["III","Salon","salon"],["IV","Portal","portal"],["V","Grimoire","grimoire"]],
+var V=[["I","Doors","doors"],["II","Tide","tide"],["III","Strata","strata"],["IV","Orbit","orbit"],["V","Quiet","quiet"]],
 p=location.pathname,m=p.split("/")[1],c=V.findIndex(function(v){return v[2]===m}),
 rest=c<0?"/":p.slice(m.length+1)||"/",
 h=document.createElement("div"),s=h.attachShadow({mode:"open"});
@@ -22,6 +22,7 @@ V.forEach(function(v,i){var a=document.createElement("a");a.href=href(v);
 a.innerHTML=v[0]+'<span class="n">'+v[1]+'</span>';a.title=v[1];
 if(i===c)a.setAttribute("aria-current","page");n.appendChild(a)});
 var k=document.createElement("a");k.href="/";k.className="x";k.textContent="\u2302";k.title="All doors";k.setAttribute("aria-label","Back to the doors");n.appendChild(k);
+var z=document.createElement("a");z.href="/archive/";z.className="x";z.title="Archive";z.setAttribute("aria-label","Archive: earlier rounds");z.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg>';n.appendChild(z);
 function open(o){n.classList.toggle("o",o);b.setAttribute("aria-expanded",o)}
 b.onclick=function(){open(!n.classList.contains("o"))};
 addEventListener("pointerdown",function(e){if(e.composedPath().indexOf(h)<0)open(false)});
