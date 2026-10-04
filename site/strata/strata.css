@@ -1,0 +1,194 @@
+/* III · Strata: panels that stack as you scroll.
+   Every section is a plate. Each plate sits in a .slot; the plate is sticky
+   under the header, and the slot keeps one viewport of room below it (padded,
+   then pulled back by a negative margin) so the plate stays put while the next
+   one slides up over it. The plate beneath settles back (a slight scale, a
+   darkening) on the next slot's view timeline, a scroll-driven animation that
+   needs no script; where the browser has none, strata.js sets --cover.
+   The bottom --peek of every plate is the next plate's edge: its ground and
+   its sigil, showing before it arrives.
+   Nothing here redefines a --nts-* or --w-* token. */
+
+:root { --peek: 44px; --plate-r: 18px; }
+html { scroll-padding-top: var(--bar-h); }
+.stack { background: var(--nts-paper-2); }
+
+/* ---------- the stack ---------- */
+.stack { position: relative; timeline-scope: --s2, --s3, --s4, --s5, --s6, --s7, --s8, --s9; }
+.slot { position: relative; padding-bottom: 100svh; margin-bottom: -100svh; }
+.slot:last-child { padding-bottom: 0; margin-bottom: 0; min-height: calc(100svh + 1px); }
+.slot:nth-child(1) { z-index: 1; } .slot:nth-child(2) { z-index: 2; view-timeline: --s2 block; }
+.slot:nth-child(3) { z-index: 3; view-timeline: --s3 block; } .slot:nth-child(4) { z-index: 4; view-timeline: --s4 block; }
+.slot:nth-child(5) { z-index: 5; view-timeline: --s5 block; } .slot:nth-child(6) { z-index: 6; view-timeline: --s6 block; }
+.slot:nth-child(7) { z-index: 7; view-timeline: --s7 block; } .slot:nth-child(8) { z-index: 8; view-timeline: --s8 block; }
+.slot:nth-child(9) { z-index: 9; view-timeline: --s9 block; }
+
+.plate {
+  position: sticky; top: var(--plate-top, var(--bar-h));
+  min-height: calc(100svh - var(--bar-h) - var(--peek));
+  display: flex; flex-direction: column;
+  background: var(--w-bg); color: var(--w-fg);
+  border-radius: var(--plate-r) var(--plate-r) 0 0;
+  box-shadow: 0 -16px 40px -18px rgba(26, 21, 48, .55), 0 -1px 0 color-mix(in srgb, var(--w-fg) 30%, transparent);
+  transform-origin: 50% 100%;
+}
+.slot:last-child .plate { min-height: calc(100svh - var(--bar-h)); }
+.plate-in { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; flex: 1; display: flex; flex-direction: column; padding-bottom: clamp(2rem, 5svh, 3.5rem); }
+.plate-in.hero, .plate-in.threshold { display: grid; }
+.plate-edge { display: flex; align-items: center; height: var(--peek); flex: none; }
+.plate-edge .nts-sigil { width: 1.3rem; height: 1.3rem; }
+.plate-text > :last-child { margin-bottom: 0; }
+html[data-nightfall] .plate { transition: background-color var(--dur-night) ease, color var(--dur-night) ease; }
+
+/* the plate beneath settles back as the next one covers it */
+.slot:not(:last-child) .plate::after {
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  border-radius: inherit; background: color-mix(in srgb, var(--nts-ink) 72%, var(--w-bg)); opacity: 0;
+}
+@keyframes settle { to { transform: scale(.92); visibility: hidden; } }
+@keyframes settle-still { to { visibility: hidden; } }
+@keyframes dim { to { opacity: .5; } }
+@supports (animation-timeline: view()) and (timeline-scope: --a) {
+  .slot:not(:last-child) .plate, .slot:not(:last-child) .plate::after {
+    animation-timing-function: linear; animation-fill-mode: both; animation-duration: auto;
+    animation-range: cover 0% entry 100%;
+  }
+  .slot:not(:last-child) .plate { animation-name: settle; }
+  .slot:not(:last-child) .plate::after { animation-name: dim; }
+  .slot:nth-child(1) .plate, .slot:nth-child(1) .plate::after { animation-timeline: --s2; }
+  .slot:nth-child(2) .plate, .slot:nth-child(2) .plate::after { animation-timeline: --s3; }
+  .slot:nth-child(3) .plate, .slot:nth-child(3) .plate::after { animation-timeline: --s4; }
+  .slot:nth-child(4) .plate, .slot:nth-child(4) .plate::after { animation-timeline: --s5; }
+  .slot:nth-child(5) .plate, .slot:nth-child(5) .plate::after { animation-timeline: --s6; }
+  .slot:nth-child(6) .plate, .slot:nth-child(6) .plate::after { animation-timeline: --s7; }
+  .slot:nth-child(7) .plate, .slot:nth-child(7) .plate::after { animation-timeline: --s8; }
+  .slot:nth-child(8) .plate, .slot:nth-child(8) .plate::after { animation-timeline: --s9; }
+}
+@supports not ((animation-timeline: view()) and (timeline-scope: --a)) {
+  .js .slot:not(:last-child) .plate { transform: scale(calc(1 - var(--cover, 0) * .08)); }
+  .js .slot:not(:last-child) .plate::after { opacity: calc(var(--cover, 0) * .5); }
+  .js .plate.is-under { visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slot:not(:last-child) .plate { animation-name: settle-still; transform: none !important; }
+}
+/* scripts off: no --plate-top for tall plates, so the plates simply follow one another */
+html:not(.js) .slot:not(:last-child) .plate { position: relative; top: auto; }
+html:not(.js) .slot:not(:last-child) .plate, html:not(.js) .slot:not(:last-child) .plate::after { animation: none; }
+
+/* ---------- home: the door plate ---------- */
+.plate-door .threshold { padding: clamp(.75rem, 2svh, 2rem) 0 0; gap: clamp(1rem, 3svh, 2rem); flex: 1; align-content: center; }
+.plate-door .door { width: min(100%, 30rem, calc(44svh / 1.18)); }
+.plate-door .intro { gap: clamp(.5rem, 1.6svh, 1.1rem); }
+.plate-door .intro h1 { font-size: clamp(2.2rem, min(10.5vw, 5.8svh), 5.5rem); }
+@media (min-width: 900px) {
+  .plate-door .threshold { min-height: 0; padding-block: 1rem 0; }
+  .plate-door .door { width: min(100%, 36rem, 72svh); }
+}
+
+/* ---------- home: Tuesdays ---------- */
+.plate-tuesdays { background: var(--nts-paper-2); --w-accent-text: color-mix(in srgb, var(--nts-coral-ink) 84%, var(--nts-ink)); }
+.plate-tuesdays .cta { color: var(--w-accent-text); }
+.plate-tuesdays .tuesdays { gap: 1rem; }
+.plate-tuesdays .plate-in > .plate-edge + * { margin-top: auto; }
+.plate-tuesdays .plate-in > :last-child { margin-bottom: auto; }
+.plate-tuesdays .sigil-stage { display: grid; place-items: center; margin: clamp(.5rem, 3svh, 2rem) 0 clamp(.75rem, 3svh, 1.5rem); }
+.plate-tuesdays .sigil-stage .nts-sigil { width: clamp(5rem, 18svh, 9rem); height: auto; aspect-ratio: 1; }
+.plate-tuesdays h2 { font-size: clamp(2.4rem, 9vw, 4rem); margin-bottom: .75rem; }
+.plate-tuesdays .prose p { margin-bottom: .75em; }
+@media (min-width: 760px) {
+  .plate-tuesdays .tuesdays { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); grid-template-rows: auto 1fr; gap: 0 4rem; align-items: center; }
+  .plate-tuesdays .plate-edge { grid-column: 1 / -1; }
+  .plate-tuesdays .plate-text { grid-column: 1; }
+  .plate-tuesdays .sigil-stage { grid-column: 2; grid-row: 2; margin: 0; }
+  .plate-tuesdays .sigil-stage .nts-sigil { width: min(100%, 18rem, 50svh); }
+}
+
+/* ---------- home: the world plates ---------- */
+.plate-world .plate-in { gap: clamp(1rem, 3svh, 1.75rem); }
+.plate-world .frag { width: min(100%, 40svh, 24rem); aspect-ratio: 1; overflow: hidden; border-radius: 14px; --card-bg: transparent; border-color: color-mix(in srgb, var(--w-fg) 16%, transparent); }
+.plate-world .frag > div { border-radius: inherit; }
+.plate-world[data-world="embers"] .frag { --frag-bg: var(--w-bg-2); }
+.plate-world[data-world="philo"] .frag { --frag-bg: var(--w-bg-2); }
+.plate-world[data-world="intersect"] .frag { --frag-bg: var(--w-bg-2); }
+.plate-world .plate-text { display: grid; gap: .5rem; justify-items: start; }
+.plate-world h2 { font-size: clamp(2.2rem, 8.5vw, 4rem); }
+.plate-world .lede { font-size: clamp(1.25rem, 4.6vw, 1.75rem); margin: 0; max-width: 24ch; }
+.plate-world .line { margin: 0; color: var(--w-muted); max-width: 44ch; }
+.plate-world .go { margin-top: .5rem; }
+.plate-world[data-world="embers"] h2.embers-display { font-size: clamp(2.6rem, 11vw, 5rem); line-height: .95; }
+.plate-world[data-world="philo"] h2 { font-size: clamp(2rem, 7.6vw, 3.6rem); }
+.plate-world[data-world="philo"] .philo-key { font-size: inherit; }
+.plate-world[data-world="intersect"] h2 { font-family: var(--font-fell); font-size: clamp(2rem, 7.6vw, 3.4rem); }
+.plate-world[data-world="intersect"] .line { font-size: 1.05rem; }
+.plate-world[data-world="intersect"] .frag { width: min(100%, 34svh, 24rem); }
+.plate-world[data-world="intersect"] .go { font-family: var(--font-mono); }
+@media (min-width: 900px) {
+  .plate-world .plate-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); grid-template-rows: auto 1fr; column-gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .plate-world .plate-edge { grid-column: 1 / -1; }
+  .plate-world .frag { grid-column: 1; grid-row: 2; width: min(100%, 64svh, 30rem); justify-self: end; }
+  .plate-world .plate-text { grid-column: 2; grid-row: 2; }
+}
+
+/* ---------- home: words, events ---------- */
+.plate-words { --band-bg: var(--nts-coral); --band-fg: var(--nts-ink); background: var(--band-bg); color: var(--band-fg); min-height: 0; padding: 0; overflow: hidden; }
+.plate-words .plate-in { padding-bottom: clamp(3rem, 8svh, 5rem); }
+.plate-words .plate-edge .nts-sigil { color: var(--nts-ink); }
+.plate-words .words-grid { margin-top: clamp(1rem, 3svh, 2rem); }
+.plate-words .words-star { right: calc(-1 * var(--gutter)); bottom: -2rem; }
+.plate-events h2 { font-size: clamp(2.4rem, 9vw, 4rem); margin: clamp(.5rem, 2svh, 1.5rem) 0 1.25rem; }
+.plate-events .after { margin: 1.5rem 0 0; }
+.plate-events .ledger-group { margin-bottom: 0; }
+
+/* ---------- world pages: the hero plate and the plates after it ---------- */
+.plate .hero { padding-top: clamp(.5rem, 2svh, 1.5rem); padding-bottom: 0; flex: 1; align-content: center; }
+.plate-body .plate-in > .plate-edge + * { margin-top: auto; padding-top: clamp(.5rem, 2svh, 1.5rem); }
+.plate-body .plate-in > :last-child { margin-bottom: auto; }
+.plate-body .sect-head { margin-top: clamp(.5rem, 2svh, 1.5rem); }
+.plate.band { background: var(--band-bg, var(--nts-coral)); color: var(--band-fg, var(--nts-ink)); }
+.plate.band .plate-edge .nts-sigil { color: currentColor; }
+.plate-short { min-height: 0; }
+.plate-short .plate-in { padding-bottom: clamp(3rem, 8svh, 5rem); }
+.plate-short .plate-in > :nth-child(2) { margin-top: clamp(1rem, 3svh, 2rem); }
+@media (min-width: 900px) { .plate .hero { min-height: 0; } }
+
+/* EMBERS */
+.plate-hero[data-world="embers"] .hearth-stage, .plate .embers-hero .hearth-stage { max-height: 52svh; }
+.plate .embers-hero { padding-right: 0; }
+.plate .embers-bar { margin-top: auto; margin-inline: calc(-1 * var(--gutter)); }
+@media (min-width: 900px) { .plate .embers-hero { padding-right: 5rem; } .plate .embers-hero .hearth-stage { max-height: 70svh; } .plate .embers-bar { margin: 0; } }
+.embers-summon .embers-display { margin: 0; }
+
+/* NOT NOT PHILO: the volumes pile up as poster plates */
+.plate .philo-hero .entity { width: min(100%, 30rem, 46svh); }
+.plate-volume .plate-in > :nth-child(2) { margin-top: auto; }
+.plate-volume .plate-in > :last-child { margin-bottom: auto; }
+.plate-volume .volumes { display: block; }
+.plate-volume .volume { width: min(100%, 34rem); margin: clamp(1rem, 3svh, 2rem) auto 0; padding: clamp(1.5rem, 4svh, 2.5rem) clamp(1.25rem, 5vw, 2.5rem) clamp(1.75rem, 4svh, 2.75rem); }
+.plate-volume .volume .num { font-size: clamp(3rem, 9svh, 5rem); }
+.plate-volume .volume h3 { font-size: clamp(2.1rem, 8vw, 3.4rem); }
+.plate-volume .volume .q { font-size: clamp(1.3rem, 4.4vw, 1.7rem); }
+.plate-volume .volume .l { font-size: 1.02rem; }
+.plate-volume .philo-venue { text-align: center; width: min(100%, 34rem); margin: 1rem auto 0; }
+.plate-volume h2 { width: min(100%, 34rem); margin-inline: auto; }
+@media (min-width: 900px) { .plate-volume .volume, .plate-volume h2, .plate-volume .philo-venue { width: min(100%, 48rem); } }
+
+/* INTERSECT */
+.plate .intersect-hero .entity { width: min(100%, 30rem, 46svh); }
+.plate .intersect-hero pre[data-nts-ascii] { width: min(100%, 46svh, 520px); }
+
+/* EVENTS */
+.plate .events-hero { min-height: 0; flex: initial; }
+.plate-ledger .plate-in { padding-top: clamp(1rem, 3svh, 2rem); }
+
+/* ---------- going in: the plate becomes the page ---------- */
+@view-transition { navigation: auto; }
+.nts-header { view-transition-name: header; }
+.plate-hero .entity { view-transition-name: entity; }
+.plate-hero { view-transition-name: plate; }
+::view-transition-group(*) { animation-duration: 560ms; animation-timing-function: var(--ease-out); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 420ms; }
+::view-transition-group(header) { animation-duration: 300ms; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
