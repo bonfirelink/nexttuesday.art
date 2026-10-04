@@ -8,10 +8,14 @@
 /* ---------- the door opens: cross-document view transitions ---------- */
 @view-transition { navigation: auto; }
 .nts-header { view-transition-name: nts-header; }
-.hero, .door-card.is-door { view-transition-name: door; }
-::view-transition-group(door) { animation-duration: .62s; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
-::view-transition-image-pair(door) { overflow: clip; }
-::view-transition-old(door), ::view-transition-new(door) { height: 100%; width: 100%; object-fit: cover; animation-duration: .5s; }
+.hero.is-door, .door-card.is-door { view-transition-name: door; }
+.door-card.is-door .door-view, .hero.is-door .entity { view-transition-name: door-view; }
+.door-card.is-door .door-text h3, .hero.is-door h1 { view-transition-name: door-title; }
+::view-transition-group(door), ::view-transition-group(door-view), ::view-transition-group(door-title) { animation-duration: .62s; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+::view-transition-image-pair(door), ::view-transition-image-pair(door-view) { overflow: clip; }
+::view-transition-old(door), ::view-transition-new(door), ::view-transition-old(door-view), ::view-transition-new(door-view) { height: 100%; width: 100%; object-fit: cover; animation-duration: .5s; }
+::view-transition-old(door-title), ::view-transition-old(door-view) { animation-duration: .2s; }
+::view-transition-new(door-title) { animation-duration: .45s; animation-delay: .12s; animation-fill-mode: both; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .32s; }
 ::view-transition-old(nts-header), ::view-transition-new(nts-header) { animation-duration: .25s; }
 @media (prefers-reduced-motion: reduce) {
@@ -65,14 +69,16 @@ html[data-nightfall] .cut::before { transition: background-color var(--dur-night
 .turn.is-open .secret { opacity: 1; transform: none; }
 html:not(.js) .turn .hint { display: none; }
 html:not(.js) .turn .secret { opacity: 1; transform: none; }
-.intro { padding: clamp(1.75rem, 5vw, 3rem) 0 clamp(2rem, 6vw, 3.5rem); }
+.intro { padding: 0 0 clamp(2rem, 6vw, 3.5rem); }
+.intro .cut-line { --cut: var(--nts-ink); margin-bottom: clamp(1.75rem, 5vw, 3rem); }
 .intro .wrap { display: grid; gap: clamp(.7rem, 2vh, 1.1rem); }
 .intro h1 { font-size: clamp(2.6rem, 12vw, 6rem); line-height: .92; max-width: 9ch; }
 .intro .incant { max-width: 24ch; margin: 0; }
 .intro .label { margin: 0; color: var(--w-muted); }
 @media (min-width: 900px) {
   .threshold { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: calc(100svh - var(--bar-h)); }
-  .door { order: 2; padding: 2rem clamp(2rem, 5vw, 4rem); }
+  .door { order: 2; padding: 2rem clamp(2rem, 5vw, 4rem); border-inline-start: 2px solid var(--nts-ink); }
+  .intro .cut-line { display: none; }
   .door .mega-btn { width: min(100%, 34rem, 72vh); }
   .intro { display: grid; align-content: center; padding: 3rem 0; }
   .intro .wrap { width: auto; margin: 0; padding-left: max(var(--gutter), calc((100vw - var(--wrap)) / 2)); padding-right: clamp(2rem, 5vw, 4rem); }
@@ -119,7 +125,8 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 /* NOT NOT PHILO's door: the poster, the misregistered label as the sill */
 .door-card[data-world="philo"] .door-text h3 { font-size: clamp(2.1rem, 9.6vw, 2.9rem); line-height: .9; margin: .2rem 0 .3rem; }
 .door-card[data-world="philo"] .door-text .philo-strip { font-size: 1.1rem; }
-.door-card[data-world="philo"] .sill { color: var(--w-fg); border-top-color: var(--w-line-strong); }
+.door-card[data-world="philo"] .sill { position: relative; color: var(--w-fg); border-top: 3px solid var(--philo-red); margin-top: 4px; }
+.door-card[data-world="philo"] .sill::before { content: ""; position: absolute; left: 0; right: 0; top: -7px; height: 3px; background: var(--philo-shadow); }
 .door-card[data-world="philo"] .sill .philo-bar { font-size: .78rem; letter-spacing: .08em; }
 .door-card[data-world="philo"]:hover .philo-bar::before, .door-card[data-world="philo"]:focus-visible .philo-bar::before { transform: translate(calc(-1 * var(--philo-off) - 2px), calc(-1 * var(--philo-off) - 2px)); }
 
@@ -133,7 +140,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .door-card[data-world="intersect"] .door-text h3 .x { color: var(--w-accent-text); }
 .door-card[data-world="intersect"] .door-text .incant { font-size: 1.25rem; }
 .door-card[data-world="intersect"] .door-text .small { font-family: var(--font-fell); font-style: italic; font-size: 1.05rem; }
-.door-card[data-world="intersect"] .sill { font-family: var(--font-mono); font-weight: 500; letter-spacing: .1em; text-transform: lowercase; color: var(--w-fg); }
+.door-card[data-world="intersect"] .sill { border-top: 2px dashed var(--w-line-strong); font-family: var(--font-mono); font-weight: 500; letter-spacing: .1em; text-transform: lowercase; color: var(--w-fg); }
 .door-card[data-world="intersect"] .sill .x { color: var(--w-accent-text); margin-right: .5em; }
 .door-card[data-world="intersect"] .sill .caret { display: inline-block; width: .55em; height: 1em; vertical-align: -.15em; margin-left: .15em; background: var(--w-accent-text); animation: blink 1.1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
@@ -233,5 +240,6 @@ html[data-nightfall][data-theme="night"] [data-world="philo"] .cut.alt { --groun
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .door-card[data-world="intersect"] .sill .caret { animation: none; }
+  .doors .door-card:hover, .doors .door-card:focus-visible { transform: none; }
   .sill::after { transition: none; }
 }
