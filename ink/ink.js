@@ -55,11 +55,13 @@
     var check = function () {
       queued = false;
       plates = plates.filter(function (el) {
-        var done = el.getAnimations({ subtree: true }).some(function (a) {
-          if (a.animationName !== "ink-spread" || !a.effect || !a.effect.pseudoElement) return false;
+        /* pinned once the plate and the text that arrives on it are both complete */
+        var spread = false, done = el.getAnimations({ subtree: true }).every(function (a) {
+          if (a.animationName !== "ink-spread" && a.animationName !== "arrive") return true;
+          if (a.animationName === "ink-spread") spread = true;
           var t = a.effect.getComputedTiming();
           return t.progress !== null && t.progress >= 0.999;
-        });
+        }) && spread;
         if (done) el.classList.add("is-inked");
         return !done;
       });
@@ -77,7 +79,7 @@
     main.addEventListener("pointerdown", function (ev) {
       if (!ev.isPrimary || ev.button > 0 || live > 10) return;
       var t = ev.target;
-      if (!(t instanceof Element) || t.closest("a, button, summary, details, canvas, pre, input, textarea, select, label, [tabindex], .orb, .nts-penrose, .hearth-stage, .mega")) return;
+      if (!(t instanceof Element) || t.closest("a, button, summary, details, canvas, pre, input, textarea, select, label, [tabindex], .orb, .nts-penrose, .hearth-stage, .mega, .entity, .sky, .orrery, .compass, .words-star, svg")) return;
       var world = t.closest("[data-world]") || document.body;
       var drop = document.createElement("span");
       drop.className = "ink-press";
