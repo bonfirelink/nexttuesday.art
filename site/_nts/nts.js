@@ -94,7 +94,6 @@
   };
   if (d.getAttribute("data-bleed-state") === "before") {
     var BLOCKS = "h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, label, .lift, .trace-bead, .nts-header, [data-bleed-block]";
-    var PROPS = ["color", "background-color", "border-color", "outline-color", "text-decoration-color", "text-shadow", "box-shadow", "fill", "stroke"];
     var ease = function (x) { return 1 - Math.pow(1 - x, 3); };
     var unease = function (u) { return 1 - Math.cbrt(1 - u); };
     var XHTML = "http://www.w3.org/1999/xhtml";
@@ -185,7 +184,7 @@
         if (!own) { var pc = it.el.parentElement; own = !pc || getComputedStyle(it.el).color !== getComputedStyle(pc).color; }
         return hold(it.el, timeAt(it.p), own);
       });
-      held.push(hold(document.body, dur, false));
+      held.push(hold(document.body, dur, false), hold(d, dur, false));
       held.forEach(function (k) {
         k.props.forEach(function (q) { k.el.style.setProperty(q[0], q[3]); });
         k.el.style.transition = "none";

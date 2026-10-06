@@ -44,8 +44,10 @@
   --intersect-fire: #ff3b63;
   --intersect-fire-text: #c8103a;
 
-  /* the world the page is in: NTS by default. World kits set these; the
-     skeleton reads only these. */
+  /* the world the page is in: NTS by default. World kits set these on
+     [data-world] and on the root when body is the world (so the canvas
+     behind body, the scrollbar and color-scheme follow); the skeleton reads
+     only these. */
   --w-bg: var(--nts-paper);
   --w-bg-2: var(--nts-paper-2);
   --w-fg: var(--nts-ink);
@@ -340,7 +342,7 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
    ever read at mid-contrast. Nothing interpolates colour: a surface that
    transitions background-color or color on its own would smear across the
    front, so token-coloured surfaces get no such transition. */
-html[data-bleed-state="before"] [data-world] {
+html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world] {
   --w-bg: var(--nts-paper);
   --w-bg-2: var(--nts-paper-2);
   --w-fg: var(--nts-ink);
@@ -358,7 +360,7 @@ html[data-bleed-state="before"] [data-world] {
 }
 /* the front: the world's ground, clipped to the shape nts.js gives it, under
    everything but the body's own background (body isolates while it runs) */
-.nts-bleed-front { position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; background: var(--w-bg); }
+body > .nts-bleed-front { position: absolute !important; left: 0; right: 0; z-index: -1 !important; pointer-events: none; background: var(--w-bg); }
 html[data-bleed-state="in"] body { isolation: isolate; }
 
 /* ---------- 12. the mega-sigil ---------- */

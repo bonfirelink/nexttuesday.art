@@ -175,6 +175,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 .compass.is-on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
+/* on phones the prose runs the full width, so the compass steps aside while
+   the words band is in view (orbit.js sets .is-aside) */
+.compass.is-on.is-aside { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px) scale(.9); }
 html:not(.js) .compass { display: none; }
 .compass:focus-visible { outline-offset: 3px; }
 .compass .c-sun { width: 18px; height: 18px; color: var(--nts-coral); animation: turn 170s linear infinite reverse; grid-area: 1 / 1; }
