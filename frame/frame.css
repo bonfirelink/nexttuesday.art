@@ -1,0 +1,179 @@
+/* IV · Frame: the worlds sit framed in the home's colour.
+   One gesture everywhere: a field held in a frame. The frame is a hairline
+   on the field's edge, four corner marks just outside it, a seal (the
+   sigil of what the field holds) set into the top edge, and, where there is
+   something to say, a plate with a title cut into the frame.
+     home      each world's window is a field inset in the page's paper (the
+               passe-partout). Scrolling into a window thins the frame (--f
+               goes from --f-max to --f-min) and the world grows towards the
+               edges; leaving, the frame closes back. The handover between
+               two windows is the paper between them, with a registration
+               mark. Scroll-driven, so it never takes the scroll away; without
+               animation-timeline the frame simply stands at --f-max.
+     worlds    every section after the hero is a framed panel (hairline and
+               marks only); a band is a filled plate in the world's accent:
+               EMBERS a thick fire frame, NOT NOT PHILO an engraved double
+               line with the numeral on a misregistered plate, INTERSECT a
+               dashed terminal frame with + marks.
+     bleed     the world pages bleed in after a breath (data-bleed="time"),
+               as a frame of the world's colour closing in from the edges
+               (frame.js sets the form).
+   Loaded after base.css and orbit.css. Nothing here redefines a --nts-* or
+   --w-* token; the frame's own colours come through --f-*. Fields on world
+   pages are real elements (.field), never pseudo-elements, so the bleed-in
+   can snapshot them: a pseudo would flip with the tokens ahead of its text. */
+
+@property --f { syntax: "<length>"; inherits: true; initial-value: 20px; }
+
+:root {
+  --f-max: clamp(14px, 4vw, 44px);   /* the frame when a window is closed */
+  --f-min: clamp(8px, 1.6vw, 16px);  /* the frame when you are inside it */
+  --f-pad: clamp(1.1rem, 4vw, 2.5rem);
+  --f-reg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a1530' stroke-width='1.1'%3E%3Ccircle cx='12' cy='12' r='7'/%3E%3Cpath d='M12 1v22M1 12h22'/%3E%3C/svg%3E");
+}
+
+/* ---------- the frame ---------- */
+.framed {
+  position: relative; isolation: isolate;
+  --f: 0px;
+  --f-line: var(--w-line-strong);
+  --f-mark: var(--w-fg);
+  --f-ground: transparent;
+  --f-w: 1px; --f-style: solid;
+  --f-seal-bg: var(--w-bg); --f-seal-fg: var(--w-accent);
+}
+/* the field with its hairline; a pseudo where the page never bleeds, a
+   .field element where it does */
+.framed::before, .framed > .field {
+  content: ""; position: absolute; inset: var(--f); z-index: -1; pointer-events: none;
+  background: var(--f-ground); border: var(--f-w) var(--f-style) var(--f-line);
+}
+.framed.fielded::before { content: none; }
+/* the corner marks: four brackets 7px outside the hairline */
+.framed::after {
+  content: ""; position: absolute; inset: calc(var(--f) - 7px); z-index: -1; pointer-events: none;
+  --m: linear-gradient(var(--f-mark), var(--f-mark));
+  background:
+    var(--m) 0 0 / 11px 1px no-repeat, var(--m) 0 0 / 1px 11px no-repeat,
+    var(--m) 100% 0 / 11px 1px no-repeat, var(--m) 100% 0 / 1px 11px no-repeat,
+    var(--m) 0 100% / 11px 1px no-repeat, var(--m) 0 100% / 1px 11px no-repeat,
+    var(--m) 100% 100% / 11px 1px no-repeat, var(--m) 100% 100% / 1px 11px no-repeat;
+  opacity: .8;
+}
+/* + marks, centred on the field's corners (INTERSECT) */
+.framed.plus::after {
+  inset: calc(var(--f) - 6px);
+  background:
+    var(--m) 0 6px / 13px 1px no-repeat, var(--m) 6px 0 / 1px 13px no-repeat,
+    var(--m) 100% 6px / 13px 1px no-repeat, var(--m) calc(100% - 6px) 0 / 1px 13px no-repeat,
+    var(--m) 0 calc(100% - 6px) / 13px 1px no-repeat, var(--m) 6px 100% / 1px 13px no-repeat,
+    var(--m) 100% calc(100% - 6px) / 13px 1px no-repeat, var(--m) calc(100% - 6px) 100% / 1px 13px no-repeat;
+}
+/* the seal: the sigil of what the field holds, set into the top edge */
+.seal {
+  position: absolute; left: 50%; top: var(--f); translate: -50% -50%; z-index: 1;
+  width: 2.6rem; height: 2.6rem; border-radius: 50%; display: grid; place-items: center;
+  background: var(--f-seal-bg); color: var(--f-seal-fg); box-shadow: 0 0 0 1px var(--f-line);
+  pointer-events: none;
+}
+.seal .nts-sigil { width: 1.5rem; height: 1.5rem; color: inherit; }
+/* the plate: a title cut into the frame, top left */
+.plate {
+  position: absolute; left: calc(var(--f) + var(--f-pad) - .4rem); top: var(--f); translate: 0 -50%; z-index: 1;
+  margin: 0; padding: .3rem .6rem; background: var(--f-seal-bg); color: var(--f-plate-fg, var(--w-muted));
+  box-shadow: 0 0 0 1px var(--f-line);
+  font-family: var(--font-text); font-weight: 600; font-size: .72rem; line-height: 1; letter-spacing: .14em; text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ---------- inside the worlds: panels and plates ---------- */
+.panel.sect { padding: var(--f-pad); margin-block: calc(var(--section) * .5); }
+.panel.sect:first-of-type { margin-top: var(--section); }
+.panel.sect > .sect-head:first-child, .panel.sect > .prose:first-child, .panel.sect > h2:first-child { margin-top: .1rem; }
+.band.framed { background: transparent; width: min(100% - 2 * var(--gutter), var(--wrap)); margin: calc(var(--section) * .5) auto; padding: calc(var(--f-pad) + 1rem) var(--f-pad) var(--f-pad); }
+.band.framed > .wrap { width: 100%; }
+.band.framed .seal { --f-seal-bg: var(--w-bg); }
+
+/* EMBERS: a thick frame of fire around the night */
+.embers-frame { --f-ground: var(--w-bg); --f-line: var(--w-accent); --f-w: 8px; --f-mark: var(--w-accent); --f-seal-fg: var(--w-accent); color: var(--w-fg); }
+.embers-frame::after { inset: calc(var(--f) - 12px); }
+.embers-frame .embers-display { color: var(--w-fg); text-shadow: var(--embers-glow); }
+.embers-frame ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
+.embers-frame :focus-visible { outline-color: var(--w-accent-text); }
+@media (min-width: 760px) { .embers-frame { --f-w: 12px; } .embers-frame::after { inset: calc(var(--f) - 16px); } }
+
+/* NOT NOT PHILO: an engraved double line, the plate set 8px inside it */
+.philo-frame { --f-line: var(--philo-ink); --f-mark: var(--philo-ink); --f-seal-fg: var(--philo-red); }
+.philo-frame > .field { inset: 8px; background: var(--band-bg); border: 0; }
+.philo-frame .plate { color: var(--philo-ground); background: var(--philo-ink); box-shadow: calc(-1 * var(--philo-off, 3px)) calc(-1 * var(--philo-off, 3px)) 0 var(--philo-red); font-family: var(--font-flyer); font-weight: 900; font-size: .95rem; letter-spacing: .04em; padding: .3rem .55rem .25rem; transition: box-shadow var(--dur-lift) var(--ease-lift); }
+.philo-frame:hover .plate { box-shadow: calc(-2 * var(--philo-off, 3px)) calc(-2 * var(--philo-off, 3px)) 0 var(--philo-red); }
+
+/* INTERSECT: a dashed terminal frame; the dashes march on hover */
+.intersect-frame { --f-line: var(--w-fg); --f-mark: var(--w-fg); --f-seal-fg: var(--w-accent); }
+.intersect-frame > .field {
+  border: 0;
+  --d: repeating-linear-gradient(90deg, var(--w-fg) 0 6px, transparent 6px 11px);
+  --dv: repeating-linear-gradient(180deg, var(--w-fg) 0 6px, transparent 6px 11px);
+  background: var(--d) 0 0 / 100% 1px repeat-x, var(--d) 0 100% / 100% 1px repeat-x, var(--dv) 0 0 / 1px 100% repeat-y, var(--dv) 100% 0 / 1px 100% repeat-y;
+  opacity: .75;
+}
+.intersect-frame:hover > .field { animation: march 1.1s linear infinite; }
+@keyframes march { to { background-position: 22px 0, -22px 100%, 0 -22px, 100% 22px; } }
+.intersect-frame .plate { font-family: var(--font-mono); font-weight: 500; letter-spacing: .06em; text-transform: none; }
+
+/* ---------- home: the windows ---------- */
+.world {
+  --f: var(--f-max);
+  overflow: visible;
+  padding: calc(var(--f-max) + clamp(2rem, 6vw, 4.5rem)) calc(var(--f-max) + var(--gutter)) calc(var(--f-max) + clamp(2.5rem, 7vw, 5rem));
+}
+.world > .wrap { width: min(100%, var(--wrap)); }
+.world::before { inset: var(--f); clip-path: none; background: var(--w-bg); border: 1px solid var(--w-line-strong); }
+.js .world::before { animation: none; }
+.world::after {
+  content: ""; position: absolute; inset: calc(var(--f) - 7px); z-index: -1; pointer-events: none;
+  --m: linear-gradient(var(--nts-ink), var(--nts-ink));
+  background:
+    var(--m) 0 0 / 11px 1px no-repeat, var(--m) 0 0 / 1px 11px no-repeat,
+    var(--m) 100% 0 / 11px 1px no-repeat, var(--m) 100% 0 / 1px 11px no-repeat,
+    var(--m) 0 100% / 11px 1px no-repeat, var(--m) 0 100% / 1px 11px no-repeat,
+    var(--m) 100% 100% / 11px 1px no-repeat, var(--m) 100% 100% / 1px 11px no-repeat;
+  opacity: .7; transition: inset var(--dur-lift) var(--ease-lift);
+}
+/* quirk: hovering the orb steps the marks out, the frame's promise of falling in */
+.world:has(.orb:hover, .orb:focus-visible)::after { inset: calc(var(--f) - 13px); }
+.world .seal { --f-seal-bg: var(--nts-paper); --f-line: var(--nts-line-strong); }
+.world[data-world="embers"] .seal { color: var(--embers-fire); }
+.world[data-world="philo"] .seal { color: var(--philo-red); }
+.world[data-world="intersect"] .seal { color: var(--intersect-fire-text, var(--intersect-phosphor)); }
+/* quirk: the seals turn with their orbits */
+.world[data-world="embers"] .seal .nts-sigil { animation: turn var(--p-embers) linear infinite; }
+.world[data-world="philo"] .seal .nts-sigil { animation: turn var(--p-philo) linear infinite reverse; }
+.world[data-world="intersect"] .seal .nts-sigil { animation: turn var(--p-intersect) linear infinite; }
+
+/* the frame opens as you scroll into a window and closes as you leave */
+@supports (animation-timeline: view()) {
+  .js .world { animation: frame-open linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+}
+@keyframes frame-open { 0% { --f: var(--f-max); } 36% { --f: var(--f-min); } 64% { --f: var(--f-min); } 100% { --f: var(--f-max); } }
+
+/* the handover: the paper between two windows, with a registration mark */
+.handover { height: clamp(2.75rem, 8vw, 4.5rem); background: var(--f-reg) center / 20px 20px no-repeat; opacity: .55; }
+@media (min-width: 900px) { .handover { height: 4rem; } }
+
+/* the words band on home: a coral plate in the same frame */
+.words.framed { --f-ground: var(--nts-coral); --f-line: var(--nts-ink); --f-mark: var(--nts-ink); --f-seal-bg: var(--nts-paper); --f-seal-fg: var(--nts-ink); overflow: visible; }
+.words.framed .words-star { right: .5rem; bottom: .5rem; }
+.words.framed > .wrap { overflow: hidden; }
+.words.framed .words-star { right: -1rem; bottom: -2rem; }
+
+@media print { .js .world { animation: none; } .world::after, .framed::after { display: none; } }
+
+/* ---------- reduced motion: every frame stands at rest ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js .world { animation: none; --f: var(--f-max); }
+  .world .seal .nts-sigil { animation: none !important; }
+  .intersect-frame:hover > .field { animation: none; }
+  .world::after { transition: none; }
+  .philo-frame .plate { transition: none; }
+}
