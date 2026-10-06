@@ -6,7 +6,7 @@
    rule below prints the triangle on that paper.
    Contrast: ink on ground 12.5:1, muted 6.5:1, red-text 5.2:1; white on the
    red bar at 13px bold 4.6:1. */
-[data-world="philo"] {
+[data-world="philo"], :root:has(> body[data-world="philo"]) {
   --w-bg: #e6e6e8;
   --w-bg-2: #dcdce0;
   --w-fg: #2b2d3e;

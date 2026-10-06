@@ -6,7 +6,7 @@
    Contrast at night: cream on night 17:1, ash on night 9.6:1, fire-text on
    night 5.6:1. Fire (#e51d47, 4.4:1) draws shapes, the bar and type at 24px+;
    on the bar, night text at 19px bold. */
-[data-world="embers"] {
+[data-world="embers"], :root:has(> body[data-world="embers"]) {
   --w-bg: #0b0709;
   --w-bg-2: #1a0a14;
   --w-fg: #ffe9d0;

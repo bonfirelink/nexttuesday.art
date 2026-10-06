@@ -4,7 +4,8 @@
                data-near names the body whose section holds the middle of
                the viewport (sections carry data-orbit-body); a tap goes
                back to the sun (a plain #top link: the stylesheet
-               scrolls smoothly when motion is welcome)
+               scrolls smoothly when motion is welcome); on phones it
+               steps aside (.is-aside) while the words band is in view
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
                "orb", so it grows into the world page's entity; coming back,
@@ -31,6 +32,10 @@
       });
     }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
     document.querySelectorAll("[data-orbit-body]").forEach(function (s) { near.observe(s); });
+    var words = document.querySelector(".words");
+    if (words && matchMedia("(max-width: 639px)").matches) {
+      new IntersectionObserver(function (es) { compass.classList.toggle("is-aside", es[es.length - 1].isIntersecting); }, { threshold: 0 }).observe(words);
+    }
   }
 
   /* falling in, and back */
