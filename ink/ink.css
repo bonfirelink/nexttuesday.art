@@ -125,10 +125,7 @@
 
 /* ---------- the bleed-in front: the world's ink, hard-edged like print ---------- */
 /* ink.js shapes it (a blob from the entity); the rim of droplets would need
-   a filter per frame, so the front keeps the plain irregular edge. The box
-   is two viewports tall (the inline height is one): the spread is slow and
-   the visitor keeps scrolling, so what rises from below is covered too */
-body > .nts-bleed-front { min-height: 200vh !important; }
+   a filter per frame, so the front keeps the plain irregular edge */
 
 /* ---------- reduced motion, print, no scripts ---------- */
 @media (prefers-reduced-motion: reduce) {
