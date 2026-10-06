@@ -1,4 +1,4 @@
-/* I · Eclipse, the world pages' bleed-in: the world's ground opens as a
+/* The world pages' bleed-in: the world's ground opens as a
    disc from the page's entity (the hearth, the triangle, the solid), the
    same figure as the apertures that open from their rings. Deferred after
    nts.js, before the bleed can start; it only sets the form, nts.js does

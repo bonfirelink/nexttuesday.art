@@ -1,12 +1,14 @@
-/* IV · Orbit: the initiatives circle the great sigil.
+/* The orrery: the initiatives circle the great sigil.
    An alchemical orrery. The mega-sigil is the sun, on a coral disc; the
    sigils of EMBERS, NOT NOT PHILO and INTERSECT ride orbits that continue
    its outer rings, and the events star rides its rim. Scrolling travels out
    to each body in turn: the body grows, its world blooms around it, its
    words arrive. A small compass keeps the sun with you. Falling into a
    world is a cross-document view transition from the body you tapped.
-   Loaded after nts.css, the world kits and base.css (the world pages'
-   flow). Nothing here redefines a --nts-* or --w-* token.
+   Loaded after nts.css, the world kits and pages.css, and before
+   apertures.css, which turns each world window and the handovers into
+   apertures (it switches off the bloom and the plumb line below).
+   Nothing here redefines a --nts-* or --w-* token.
    Angles and periods: --a is where a body starts, --p how long one orbit
    takes. The compass repeats them so its dots stay in step with the sky.
    Every orbit is a zero-size pivot that turns, with the body offset by the
@@ -111,9 +113,9 @@
 }
 
 /* ---------- the journey: handovers and worlds ---------- */
-/* The handover between two sections is the thing the variants replace: here
-   it is plain on purpose, a short dotted plumb line in the page's ink,
-   centred, the orbit's own dash. Markup: <div class="handover" aria-hidden="true"></div>. */
+/* The handover between two sections: a short dotted plumb line in the
+   page's ink, centred, the orbit's own dash; apertures.css makes it the
+   plain gap where the next ring sits. Markup: <div class="handover" aria-hidden="true"></div>. */
 .handover { display: block; height: clamp(3.5rem, 10vw, 6rem); background: repeating-linear-gradient(to bottom, var(--nts-ink) 0 3px, transparent 3px 11px) 50% 0 / 1px calc(100% - 1rem) no-repeat; opacity: .45; }
 
 .world { position: relative; isolation: isolate; overflow: clip; color: var(--w-fg); padding: clamp(2.5rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); --bloom-at: 50% 30%; }

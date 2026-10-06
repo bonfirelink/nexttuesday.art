@@ -1,4 +1,4 @@
-/* I · Eclipse: each section opens like a disc from the orrery.
+/* The apertures: each section opens like a disc from the orrery.
    One handover language for the home page and the worlds: a section that
    changes ground is an aperture (.ecl), inset in the page so the ground
    around it stays in view, with the section's sigil in a thin ring on its
@@ -18,7 +18,7 @@
    (the ground around it): worlds set them from --w-*, bands from --band-*.
    Scroll-driven where animation-timeline: view() exists and html.js is
    set; everywhere else, and under reduced motion, every disc is open.
-   Loaded after orbit.css. Nothing here redefines a --nts-* or --w-* token. */
+   Loaded after orrery.css. Nothing here redefines a --nts-* or --w-* token. */
 
 @property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
 
@@ -73,7 +73,7 @@ main { --ecl-out: var(--w-bg); }
 .world.ecl .ecl-ring { color: var(--w-accent); }
 .world.ecl > .ecl-win .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
 @media (min-width: 760px) { .world.ecl .ecl-win { padding-inline: clamp(1rem, 3vw, 3rem); } }
-/* the handover is now the breathing space between a section and the next
+/* the handover is the breathing space between a section and the next
    aperture: the page's own ground, where the ring sits */
 .handover { height: var(--ecl-gap); background: none; opacity: 1; }
 @media (min-width: 900px) { .handover { height: var(--ecl-gap); } }
@@ -146,5 +146,5 @@ html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--nts-paper-2);
 }
 @media print { .ecl { animation: none !important; --ecl-p: 1; } .ecl-win, .ecl-win::after { -webkit-mask: none; mask: none; } .ecl-win::after { display: none; } }
 
-/* the reference bloomed the ground out of the orb with a ::before; the aperture is the ground now */
+/* orrery.css blooms the ground out of the orb with a ::before; here the aperture is the ground */
 .world.ecl::before { content: none; }
