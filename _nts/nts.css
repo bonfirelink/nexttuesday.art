@@ -359,8 +359,17 @@ html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world] {
   color-scheme: light;
 }
 /* the front: the world's ground, clipped to the shape nts.js gives it, under
-   everything but the body's own background (body isolates while it runs) */
-body > .nts-bleed-front { position: absolute !important; left: 0; right: 0; z-index: -1 !important; pointer-events: none; background: var(--w-bg); }
+   everything but the body's own background (body isolates while it runs).
+   Fixed to the viewport, so a scroll still moving when it starts never
+   shows a strip outside it. */
+body > .nts-bleed-front { position: fixed !important; inset: 0; z-index: -1 !important; pointer-events: none; background: var(--w-bg); }
+/* an image made of text crossing: copies of its glyphs (nts.js places them
+   every frame), in its old colours under the front and in the world's over
+   the page, clipped like the front */
+body > .nts-bleed-glyphs { position: fixed !important; inset: 0; pointer-events: none; margin: 0; }
+body > .nts-bleed-glyphs.under { z-index: -2 !important; }
+.nts-bleed-glyphs > div { position: absolute; overflow: hidden; }
+.nts-bleed-glyphs pre { position: absolute; margin: 0; border-style: solid; border-color: transparent; box-sizing: border-box; overflow: hidden; }
 html[data-bleed-state="in"] body { isolation: isolate; }
 
 /* ---------- 12. the mega-sigil ---------- */
