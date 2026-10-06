@@ -1,0 +1,142 @@
+/* I · Eclipse: each section opens like a disc from the orrery.
+   One handover language for the home page and the worlds: a section that
+   changes ground is an aperture (.ecl), inset in the page so the ground
+   around it stays in view, with the section's sigil in a thin ring on its
+   top edge. The ring is the disc's origin: as the aperture scrolls into
+   view its ground and everything on it open as a circle from the ring,
+   occluding the page's ground, and close again on the way back up. The
+   edge of the growing disc carries a thin bright limb. Crisp geometry,
+   never a blob: the disc is a radial mask with a one-pixel edge.
+   Markup:
+     <section class="ecl …" data-orbit-body="…">
+       <span class="ecl-ring" aria-hidden="true"><svg class="nts-sigil"><use href="#sigil-…"/></svg></span>
+       <div class="ecl-win"> … the section's content … </div>
+     </section>
+   On the home the apertures are the world windows (.world) and the two
+   NTS bands; inside a world they are its bands (.band). Colours come from
+   --ecl-bg (the aperture's ground), --ecl-fg (its marks) and --ecl-out
+   (the ground around it): worlds set them from --w-*, bands from --band-*.
+   Scroll-driven where animation-timeline: view() exists and html.js is
+   set; everywhere else, and under reduced motion, every disc is open.
+   Loaded after orbit.css. Nothing here redefines a --nts-* or --w-* token. */
+
+@property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+:root {
+  --ecl-inset: clamp(10px, 2.5vw, 2rem);   /* the page's ground around an aperture */
+  --ecl-radius: clamp(1.25rem, 5vw, 2.75rem);
+  --ecl-ring: 3.25rem;
+  --ecl-gap: clamp(3rem, 8vw, 5rem);        /* between a section and the next aperture */
+}
+main { --ecl-out: var(--w-bg); }
+
+/* ---------- the aperture ---------- */
+.ecl { position: relative; isolation: isolate; width: min(100% - 2 * var(--ecl-inset), 88rem); margin-inline: auto; --ecl-p: 1; }
+.ecl-win {
+  position: relative; overflow: clip; border-radius: var(--ecl-radius);
+  background: var(--ecl-bg); color: var(--ecl-fg-text, inherit);
+  -webkit-mask: radial-gradient(circle farthest-corner at 50% 0, #000 calc(var(--ecl-p) * 100%), transparent calc(var(--ecl-p) * 100% + 1px));
+  mask: radial-gradient(circle farthest-corner at 50% 0, #000 calc(var(--ecl-p) * 100%), transparent calc(var(--ecl-p) * 100% + 1px));
+}
+/* the limb: a thin line of the aperture's accent riding the disc's edge,
+   gone once the disc has passed the corners */
+.ecl-win::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle farthest-corner at 50% 0, transparent calc(var(--ecl-p) * 100% - 2.5px), var(--ecl-limb, var(--ecl-fg)) calc(var(--ecl-p) * 100% - 1.5px), var(--ecl-limb, var(--ecl-fg)) calc(var(--ecl-p) * 100%), transparent calc(var(--ecl-p) * 100% + .5px));
+  opacity: .9;
+}
+/* the ring on the top edge: the section's sigil on a small disc of the
+   aperture's own ground, a thin ring of its marks, and a halo of the page's
+   ground so it sits cleanly on the seam, like a bead in the orrery */
+.ecl-ring {
+  position: absolute; z-index: 4; left: 50%; top: 0; translate: -50% -50%;
+  width: var(--ecl-ring); height: var(--ecl-ring); border-radius: 50%;
+  display: grid; place-items: center; color: var(--ecl-fg);
+  background: var(--ecl-bg);
+  border: 1px solid color-mix(in srgb, var(--ecl-fg) 62%, transparent);
+  box-shadow: 0 0 0 3px var(--ecl-out), 0 8px 18px -10px rgba(26, 21, 48, .5);
+  pointer-events: none;
+}
+.ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; rotate: calc(var(--ecl-p) * 1turn - 1turn); }
+
+/* scrolling opens the disc: from the ring the moment the aperture's top
+   edge enters, fully open after 70vh of travel, so the disc keeps pace with the scroll; scrolling back closes it */
+@supports (animation-timeline: view()) {
+  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover 70vh; }
+}
+@keyframes ecl-open { from { --ecl-p: 0; } to { --ecl-p: 1; } }
+
+/* ---------- home: the windows into the worlds ---------- */
+.world.ecl { overflow: visible; --ecl-bg: var(--w-bg); --ecl-fg: var(--w-accent); --ecl-limb: var(--w-accent); padding: 0; }
+.world.ecl .ecl-win { padding: clamp(2.75rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); color: var(--w-fg); }
+.world.ecl .ecl-ring { color: var(--w-accent); }
+.world.ecl > .ecl-win .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
+@media (min-width: 760px) { .world.ecl .ecl-win { padding-inline: clamp(1rem, 3vw, 3rem); } }
+/* the handover is now the breathing space between a section and the next
+   aperture: the page's own ground, where the ring sits */
+.handover { height: var(--ecl-gap); background: none; opacity: 1; }
+@media (min-width: 900px) { .handover { height: var(--ecl-gap); } }
+
+/* the two NTS apertures: the words band (coral) and the ledger (paper-2) */
+.band.ecl { background: none; color: inherit; --ecl-bg: var(--band-bg, var(--nts-coral)); --ecl-fg: var(--band-fg, var(--nts-ink)); }
+.band.ecl .ecl-win { color: var(--band-fg, var(--nts-ink)); }
+/* a band's words sit right at its top edge, where the disc is still small:
+   they come in whole once the disc has passed them (p .5 to .8), so no line
+   is ever shown cut by the edge; the home windows show their orb first and
+   need no such hold */
+.band.ecl .ecl-win > .wrap { opacity: calc((var(--ecl-p) - .5) / .3); }
+.words.ecl { padding: 0; overflow: visible; }
+.words.ecl .ecl-win { padding: clamp(3rem, 8vw, 6rem) 0; }
+.words.ecl .ecl-win::after { opacity: .7; }
+.ledger-ap { --band-bg: var(--nts-paper-2); --band-fg: var(--nts-ink); --ecl-limb: var(--nts-gold); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
+.ledger-ap .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.ledger-ap .ecl-ring { color: var(--nts-gold); }
+.ledger-ap .ecl-ring .nts-sigil { filter: drop-shadow(0 1px 1px rgba(26, 21, 48, .35)); }
+.ledger-ap .ledger li { border-color: var(--nts-line); }
+/* coral-ink is 4.4:1 on paper-2; the upcoming dates take a deeper red there (5:1) */
+.ledger-ap .ledger li.upcoming .when { color: #b4261b; }
+
+/* ---------- inside the worlds: the bands ---------- */
+.band.ecl.sect-band { margin-block: var(--section); }
+.band.ecl .ecl-win > .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
+/* EMBERS: the summon band keeps its fire; the ring carries the fire triangle in night */
+.embers-summon.ecl { padding: 0; --ecl-limb: var(--embers-cream); }
+.embers-summon.ecl .ecl-win { padding: clamp(3rem, 7vw, 4.5rem) 0; }
+/* NOT NOT PHILO: the volumes are a disc of the deeper grey with the engraved
+   rings; "Next volume" keeps its charcoal, the star says what it is */
+.philo-volumes { --band-bg: var(--w-bg-2); --band-fg: var(--w-fg); --ecl-limb: var(--w-accent); }
+.philo-volumes .ecl-ring { color: var(--w-accent); }
+.philo-volumes .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.philo-volumes .ecl-win > .wrap > h2 { margin: 0; }
+.philo-volumes .volumes { margin-top: 1.5rem; }
+.philo-next.ecl { padding: 0; margin-top: var(--ecl-gap); --ecl-limb: var(--philo-red); }
+.philo-next.ecl .ecl-ring { color: var(--philo-red); }
+.philo-next.ecl .ecl-win { padding: clamp(3rem, 7vw, 4.5rem) 0; }
+.philo-next.ecl .ecl-win::after { opacity: 1; }
+/* INTERSECT: the correspondence sits on a lifted black (bg-2 is too close to the ground to read as a disc), phosphor ring */
+.intersect-corr { --band-bg: color-mix(in srgb, var(--w-fg) 8%, var(--w-bg)); --band-fg: var(--w-fg); --ecl-limb: var(--w-accent-text); }
+.intersect-corr .ecl-ring { color: var(--w-accent-text); }
+.intersect-corr .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.intersect-corr .ecl-win .sect-head { margin-bottom: 1.5rem; }
+.intersect-corr .corr th, .intersect-corr .corr td { border-color: var(--w-line-strong); }
+/* EVENTS: the whole ledger is one aperture of paper-2 under the star */
+.events-ap { margin-top: 1.5rem; }
+
+/* ---------- the compass eclipse ---------- */
+/* near a world, a moon in that world's ground slides over the sun */
+.compass .c-moon { grid-area: 1 / 1; width: 18px; height: 18px; border-radius: 50%; background: var(--c-moon, var(--nts-ink)); box-shadow: 0 0 0 1px var(--nts-paper); translate: -14px -6px; scale: 0; transition: translate .7s var(--ease-out), scale .5s var(--ease-out), background-color .4s; z-index: 1; }
+.compass[data-near="embers"] { --c-moon: var(--embers-night); }
+.compass[data-near="philo"] { --c-moon: var(--philo-ink); }
+.compass[data-near="intersect"] { --c-moon: var(--intersect-black); }
+.compass[data-near="embers"] .c-moon, .compass[data-near="philo"] .c-moon, .compass[data-near="intersect"] .c-moon { translate: -6px -3px; scale: 1; }
+.compass[data-near="star"] .c-moon { translate: 0 0; scale: .35; background: var(--nts-gold); box-shadow: none; }
+
+/* ---------- reduced motion: every disc open, the moon simply there ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js .ecl { animation: none !important; --ecl-p: 1; }
+  .compass .c-moon { transition: none; }
+}
+@media print { .ecl { animation: none !important; --ecl-p: 1; } .ecl-win, .ecl-win::after { -webkit-mask: none; mask: none; } .ecl-win::after { display: none; } }
+
+/* the reference bloomed the ground out of the orb with a ::before; the aperture is the ground now */
+.world.ecl::before { content: none; }
