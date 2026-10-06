@@ -1,0 +1,122 @@
+/* III · Frequency: the handover is a field of lines.
+   Every edge between two sections is a seam: a band of fine horizontal
+   lines, flat at rest, that swell into waves as the seam crosses the middle
+   of the screen and settle again as the next section takes over. Under the
+   lines the next ground arrives as a line screen: lines of its colour that
+   thicken until they merge into solid ground. Each world speaks in its own
+   line (embers: the hearth's frequency lines; philo: engraved arcs of its
+   rings; intersect: stepped scanlines; the NTS home: the orbits' dashes).
+   signal.js builds the wave paths and sets the bleed form; without scripts
+   the seam is a flat line field over the same ground ramp.
+   Loaded after frequency.css (the orrery). Nothing here redefines a --nts-*
+   or --w-* token. */
+
+@property --sig { syntax: "<number>"; inherits: true; initial-value: 0.55; }
+
+:root { --seam-h: clamp(5rem, 14vw, 7.5rem); --seam-thin: clamp(3rem, 8vw, 4.5rem); }
+
+/* the ground ramp: 12 bars thickening downwards, as a mask on a real
+   element (a pseudo-element could not hold the bleed's snapshot) */
+.seam {
+  --ramp: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 12' preserveAspectRatio='none'%3E%3Crect y='0' width='1' height='.09'/%3E%3Crect y='1' width='1' height='.17'/%3E%3Crect y='2' width='1' height='.25'/%3E%3Crect y='3' width='1' height='.33'/%3E%3Crect y='4' width='1' height='.42'/%3E%3Crect y='5' width='1' height='.5'/%3E%3Crect y='6' width='1' height='.58'/%3E%3Crect y='7' width='1' height='.67'/%3E%3Crect y='8' width='1' height='.75'/%3E%3Crect y='9' width='1' height='.84'/%3E%3Crect y='10' width='1' height='.92'/%3E%3Crect y='11' width='1' height='1.01'/%3E%3C/svg%3E");
+  --seam-line: var(--w-accent);
+  --seam-ground: var(--w-bg);
+  --pitch: 9px;
+  position: relative; display: block; height: var(--seam-h); overflow: clip;
+  background: repeating-linear-gradient(to bottom, var(--seam-line) 0 1px, transparent 1px var(--pitch)) 0 50% / 100% calc(100% - 1rem) no-repeat;
+  --sig: 0.55;
+}
+.seam.is-live { background: none; }
+.seam .ground { position: absolute; inset: 0; display: block; background: var(--seam-ground); -webkit-mask: var(--ramp) 0 0 / 100% 100% no-repeat; mask: var(--ramp) 0 0 / 100% 100% no-repeat; }
+.seam.out .ground { transform: scaleY(-1); }
+.seam.thin { height: var(--seam-thin); }
+.seam.thin .ground { display: none; }
+.seam .signal { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; color: var(--seam-line); }
+.seam .signal path {
+  fill: none; stroke: currentColor; stroke-width: var(--sw, 1); vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round;
+  transform-box: fill-box; transform-origin: center;
+  transform: scaleY(calc(0.03 + var(--sig) * var(--env, 1)));
+  opacity: var(--line-a, .85);
+}
+.seam .signal path.dash { stroke-dasharray: 3 9; }
+.seam .signal path.hot { color: var(--seam-hot, currentColor); --sw: 1.4; }
+/* the signal travels, slowly, only while the seam is near the screen;
+   a pointer over it quickens the travel (a quirk) */
+.seam .signal g { animation: travel 14s linear infinite paused; }
+.seam.is-near .signal g { animation-play-state: running; }
+.seam:hover .signal g { animation-duration: 5s; }
+@keyframes travel { to { transform: translateX(-250px); } }
+
+/* the lines of each world */
+.seam[data-line="embers"] { --seam-line: var(--embers-fire); --seam-hot: var(--embers-cream); --pitch: 9px; }
+.seam[data-line="philo"] { --seam-line: var(--philo-ink); --pitch: 6px; --line-a: .55; }
+.seam[data-line="intersect"] { --seam-line: var(--intersect-fire-hi, #ff3b63); --pitch: 7px; --line-a: .8; }
+.seam[data-line="nts"] { --seam-line: var(--nts-ink); --pitch: 10px; --line-a: .6; }
+/* on the dark grounds the lines read in the ground's light */
+[data-world="intersect"] .seam[data-line="intersect"] { --seam-line: var(--intersect-phosphor); --line-a: .55; }
+[data-world="embers"] .seam.in[data-line="embers"], [data-world="embers"] .seam.out[data-line="embers"] { --seam-line: var(--embers-cream); --seam-hot: var(--embers-cream); --seam-ground: var(--embers-fire); --line-a: .75; }
+[data-world="philo"] .seam.in[data-line="philo"], [data-world="philo"] .seam.out[data-line="philo"] { --seam-ground: var(--philo-ink); --seam-line: var(--philo-ink); }
+[data-world="philo"] .seam.in[data-line="philo"] .signal, [data-world="philo"] .seam.out[data-line="philo"] .signal { mix-blend-mode: difference; color: var(--philo-ground); }
+
+/* the swell: --sig rises to 1 as the seam crosses the middle of the
+   screen and falls back; scroll-driven where the browser can, a resting
+   half-swell elsewhere and under reduced motion */
+@supports (animation-timeline: view()) {
+  .js .seam { animation: swell linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+}
+@keyframes swell { 0% { --sig: 0.02; } 45%, 55% { --sig: 1; } 100% { --sig: 0.02; } }
+
+/* ---------- home: the seams replace the handover and the bloom ---------- */
+.handover { display: none; }
+.js .world::before { animation: none !important; clip-path: none !important; }
+.world { padding-top: clamp(1.5rem, 5vw, 3.5rem); }
+.sect.tuesdays { padding-bottom: clamp(2rem, 6vw, 4rem); }
+.words { margin-top: 0; }
+/* the home's windows are full width: the lines need the whole width to
+   read as a signal, and the paper returns between every two worlds in the
+   seams, so the home's colour is never further than a screen away */
+
+/* ---------- EMBERS: the landing is the hearth's field ---------- */
+/* the lines fill the whole first screen; the tetrahedron keeps its size
+   (data-size is set per screen width by the page) */
+.embers-hero.wrap { position: relative; min-height: calc(100svh - var(--bar-h)); align-content: end; padding-top: 0; isolation: isolate; overflow: clip; width: 100%; padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2); }
+.embers-hero .entity { position: absolute; inset: 0; z-index: 0; }
+.embers-hero .hearth-stage { position: absolute; inset: 0; width: auto; max-height: none; aspect-ratio: auto; margin: 0; }
+.embers-hero .hearth-still svg { width: min(72%, 24rem); }
+.embers-hero .trace { width: min(60svh, 100% - 2rem); top: 42%; }
+.embers-hero .hero-text { position: relative; z-index: 1; padding: 1rem 0 clamp(1.5rem, 5vw, 3rem); pointer-events: none; }
+.embers-hero .hero-text > * { pointer-events: auto; }
+.embers-hero .hero-text { padding-right: 0; }
+@media (min-width: 900px) {
+  .embers-hero.wrap { align-content: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: max(5rem, (100% - var(--wrap)) / 2); }
+  .embers-hero .trace { left: 72%; top: 50%; width: min(64svh, 44%); }
+  .embers-hero .entity { order: 0; }
+  .embers-hero .hero-text { grid-column: 1; align-self: center; }
+}
+.embers-hero .hint { position: relative; z-index: 1; }
+/* the summon band is the signal's peak */
+.embers-summon { position: relative; }
+.embers-summon .embers-display { position: relative; }
+
+/* ---------- NOT NOT PHILO: the next volume resolves from the lines ---------- */
+.philo-next .wrap { position: relative; display: grid; gap: 1rem 2rem; align-items: center; }
+.philo-next .next-num {
+  margin: 0; font-family: var(--font-display); font-weight: 700; font-variation-settings: var(--fraunces-display);
+  font-size: clamp(7rem, 32vw, 13rem); line-height: .8; letter-spacing: -.02em; user-select: none;
+  color: transparent; -webkit-background-clip: text; background-clip: text;
+  background: linear-gradient(var(--philo-ground), var(--philo-ground)) 0 100% / 100% var(--solid, 0%) no-repeat,
+              repeating-linear-gradient(to bottom, var(--philo-ground) 0 2px, transparent 2px 6px) 0 0 / 100% 100% no-repeat;
+  transition: background-size .7s var(--ease-out);
+}
+.philo-next .next-num:hover { --solid: 100%; }
+.philo-next .next-num small { font-family: var(--font-text); font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; vertical-align: 1.1em; margin-left: .3em; }
+@media (min-width: 760px) { .philo-next .wrap { grid-template-columns: minmax(0, 1fr) auto; } .philo-next .next-num { grid-column: 2; grid-row: 1 / span 2; } .philo-next h2, .philo-next .prose { grid-column: 1; } }
+
+/* ---------- reduced motion and print: the lines hold their half-swell ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js .seam { animation: none; --sig: 0.55; }
+  .seam .signal g { animation: none; }
+  .philo-next .next-num { transition: none; }
+}
+@media print { .seam { display: none; } }
+.seam.is-hidden .signal g { animation-play-state: paused; }
