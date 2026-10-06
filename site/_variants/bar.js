@@ -1,14 +1,15 @@
 (function(){
-var V=[["I","Doors","doors"],["II","Tide","tide"],["III","Strata","strata"],["IV","Orbit","orbit"],["V","Quiet","quiet"]],
+var V=[["I","Eclipse","eclipse"],["II","Swell","swell"],["III","Frequency","frequency"],["IV","Frame","frame"],["V","Ink","ink"]],
 p=location.pathname,m=p.split("/")[1],c=V.findIndex(function(v){return v[2]===m}),
 rest=c<0?"/":p.slice(m.length+1)||"/",
 h=document.createElement("div"),s=h.attachShadow({mode:"open"});
 function href(v){return"/"+v[2]+rest+location.search+location.hash}
 s.innerHTML='<style>'+
 ':host{all:initial}'+
-'nav{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483000;display:flex;align-items:center;gap:2px;height:40px;padding:0 6px;box-sizing:border-box;max-width:calc(100vw - 16px);background:rgba(14,10,12,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:20px;font:12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;color:#eee;transition:transform .3s,opacity .3s}'+
+'nav{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2147483000;display:flex;align-items:center;gap:2px;height:40px;padding:0 6px;box-sizing:border-box;max-width:calc(100vw - 16px);background:rgba(14,10,12,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:20px;font:12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;color:#eee;transition:transform .3s,opacity .3s;overflow-x:auto;scrollbar-width:none}'+
+'nav::-webkit-scrollbar{display:none}'+
 'nav.h{transform:translate(-50%,calc(100% + 24px));opacity:0}'+
-'a,button{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-width:32px;height:32px;padding:0 7px;border-radius:16px;color:inherit;cursor:pointer;white-space:nowrap}'+
+'a,button{all:unset;box-sizing:border-box;flex:none;display:flex;align-items:center;justify-content:center;min-width:32px;height:32px;padding:0 7px;border-radius:16px;color:inherit;cursor:pointer;white-space:nowrap}'+
 'a:hover,button:hover{background:rgba(255,255,255,.12)}'+
 'a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:-2px}'+
 'a[aria-current]{color:#e51d47;text-decoration:underline;text-underline-offset:4px;font-weight:600}'+

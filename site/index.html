@@ -2,10 +2,10 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Next Tuesday Society</title>
-<meta name="description" content="One Society, five ways through: drafts for the Next Tuesday Society's new website, round two.">
+<meta name="description" content="One Society, five passages: drafts for the Next Tuesday Society's new website, round three.">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Next Tuesday Society">
-<meta property="og:title" content="Next Tuesday Society: five ways through">
-<meta property="og:description" content="One Society. Five ways through.">
+<meta property="og:title" content="Next Tuesday Society: one orbit, five passages">
+<meta property="og:description" content="One orbit. Five passages.">
 <meta property="og:url" content="https://nexttuesday.art/">
 <meta name="theme-color" content="#0b0709">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-16 -16 32 32'%3E%3Ccircle r='12' fill='none' stroke='%23E4DCC8' stroke-width='2.5'/%3E%3Ccircle r='5' fill='%23e51d47'/%3E%3C/svg%3E">
@@ -20,7 +20,7 @@ h1 em{color:#e51d47}
 .arch:hover,.arch:focus-visible{opacity:1;color:#e51d47}
 main{max-width:1320px;margin:0 auto;padding:clamp(28px,6vw,72px) 20px 32px}
 header{margin-bottom:clamp(28px,5vw,56px)}
-ul{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.doors{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
 .door{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:center;padding:12px;border:1px solid rgba(228,220,200,.16);border-radius:14px;text-decoration:none;transition:border-color .25s,background .25s,transform .25s}
 .door:hover,.door:focus-visible{border-color:#e51d47;background:rgba(229,29,71,.06)}
 .door:active{transform:scale(.99)}
@@ -30,11 +30,12 @@ ul{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-column
 .num{display:block;font:italic 500 1.05rem "EB Garamond",Georgia,serif;color:#e51d47;letter-spacing:.08em}
 .name{display:block;margin:.1rem 0 .35rem;font:500 1.6rem/1.1 "EB Garamond",Georgia,serif}
 .desc{display:block;font-size:.9rem;opacity:.72}
+.quirks{list-style:none;margin:.6rem 0 0;padding:0;font-size:.78rem;line-height:1.4;opacity:.6}.quirks:empty{display:none}.quirks:not(:empty)::before{content:"Quirks to try";display:block;margin-bottom:.25rem;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:#e51d47;opacity:.9}.quirks li{margin:0 0 .2rem;padding-left:.9em;position:relative}.quirks li::before{content:"\00b7";position:absolute;left:.2em}
 .go{display:inline-block;margin-top:.7rem;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:#e51d47}
 footer{margin-top:clamp(36px,6vw,64px);padding-top:20px;border-top:1px solid rgba(228,220,200,.12);font-size:.85rem;opacity:.75}
 footer p{margin:0 0 .3rem}
 @media(min-width:900px){
-ul{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
+.doors{grid-template-columns:repeat(5,minmax(0,1fr));gap:18px}
 .door{grid-template-columns:1fr;gap:14px;padding:14px;align-items:start}
 .thumb{order:-1;width:min(100%,calc(44vh * .462));margin:0 auto}
 main{padding-top:40px}
@@ -46,18 +47,18 @@ header{margin-bottom:32px}
 </style></head>
 <body><a class="arch" href="/archive/" aria-label="Archive: earlier rounds"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg><span>Archive</span></a><main>
 <header><p class="eyebrow">Next Tuesday Society</p>
-<h1>One Society.<br><em>Five ways through.</em></h1></header>
-<ul>
-<li><a class="door" href="/doors/"><span class="thumb" data-n="I"><img src="/_variants/thumbs/doors.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
-<span><span class="num">I</span><span class="name">Doors</span><span class="desc">Clean cuts, and each initiative a card holding a piece of its world.</span><span class="go">Enter →</span></span></a></li>
-<li><a class="door" href="/tide/"><span class="thumb" data-n="II"><img src="/_variants/thumbs/tide.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
-<span><span class="num">II</span><span class="name">Tide</span><span class="desc">Each section bleeds into the next, and night falls as you go in.</span><span class="go">Enter →</span></span></a></li>
-<li><a class="door" href="/strata/"><span class="thumb" data-n="III"><img src="/_variants/thumbs/strata.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
-<span><span class="num">III</span><span class="name">Strata</span><span class="desc">Panels that stack as you scroll.</span><span class="go">Enter →</span></span></a></li>
-<li><a class="door" href="/orbit/"><span class="thumb" data-n="IV"><img src="/_variants/thumbs/orbit.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
-<span><span class="num">IV</span><span class="name">Orbit</span><span class="desc">The initiatives circle the great sigil.</span><span class="go">Enter →</span></span></a></li>
-<li><a class="door" href="/quiet/"><span class="thumb" data-n="V"><img src="/_variants/thumbs/quiet.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
-<span><span class="num">V</span><span class="name">Quiet</span><span class="desc">A calm index, where the worlds wait until you reach for them.</span><span class="go">Enter →</span></span></a></li>
+<h1>One orbit.<br><em>Five passages.</em></h1></header>
+<ul class="doors">
+<li><a class="door" href="/eclipse/"><span class="thumb" data-n="I"><img src="/_variants/thumbs/eclipse.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
+<span><span class="num">I</span><span class="name">Eclipse</span><span class="desc">Each section opens like a disc from the orrery.</span><ul class="quirks" data-variant="eclipse"></ul><span class="go">Enter →</span></span></a></li>
+<li><a class="door" href="/swell/"><span class="thumb" data-n="II"><img src="/_variants/thumbs/swell.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
+<span><span class="num">II</span><span class="name">Swell</span><span class="desc">One bold wave carries each world in.</span><ul class="quirks" data-variant="swell"></ul><span class="go">Enter →</span></span></a></li>
+<li><a class="door" href="/frequency/"><span class="thumb" data-n="III"><img src="/_variants/thumbs/frequency.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
+<span><span class="num">III</span><span class="name">Frequency</span><span class="desc">The experimental one, drawn in each world's own lines.</span><ul class="quirks" data-variant="frequency"></ul><span class="go">Enter →</span></span></a></li>
+<li><a class="door" href="/frame/"><span class="thumb" data-n="IV"><img src="/_variants/thumbs/frame.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
+<span><span class="num">IV</span><span class="name">Frame</span><span class="desc">The worlds sit framed in the home's colour.</span><ul class="quirks" data-variant="frame"></ul><span class="go">Enter →</span></span></a></li>
+<li><a class="door" href="/ink/"><span class="thumb" data-n="V"><img src="/_variants/thumbs/ink.webp" alt="" loading="lazy" width="390" height="844" onerror="this.style.display='none'"></span>
+<span><span class="num">V</span><span class="name">Ink</span><span class="desc">Colour spreads into the next section like ink in water.</span><ul class="quirks" data-variant="ink"></ul><span class="go">Enter →</span></span></a></li>
 </ul>
-<footer><p>Drafts for the Society's new website, round two, October 2026.</p><p>🪬 Know thyself</p></footer>
+<footer><p>Drafts for the Society's new website, round three, October 2026.</p><p>🪬 Know thyself</p></footer>
 </main></body></html>
