@@ -28,7 +28,10 @@
       if (this._c) return this._c;
       var e = document.querySelector(".hero .entity"), cx = w / 2, cy = h / 2;
       if (e) { var r = e.getBoundingClientRect(); if (r.width || r.height) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; } }
-      var far = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, h - cy), Math.hypot(w - cx, h - cy));
+      /* the front box is two viewports tall (ink.css), so a slow spread
+         still covers what scrolls up from below while it runs */
+      var H = 2 * h;
+      var far = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, H - cy), Math.hypot(w - cx, H - cy));
       this._c = { cx: cx, cy: cy, R: (far + J) / FMIN + 2 };
       return this._c;
     },
