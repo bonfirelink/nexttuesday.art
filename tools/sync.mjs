@@ -1,8 +1,9 @@
 /* Fills the shared regions of every page from the content source, so the
-   five variants cannot drift. Run from anywhere, after any edit:
-     node tools/sync.mjs            every site/<folder>/**\/*.html that has a region
-     node tools/sync.mjs site/doors  one folder
-     node tools/sync.mjs --check    exit 1 if anything would change (CI, pre-commit)
+   pages cannot drift from it or from each other. Run from anywhere, after
+   any edit:
+     node tools/sync.mjs                        every site/**\/*.html that has a region
+     node tools/sync.mjs site/embers/index.html  one page (or one folder)
+     node tools/sync.mjs --check                exit 1 if anything would change (CI, pre-commit)
    Pages are static HTML; this script rewrites only what sits between
    markers and leaves everything else byte for byte.
 
@@ -18,8 +19,8 @@
    Attributes:
      data-nts-copy="key"      the element's inner HTML becomes copy.json[key]
      data-nts-fragment="w"    the element's inner HTML becomes the world's still
-   Links inside generated markup are prefixed with the folder the page is in
-   (site/doors/… gets /doors/…), so a variant is one folder, copied whole. */
+   Links inside generated markup are root-relative (/embers/, /events/…); the
+   page a file is (home, or the folder it sits in) marks the nav's current link. */
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -141,9 +142,8 @@ function replaceInner(html, attr, resolve) {
 
 function sync(file) {
   const rel = relative(site, file).split(sep);
-  const folder = rel.length > 1 ? rel[0] : '';
-  const prefix = folder ? `/${folder}/` : '/';
-  const page = rel.length === 2 ? 'home' : rel.length >= 3 ? rel[rel.length - 2] : 'home';
+  const prefix = '/';
+  const page = rel.length >= 2 ? rel[rel.length - 2] : 'home';
   const before = read(file);
   let html = before;
   html = region(html, 'sprite', () => SPRITE);
@@ -171,9 +171,7 @@ function walk(dir, acc = []) {
   for (const name of readdirSync(dir)) {
     if (name.startsWith('.')) continue;
     const p = join(dir, name);
-    /* site/archive/ holds earlier rounds as they were published, built from
-       their own content: sync never rewrites it */
-    if (statSync(p).isDirectory()) { if (p !== nts && name !== '_variants' && p !== join(site, 'archive')) walk(p, acc); }
+    if (statSync(p).isDirectory()) { if (p !== nts) walk(p, acc); }
     else if (name.endsWith('.html')) acc.push(p);
   }
   return acc;

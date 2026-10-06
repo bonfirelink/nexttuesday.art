@@ -90,7 +90,7 @@
   --section: clamp(3.5rem, 9vw, 7rem);
   --bar-h: 3.25rem;
 
-  /* motion. --ease-lift is the chooser's card lift, kept exactly. */
+  /* motion. --ease-lift/--dur-lift/--lift-y: the card lift (ease, 250ms, -4px). */
   --ease-lift: ease;
   --dur-lift: 250ms;
   --lift-y: -4px;
@@ -128,7 +128,7 @@ body {
   line-height: 1.55;
   font-kerning: normal;
   overflow-x: clip;
-  padding-bottom: 72px; /* the switcher pill owns the bottom 64px */
+  padding-bottom: 72px; /* the page's ground runs on under the footer */
 }
 ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
 :focus-visible { outline: 2px solid var(--w-accent-text); outline-offset: 4px; border-radius: 2px; }
@@ -278,7 +278,7 @@ details.reveal summary::before { content: ""; width: .9em; height: .9em; backgro
 details.reveal[open] summary::before { transform: rotate(180deg); }
 details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: 1.2rem; }
 
-/* ---------- 8. the lift (the chooser's card lift, shared) ---------- */
+/* ---------- 8. the lift ---------- */
 .lift {
   display: block; position: relative; text-decoration: none; color: inherit;
   border: 1px solid var(--w-line); border-radius: 14px;

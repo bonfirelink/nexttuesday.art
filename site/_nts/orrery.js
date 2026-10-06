@@ -1,10 +1,12 @@
-/* IV · Orbit, the home page's behaviours. Deferred; the page reads fully
+/* The orrery's behaviours, on the home page. Deferred; the page reads fully
    without it (the sky turns in CSS, the worlds are plain sections).
      compass   .compass shows once the orrery has scrolled away, and its
                data-near names the body whose section holds the middle of
                the viewport (sections carry data-orbit-body); a tap goes
                back to the sun (a plain #top link: the stylesheet
-               scrolls smoothly when motion is welcome)
+               scrolls smoothly when motion is welcome); on phones it
+               steps aside (.is-aside) while the words band is in view or any text
+               would sit under it
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
                "orb", so it grows into the world page's entity; coming back,
@@ -31,6 +33,46 @@
       });
     }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
     document.querySelectorAll("[data-orbit-body]").forEach(function (s) { near.observe(s); });
+    /* phones: the compass steps aside whenever visible text would sit under
+       it (or the words band is in view); checked once per frame, only while shown */
+    if (matchMedia("(max-width: 639px)").matches) {
+      var words = document.querySelector(".words");
+      var wordsIn = false, queued = false;
+      var TEXT = "p, h1, h2, h3, h4, li, a, button, blockquote, figcaption, dt, dd, .lede, .label";
+      var hits = function (r, b) { return r.width > 0 && r.height > 0 && r.right > b.left && r.left < b.right && r.bottom > b.top && r.top < b.bottom; };
+      var under = function () {
+        var c = compass.getBoundingClientRect(), pad = 8;
+        var b = { left: c.left - pad, right: c.right + pad, top: c.top - pad, bottom: c.bottom + pad };
+        var els = document.querySelectorAll(TEXT), rg = document.createRange();
+        for (var i = 0; i < els.length; i++) {
+          var el = els[i];
+          if (compass.contains(el) || !hits(el.getBoundingClientRect(), b)) continue;
+          if (el.checkVisibility && !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+          var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), n;
+          while ((n = tw.nextNode())) {
+            if (!/\S/.test(n.nodeValue)) continue;
+            rg.selectNodeContents(n);
+            var rs = rg.getClientRects();
+            for (var k = 0; k < rs.length; k++) if (hits(rs[k], b)) return true;
+          }
+        }
+        return false;
+      };
+      var check = function () {
+        queued = false;
+        if (!compass.classList.contains("is-on")) return;
+        compass.classList.toggle("is-aside", wordsIn || under());
+      };
+      var queue = function () { if (!queued) { queued = true; requestAnimationFrame(check); } };
+      addEventListener("scroll", queue, { passive: true });
+      addEventListener("resize", queue);
+      /* text that fades or slides in changes what sits under the compass without a scroll */
+      document.addEventListener("transitionend", queue, true);
+      document.addEventListener("animationend", queue, true);
+      new MutationObserver(queue).observe(compass, { attributes: true, attributeFilter: ["class"] });
+      if (words) new IntersectionObserver(function (es) { wordsIn = es[es.length - 1].isIntersecting; queue(); }, { threshold: 0 }).observe(words);
+      queue();
+    }
   }
 
   /* falling in, and back */
