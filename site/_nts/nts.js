@@ -164,13 +164,37 @@
         var r = el.getBoundingClientRect(), c = form.cover(box(r), w, h);
         return timeAt((Math.max(0, Math.min(1, c[0])) + Math.max(0, Math.min(1, c[1]))) / 2);
       };
-      /* 3. hold every element's colours until the front reaches it */
-      var hold = function (el, t) {
-        el.__ntsT = el.style.transition;
-        el.style.transition = PROPS.map(function (pr) { return pr + " 0s linear " + t + "ms"; }).join(", ");
+      /* 3. hold every element's colours until the front reaches it: an
+         inline snapshot of what it shows now, released on the front's
+         schedule. Explicit values, not delayed transitions: a child inherits
+         its parent's animated value, so a transition held on a container
+         would hold its text past the front. color is held only where an
+         element has text of its own or sets its own colour; the rest is
+         inherited and follows its holder. */
+      var SURF = ["background-color", "border-color", "box-shadow", "text-shadow", "text-decoration-color"];
+      var hold = function (el, t, withColor) {
+        var cs = getComputedStyle(el), keep = { el: el, t: t, props: [] };
+        (withColor ? ["color"].concat(SURF) : SURF).forEach(function (pr) {
+          keep.props.push([pr, el.style.getPropertyValue(pr), el.style.getPropertyPriority(pr), cs.getPropertyValue(pr)]);
+        });
+        keep.tr = el.style.transition;
+        return keep;
       };
-      items.forEach(function (it) { hold(it.el, timeAt(it.p)); });
-      hold(document.body, dur); hold(d, dur);
+      var held = items.map(function (it) {
+        var own = it.whole && hasText(it.el);
+        if (!own) { var pc = it.el.parentElement; own = !pc || getComputedStyle(it.el).color !== getComputedStyle(pc).color; }
+        return hold(it.el, timeAt(it.p), own);
+      });
+      held.push(hold(document.body, dur, false));
+      held.forEach(function (k) {
+        k.props.forEach(function (q) { k.el.style.setProperty(q[0], q[3]); });
+        k.el.style.transition = "none";
+      });
+      var release = function (k) {
+        k.props.forEach(function (q) { if (q[1]) k.el.style.setProperty(q[0], q[1], q[2]); else k.el.style.removeProperty(q[0]); });
+        k.done = true;
+      };
+      held.sort(function (x, y) { return x.t - y.t; });
       /* 4. the front, then the flip */
       var front = document.createElement("div");
       front.className = "nts-bleed-front";
@@ -181,13 +205,15 @@
       void getComputedStyle(document.body).color;
       d.setAttribute("data-bleed-state", "in");
       dispatchEvent(new CustomEvent("nts:bleed", { detail: { phase: "start", world: world, duration: dur, at: at } }));
-      var t0 = performance.now();
+      var t0 = performance.now(), next = 0;
       var tick = function (now) {
-        var u = Math.min(1, (now - t0) / dur);
+        var el = now - t0, u = Math.min(1, el / dur);
         front.style.clipPath = form.clip(frontAt(ease(u) * gaps), w, h);
+        while (next < held.length && held[next].t <= el) release(held[next++]);
         if (u < 1) { requestAnimationFrame(tick); return; }
-        items.forEach(function (it) { it.el.style.transition = it.el.__ntsT || ""; delete it.el.__ntsT; });
-        document.body.style.transition = document.body.__ntsT || ""; d.style.transition = d.__ntsT || "";
+        while (next < held.length) release(held[next++]);
+        void getComputedStyle(document.body).color;
+        held.forEach(function (k) { k.el.style.transition = k.tr; });
         front.remove();
         flip();
       };
