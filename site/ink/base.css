@@ -1,0 +1,93 @@
+/* Orbit: the world pages' flow, kept from the reference. The home page and
+   the orbit traces are in orbit.css. Nothing here redefines a --nts-* or
+   --w-* token. */
+
+/* ---------- home: the opener is orbit.css; only the turn (hint and secret) stays ---------- */
+.turn { position: relative; min-height: 3.4em; display: grid; width: min(100%, 30rem); }
+.turn > * { grid-area: 1 / 1; margin: 0; }
+.turn .hint { color: var(--nts-coral-ink); transition: opacity .6s; }
+.turn .hint { display: inline-flex; align-items: center; justify-content: center; gap: .6em; }
+.turn .hint::before, .turn .hint::after { content: ""; width: .9em; height: .9em; background: currentColor; -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; }
+.turn .secret { opacity: 0; transform: translateY(6px); transition: opacity 1.4s ease .9s, transform 1.4s var(--ease-out) .9s; font-size: clamp(1.15rem, 3.2vw, 1.5rem); }
+.turn.is-open .hint { opacity: 0; }
+.turn.is-open .secret { opacity: 1; transform: none; }
+html:not(.js) .turn .hint { display: none; }
+html:not(.js) .turn .secret { opacity: 1; transform: none; }
+
+/* ---------- home: sections ---------- */
+.tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--nts-coral-ink); }
+.tuesdays .sigil-stage { display: none; }
+@media (min-width: 760px) {
+  .tuesdays { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: 1.5rem 3rem; align-items: center; }
+  .tuesdays .sect-head { grid-column: 1; }
+  .tuesdays .prose { grid-column: 1; }
+  .tuesdays .sigil-stage { display: grid; place-items: center; grid-column: 2; grid-row: 1 / span 2; }
+  .tuesdays .sigil-stage .nts-sigil { width: min(100%, 16rem); height: auto; aspect-ratio: 1; }
+}
+.words { padding: clamp(3rem, 8vw, 6rem) 0; position: relative; overflow: hidden; }
+.words .wrap { position: relative; }
+.words-grid { display: grid; gap: 1.5rem 3rem; }
+.words h2 { font-size: clamp(2.4rem, 8vw, 4.5rem); line-height: .98; }
+.words .prose p { font-size: 1.05rem; }
+.words .contact { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--fraunces-small); font-size: 1.25rem; line-height: 1.5; }
+.words .contact a { text-decoration-color: color-mix(in srgb, var(--nts-ink) 40%, transparent); }
+.words-star { position: absolute; right: -2rem; bottom: -3rem; width: clamp(9rem, 22vw, 16rem); opacity: .55; pointer-events: none; }
+@media (min-width: 760px) { .words-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+#yet-to-come .after { margin: 1.5rem 0 0; }
+
+/* ---------- world pages: the hero ---------- */
+.hero { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }
+.hero .label { color: var(--w-muted); margin: 0 0 .6rem; }
+.hero .lede, .hero .incant { max-width: 26ch; }
+.hero-text { display: grid; gap: .6rem; }
+.hero-text p { margin: 0; }
+@media (min-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; min-height: calc(100svh - var(--bar-h)); column-gap: clamp(2rem, 5vw, 5rem); }
+  .hero .entity { order: 2; }
+}
+
+/* EMBERS */
+.embers-hero { padding-bottom: 0; }
+.embers-hero .hearth-stage { width: min(100%, 34rem); margin-inline: auto; }
+.embers-hero .hint { font-family: var(--font-mono); font-size: .8rem; color: var(--w-muted); margin: .25rem 0 1.5rem; }
+.embers-hero .hint .cue { color: var(--w-accent-text); }
+@media (min-width: 900px) { .embers-hero { padding-right: 5rem; } .embers-hero .hearth-stage { width: 100%; } .embers-hero .hero-text { container-type: inline-size; } .embers-hero h1.embers-display { font-size: min(7rem, 16cqi); } }
+.embers-body .genres { margin: 1.25rem 0; }
+.embers-summon { --band-bg: var(--embers-fire); --band-fg: #0b0709; padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.embers-summon .embers-display { font-size: clamp(1.6rem, 6.4vw, 3.6rem); line-height: 1.05; letter-spacing: 0; max-width: 20ch; text-shadow: none; color: inherit; }
+.embers-summon ::selection { background: #0b0709; color: var(--embers-cream); }
+.embers-venues .prose p { font-size: 1.1rem; }
+
+/* NOT NOT PHILO */
+.philo-hero .stack { display: grid; gap: .5rem; justify-items: start; }
+.philo-hero h1 { margin: .4rem 0 .6rem; }
+.philo-hero .entity { width: min(100%, 30rem); margin-inline: auto; }
+.philo-salon .prose p:first-of-type { font-size: 1.1rem; }
+.philo-next { --band-bg: var(--philo-ink); --band-fg: var(--philo-ground); padding: clamp(2.5rem, 6vw, 4rem) 0; }
+.philo-next h2 { font-family: var(--font-flyer); font-variation-settings: normal; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; font-size: clamp(2rem, 7vw, 3.6rem); margin-bottom: 1rem; }
+.philo-next .prose { font-size: 1.1rem; }
+.philo-next .prose a { color: inherit; }
+.philo-venue { color: var(--w-muted); margin-top: 1rem; font-size: .95rem; }
+
+/* INTERSECT */
+.intersect-hero { text-align: left; }
+.intersect-hero .entity { width: min(100%, 30rem); margin-inline: auto; }
+/* the title is IM Fell, the one place it lives; the prompt before it stays mono */
+.intersect-hero h1 { text-transform: uppercase; letter-spacing: .02em; font-size: clamp(2.4rem, 10vw, 5rem); line-height: .95; }
+.intersect-hero h1 .x { font-family: var(--font-mono); font-weight: 500; color: var(--w-accent-text); }
+.intersect-hero .incant { font-size: clamp(1.4rem, 4vw, 2rem); }
+.intersect-body .prose p { font-size: 1.15rem; }
+.intersect-whisper { font-family: var(--font-intersect); font-style: italic; color: var(--w-muted); font-size: 1.25rem; margin: 1.5rem 0 0; }
+.intersect-link { font-family: var(--font-mono); font-size: .9rem; margin-top: 1rem; }
+
+/* EVENTS */
+.events-hero { min-height: 0; padding-bottom: 1rem; }
+.events-hero .entity { display: none; }
+@media (min-width: 900px) { .events-hero { min-height: 0; } .events-hero .entity { display: block; } }
+.events-hero h1 { font-size: clamp(3rem, 14vw, 7rem); line-height: .9; }
+.events-hero .lede { max-width: 32ch; }
+.events-hero .sigils { display: flex; gap: .9rem; margin-top: .5rem; }
+.events-hero .sigils .nts-sigil { width: 2rem; height: 2rem; }
+.events-key { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: 0 0 1rem; padding: 0; list-style: none; font-size: .85rem; color: var(--w-muted); }
+.events-key li { display: inline-flex; align-items: center; gap: .45rem; }
+.events-key .nts-sigil { width: 1.2rem; height: 1.2rem; }
