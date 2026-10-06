@@ -11,12 +11,13 @@
 <meta property="og:title" data-nts-copy="events.title" content="Events">
 <meta property="og:description" data-nts-copy="events.og.description" content="What we have conspired so far, and what we are conspiring next.">
 <meta name="theme-color" content="#f4ecdc">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f04a3a'/%3E%3Cpath fill='none' stroke='%231a1530' stroke-width='3' stroke-linejoin='round' d='M32 6L35.3 28.7L58 32L35.3 35.3L32 58L28.7 35.3L6 32L28.7 28.7Z'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23f04a3a'/%3E%3Cg fill='none' stroke='%231a1530' stroke-width='3'%3E%3Ccircle cx='32' cy='32' r='26'/%3E%3Cpath d='M32 11L41.3 51.8L15.2 19.1L52.9 37.3L11.1 37.3L48.8 19.1L22.7 51.8Z'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica:ital@0;1&family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Red+Hat+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Red+Hat+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="/_nts/nts.css">
 <link rel="stylesheet" href="/_base/base.css">
+<link rel="stylesheet" href="/_base/orbit.css">
 <script src="/_nts/nts-head.js"></script>
 <script src="/_nts/nts.js" defer></script>
 </head>
@@ -51,7 +52,14 @@
       </ul>
     </div>
     <div class="entity" data-nts-draw>
-      <svg class="nts-sigil sigil-nts xl" aria-hidden="true" focusable="false" style="width:min(60%,14rem);height:auto;aspect-ratio:1;margin-inline:auto"><use href="#sigil-star"/></svg>
+      <div class="mini-orrery">
+        <span class="sun-disc" aria-hidden="true"></span>
+        <svg class="nts-sigil" aria-hidden="true" focusable="false"><use href="#sigil-star"/></svg>
+        <span class="mini-ring ring-1" aria-hidden="true"></span><span class="mini-ring ring-2" aria-hidden="true"></span><span class="mini-ring ring-3" aria-hidden="true"></span>
+        <div class="pivot trace-orbit o1"><a class="trace-bead" href="/_base/embers/" aria-label="EMBERS"><svg class="nts-sigil sigil-embers" aria-hidden="true" focusable="false"><use href="#sigil-embers"/></svg></a></div>
+        <div class="pivot trace-orbit o2"><a class="trace-bead" href="/_base/not-not-philo/" aria-label="NOT NOT PHILO"><svg class="nts-sigil sigil-philo" aria-hidden="true" focusable="false"><use href="#sigil-philo"/></svg></a></div>
+        <div class="pivot trace-orbit o3"><a class="trace-bead" href="/_base/intersect/" aria-label="INTERSECT"><svg class="nts-sigil sigil-intersect" aria-hidden="true" focusable="false"><use href="#sigil-intersect"/></svg></a></div>
+      </div>
     </div>
   </section>
 

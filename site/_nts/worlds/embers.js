@@ -13,7 +13,8 @@
    turn, tap to stoke) and on every <div data-nts-fragment="embers"> (a small,
    cheap, non-interactive one for the home page). Decorative only. Under
    prefers-reduced-motion it draws one still frame. DPR capped at 2, paused
-   off-screen and in hidden tabs. Follows html[data-theme] day or night.
+   off-screen and in hidden tabs. Draws its day palette while the page waits
+   for the world to bleed in (html[data-bleed-state="before"]), night after.
    Tuning, by data attribute on the canvas or the fragment:
      data-spacing  px between lines (14; fragments 9)
      data-wave     ripple frequency, rad/px (0.42)
@@ -40,7 +41,7 @@
     embers: ["#f5b31b", "#f2591b", "#e51d47", "#c0103a", "#a3163c", "#6e1030", "#4a1a3a"],
     halo: [[242, 89, 27], [229, 29, 71]], glow: "229, 29, 71", composite: "multiply",
   };
-  const theme = () => (document.documentElement.getAttribute("data-theme") === "day" ? DAY : NIGHT);
+  const theme = () => (document.documentElement.getAttribute("data-bleed-state") === "before" ? DAY : NIGHT);
   const baseColour = (el) => getComputedStyle(el).getPropertyValue("--hearth-base").trim() || "rgba(229, 29, 71, 0.3)";
 
   function mount(canvas, host, lite) {
@@ -216,7 +217,7 @@
     } else visible = true;
     document.addEventListener("visibilitychange", () => { document.hidden ? halt() : schedule(); });
     still.addEventListener?.("change", () => { halt(); draw(); schedule(); });
-    addEventListener("nts:night", () => { pal = theme(); setTimeout(() => { base = baseColour(host); draw(); }, 1900); });
+    addEventListener("nts:bleed", (e) => { if (e.detail.phase === "start") setTimeout(() => { pal = theme(); base = baseColour(host); draw(); }, e.detail.at(host)); });
     if ("ResizeObserver" in window) new ResizeObserver(resize).observe(canvas); else addEventListener("resize", resize);
     if (still.matches) stoke = Math.max(stoke, 0.5);
     resize(); schedule();
