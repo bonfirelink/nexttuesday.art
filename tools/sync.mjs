@@ -171,7 +171,9 @@ function walk(dir, acc = []) {
   for (const name of readdirSync(dir)) {
     if (name.startsWith('.')) continue;
     const p = join(dir, name);
-    if (statSync(p).isDirectory()) { if (p !== nts && name !== '_variants') walk(p, acc); }
+    /* site/archive/ holds earlier rounds as they were published, built from
+       their own content: sync never rewrites it */
+    if (statSync(p).isDirectory()) { if (p !== nts && name !== '_variants' && p !== join(site, 'archive')) walk(p, acc); }
     else if (name.endsWith('.html')) acc.push(p);
   }
   return acc;

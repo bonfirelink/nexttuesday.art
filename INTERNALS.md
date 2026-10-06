@@ -272,18 +272,27 @@ bleed-in is its night-fall: paper to night.
 - The trigger: with `scroll`, the first real scroll past a third of the
   viewport; with `time`, after `data-bleed-after` ms on the script tag
   (default 2400).
-- The crossing, in `nts.js`: a layer `.nts-bleed-front` (the viewport's box
-  at the moment it starts, anchored to the document so scrolling does not
-  move it) carries the world's ground, clipped to a shape that grows with a
-  progress `p` from 0 to 1 over `--dur-bleed` (1.6s, ease-out cubic).
-  The tokens flip at once underneath, and every element holds an inline
-  snapshot of its old colours (`color` where it has text of its own or
-  sets its own colour; background, border, shadows everywhere) until the
-  front reaches it. Text blocks are crossed in one jump: the front's
-  progress is warped so the intervals they cover take no time. That is
-  what keeps every frame readable; no colour is ever interpolated.
-  Elements outside the viewport switch with the body's background at the
-  end. Then the snapshots go, the front is removed, the state is `world`.
+- The crossing, in `nts.js`: a layer `.nts-bleed-front`, fixed to the
+  viewport while it runs, carries the world's ground, clipped to a shape
+  that grows with a progress `p` from 0 to 1 over `--dur-bleed` (1.6s,
+  ease-out cubic). The tokens flip at once underneath, and every element
+  holds an inline snapshot of its old colours (`color` where it has text
+  of its own or sets its own colour; background, border, shadows
+  everywhere) until the front reaches it. Text blocks are crossed in one
+  jump: the front's progress is warped so the intervals they cover take no
+  time. That is what keeps every frame readable; no colour is ever
+  interpolated. Positions are read again on every frame, so a scroll still
+  moving after the trigger carries elements across the front and each
+  switches (or switches back) where it is; the front never rests inside a
+  text block, so a fast scroll pushes it on in jumps. Text on a surface of
+  its own (an ancestor with an opaque background, which hides the front)
+  switches with that surface, not with the front. An image made of text
+  (`[role=img]` with text of its own, INTERSECT's ASCII solid) is not a
+  text block: the front crosses it like ground, through two copies of its
+  glyphs (`.nts-bleed-glyphs`), old colours under the front and the
+  world's over the page, clipped like the front. Elements still outside
+  the viewport switch with the body's background at the end. Then the
+  snapshots go, the front is removed, the state is `world`.
 - Hooks, all on `window.NTS.bleed`, set before the trigger (a deferred
   script after `nts.js` is early enough):
   - `form`: `"sweep"` (default, top to bottom), `"disc"` (opening from the
