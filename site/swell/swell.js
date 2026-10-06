@@ -25,28 +25,49 @@
   var NTS = window.NTS = window.NTS || {};
   NTS.bleed = NTS.bleed || {};
   var wave = {
-    A: 0, L: 0,
+    A: 0, L: 0, stepped: document.body.getAttribute("data-world") === "intersect",
     measure: function () {
-      if (!this.L) { this.A = px(root, "--swell-amp") || 40; this.L = px(document.body, "--swell-lambda") || 340; }
+      if (!this.L) { this.A = (px(root, "--swell-amp") || 40) * .7; this.L = px(document.body, "--swell-lambda") || 340; }
     },
-    /* the edge at progress p: a baseline that travels from below the viewport
-       (crest just touching the bottom) to above it (trough just leaving the top) */
+    /* the edge's height at x, in -1..1: a sine, or INTERSECT's twelve steps */
+    s: function (x) {
+      var t = x / this.L;
+      if (this.stepped) t = (Math.floor(t * 12) + .5) / 12;
+      return Math.sin(2 * Math.PI * t);
+    },
+    /* the extremes of the edge over an x-range: the full swing once the range
+       holds a crest or a trough, else the ends */
+    swing: function (x0, x1) {
+      var L = this.L, lo = 1, hi = -1, k;
+      var ends = [this.s(x0), this.s(x1)];
+      lo = Math.min(ends[0], ends[1]); hi = Math.max(ends[0], ends[1]);
+      if (x1 - x0 >= L) return [-1, 1];
+      for (k = Math.floor(x0 / L) - 1; k <= Math.ceil(x1 / L); k++) {
+        var c = (k + .25) * L, t = (k + .75) * L;
+        if (c >= x0 && c <= x1) hi = 1;
+        if (t >= x0 && t <= x1) lo = -1;
+      }
+      return [lo, hi];
+    },
+    /* the baseline at progress p travels from below the viewport (crest just
+       touching the bottom) to above it (trough just leaving the top) */
     base: function (p, h) { this.measure(); return (h + this.A) - p * (h + 2 * this.A); },
     clip: function (p, w, h) {
-      var yb = this.base(p, h), A = this.A, L = this.L, pts = [], n = Math.max(24, Math.ceil(w / L) * 16);
+      var yb = this.base(p, h), A = this.A, L = this.L, pts = [], n = Math.max(24, Math.ceil(w / L) * (this.stepped ? 48 : 16));
       for (var i = 0; i <= n; i++) {
-        var x = w * i / n;
-        pts.push(x.toFixed(1) + "px " + (yb - A * Math.sin(2 * Math.PI * x / L)).toFixed(1) + "px");
+        var x = w * i / n, y = yb - A * this.s(this.stepped ? x + .001 : x);
+        if (this.stepped && i) { var xp = w * (i - 1) / n; pts.push(x.toFixed(1) + "px " + (yb - A * this.s(xp + .001)).toFixed(1) + "px"); }
+        pts.push(x.toFixed(1) + "px " + y.toFixed(1) + "px");
       }
       pts.push(w + "px " + (h + 3 * A) + "px", "0px " + (h + 3 * A) + "px");
       return "polygon(" + pts.join(",") + ")";
     },
-    /* first touched when the crest (baseline - A) reaches the box's bottom;
-       covered when the trough (baseline + A) passes its top */
+    /* first touched when the edge's highest point over the box reaches its
+       bottom; covered when its lowest point passes the box's top */
     cover: function (b, w, h) {
       this.measure();
-      var span = h + 2 * this.A;
-      return [(h - b.y1) / span, (h + 2 * this.A - b.y0) / span];
+      var span = h + 2 * this.A, sw = this.swing(b.x0, b.x1);
+      return [(h + this.A - b.y1 - this.A * sw[1]) / span, (h + this.A - b.y0 - this.A * sw[0]) / span];
     }
   };
   NTS.bleed.form = wave;
