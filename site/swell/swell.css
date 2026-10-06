@@ -27,18 +27,18 @@
   --swell-amp: clamp(2.1rem, 6vw, 3.5rem);        /* crest to trough */
   --surge: 0;                                     /* swell.js: 0..1, how fast the page is being scrolled */
   --swell-amp-live: calc(var(--swell-amp) * (1 + .55 * min(1, var(--surge))));
-  --swell-lambda: 18.5rem; --swell-p: var(--p-star);          /* the star's orbit: the home's own sections */
+  --swell-lambda: 18.5rem; --swell-p: var(--p-star); --swell-steps: 400;   /* the star's orbit: the home's own sections */
   --swell-fill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 20C16.67 -6.67 33.33 -6.67 50 20S83.33 46.67 100 20V40H0Z'/%3E%3C/svg%3E");
   /* the crest strokes live in a taller box (y from -10 to 50) so a stroke centred on the edge is not cut */
-  --swell-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' fill='none' stroke='%23000' stroke-width='5'/%3E%3C/svg%3E");
-  --swell-line-3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.9'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20'/%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' transform='translate(0 -4.4)'/%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' transform='translate(0 4.4)'/%3E%3C/g%3E%3C/svg%3E");
-  --swell-line-4: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' fill='none' stroke='%23000' stroke-width='4'/%3E%3C/svg%3E");
+  --swell-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' fill='none' stroke='%23000' stroke-width='3.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  --swell-line-3: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.6' vector-effect='non-scaling-stroke'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20'/%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' transform='translate(0 -4.4)'/%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' transform='translate(0 4.4)'/%3E%3C/g%3E%3C/svg%3E");
+  --swell-line-4: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-100 20C-83.33 -6.67 -66.67 -6.67 -50 20S-16.67 46.67 0 20S33.33 -6.67 50 20S83.33 46.67 100 20S133.33 -6.67 150 20S183.33 46.67 200 20' fill='none' stroke='%23000' stroke-width='2.6' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
   --swell-step-fill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 14.82H8.33V5.86H16.67V0.68H25V0.68H33.33V5.86H41.67V14.82H50V25.18H58.33V34.14H66.67V39.32H75V39.32H83.33V34.14H91.67V25.18H100V40H0Z'/%3E%3C/svg%3E");
-  --swell-step-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-8.33 25.18H0V14.82H8.33V5.86H16.67V0.68H25V0.68H33.33V5.86H41.67V14.82H50V25.18H58.33V34.14H66.67V39.32H75V39.32H83.33V34.14H91.67V25.18H100V14.82H108.33' fill='none' stroke='%23000' stroke-width='3.2'/%3E%3C/svg%3E");
+  --swell-step-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -10 100 60' preserveAspectRatio='none'%3E%3Cpath d='M-8.33 25.18H0V14.82H8.33V5.86H16.67V0.68H25V0.68H33.33V5.86H41.67V14.82H50V25.18H58.33V34.14H66.67V39.32H75V39.32H83.33V34.14H91.67V25.18H100V14.82H108.33' fill='none' stroke='%23000' stroke-width='3' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
 }
 [data-world="embers"] { --swell-lambda: 21.4rem; --swell-p: var(--p-embers); }
 [data-world="philo"] { --swell-lambda: 24.5rem; --swell-p: var(--p-philo); }
-[data-world="intersect"] { --swell-lambda: 27.2rem; --swell-p: var(--p-intersect); --swell-fill: var(--swell-step-fill); --swell-line: var(--swell-step-line); }
+[data-world="intersect"] { --swell-lambda: 27.2rem; --swell-p: var(--p-intersect); --swell-steps: 800; --swell-fill: var(--swell-step-fill); --swell-line: var(--swell-step-line); }
 
 /* ---------- the swell: the next ground rising over the previous one ---------- */
 .has-swell, .world { position: relative; isolation: isolate; margin-top: calc(-1 * var(--swell-h)); background: transparent; }
@@ -61,14 +61,15 @@
   mask-repeat: repeat-x, no-repeat;
 }
 /* the crest: a stroke along the edge in a fixed colour (--crest); ::after is
-   the second print, shown where a world prints its edge twice */
+   the second print where a world prints its edge twice: it sits under the sea,
+   shifted up and right, so it shows as a misregistered line above the crest */
 .swell::before, .swell::after {
   content: ""; position: absolute; left: 0; right: 0; top: calc(-.25 * var(--swell-amp-live)); height: calc(1.5 * var(--swell-amp-live));
   background: var(--crest, var(--nts-coral));
   -webkit-mask: var(--swell-line) calc(var(--swell-shift) + var(--print-dx, 0px)) var(--print-dy, 0px) / var(--swell-lambda) calc(1.5 * var(--swell-amp-live)) repeat-x;
   mask: var(--swell-line) calc(var(--swell-shift) + var(--print-dx, 0px)) var(--print-dy, 0px) / var(--swell-lambda) calc(1.5 * var(--swell-amp-live)) repeat-x;
 }
-.swell::after { display: none; }
+.swell::after { display: none; z-index: -1; }
 
 /* the sections make room: the one above pads for the overlap, the one below starts under its own wave */
 .world { padding-top: calc(var(--swell-h) + clamp(2rem, 6vw, 4rem)); padding-bottom: calc(clamp(3rem, 8vw, 6rem) + var(--swell-h)); overflow: clip visible; }
@@ -84,7 +85,7 @@
 /* ---------- the home: every crest in the home's colours ---------- */
 [data-nts-home] .world { --crest: var(--nts-coral); }
 [data-nts-home] .world[data-world="embers"] { --swell-line: var(--swell-line-3); }
-[data-nts-home] .world[data-world="philo"] .swell::after { display: block; background: var(--nts-paper); --print-dx: -5px; --print-dy: -4px; }
+[data-nts-home] .world[data-world="philo"] .swell::after { display: block; background: var(--nts-paper); --print-dx: 5px; --print-dy: -5px; }
 [data-nts-home] .world[data-world="philo"] { --swell-line: var(--swell-line-4); }
 .words.has-swell { --crest: var(--nts-paper); }
 #yet-to-come.has-swell { --crest: var(--nts-gold); }
@@ -98,7 +99,7 @@
 [data-world="embers"] .has-swell { --crest: var(--embers-fire); --swell-line: var(--swell-line-3); }
 [data-world="embers"] .embers-summon.has-swell { --crest: var(--embers-cream, #ffe9d0); }
 [data-world="philo"] .has-swell { --crest: var(--philo-red); --swell-line: var(--swell-line-4); }
-[data-world="philo"] .philo-next.has-swell .swell::after { display: block; background: var(--philo-ground); --print-dx: 5px; --print-dy: -4px; }
+[data-world="philo"] .philo-next.has-swell .swell::after { display: block; background: var(--philo-ink); --print-dx: 5px; --print-dy: -5px; }
 [data-world="intersect"] .has-swell { --crest: var(--intersect-phosphor); }
 .intersect-corr.band { --band-bg: var(--w-bg-2); --band-fg: var(--w-fg); }
 .intersect-corr.band ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
@@ -132,7 +133,7 @@ main > :last-child { padding-bottom: calc(var(--section) + var(--swell-h)); }
 /* ---------- motion ---------- */
 /* the drift: one wavelength per revolution of the world's orbit */
 /* steps: the masks re-raster on every change, so the drift moves a pixel at a time, a few times a second */
-.js .swell, .js .nts-footer { animation: swell-drift var(--swell-p, 70s) steps(400) infinite; }
+.js .swell, .js .nts-footer { animation: swell-drift var(--swell-p, 70s) steps(var(--swell-steps, 400)) infinite; }
 @keyframes swell-drift { to { --swell-shift: var(--swell-lambda); } }
 /* the buoy bobs between crest and trough on the same clock; the bob is the
    drift's own sine, so ease-in-out alternate over half a period */
@@ -141,7 +142,7 @@ main > :last-child { padding-bottom: calc(var(--section) + var(--swell-h)); }
 /* the rise: the wave comes up as its section enters, over the first stretch of scroll */
 @supports (animation-timeline: view()) {
   .js .has-swell, .js .world { view-timeline: --swell-in block; }
-  .js .swell { animation: swell-rise linear both, swell-drift var(--swell-p, 70s) steps(400) infinite; animation-timeline: --swell-in, auto; animation-range: entry 0% entry 45vh, normal; }
+  .js .swell { animation: swell-rise linear both, swell-drift var(--swell-p, 70s) steps(var(--swell-steps, 400)) infinite; animation-timeline: --swell-in, auto; animation-range: entry 0% entry 45vh, normal; }
 }
 @keyframes swell-rise { from { translate: 0 var(--swell-h); } to { translate: 0 0; } }
 @media print { .swell, .nts-footer, .buoy { animation: none !important; } }

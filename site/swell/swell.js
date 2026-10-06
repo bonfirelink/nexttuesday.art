@@ -75,21 +75,22 @@
      waves on the page itself (masks on real elements) also cross whole */
   NTS.bleed.blocks = ".swell, .sea, .buoy";
 
-  /* the surge */
+  /* the surge: a target follows the scroll speed; the value eases towards it
+     a frame at a time, so the troughs deepen and settle, never snap */
   if (still.matches) return;
-  var lastY = scrollY, lastT = performance.now(), surge = 0, raf = 0;
+  var lastY = scrollY, lastT = performance.now(), surge = 0, target = 0, raf = 0;
   var tick = function (now) {
-    surge *= Math.pow(.2, (now - lastT) / 1000);
-    lastT = now;
-    if (surge < .02) { surge = 0; root.style.removeProperty("--surge"); raf = 0; return; }
+    target *= Math.pow(.15, Math.max(0, now - lastT) / 1000);
+    surge += (target - surge) * .18;
+    if (surge < .02 && target < .02) { surge = target = 0; root.style.removeProperty("--surge"); raf = 0; return; }
     root.style.setProperty("--surge", surge.toFixed(3));
     raf = requestAnimationFrame(tick);
   };
   addEventListener("scroll", function () {
-    var now = performance.now(), y = scrollY, dt = Math.max(16, now - lastT);
+    var now = performance.now(), y = scrollY, dt = Math.max(40, now - lastT);
     var v = Math.abs(y - lastY) / dt; /* px per ms */
     lastY = y; lastT = now;
-    surge = Math.min(1, Math.max(surge, (v - .6) / 2.4));
-    if (surge > 0 && !raf) raf = requestAnimationFrame(tick);
+    target = Math.min(1, Math.max(target, (v - .5) / 2));
+    if (target > 0 && !raf) raf = requestAnimationFrame(tick);
   }, { passive: true });
 })();
