@@ -5,7 +5,7 @@
    not interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
    host's computed --penrose-ink, --penrose-cut and --penrose-ground, so
-   the night tokens apply and a night-fall redraws it. 30 fps, 15 for the
+   a world bleed-in recolours it as the front reaches it. 30 fps, 15 for the
    fragment; one closed frame under prefers-reduced-motion. */
 (() => {
   "use strict";
@@ -89,7 +89,7 @@
     reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; draw(CLOSED); } else start(); });
     new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
     document.addEventListener("visibilitychange", () => { hidden = document.hidden; if (!hidden) start(); });
-    addEventListener("nts:night", () => { setTimeout(() => { colours(); redraw(); }, 1900); colours(); });
+    addEventListener("nts:bleed", (e) => { if (e.detail.phase === "start") setTimeout(() => { colours(); redraw(); }, e.detail.at(host)); });
     let timer = 0;
     addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { measure(); redraw(); }, 120); });
     if (!lite) {

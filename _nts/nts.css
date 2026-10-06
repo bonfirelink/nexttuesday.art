@@ -61,10 +61,23 @@
   --w-bar-fg: var(--nts-ink);
   --w-sigil: "nts";
 
-  /* type: three families across the whole site */
-  --font-fell: "IM Fell DW Pica", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --font-sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* type. Fraunces is the display face and Instrument Sans the text face,
+     everywhere by default. IM Fell lives only inside INTERSECT. Archivo is
+     the voice two worlds brought with them (EMBERS' extended flyer caps,
+     NOT NOT PHILO's poster bold). The mono sets dates, the hacker layer and
+     the ASCII solid. A page loads only the families it uses, in one Google
+     Fonts link. */
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-text: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-intersect: "IM Fell DW Pica", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-flyer: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Red Hat Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* Fraunces' axes by role: display is cut sharp (opsz 144, SOFT 40), the
+     italic voice soft (SOFT 100), small display in between; WONK 1 keeps the
+     wonky alternates on in every role */
+  --fraunces-display: "opsz" 144, "SOFT" 40, "WONK" 1;
+  --fraunces-voice: "opsz" 48, "SOFT" 100, "WONK" 1;
+  --fraunces-small: "opsz" 24, "SOFT" 50, "WONK" 1;
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   --text: 1.0625rem;
   --measure: 38rem;
@@ -82,10 +95,9 @@
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
-  --dur-night: 1.8s;
-  /* night-fall: how grounds cross from day to night (the text is dimmed
-     through the dusk meanwhile, see section 11) */
-  --ease-night: ease;
+  /* the world bleed-in (section 11): how long the front takes to cross the
+     viewport. The easing is in nts.js, since it has to be inverted there. */
+  --dur-bleed: 1.6s;
 
   /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
@@ -109,7 +121,7 @@ body {
   min-height: 100svh;
   background: var(--w-bg);
   color: var(--w-fg);
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   font-size: var(--text);
   line-height: 1.55;
   font-kerning: normal;
@@ -134,17 +146,22 @@ strong { font-weight: 600; }
 .prose > :last-child { margin-bottom: 0; }
 
 /* ---------- 3. type ---------- */
-h1, h2, h3, .fell { font-family: var(--font-fell); font-weight: 400; line-height: 1.02; margin: 0; text-wrap: balance; }
-h1 { font-size: clamp(2.6rem, 10vw, 5.5rem); letter-spacing: .01em; }
+/* Roles: display (h1-h3, .display), the italic voice (.incant, .whisper, the
+   reveals), text (body, .lede), labels (.label, .caps), mono. Fraunces gets
+   its axes from the role tokens above; a world that brings its own display
+   face overrides the family and resets font-variation-settings. */
+h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; font-variation-settings: var(--fraunces-display); line-height: 1.02; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 10vw, 5.5rem); font-weight: 700; letter-spacing: -.015em; line-height: .95; }
 h2 { font-size: clamp(1.9rem, 5.5vw, 3rem); }
-h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
+h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); font-variation-settings: "opsz" 48, "SOFT" 40, "WONK" 1; }
 .caps { text-transform: uppercase; letter-spacing: .06em; }
-.incant { font-family: var(--font-fell); font-style: italic; font-size: clamp(1.25rem, 3.4vw, 1.75rem); line-height: 1.3; }
+h1.caps { letter-spacing: -.005em; }
+.incant { font-family: var(--font-display); font-style: italic; font-weight: 400; font-variation-settings: var(--fraunces-voice); font-size: clamp(1.25rem, 3.4vw, 1.75rem); line-height: 1.3; letter-spacing: 0; }
 .lede { font-size: clamp(1.15rem, 2.6vw, 1.35rem); line-height: 1.45; }
-.label { font-family: var(--font-sans); font-weight: 600; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; font-variation-settings: "wdth" 100; }
-.whisper { font-family: var(--font-fell); font-style: italic; color: var(--w-muted); font-size: 1.05rem; }
+.label { font-family: var(--font-text); font-weight: 600; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; }
+.whisper { font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); color: var(--w-muted); font-size: 1.05rem; }
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.mark { color: var(--w-accent); font-family: var(--font-fell); }
+.mark { color: var(--w-accent); font-family: var(--font-display); font-variation-settings: var(--fraunces-display); }
 
 /* ---------- 4. sigils ---------- */
 .nts-sigil { width: 1.5em; height: 1.5em; flex: none; color: var(--w-accent); overflow: visible; }
@@ -164,7 +181,7 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2);
   border-bottom: 1px solid transparent;
-  transition: border-color 400ms, background-color var(--dur-night), color var(--dur-night);
+  transition: border-color 400ms;
 }
 .nts-header.is-scrolled { border-bottom-color: var(--w-line); }
 .nts-header .bar {
@@ -175,26 +192,31 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
 .nts-home { display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 0; min-height: 44px; }
 .nts-home .nts-sigil { width: 1.75rem; height: 1.75rem; color: var(--w-accent); transition: transform 2.2s var(--ease-turn); }
 .nts-home:hover .nts-sigil, .nts-home:focus-visible .nts-sigil { transform: rotate(51.43deg); }
-.nts-home .wordmark { font-family: var(--font-fell); font-size: 1.2rem; line-height: 1; white-space: nowrap; padding-top: .1em; }
+.nts-home .wordmark { font-family: var(--font-display); font-weight: 600; font-variation-settings: var(--fraunces-small); font-size: 1.15rem; letter-spacing: -.005em; line-height: 1; white-space: nowrap; padding-top: .1em; }
 .nts-nav { display: flex; gap: 0 clamp(.6rem, 2.5vw, 1.6rem); margin: 0; padding: 0; list-style: none; }
 .nts-nav a {
-  display: inline-flex; align-items: center; gap: .4rem;
+  position: relative; display: inline-flex; align-items: center; gap: .4rem;
   min-height: 44px; padding: .2rem 0;
-  font-weight: 600; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
-  border-bottom: 1.5px solid transparent;
-  transition: border-color 200ms, color 200ms;
+  font-family: var(--font-text); font-weight: 600; font-size: .72rem; line-height: 1.2; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  transition: color 200ms;
 }
-.nts-nav a:hover, .nts-nav a:focus-visible { border-bottom-color: currentColor; }
-.nts-nav a[aria-current="page"] { border-bottom-color: var(--w-accent); }
+/* the current page's marker: a 2px bar right under the label, on the
+   text's own line (4px below the baseline), in the world's accent. It
+   belongs to the word, not to the bar's bottom edge. Hover and focus show
+   the same bar faintly in the text colour. */
+.nts-nav a span { position: relative; }
+.nts-nav a span::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% + .05em); height: 2px; border-radius: 1px; background: currentColor; opacity: 0; transform: scaleX(.4); transform-origin: left; transition: opacity 200ms, transform 300ms var(--ease-out); }
+.nts-nav a:hover span::after, .nts-nav a:focus-visible span::after { opacity: .5; transform: none; }
+.nts-nav a[aria-current="page"] span::after { opacity: 1; transform: none; background: var(--w-accent); }
 .nts-nav .nts-sigil { width: 1.1rem; height: 1.1rem; display: none; }
 .nts-nav a[aria-current="page"] .nts-sigil { display: block; }
 @media (max-width: 639px) {
   .nts-home .wordmark { display: none; }
   .nts-nav { flex: 1; justify-content: space-between; margin-left: .25rem; }
-  .nts-nav a { font-size: .7rem; letter-spacing: .05em; font-variation-settings: "wdth" 82; }
+  .nts-nav a { font-size: .7rem; letter-spacing: .05em; }
   .nts-nav .nts-sigil { display: none !important; }
 }
-@media (max-width: 339px) { .nts-nav a { font-size: .7rem; letter-spacing: 0; font-variation-settings: "wdth" 68; } .nts-nav { gap: 0 .5rem; } }
+@media (max-width: 359px) { .nts-nav a { font-size: .6875rem; letter-spacing: .01em; } .nts-nav { gap: 0 .4rem; } }
 
 /* ---------- 6. the skeleton: footer ---------- */
 .nts-footer {
@@ -202,7 +224,6 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
   border-top: 1px solid var(--w-line);
   padding: clamp(2.5rem, 6vw, 4rem) 0 1.5rem;
   color: var(--w-fg);
-  transition: background-color var(--dur-night), color var(--dur-night), border-color var(--dur-night);
 }
 .nts-footer .cols { display: grid; gap: 2rem 3rem; grid-template-columns: 1fr; }
 @media (min-width: 720px) { .nts-footer .cols { grid-template-columns: 1.3fr 1fr 1fr; } }
@@ -217,7 +238,7 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
 .nts-footer .worlds .nts-sigil { width: 1.35rem; height: 1.35rem; }
 .nts-footer .sign { margin-top: clamp(2rem, 5vw, 3rem); padding-top: 1.25rem; border-top: 1px solid var(--w-line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 2rem; align-items: baseline; }
 .nts-footer .sign .small { font-size: .85rem; color: var(--w-muted); }
-.nts-footer .signoff { font-family: var(--font-fell); font-size: 1.25rem; margin: 0; }
+.nts-footer .signoff { font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: 1.25rem; margin: 0; }
 .nts-footer .signoff .emoji { margin-right: .35em; }
 
 /* ---------- 7. section grammar ---------- */
@@ -243,7 +264,7 @@ h3 { font-size: clamp(1.3rem, 3.4vw, 1.65rem); }
 .go { display: inline-flex; align-items: center; gap: .55rem; font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; color: var(--w-accent-text); min-height: 44px; }
 .go .nts-sigil { width: .9rem; height: .9rem; color: currentColor; transition: transform 500ms var(--ease-out); }
 .go:hover .nts-sigil, .go:focus-visible .nts-sigil { transform: rotate(90deg) scale(1.15); }
-.go::after { content: "→"; font-family: var(--font-sans); transition: transform 300ms var(--ease-out); }
+.go::after { content: "→"; font-family: var(--font-text); transition: transform 300ms var(--ease-out); }
 .go:hover::after, .go:focus-visible::after { transform: translateX(4px); }
 .band .go { color: inherit; }
 
@@ -253,7 +274,7 @@ details.reveal summary { cursor: pointer; list-style: none; display: inline-flex
 details.reveal summary::-webkit-details-marker { display: none; }
 details.reveal summary::before { content: ""; width: .9em; height: .9em; background: currentColor; -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; transition: transform 500ms var(--ease-out); }
 details.reveal[open] summary::before { transform: rotate(180deg); }
-details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style: italic; font-size: 1.2rem; }
+details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: 1.2rem; }
 
 /* ---------- 8. the lift (the chooser's card lift, shared) ---------- */
 .lift {
@@ -276,7 +297,7 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
 .ledger .nts-sigil { width: 1.9rem; height: 1.9rem; margin-top: .15rem; grid-row: span 4; }
 .ledger .when, .ledger .what, .ledger .where, .ledger .line { grid-column: 2; }
 .ledger .when { font-family: var(--font-mono); font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--w-muted); }
-.ledger .what { font-family: var(--font-fell); font-size: 1.35rem; line-height: 1.15; margin: 0; }
+.ledger .what { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--fraunces-small); font-size: 1.35rem; line-height: 1.15; margin: 0; }
 .ledger .what a { color: inherit; text-decoration: none; }
 .ledger .what a:hover { text-decoration: underline; text-underline-offset: .15em; text-decoration-color: var(--w-accent); }
 .ledger .where { font-size: .9rem; color: var(--w-muted); margin: 0; }
@@ -307,34 +328,38 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-fell); font-style
 .js .rule.draw.is-in { transform: scaleX(1); transition: transform 1.2s var(--ease-out) var(--draw-delay); }
 .js [data-nts-draw] .nts-sigil .dot, .js .nts-sigil[data-nts-draw] .dot { transition: opacity 400ms ease calc(var(--draw-delay) + var(--dur-draw)); }
 
-/* ---------- 11. night-fall ---------- */
-/* A page with data-nts-nightfall starts in its world's day tokens when the
-   visitor arrived from home (html[data-theme="day"]) and crosses to night
-   when scrolled. World kits define both sets. The crossing is a dusk, so no
-   text is ever readable at mid contrast: nts.js dims the text first
-   (html[data-dusk="in"], a quarter of --dur-night), flips the tokens while it
-   is dim, the grounds and lines cross over --dur-night on --ease-night, and
-   as they settle (0.65 in) the text returns in its night colours
-   (data-dusk="out"), readable only once the ground is there.
-   Text colour itself is never interpolated. */
-html[data-nightfall] body, html[data-nightfall] .nts-header, html[data-nightfall] .nts-footer, html[data-nightfall] .sect, html[data-nightfall] .hero, html[data-nightfall] .band, html[data-nightfall] .lift, html[data-nightfall] .ledger li {
-  transition: background-color var(--dur-night) ease, border-color var(--dur-night) ease;
-  transition-timing-function: var(--ease-night);
+/* ---------- 11. the world bleed-in ---------- */
+/* A world page loaded with <script src="nts-head.js" data-bleed="scroll|time">
+   starts in the NTS colours when the visitor arrived from the home page
+   (html[data-bleed-state="before"]): every [data-world] on the page reads
+   the NTS tokens below, and each kit undoes what else its world brings
+   (EMBERS' glow, INTERSECT's grain). nts.js then lets the world in as a
+   front (the "bleed" block there): a layer carrying the world's ground
+   crosses the viewport, and every element switches to the world's colours
+   at the instant the front reaches it, text blocks whole, so nothing is
+   ever read at mid-contrast. Nothing interpolates colour: a surface that
+   transitions background-color or color on its own would smear across the
+   front, so token-coloured surfaces get no such transition. */
+html[data-bleed-state="before"] [data-world] {
+  --w-bg: var(--nts-paper);
+  --w-bg-2: var(--nts-paper-2);
+  --w-fg: var(--nts-ink);
+  --w-muted: var(--nts-ink-soft);
+  --w-accent: var(--nts-coral);
+  --w-accent-text: var(--nts-coral-ink);
+  --w-link: var(--nts-cobalt);
+  --w-line: var(--nts-line);
+  --w-line-strong: var(--nts-line-strong);
+  --w-selection: var(--nts-gold);
+  --w-selection-fg: var(--nts-ink);
+  --w-bar-bg: rgba(244, 236, 220, 0.86);
+  --w-bar-fg: var(--nts-ink);
+  color-scheme: light;
 }
-html[data-nightfall] { transition: background-color var(--dur-night) ease; transition-timing-function: var(--ease-night); }
-/* the dusk: what carries text dims out and comes back. !important because it
-   must beat draw-in, reveals and variants' own opacity and transitions, and
-   only for the length of the dusk. */
-html[data-dusk] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) {
-  transition: opacity calc(var(--dur-night) * .25) ease !important;
-}
-html[data-dusk="in"] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) { opacity: 0 !important; }
-html[data-dusk="out"] :is(main, .nts-header, .nts-footer) :is(h1, h2, h3, h4, h5, h6, p, li, dt, dd, summary, figcaption, blockquote, th, td, pre, .label, .whisper, .incant, .lede, .caps, .go, .embers-display, .embers-label, .embers-bar, .nts-nav, .nts-home) { transition-duration: calc(var(--dur-night) * .35) !important; }
-/* links' hover fades would otherwise carry their colour across too. :where()
-   keeps these at the specificity of the rules they amend, so a variant's own
-   transitions still win. */
-:where(html[data-nightfall][data-theme="night"]) a { transition: text-decoration-color 160ms; }
-:where(html[data-nightfall][data-theme="night"]) .nts-nav a { transition: border-color 200ms; }
+/* the front: the world's ground, clipped to the shape nts.js gives it, under
+   everything but the body's own background (body isolates while it runs) */
+.nts-bleed-front { position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; background: var(--w-bg); }
+html[data-bleed-state="in"] body { isolation: isolate; }
 
 /* ---------- 12. the mega-sigil ---------- */
 .mega { position: relative; width: 100%; aspect-ratio: 1; }
