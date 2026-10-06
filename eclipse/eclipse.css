@@ -39,7 +39,8 @@ main { --ecl-out: var(--w-bg); }
   mask: radial-gradient(circle farthest-corner at 50% 0, #000 calc(var(--ecl-p) * 100%), transparent calc(var(--ecl-p) * 100% + 1px));
 }
 /* the limb: a thin line of the aperture's accent riding the disc's edge,
-   gone once the disc has passed the corners */
+   gone once the disc has passed the corners. A pseudo-element cannot hold
+   a bleed snapshot, so the world bands pin --ecl-limb to a fixed colour */
 .ecl-win::after {
   content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit;
   background: radial-gradient(circle farthest-corner at 50% 0, transparent calc(var(--ecl-p) * 100% - 2.5px), var(--ecl-limb, var(--ecl-fg)) calc(var(--ecl-p) * 100% - 1.5px), var(--ecl-limb, var(--ecl-fg)) calc(var(--ecl-p) * 100%), transparent calc(var(--ecl-p) * 100% + .5px));
@@ -60,9 +61,9 @@ main { --ecl-out: var(--w-bg); }
 .ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; rotate: calc(var(--ecl-p) * 1turn - 1turn); }
 
 /* scrolling opens the disc: from the ring the moment the aperture's top
-   edge enters, fully open after 70vh of travel, so the disc keeps pace with the scroll; scrolling back closes it */
+   edge enters, fully open after 55vh of travel, so the disc keeps pace with the scroll; scrolling back closes it */
 @supports (animation-timeline: view()) {
-  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover 70vh; }
+  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover 55vh; }
 }
 @keyframes ecl-open { from { --ecl-p: 0; } to { --ecl-p: 1; } }
 
@@ -81,15 +82,17 @@ main { --ecl-out: var(--w-bg); }
 .band.ecl { background: none; color: inherit; --ecl-bg: var(--band-bg, var(--nts-coral)); --ecl-fg: var(--band-fg, var(--nts-ink)); }
 .band.ecl .ecl-win { color: var(--band-fg, var(--nts-ink)); }
 /* a band's words sit right at its top edge, where the disc is still small:
-   they come in whole once the disc has passed them (p .8 to .97: at .8 the
-   disc already covers the top third of a phone-wide band to its sides), so
-   no line is ever shown cut by the edge; the home windows show their orb
-   first and need no such hold */
-.band.ecl .ecl-win > .wrap { opacity: calc((var(--ecl-p) - .8) / .17); }
-.words.ecl { padding: 0; overflow: visible; }
+   they come in whole once the disc has passed them, so no line is ever
+   shown cut by the edge. --ecl-hold is the progress at which they start to
+   show, --ecl-show how much progress the fade takes: a short band's words
+   reach its far corners (hold .8), a tall ledger's top rows are under the
+   disc almost at once (hold .15). The home windows show their orb first
+   and need no hold. */
+.band.ecl .ecl-win > .wrap { opacity: calc((var(--ecl-p) - var(--ecl-hold, .8)) / var(--ecl-show, .17)); }
+.words.ecl { padding: 0; overflow: visible; --ecl-hold: .55; --ecl-show: .15; }
 .words.ecl .ecl-win { padding: clamp(3rem, 8vw, 6rem) 0; }
 .words.ecl .ecl-win::after { opacity: .7; }
-.ledger-ap { --band-bg: var(--nts-paper-2); --band-fg: var(--nts-ink); --ecl-limb: var(--nts-gold); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
+.ledger-ap { --ecl-hold: .15; --ecl-show: .2; --band-bg: var(--nts-paper-2); --band-fg: var(--nts-ink); --ecl-limb: var(--nts-gold); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
 .ledger-ap .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .ledger-ap .ecl-ring { color: var(--nts-gold); }
 .ledger-ap .ecl-ring .nts-sigil { filter: drop-shadow(0 1px 1px rgba(26, 21, 48, .35)); }
@@ -101,21 +104,25 @@ main { --ecl-out: var(--w-bg); }
 .band.ecl.sect-band { margin-block: var(--section); }
 .band.ecl .ecl-win > .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
 /* EMBERS: the summon band keeps its fire; the ring carries the fire triangle in night */
-.embers-summon.ecl { padding: 0; --ecl-limb: var(--embers-cream); }
+.embers-summon.ecl { padding: 0; --ecl-limb: #ffe9d0; }
 .embers-summon.ecl .ecl-win { padding: clamp(3rem, 7vw, 4.5rem) 0; }
 /* NOT NOT PHILO: the volumes are a disc of the deeper grey with the engraved
    rings; "Next volume" keeps its charcoal, the star says what it is */
-.philo-volumes { --band-bg: var(--w-bg-2); --band-fg: var(--w-fg); --ecl-limb: var(--w-accent); }
+.philo-volumes { --band-bg: var(--w-bg-2); --band-fg: var(--w-fg); --ecl-limb: #e5174a; --ecl-hold: .3; --ecl-show: .15; }
 .philo-volumes .ecl-ring { color: var(--w-accent); }
 .philo-volumes .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .philo-volumes .ecl-win > .wrap > h2 { margin: 0; }
 .philo-volumes .volumes { margin-top: 1.5rem; }
-.philo-next.ecl { padding: 0; margin-top: var(--ecl-gap); --ecl-limb: var(--philo-red); }
+.philo-next.ecl { padding: 0; margin-top: var(--ecl-gap); --ecl-limb: #e5174a; }
 .philo-next.ecl .ecl-ring { color: var(--philo-red); }
 .philo-next.ecl .ecl-win { padding: clamp(3rem, 7vw, 4.5rem) 0; }
 .philo-next.ecl .ecl-win::after { opacity: 1; }
-/* INTERSECT: the correspondence sits on a lifted black (bg-2 is too close to the ground to read as a disc), phosphor ring */
-.intersect-corr { --band-bg: color-mix(in srgb, var(--w-fg) 8%, var(--w-bg)); --band-fg: var(--w-fg); --ecl-limb: var(--w-accent-text); }
+/* INTERSECT: the correspondence sits on a lifted black (bg-2 is too close to
+   the ground to read as a disc; fixed, with paper-2 while the page is still
+   in the NTS colours before the bleed), phosphor ring */
+.intersect-corr { --band-bg: #2a2925; --band-fg: var(--w-fg); --ecl-limb: #ff3b63; --ecl-hold: .4; --ecl-show: .15; }
+html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--nts-paper-2); }
+.intersect-corr .ecl-win::after { opacity: 1; }
 .intersect-corr .ecl-ring { color: var(--w-accent-text); }
 .intersect-corr .ecl-win { padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .intersect-corr .ecl-win .sect-head { margin-bottom: 1.5rem; }
@@ -125,7 +132,7 @@ main { --ecl-out: var(--w-bg); }
 
 /* ---------- the compass eclipse ---------- */
 /* near a world, a moon in that world's ground slides over the sun */
-.compass .c-moon { grid-area: 1 / 1; width: 18px; height: 18px; border-radius: 50%; background: var(--c-moon, var(--nts-ink)); box-shadow: 0 0 0 1px var(--nts-paper); translate: -14px -6px; scale: 0; transition: translate .7s var(--ease-out), scale .5s var(--ease-out), background-color .4s; z-index: 1; }
+.compass .c-moon { grid-area: 1 / 1; width: 18px; height: 18px; border-radius: 50%; background: var(--c-moon, var(--nts-ink)); box-shadow: 0 0 0 1px var(--nts-paper); translate: -14px -6px; scale: 0; transition: translate .7s var(--ease-out), scale .5s var(--ease-out); z-index: 1; }
 .compass[data-near="embers"] { --c-moon: var(--embers-night); }
 .compass[data-near="philo"] { --c-moon: var(--philo-ink); }
 .compass[data-near="intersect"] { --c-moon: var(--intersect-black); }
