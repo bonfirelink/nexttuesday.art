@@ -45,7 +45,7 @@
     nts: { n: 11, amp: 0.5, shape: "sine", dash: true },
     embers: { n: 13, amp: 0.5, shape: "sine", hot: 2 },
     philo: { n: 15, amp: 5, shape: "arc", dasharray: "9 4" },
-    intersect: { n: 15, amp: 0.3, shape: "sine", dasharray: ["2 2.5", "1 3", "5 2.5", "3 3", "1 2 4 2"] }
+    intersect: { n: 15, amp: 0.3, shape: "sine", dasharray: ["2 2.7", "1 3.3", "5 2.1", "3 3.9", "1 2 4 2.6", "6 1.7"] }
   };
   const fmt = (v) => (Math.round(v * 10) / 10).toString();
   function wave(base, A, phase, shape) {
@@ -83,7 +83,7 @@
       if (home && o.dash === undefined && !thin && (out ? i >= n / 2 : i < n / 2)) cls.push("dash");
       if (o.dash) cls.push("dash");
       if (o.hot && Math.abs(i - (n - 1) / 2) < o.hot / 2 + 0.01) cls.push("hot");
-      d += `<path class="${cls.join(" ")}" style="--env:${env.toFixed(3)}"${o.dasharray ? ` stroke-dasharray="${Array.isArray(o.dasharray) ? o.dasharray[i % o.dasharray.length] : o.dasharray}"` : ""} d="${wave(base, A, i * 0.9, o.shape)}"/>`;
+      d += `<path class="${cls.join(" ")}" style="--env:${env.toFixed(3)}"${o.dasharray ? ` stroke-dasharray="${Array.isArray(o.dasharray) ? o.dasharray[i % o.dasharray.length] : o.dasharray}" stroke-dashoffset="${fmt(i * 7.3)}"` : ""} d="${wave(base, A, i * 0.9, o.shape)}"/>`;
     }
     seam.insertAdjacentHTML("beforeend", `<svg class="signal" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false"><g>${d}</g></svg>`);
     seam.classList.add("is-live");
