@@ -15,10 +15,10 @@
 
 :root { --seam-h: clamp(5rem, 14vw, 7.5rem); --seam-thin: clamp(3rem, 8vw, 4.5rem); }
 
-/* the ground ramp: 12 bars thickening downwards, as a mask on a real
+/* the ground ramp: 16 bars thickening downwards, as a mask on a real
    element (a pseudo-element could not hold the bleed's snapshot) */
 .seam {
-  --ramp: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 12' preserveAspectRatio='none'%3E%3Crect y='0' width='1' height='.09'/%3E%3Crect y='1' width='1' height='.17'/%3E%3Crect y='2' width='1' height='.25'/%3E%3Crect y='3' width='1' height='.33'/%3E%3Crect y='4' width='1' height='.42'/%3E%3Crect y='5' width='1' height='.5'/%3E%3Crect y='6' width='1' height='.58'/%3E%3Crect y='7' width='1' height='.67'/%3E%3Crect y='8' width='1' height='.75'/%3E%3Crect y='9' width='1' height='.84'/%3E%3Crect y='10' width='1' height='.92'/%3E%3Crect y='11' width='1' height='1.01'/%3E%3C/svg%3E");
+  --ramp: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 16' preserveAspectRatio='none'%3E%3Crect y='0' width='1' height='0.072'/%3E%3Crect y='1' width='1' height='0.135'/%3E%3Crect y='2' width='1' height='0.198'/%3E%3Crect y='3' width='1' height='0.26'/%3E%3Crect y='4' width='1' height='0.323'/%3E%3Crect y='5' width='1' height='0.385'/%3E%3Crect y='6' width='1' height='0.448'/%3E%3Crect y='7' width='1' height='0.51'/%3E%3Crect y='8' width='1' height='0.573'/%3E%3Crect y='9' width='1' height='0.635'/%3E%3Crect y='10' width='1' height='0.698'/%3E%3Crect y='11' width='1' height='0.76'/%3E%3Crect y='12' width='1' height='0.823'/%3E%3Crect y='13' width='1' height='0.885'/%3E%3Crect y='14' width='1' height='0.948'/%3E%3Crect y='15' width='1' height='1.01'/%3E%3C/svg%3E");
   --seam-line: var(--w-accent);
   --seam-ground: var(--w-bg);
   --pitch: 9px;
@@ -103,9 +103,10 @@
 .philo-next .next-num {
   margin: 0; font-family: var(--font-display); font-weight: 700; font-variation-settings: var(--fraunces-display);
   font-size: clamp(7rem, 32vw, 13rem); line-height: .8; letter-spacing: -.02em; user-select: none;
-  color: transparent; -webkit-background-clip: text; background-clip: text;
   background: linear-gradient(var(--philo-ground), var(--philo-ground)) 0 100% / 100% var(--solid, 0%) no-repeat,
               repeating-linear-gradient(to bottom, var(--philo-ground) 0 2px, transparent 2px 6px) 0 0 / 100% 100% no-repeat;
+  /* the clip comes after the shorthand, which would reset it */
+  color: transparent; -webkit-background-clip: text; background-clip: text;
   transition: background-size .7s var(--ease-out);
 }
 .philo-next .next-num:hover { --solid: 100%; }

@@ -16,7 +16,7 @@
      starting at i/N of the remaining run, so about T*N stripes are
      thickening at any moment (the seams' ramp, moving). T is kept short so
      the warp that jumps text blocks across keeps enough open ground. */
-  const N = 24, T = 0.16;
+  const N = 24, T = 0.07;
   const clamp = (x) => Math.max(0, Math.min(1, x));
   const fillAt = (p, i) => clamp((p - (i / N) * (1 - T)) / T);
   window.NTS = window.NTS || {};
@@ -44,17 +44,20 @@
   const LINE = {
     nts: { n: 11, amp: 0.5, shape: "sine", dash: true },
     embers: { n: 13, amp: 0.5, shape: "sine", hot: 2 },
-    philo: { n: 15, amp: 1.8, shape: "arc", dasharray: "9 4" },
-    intersect: { n: 15, amp: 0.45, shape: "step", dasharray: "2 2.5" }
+    philo: { n: 15, amp: 5, shape: "arc", dasharray: "9 4" },
+    intersect: { n: 15, amp: 0.3, shape: "sine", dasharray: ["2 2.5", "1 3", "5 2.5", "3 3", "1 2 4 2"] }
   };
   const fmt = (v) => (Math.round(v * 10) / 10).toString();
   function wave(base, A, phase, shape) {
     if (shape === "arc") return `M${-L} ${fmt(base)}Q${W / 2} ${fmt(base - 2 * A)} ${W + L} ${fmt(base)}`;
     if (shape === "step") {
-      let d = `M${-L} ${fmt(base + A)}`;
-      for (let x = -L; x < W + L; x += L / 2) {
-        const up = ((x + L) / (L / 2)) % 2 < 1;
-        d += `H${x}V${fmt(up ? base - A : base + A)}`;
+      // a stepped row, two pulses per wavelength, the pulse widths uneven
+      // so the rows read as characters rather than a grid
+      let d = `M${-L} ${fmt(base + A)}`, up = false;
+      const run = [L * 0.14, L * 0.22, L * 0.1, L * 0.3, L * 0.08, L * 0.16];
+      for (let x = -L, k = 0; x < W + L; x += run[k++ % run.length]) {
+        up = !up;
+        d += `H${fmt(x)}V${fmt(up ? base - A : base + A)}`;
       }
       return d + `H${W + L}`;
     }
@@ -80,7 +83,7 @@
       if (home && o.dash === undefined && !thin && (out ? i >= n / 2 : i < n / 2)) cls.push("dash");
       if (o.dash) cls.push("dash");
       if (o.hot && Math.abs(i - (n - 1) / 2) < o.hot / 2 + 0.01) cls.push("hot");
-      d += `<path class="${cls.join(" ")}" style="--env:${env.toFixed(3)}"${o.dasharray ? ` stroke-dasharray="${o.dasharray}"` : ""} d="${wave(base, A, i * 0.9, o.shape)}"/>`;
+      d += `<path class="${cls.join(" ")}" style="--env:${env.toFixed(3)}"${o.dasharray ? ` stroke-dasharray="${Array.isArray(o.dasharray) ? o.dasharray[i % o.dasharray.length] : o.dasharray}"` : ""} d="${wave(base, A, i * 0.9, o.shape)}"/>`;
     }
     seam.insertAdjacentHTML("beforeend", `<svg class="signal" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false"><g>${d}</g></svg>`);
     seam.classList.add("is-live");
