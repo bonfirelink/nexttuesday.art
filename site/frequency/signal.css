@@ -41,10 +41,11 @@
 .seam .signal path.dash { stroke-dasharray: 3 9; }
 .seam .signal path.hot { color: var(--seam-hot, currentColor); --sw: 1.4; }
 /* the signal travels, slowly, only while the seam is near the screen;
-   a pointer over it quickens the travel (a quirk) */
+   a pointer over it raises the gain (a quirk) */
 .seam .signal g { animation: travel 14s linear infinite paused; }
 .seam.is-near .signal g { animation-play-state: running; }
-.seam:hover .signal g { animation-duration: 5s; }
+.seam .signal { transition: transform .7s var(--ease-out); }
+.seam:hover .signal { transform: scaleY(1.4); }
 @keyframes travel { to { transform: translateX(-250px); } }
 
 /* the lines of each world */
@@ -52,6 +53,7 @@
 .seam[data-line="philo"] { --seam-line: var(--philo-ink); --pitch: 6px; --line-a: .55; }
 .seam[data-line="intersect"] { --seam-line: var(--intersect-fire-hi, #ff3b63); --pitch: 7px; --line-a: .8; }
 .seam[data-line="nts"] { --seam-line: var(--nts-ink); --pitch: 10px; --line-a: .6; }
+.seam.in[data-line="nts"], .seam.out[data-line="nts"] { --seam-ground: var(--nts-coral); }
 /* on the dark grounds the lines read in the ground's light */
 [data-world="intersect"] .seam[data-line="intersect"] { --seam-line: var(--intersect-phosphor); --line-a: .55; }
 [data-world="embers"] .seam.in[data-line="embers"], [data-world="embers"] .seam.out[data-line="embers"] { --seam-line: var(--embers-cream); --seam-hot: var(--embers-cream); --seam-ground: var(--embers-fire); --line-a: .75; }
@@ -72,6 +74,7 @@
 .world { padding-top: clamp(1.5rem, 5vw, 3.5rem); }
 .sect.tuesdays { padding-bottom: clamp(2rem, 6vw, 4rem); }
 .words { margin-top: 0; }
+#yet-to-come.sect { padding-top: clamp(2rem, 6vw, 4rem); }
 /* the home's windows are full width: the lines need the whole width to
    read as a signal, and the paper returns between every two worlds in the
    seams, so the home's colour is never further than a screen away */
@@ -84,10 +87,11 @@
 .embers-hero .hearth-stage { position: absolute; inset: 0; width: auto; max-height: none; aspect-ratio: auto; margin: 0; }
 .embers-hero .hearth-still svg { width: min(72%, 24rem); }
 .embers-hero .trace { width: min(60svh, 100% - 2rem); top: 42%; }
-.embers-hero .hero-text { position: relative; z-index: 1; padding: 1rem 0 clamp(1.5rem, 5vw, 3rem); pointer-events: none; }
+.embers-hero .hero-text { position: relative; z-index: 1; padding: 1rem 0 5rem; pointer-events: none; }
 .embers-hero .hero-text > * { pointer-events: auto; }
 .embers-hero .hero-text { padding-right: 0; }
 @media (min-width: 900px) {
+  .embers-hero .hero-text { padding-bottom: 1rem; }
   .embers-hero.wrap { align-content: center; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding-right: max(5rem, (100% - var(--wrap)) / 2); }
   .embers-hero .trace { left: 72%; top: 50%; width: min(64svh, 44%); }
   .embers-hero .entity { order: 0; }
@@ -110,7 +114,7 @@
   transition: background-size .7s var(--ease-out);
 }
 .philo-next .next-num:hover { --solid: 100%; }
-.philo-next .next-num small { font-family: var(--font-text); font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; vertical-align: 1.1em; margin-left: .3em; }
+.philo-next .next-num small { color: var(--philo-ground); -webkit-text-fill-color: var(--philo-ground); font-family: var(--font-text); font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; vertical-align: 1.1em; margin-left: .3em; }
 @media (min-width: 760px) { .philo-next .wrap { grid-template-columns: minmax(0, 1fr) auto; } .philo-next .next-num { grid-column: 2; grid-row: 1 / span 2; } .philo-next h2, .philo-next .prose { grid-column: 1; } }
 
 /* ---------- reduced motion and print: the lines hold their half-swell ---------- */
