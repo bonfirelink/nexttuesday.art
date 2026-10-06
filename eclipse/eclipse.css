@@ -81,10 +81,11 @@ main { --ecl-out: var(--w-bg); }
 .band.ecl { background: none; color: inherit; --ecl-bg: var(--band-bg, var(--nts-coral)); --ecl-fg: var(--band-fg, var(--nts-ink)); }
 .band.ecl .ecl-win { color: var(--band-fg, var(--nts-ink)); }
 /* a band's words sit right at its top edge, where the disc is still small:
-   they come in whole once the disc has passed them (p .5 to .8), so no line
-   is ever shown cut by the edge; the home windows show their orb first and
-   need no such hold */
-.band.ecl .ecl-win > .wrap { opacity: calc((var(--ecl-p) - .5) / .3); }
+   they come in whole once the disc has passed them (p .8 to .97: at .8 the
+   disc already covers the top third of a phone-wide band to its sides), so
+   no line is ever shown cut by the edge; the home windows show their orb
+   first and need no such hold */
+.band.ecl .ecl-win > .wrap { opacity: calc((var(--ecl-p) - .8) / .17); }
 .words.ecl { padding: 0; overflow: visible; }
 .words.ecl .ecl-win { padding: clamp(3rem, 8vw, 6rem) 0; }
 .words.ecl .ecl-win::after { opacity: .7; }
