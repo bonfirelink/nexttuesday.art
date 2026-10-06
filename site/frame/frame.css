@@ -119,6 +119,9 @@
 }
 .intersect-frame:hover > .field { animation: march 1.1s linear infinite; }
 @keyframes march { to { background-position: 22px 0, -22px 100%, 0 -22px, 100% 22px; } }
+/* the table is wider than a 320px phone's panel: it scrolls inside, the frame stays */
+.corr-scroll { overflow-x: auto; scrollbar-width: thin; }
+.corr-scroll:focus-visible { outline-offset: 2px; }
 .intersect-frame .plate { font-family: var(--font-mono); font-weight: 500; letter-spacing: .06em; text-transform: none; }
 
 /* ---------- home: the windows ---------- */
