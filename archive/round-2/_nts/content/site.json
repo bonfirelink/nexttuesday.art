@@ -1,0 +1,27 @@
+{
+  "name": "Next Tuesday Society",
+  "email": "hello@nexttuesday.art",
+  "instagram": "@next.tuesday.society",
+  "instagram_url": "https://www.instagram.com/next.tuesday.society/",
+  "embers_instagram": "@embers.gva",
+  "embers_instagram_url": "https://www.instagram.com/embers.gva/",
+  "signoff": "Know thyself",
+  "signoff_emoji": "🪬",
+  "nav": [
+    { "slug": "embers", "label": "EMBERS", "world": "embers" },
+    { "slug": "not-not-philo", "label": "NOT NOT PHILO", "world": "philo" },
+    { "slug": "intersect", "label": "INTERSECT", "world": "intersect" },
+    { "slug": "events", "label": "Events", "world": "nts" }
+  ],
+  "worlds": {
+    "nts": { "name": "Next Tuesday Society", "sigil": "nts", "home": "" },
+    "embers": { "name": "EMBERS", "sigil": "embers", "home": "embers/", "line": "Our nightlife series. Raves around Geneva since 2021." },
+    "philo": { "name": "NOT NOT PHILO", "sigil": "philo", "home": "not-not-philo/", "line": "Discussions on everything, nothing and anything in between." },
+    "intersect": { "name": "INTERSECT", "sigil": "intersect", "home": "intersect/", "line": "An assembly at the Chaos Communication Congress." }
+  },
+  "footer": {
+    "about": "An association in Geneva. We gather every Tuesday, and from there come raves, philo salons and an endless field of possibilities.",
+    "write": "Venues, institutions, collaborators: if there is something you would like to make with us, write to us.",
+    "colophon": "Geneva · every Tuesday"
+  }
+}
