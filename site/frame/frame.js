@@ -34,4 +34,12 @@
       return [p0, p1];
     }
   };
+  /* the correspondence table scrolls inside its frame on narrow phones:
+     the region is focusable only while it does */
+  var fit = function () {
+    Array.prototype.forEach.call(document.querySelectorAll(".corr-scroll"), function (el) {
+      if (el.scrollWidth > el.clientWidth + 1) el.setAttribute("tabindex", "0"); else el.removeAttribute("tabindex");
+    });
+  };
+  fit(); addEventListener("resize", fit);
 })();
