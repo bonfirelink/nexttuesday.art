@@ -33,11 +33,13 @@
       });
     }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
     document.querySelectorAll("[data-orbit-body]").forEach(function (s) { near.observe(s); });
-    /* phones: the compass steps aside whenever visible text would sit under
-       it (or the words band is in view); checked once per frame, only while shown */
-    if (matchMedia("(max-width: 639px)").matches) {
+    /* wherever the content column reaches the compass's corner (the column is
+       1152px wide, so below ~1320px): it steps aside whenever visible text would
+       sit under it (on phones also while the words band is in view); checked once
+       per frame, only while shown */
+    if (matchMedia("(max-width: 1319px)").matches) {
       var words = document.querySelector(".words");
-      var wordsIn = false, queued = false;
+      var wordsIn = false, queued = false, phone = matchMedia("(max-width: 639px)").matches;
       var TEXT = "p, h1, h2, h3, h4, li, a, button, blockquote, figcaption, dt, dd, .lede, .label";
       var hits = function (r, b) { return r.width > 0 && r.height > 0 && r.right > b.left && r.left < b.right && r.bottom > b.top && r.top < b.bottom; };
       var under = function () {
@@ -61,7 +63,7 @@
       var check = function () {
         queued = false;
         if (!compass.classList.contains("is-on")) return;
-        compass.classList.toggle("is-aside", wordsIn || under());
+        compass.classList.toggle("is-aside", (wordsIn && phone) || under());
       };
       var queue = function () { if (!queued) { queued = true; requestAnimationFrame(check); } };
       addEventListener("scroll", queue, { passive: true });

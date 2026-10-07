@@ -161,7 +161,7 @@
 
 /* ---------- the compass: the sun, small, once the sky has scrolled away ---------- */
 .compass {
-  position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: 84px; z-index: 30;
+  position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); z-index: 30;
   width: 54px; height: 54px; border-radius: 50%;
   background: color-mix(in srgb, var(--nts-paper) 94%, transparent); border: 1px solid var(--nts-line-strong);
   box-shadow: 0 10px 22px -12px rgba(26, 21, 48, .6);
@@ -171,8 +171,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 .compass.is-on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
-/* on phones the prose runs the full width, so the compass steps aside while
-   the words band is in view (orbit.js sets .is-aside) */
+/* where the content column reaches its corner, the compass steps aside while
+   text would sit under it, and on phones while the words band is in view
+   (orrery.js sets .is-aside) */
 .compass.is-on.is-aside { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px) scale(.9); }
 html:not(.js) .compass { display: none; }
 .compass:focus-visible { outline-offset: 3px; }

@@ -128,7 +128,6 @@ body {
   line-height: 1.55;
   font-kerning: normal;
   overflow-x: clip;
-  padding-bottom: 72px; /* the page's ground runs on under the footer */
 }
 ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
 :focus-visible { outline: 2px solid var(--w-accent-text); outline-offset: 4px; border-radius: 2px; }
@@ -224,7 +223,7 @@ h1.caps { letter-spacing: -.005em; }
 .nts-footer {
   margin-top: var(--section);
   border-top: 1px solid var(--w-line);
-  padding: clamp(2.5rem, 6vw, 4rem) 0 1.5rem;
+  padding: clamp(2.5rem, 6vw, 4rem) 0 calc(1.5rem + env(safe-area-inset-bottom)); /* the page ends at the footer; clear of the home indicator */
   color: var(--w-fg);
 }
 .nts-footer .cols { display: grid; gap: 2rem 3rem; grid-template-columns: 1fr; }
