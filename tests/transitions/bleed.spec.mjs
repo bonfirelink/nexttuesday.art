@@ -1,6 +1,6 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import {
-  WORLDS, groundLuma, recordBleed, clickWorldLink, bleedState, bleedEnd, scrollToY, bleedProgress,
+  WORLDS, groundLuma, rowLuma, recordBleed, clickWorldLink, bleedState, bleedEnd, scrollToY, bleedProgress,
 } from "../helpers/transitions.mjs";
 
 const UP = [0.15, 0.3, 0.45, 0.6, 0.75];
@@ -167,6 +167,44 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
         if (during[1] !== null && after[1] !== null) {
           expect(Math.abs(during[1] - after[1]), `ground below the hero ${during[1]} vs settled ${after[1]}`).toBeLessThanOrEqual(GROUND_TOLERANCE);
         }
+      });
+    }
+  });
+}
+
+// The hero's foot is seamless: no row across the boundary between the disc
+// (the hero's night copy) and the section below differs from the ground
+// beside it, at state `in` and settled, on a width where the disc layer lands off the device pixel grid.
+const SEAM_TOLERANCE = 2;
+const SEAM_SCALES = [2, 3];
+
+for (const scale of SEAM_SCALES) {
+  test.describe(`bleed seam scale ${scale}`, () => {
+    test.use({ viewport: { width: 1117, height: 700 }, deviceScaleFactor: scale });
+    for (const world of WORLDS) {
+      test(`T3 the ${world} bleed has no seam at the hero's foot, scale ${scale}`, async ({ page }) => {
+        await arrive(page, world, "flag");
+        await page.waitForTimeout(700);
+        const end = await bleedEnd(page);
+        const y = Math.round(0.5 * end);
+        const rows = async () => {
+          const foot = await page.evaluate(() => document.querySelector("main .hero").getBoundingClientRect().bottom);
+          const dev = Math.round(foot * scale), band = 10 * scale;
+          // the columns where the disc covers the hero's foot: the right fifth
+          const r = await rowLuma(page, Math.round(800 * scale), Math.round(980 * scale), dev - band, dev + band);
+          const ref = [...r.slice(0, 4), ...r.slice(-4)].sort((a, b) => a - b)[4];
+          return { ref, worst: Math.max(...r.map((v) => Math.abs(v - ref))), r };
+        };
+        await scrollToY(page, y);
+        expect(await bleedState(page)).toBe("in");
+        const during = await rows();
+        expect(during.worst, `in: ground ${during.ref}, rows ${during.r.join(",")}`).toBeLessThanOrEqual(SEAM_TOLERANCE);
+        await scrollToY(page, Math.round(end) + 5);
+        await expect.poll(() => bleedState(page)).toBe("world");
+        await scrollToY(page, y);
+        await page.waitForTimeout(700);
+        const after = await rows();
+        expect(after.worst, `world: ground ${after.ref}, rows ${after.r.join(",")}`).toBeLessThanOrEqual(SEAM_TOLERANCE);
       });
     }
   });

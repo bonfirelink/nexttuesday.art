@@ -127,3 +127,29 @@ export async function groundLuma(page, regions) {
     }, { png, regions });
   } finally { await aux.close(); }
 }
+
+// Per-row median luminance (0..255) of a viewport screenshot, for the device
+// rows y0..y1 over the device columns x0..x1 (screenshot pixels, any scale).
+export async function rowLuma(page, x0, x1, y0, y1) {
+  const png = (await page.screenshot()).toString("base64");
+  const aux = await page.context().newPage();
+  try {
+    return await aux.evaluate(async ({ png, x0, x1, y0, y1 }) => {
+      const img = new Image();
+      img.src = "data:image/png;base64," + png;
+      await img.decode();
+      const c = document.createElement("canvas");
+      c.width = img.width; c.height = img.height;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(img, 0, 0);
+      const out = [];
+      for (let y = y0; y < y1; y++) {
+        const d = g.getImageData(x0, y, x1 - x0, 1).data, v = [];
+        for (let i = 0; i < d.length; i += 4) v.push(Math.round(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]));
+        v.sort((a, b) => a - b);
+        out.push(v[v.length >> 1]);
+      }
+      return out;
+    }, { png, x0, x1, y0, y1 });
+  } finally { await aux.close(); }
+}
