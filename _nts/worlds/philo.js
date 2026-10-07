@@ -86,22 +86,27 @@
         ctx.stroke(); ctx.restore();
       }
     }
-    let t0 = performance.now(), last = 0, raf = 0, visible = true, hidden = document.hidden;
+    /* the figure's own clock runs only while it animates, so a figure held
+       still (off screen, or by NTS.live) resumes from the frame it shows */
+    let clock = 0, prev = 0, last = 0, raf = 0, visible = true, hidden = document.hidden, held = false;
     const hand = { active: false, x: 0, y: 0, dTheta: 0, dPsi: 0 };
-    function pose(now) {
-      const t = (now - t0) / 1000, s = Math.sin((2 * Math.PI * t) / PERIOD);
+    function pose() {
+      const t = clock, s = Math.sin((2 * Math.PI * t) / PERIOD);
       return { theta: TILT * s * s * s + hand.dTheta, psi: DRIFT * t + hand.dPsi, phi: CLOSED.phi };
     }
     function tick(now) {
       raf = 0;
-      if (!visible || hidden) return;
-      if (now - last >= 1000 / FPS) { last = now; draw(pose(now)); }
+      if (!visible || hidden || held) return;
+      clock += prev ? Math.min(0.1, (now - prev) / 1000) : 0; prev = now;
+      if (now - last >= 1000 / FPS) { last = now; draw(pose()); }
       if (!hand.active) hand.dTheta *= 0.985;
       raf = requestAnimationFrame(tick);
     }
-    function start() { if (!raf && visible && !hidden && !reduce.matches) raf = requestAnimationFrame(tick); }
-    function redraw() { draw(reduce.matches ? CLOSED : pose(performance.now())); }
+    function start() { if (!raf && visible && !hidden && !held && !reduce.matches) { prev = 0; raf = requestAnimationFrame(tick); } }
+    function redraw() { draw(reduce.matches ? CLOSED : pose()); }
 
+    /* in an aperture (the home's windows), NTS.live says when it may animate */
+    held = !(window.NTS && window.NTS.live ? window.NTS.live.join(host, (on) => { held = !on; if (on) start(); }) : true);
     colours(); measure();
     host.classList.add("is-live");
     redraw(); start();
