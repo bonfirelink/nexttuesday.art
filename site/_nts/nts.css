@@ -23,6 +23,8 @@
   --nts-cobalt-tint: #cfcbf2;
   --nts-line: rgba(26, 21, 48, 0.18);
   --nts-line-strong: rgba(26, 21, 48, 0.42);
+  --nts-rim: rgba(255, 255, 255, 0.5);
+  --nts-cast: rgba(26, 21, 48, 0.3);
 
   /* the worlds, for use outside their pages (ledger marks, fragments) */
   --embers-night: #0b0709;
@@ -62,6 +64,14 @@
   --w-bar-bg: rgba(244, 236, 220, 0.86);
   --w-bar-fg: var(--nts-ink);
   --w-sigil: "nts";
+  /* depth: whatever stands off the ground (a bead, an orb, a lift) is lit
+     from above. --w-rim lights its upper lip, --w-cast is the shadow it
+     throws. A light ground can only show the shadow and a near-black one
+     only the light, so each world sets the pair so the two edges carry the
+     same contrast against its ground: the dark worlds' lip is as strong as
+     the light worlds' shadow (tests/behaviour/orbs.spec.mjs measures it). */
+  --w-rim: var(--nts-rim);
+  --w-cast: var(--nts-cast);
 
   /* type. Fraunces is the display face and Instrument Sans the text face,
      everywhere by default. IM Fell lives only inside INTERSECT. Archivo is
@@ -282,10 +292,20 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
   display: block; position: relative; text-decoration: none; color: inherit;
   border: 1px solid var(--w-line); border-radius: 14px;
   background: var(--card-bg, color-mix(in srgb, var(--w-bg) 70%, var(--w-bg-2)));
-  transition: transform var(--dur-lift) var(--ease-lift), border-color var(--dur-lift), background-color var(--dur-lift), box-shadow var(--dur-lift) var(--ease-lift);
+  transition: transform var(--dur-lift) var(--ease-lift), border-color var(--dur-lift), background-color var(--dur-lift);
 }
-.lift:hover, .lift:focus-visible { transform: translateY(var(--lift-y)); border-color: var(--w-accent); box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--w-fg) 55%, transparent); }
-.lift:active { transform: scale(.99); box-shadow: none; }
+/* lifted, it is lit from above (the depth tokens): the light on its lip and
+   its shadow sit on a layer that fades in, so the hover is a transform and
+   an opacity, never a repainted shadow */
+.lift::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 1px 0 var(--w-rim), 0 12px 24px -12px var(--w-cast);
+  opacity: 0; transition: opacity var(--dur-lift) var(--ease-lift);
+}
+.lift:hover, .lift:focus-visible { transform: translateY(var(--lift-y)); border-color: var(--w-accent); }
+.lift:hover::after, .lift:focus-visible::after { opacity: 1; }
+.lift:active { transform: scale(.99); }
+.lift:active::after { opacity: 0; }
 .lift:focus-visible { outline-offset: 3px; }
 
 /* ---------- 9. the ledger ---------- */
@@ -353,6 +373,8 @@ html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world], h
   --w-selection-fg: var(--nts-ink);
   --w-bar-bg: rgba(244, 236, 220, 0.86);
   --w-bar-fg: var(--nts-ink);
+  --w-rim: var(--nts-rim);
+  --w-cast: var(--nts-cast);
   color-scheme: light;
 }
 /* text inherits the body's colour as a value, not its token */
