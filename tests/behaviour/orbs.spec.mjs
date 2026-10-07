@@ -1,7 +1,8 @@
 // O1 the orrery's bodies and the ring beads are one component (.disc);
 // O2 every world defines the depth pair the discs, orbs and lifts read;
 // O3 the home's three orbs are one portal: opening one moves and fades its
-// layers (transform, opacity) and nothing else, the same parts on every
+// layers (transform, opacity; visibility only keeps a layer unpainted at
+// rest) and nothing else, the same parts on every
 // world, and the orb itself never rises; O4 under reduced motion the
 // portal still opens, by fading alone.
 import { test, expect } from "../helpers/fixtures.mjs";
@@ -85,7 +86,7 @@ test("O3 the home's orbs open as one portal, by transform and opacity, without r
   for (const { body } of WORLDS) {
     const o = await openOrb(page, body);
     expect(o.parts.length, `${body}: the opening runs`).toBeGreaterThan(0);
-    for (const p of o.parts) expect(p, `${body}: compositor-only`).toMatch(/ (transform|opacity)$/);
+    for (const p of o.parts) expect(p, `${body}: compositor-only`).toMatch(/ (transform|opacity|visibility)$/);
     expect(o.transform, `${body}: the orb does not lift`).toBe("none");
     expect(o.translate, `${body}: the orb does not lift`).toBe("none");
     expect(Math.abs(o.dy) + Math.abs(o.dx), `${body}: the orb stays put`).toBeLessThan(0.5);
@@ -101,6 +102,6 @@ test("O4 under reduced motion the portal opens by fading alone", async ({ page }
   for (const { body } of WORLDS) {
     const o = await openOrb(page, body);
     expect(o.parts.length, `${body}: the opening still shows`).toBeGreaterThan(0);
-    for (const p of o.parts) expect(p, `${body}: no motion`).toMatch(/ opacity$/);
+    for (const p of o.parts) expect(p, `${body}: no motion`).toMatch(/ (opacity|visibility)$/);
   }
 });
