@@ -196,11 +196,17 @@ html:not(.js) .compass { display: none; }
 .compass .c-intersect { --a: var(--a-intersect); --p: var(--p-intersect); --c: var(--intersect-fire-text); }
 .compass .c-star { --a: var(--a-star); --p: var(--p-star); --c: var(--nts-gold); }
 .compass .c-orbit { --r: 19px; }
-.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transition: opacity .4s, background-color .4s; }
-/* the needle stands upright on the sun and only fades in; it does not ride */
-.compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: none; animation: none; transition: opacity .4s; }
-.compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: var(--pose) scale(1.9); }
-.compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; }
+/* the compass's dot and needle turn about the sun with the rotate property,
+   in step with the sky (same --a, --p), so the needle always points at its
+   dot; their transform stays free for the near state, where the dot grows
+   and the needle draws out to it. Only rotate animates (compositor), and
+   neither declares a custom property (see the pivot above). */
+.compass .c-orbit > * { rotate: var(--a, 20deg); animation: c-turn var(--p, 80s) linear infinite; }
+@keyframes c-turn { from { rotate: var(--a, 20deg); } to { rotate: calc(var(--a, 20deg) + 1turn); } }
+.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transform: translateY(calc(-1 * var(--r))); transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
+.compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
+.compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: translateY(calc(-1 * var(--r))) scale(1.9); }
+.compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; transform: none; }
 .compass[data-near="sun"] .c-sun { filter: drop-shadow(0 0 4px rgba(240, 74, 58, .6)); }
 .compass:hover, .compass:focus-visible { border-color: var(--nts-coral-ink); }
 
