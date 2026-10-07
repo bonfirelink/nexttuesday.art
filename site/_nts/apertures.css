@@ -21,6 +21,9 @@
    else, and under reduced motion, every disc is open.
    Loaded after orrery.css. Nothing here redefines a --nts-* or --w-* token. */
 
+/* where the disc is complete: this much scroll after the section enters the viewport (in vh; nts.js reads it to latch the aperture) */
+:root { --ecl-open-end: 55vh; }
+
 @property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
 
 :root {
@@ -64,7 +67,7 @@ main { --ecl-out: var(--w-bg); }
 /* scrolling opens the disc: from the ring the moment the aperture's top
    edge enters, fully open after 55vh of travel, so the disc keeps pace with the scroll; scrolling back closes it */
 @supports (animation-timeline: view()) {
-  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover 55vh; }
+  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover var(--ecl-open-end); }
 }
 @keyframes ecl-open { from { --ecl-p: 0; } to { --ecl-p: 1; } }
 
