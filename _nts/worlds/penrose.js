@@ -1,8 +1,9 @@
 /* The impossible triangle: three square bars arranged in space so that,
-   seen along one diagonal, they close into a Penrose triangle. Each bar
-   starts a little behind the end of the one before it, all the way round
-   the loop, which is the impossibility: it only closes in projection. Tilt
-   the model and the loop breaks open at one corner.
+   seen along one diagonal, they close into a Penrose triangle. They make a
+   real, open solid: each bar sits on the end of the one before it, and the
+   last one's end only meets the first one's start in projection, which is
+   the impossibility. Tilt the model and the loop breaks open at that
+   corner.
    Drawn as an engraving: no outlines, only hatching that lives on each face
    and turns with it; line weight carries the light; the cut ends of the
    bars are hatched in red.
@@ -11,12 +12,23 @@
    browser it is window.NTS.penrose; in node, module.exports. */
 (function () {
   "use strict";
-  const S = 1, L = 4.3, T = 0.13, SLABS = 7, HATCH = S / 16;
+  const S = 1, L = 4.3, HATCH = S / 16;
+  /* The bars touch but never overlap, so each pair has a plane between
+     them (SEP) and a painter's order exists at every pose: drawing the bars
+     whole in that order is exact, and a face drawn whole has no seams. */
   const BARS = [
     { axis: 0, min: [0, 0, 0], max: [L, S, S] },
-    { axis: 1, min: [L - S - T, S - T, -T], max: [L - T, L - T, S - T] },
-    { axis: 2, min: [L - S - 2 * T, L - S - 2 * T, S - 2 * T], max: [L - 2 * T, L - 2 * T, L - 2 * T] },
+    { axis: 1, min: [L - S, S, 0], max: [L, L, S] },
+    { axis: 2, min: [L - S, L - S, S], max: [L, L, L] },
   ];
+  /* [a, b, k]: bar b lies on the +k side of bar a */
+  const SEP = [];
+  for (let a = 0; a < BARS.length; a++) for (let b = a + 1; b < BARS.length; b++) {
+    for (let k = 0; k < 3; k++) {
+      if (BARS[a].max[k] <= BARS[b].min[k]) { SEP.push([a, b, k]); break; }
+      if (BARS[b].max[k] <= BARS[a].min[k]) { SEP.push([b, a, k]); break; }
+    }
+  }
   /* The model's pivot (the origin of every pose), in model coordinates. It
      starts at the mean of the bars' centres; see PIVOT below for where it
      ends up. */
@@ -45,55 +57,55 @@
     return (v) => mul(R2, mul(R1, v));
   }
   function pieces() {
-    const slabs = [];
-    for (const bar of BARS) {
-      const a = bar.axis, len = bar.max[a] - bar.min[a];
-      for (let sIdx = 0; sIdx < SLABS; sIdx++) {
-        const ua = (len * sIdx) / SLABS, ub = (len * (sIdx + 1)) / SLABS;
-        const first = sIdx === 0, last = sIdx === SLABS - 1;
-        const c = [0, 1, 2].map((k) => (bar.min[k] + bar.max[k]) / 2 - centre[k]);
-        c[a] = bar.min[a] + (ua + ub) / 2 - centre[a];
-        const faces = [];
-        for (let k = 0; k < 3; k++) {
-          for (const sign of [1, -1]) {
-            const n = E[k].map((x) => x * sign);
-            const fixed = sign > 0 ? bar.max[k] : bar.min[k];
-            if (k === a) {
-              if (!(sign > 0 ? last : first)) continue;
-              const i = (k + 1) % 3, j = (k + 2) % 3;
-              const p0 = [0, 0, 0]; p0[k] = fixed; p0[i] = bar.min[i]; p0[j] = bar.min[j];
-              faces.push({ p0: add(p0, centre, -1), u: E[i], v: E[j], ua: 0, ub: S, lv: S, n, cap: true, eps: [0, 0] });
-            } else {
-              const j = 3 - k - a;
-              const p0 = [0, 0, 0]; p0[k] = fixed; p0[a] = bar.min[a]; p0[j] = bar.min[j];
-              faces.push({ p0: add(p0, centre, -1), u: E[a], v: E[j], ua, ub, lv: S, n, cap: false, eps: [first ? 0 : 0.015, last ? 0 : 0.015] });
-            }
+    return BARS.map((bar) => {
+      const a = bar.axis, faces = [];
+      for (let k = 0; k < 3; k++) {
+        for (const sign of [1, -1]) {
+          const n = E[k].map((x) => x * sign);
+          const fixed = sign > 0 ? bar.max[k] : bar.min[k];
+          if (k === a) {
+            const i = (k + 1) % 3, j = (k + 2) % 3;
+            const p0 = [0, 0, 0]; p0[k] = fixed; p0[i] = bar.min[i]; p0[j] = bar.min[j];
+            faces.push({ p0: add(p0, centre, -1), u: E[i], v: E[j], ua: 0, ub: S, lv: S, n, cap: true });
+          } else {
+            const j = 3 - k - a;
+            const p0 = [0, 0, 0]; p0[k] = fixed; p0[a] = bar.min[a]; p0[j] = bar.min[j];
+            faces.push({ p0: add(p0, centre, -1), u: E[a], v: E[j], ua: 0, ub: bar.max[a] - bar.min[a], lv: S, n, cap: false });
           }
         }
-        slabs.push({ c, faces });
       }
-    }
-    return slabs;
+      return faces;
+    });
   }
   let PIECES = pieces();
   const LIGHT = norm([-0.45, 0.75, 0.55]);
   /* One frame: the visible face pieces, far to near, each with its screen
-     polygon, hatch segments, a colour role ('ink' or 'cut') and a line
-     width in model units. */
+     polygon, hatch segments, a colour role ('ink' or 'cut'), a line width
+     in model units, and its plane in view space (a point o and the normal
+     n; depth grows towards the viewer) for checking the drawing order. */
   function frame({ theta = 0, psi = 0, phi = 0 } = {}) {
     const rot = rotator(theta, psi, phi);
     const view = (p) => rot(toCamera(p));
-    const slabs = PIECES.map((sl) => ({ depth: rot(toCamera(sl.c))[2], faces: sl.faces }));
-    slabs.sort((a, b) => a.depth - b.depth);
+    /* far to near: of two bars, the one on the viewer's side of the plane
+       between them goes last */
+    const toward = E.map((e) => rot(toCamera(e))[2]);
+    const after = BARS.map(() => []);
+    for (const [a, b, k] of SEP) { if (toward[k] > 0) after[b].push(a); else after[a].push(b); }
+    const order = [];
+    while (order.length < BARS.length) {
+      let i = BARS.findIndex((_, i) => !order.includes(i) && after[i].every((j) => order.includes(j)));
+      if (i < 0) i = BARS.findIndex((_, i) => !order.includes(i));
+      order.push(i);
+    }
     const out = [];
-    for (const sl of slabs) {
-      for (const f of sl.faces) {
+    for (const bi of order) {
+      for (const f of PIECES[bi]) {
         const n = rot(toCamera(f.n));
         if (n[2] <= 0.02) continue;
         const lambert = Math.max(0, dot(n, LIGHT));
         const P0 = view(f.p0), U = view(f.u), V = view(f.v);
         const at = (a, b) => [P0[0] + a * U[0] + b * V[0], P0[1] + a * U[1] + b * V[1]];
-        const ua = f.ua - f.eps[0], ub = f.ub + f.eps[1];
+        const ua = f.ua, ub = f.ub;
         const poly = [at(ua, 0), at(ub, 0), at(ub, f.lv), at(ua, f.lv)];
         const lines = [];
         if (f.cap) {
@@ -110,7 +122,7 @@
             lines.push([p[0], p[1], q[0], q[1]]);
           }
         }
-        out.push({ poly, lines, role: f.cap ? "cut" : "ink", width: f.cap ? 0.011 : 0.005 + 0.014 * (1 - lambert) });
+        out.push({ poly, lines, role: f.cap ? "cut" : "ink", width: f.cap ? 0.011 : 0.005 + 0.014 * (1 - lambert), o: P0, n });
       }
     }
     return out;
