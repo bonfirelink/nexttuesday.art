@@ -6,7 +6,7 @@ const INSET_TOL = 1; // px: geometry read with getBoundingClientRect
 const TOGGLE_TOL = 4; // px of scroll: on and off happen at one place, a step (3 px) apart at most
 const STEP = 3; // px per scroll step
 const SWEEP = 1200; // px above the bottom where the sweep starts
-const SWEEP_TIMEOUT = 120_000; // ms: ~800 steps of two frames each, there and back
+const SWEEP_TIMEOUT = 120_000; // ms: ~800 steps of a frame each, there and back
 
 for (const vp of VIEWPORTS) {
   test.describe(`compass at ${vp.name}`, () => {
@@ -42,6 +42,8 @@ for (const vp of VIEWPORTS) {
 
     test("B1 the compass hides only while the footer is in view, once each way", async ({ page, settle }) => {
       test.setTimeout(SWEEP_TIMEOUT);
+      // Reduced motion keeps the figures still, so each of the 800 frames is cheap.
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await open(page);
       await expect(page.locator(".compass")).not.toHaveClass(/is-on/);
       expect(await page.locator(".compass").evaluate((c) => getComputedStyle(c).visibility)).toBe("hidden");
@@ -52,7 +54,8 @@ for (const vp of VIEWPORTS) {
 
       const run = await page.evaluate(
         async ({ from, to, step }) => {
-          const frames = (n) => new Promise((r) => (n ? requestAnimationFrame(() => frames(n - 1).then(r)) : r()));
+          // One frame after a scroll, the observer's task has run: read, then move on to the next step.
+          const frame = () => new Promise((r) => requestAnimationFrame(r));
           const compass = document.querySelector(".compass"), foot = document.querySelector(".nts-footer");
           const changes = [];
           let was = compass.classList.contains("is-aside");
@@ -65,9 +68,8 @@ for (const vp of VIEWPORTS) {
           const sweep = async (a, b, dir) => {
             for (let y = a; dir > 0 ? y <= b : y >= b; y += dir * step) {
               scrollTo({ top: y, behavior: "instant" });
-              await frames(2);
-              const cs = getComputedStyle(compass);
-              const bottom = innerHeight - parseFloat(cs.bottom); // the compass's layout bottom edge
+              await frame();
+              const bottom = innerHeight - parseFloat(getComputedStyle(compass).bottom); // the compass's layout bottom edge
               const top = foot.getBoundingClientRect().top;
               const aside = compass.classList.contains("is-aside");
               if (top < bottom - 1 && !aside) wrong.push(`y=${y} footer overlaps the compass, not aside`);
