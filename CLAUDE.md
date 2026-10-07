@@ -20,7 +20,7 @@ from the working branch (currently `eclipse`, later `main`). How the code fits:
 
 ## Tests
 
-Run `npm test` before asking for review and before merging; `npm run test:publish` before any publish; never publish on a red suite; new behaviour gets a test first. Until the test suite lands on the working branch: `node tools/sync.mjs --check`.
+Run `npm test` before asking for review and before merging; `npm run test:publish` before any publish; never publish on a red suite; new behaviour gets a test first.
 
 ## Design principles
 
