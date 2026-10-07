@@ -163,12 +163,10 @@
 @supports (animation-timeline: view()) {
   .js .world::before { animation: bloom linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
   .js .world .prose { animation: arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 85%; }
-  .js .sky { animation: sky-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 50% 0; }
 }
-@media print { .world::before, .world .prose, .sky, .pivot, .pivot > * { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
+@media print { .world::before, .world .prose, .pivot, .pivot > * { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
 @keyframes bloom { from { clip-path: circle(0% at var(--bloom-at)); } to { clip-path: circle(150% at var(--bloom-at)); } }
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
-@keyframes sky-leave { from { opacity: 1; transform: none; } to { opacity: .35; transform: scale(.86); } }
 
 /* ---------- the compass: the sun, small, once the sky has scrolled away ---------- */
 .compass {
@@ -249,7 +247,7 @@ html:not(.js) .compass { display: none; }
   .js .orrery .r-embers { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 1; animation: none; }
   .js .bead .face { animation: none; }
-  .world::before, .world .prose, .sky { animation: none !important; }
+  .world::before, .world .prose { animation: none !important; }
   .world::before { clip-path: none; }
   .bead:hover .face, .bead:focus-visible .face { transform: none; }
   .compass { transition: none; }
