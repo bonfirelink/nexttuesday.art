@@ -20,7 +20,7 @@
   --w-bar-bg: rgba(10, 10, 10, 0.8);
   --w-bar-fg: #e9e2cf;
   --w-sigil: "intersect";
-  --w-rim: rgba(233, 226, 207, 0.3);
+  --w-rim: rgba(233, 226, 207, 0.34);
   --w-cast: rgba(0, 0, 0, 0.7);
   --grain: .07;
   color-scheme: dark;
