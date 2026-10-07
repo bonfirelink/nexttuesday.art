@@ -8,6 +8,34 @@ import { fileURLToPath } from "node:url";
 const fontsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../fonts");
 const manifest = JSON.parse(fs.readFileSync(path.join(fontsDir, "manifest.json"), "utf8"));
 
+/**
+ * Route a context's external traffic: Google Fonts from tests/fonts/ (held for `fontDelay` ms),
+ * any other request that leaves for a host other than $NTS_BASE is pushed to `external` and aborted.
+ */
+export async function installFontRoutes(context, { fontDelay = 0, external = [] } = {}) {
+  const base = process.env.NTS_BASE ? new URL(process.env.NTS_BASE).host : "";
+  await context.route(
+    (url) => /^https?:$/.test(url.protocol) && url.host !== base,
+    async (route) => {
+      const url = route.request().url();
+      const u = new URL(url);
+      const file =
+        u.host === "fonts.googleapis.com" ? manifest.css[url] :
+        u.host === "fonts.gstatic.com" ? manifest.files[url] : null;
+      if (!file) {
+        external.push(url);
+        return route.abort("blockedbyclient");
+      }
+      if (fontDelay) await new Promise((r) => setTimeout(r, fontDelay));
+      await route.fulfill({
+        body: fs.readFileSync(path.join(fontsDir, file)),
+        contentType: file.endsWith(".css") ? "text/css; charset=utf-8" : "font/woff2",
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+  );
+}
+
 export const test = base.extend({
   // Milliseconds to hold every font response (the ASCII race needs a slow font).
   fontDelay: [0, { option: true }],
@@ -26,27 +54,7 @@ export const test = base.extend({
 
   // Fonts from tests/fonts/, anything else that leaves for an external host fails the test.
   _routes: [async ({ context, fontDelay, watch }, use) => {
-    const base = process.env.NTS_BASE ? new URL(process.env.NTS_BASE).host : "";
-    await context.route(
-      (url) => /^https?:$/.test(url.protocol) && url.host !== base,
-      async (route) => {
-        const url = route.request().url();
-        const u = new URL(url);
-        const file =
-          u.host === "fonts.googleapis.com" ? manifest.css[url] :
-          u.host === "fonts.gstatic.com" ? manifest.files[url] : null;
-        if (!file) {
-          watch.external.push(url);
-          return route.abort("blockedbyclient");
-        }
-        if (fontDelay) await new Promise((r) => setTimeout(r, fontDelay));
-        await route.fulfill({
-          body: fs.readFileSync(path.join(fontsDir, file)),
-          contentType: file.endsWith(".css") ? "text/css; charset=utf-8" : "font/woff2",
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
-      }
-    );
+    await installFontRoutes(context, { fontDelay, external: watch.external });
     await use();
     expect(watch.external, "requests that left for an external host").toEqual([]);
   }, { auto: true }],

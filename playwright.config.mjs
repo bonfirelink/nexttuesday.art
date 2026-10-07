@@ -32,7 +32,7 @@ export default defineConfig({
   use: base,
   projects: [
     { name: "static", testMatch: "static/**/*.spec.mjs" },
-    { name: "fast", testMatch: ["*.spec.mjs", `${dirs}/**/*.spec.mjs`], grepInvert: /@slow|@perf|@visual/ },
+    { name: "fast", testMatch: ["smoke.spec.mjs", `${dirs}/**/*.spec.mjs`], grepInvert: /@slow|@perf|@visual/ },
     { name: "slow", testMatch: [`${dirs}/**/*.spec.mjs`], grep: /@slow/ },
     { name: "visual", testMatch: "visual/**/*.spec.mjs", grep: /@visual/ },
     { name: "live", testMatch: "live/**/*.spec.mjs" },

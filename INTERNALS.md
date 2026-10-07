@@ -484,10 +484,21 @@ commit that fast-forwards `site`. Push it only on the owner's word to publish.
 
 ## Checks before a change lands
 
-Phone 320, 360 and 390 on all five pages: scrollWidth equals innerWidth.
-Console: no errors, no 404s. In-browser contrast audit over every text
-node: all AA, nothing under 11px, settled on every page. Bleed-in:
-`before` on arrival from home, `in` from the first scroll, `world` once
-the hero is half scrolled away, back and forth on the way, no inline
-styles or layers left behind. `tools/` has no test runner: drive a headless Chromium against the
-preview (`devshell up`, `devshell url`) and read the screenshots.
+`npm ci` once per checkout. `npm test` after every change: the static and
+fast tiers, in a minute or two, with the dev shell's Chromium and an
+offline copy of the fonts. `npm run test:publish` before a publish: adds
+the `@slow` sweeps and the `@perf` guards. Tiers are tags in test titles
+(`playwright.config.mjs`); each spec file belongs to one project.
+
+They replaced these hand checks: phone widths 320, 360 and 390 with no
+horizontal overflow, and a clean console with no 404s (the page walk in
+`tests/static`); the bleed-in sequence on arrival, scroll and back
+(`tests/transitions`); the orb morph between pages (`tests/transitions`);
+hero, figure and card geometry (`tests/layout`). Still by hand: the
+contrast audit over every text node (all AA, nothing under 11px, settled
+on every page), and looking at screenshots from the preview
+(`devshell up`, `devshell url`).
+
+Tests that open a fresh browser context use `coldPage`
+(`tests/helpers/cold.mjs`); the font cache and the external-request block
+come from one installer in `tests/helpers/fixtures.mjs`.

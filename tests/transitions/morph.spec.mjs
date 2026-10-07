@@ -1,4 +1,5 @@
 import { test, expect } from "../helpers/fixtures.mjs";
+import { coldPage } from "../helpers/cold.mjs";
 import { WORLDS, recordTransitions, arrivedTransition, clickWorldLink, followLink } from "../helpers/transitions.mjs";
 
 // The orb morph was a race (the view transition's reveal ran before the page
@@ -14,26 +15,24 @@ const SIZES = [
 const PAIRS = WORLDS.flatMap((a) => WORLDS.filter((b) => b !== a).map((b) => [a, b]));
 
 async function homeToWorld(browser, viewport, world, base) {
-  const ctx = await browser.newContext({ viewport });
-  const page = await ctx.newPage();
+  const { page, close } = await coldPage(browser, { viewport });
   await page.addInitScript(recordTransitions);
   await page.goto(base + "/", { waitUntil: "load" });
   await page.evaluate(() => document.fonts.ready);
   await clickWorldLink(page, world);
   const vt = await arrivedTransition(page);
-  await ctx.close();
+  await close();
   return vt;
 }
 
 async function worldToWorld(browser, viewport, from, to, base) {
-  const ctx = await browser.newContext({ viewport });
-  const page = await ctx.newPage();
+  const { page, close } = await coldPage(browser, { viewport });
   await page.addInitScript(recordTransitions);
   await page.goto(`${base}/${from}/`, { waitUntil: "load" });
   await page.evaluate(() => document.fonts.ready);
   await followLink(page, `/${to}/`);
   const vt = await arrivedTransition(page);
-  await ctx.close();
+  await close();
   return vt;
 }
 
