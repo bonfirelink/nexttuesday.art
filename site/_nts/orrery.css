@@ -171,23 +171,21 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
   transition-duration: var(--portal-in);
 }
 .orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
-/* the opening, an iris: the window is an aperture, the same opening as the
-   world windows' own as they scroll in. At rest a lid of the window's ground
-   covers the outer edge of the disc, its edge drawn by the world's limb (a
-   hairline of --w-accent) and shading the figure under it, so the window
-   reads as a door ajar. Opened, the lid draws back past the rim and the
-   figure comes a little nearer. The lid is one radial gradient on ::after,
-   inside the disc's round clip, scaled out. Reduced motion: the lid fades
-   instead. */
+/* the opening, an approach: you move toward the window and through it. At
+   rest a faint shade at the rim. Opened, the world beyond rushes nearer (the
+   figure grows past the rim, cut by it, a portal's overshoot), the rim
+   kindles to the world's limb (a hairline of --w-accent) over a deeper
+   vignette (::after, over the figure), and the orbit slips past you, out
+   and away. Reduced motion: the layers fade, nothing moves. */
 .orb > [data-nts-fragment]::after {
-  background: radial-gradient(closest-side, transparent 80%, var(--w-cast) 92.6%, color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)) 92.8% 93.5%, var(--w-bg) 93.7%);
+  box-shadow: inset 0 0 0 1.25px var(--w-accent);
+  background: radial-gradient(closest-side, transparent 62%, color-mix(in srgb, var(--w-deep) 50%, transparent) 100%);
+  opacity: .3;
 }
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(1.05); }
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { transform: scale(1.12); }
-@media (prefers-reduced-motion: reduce) {
-  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: none; }
-  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { transform: none; opacity: 0; }
-}
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(1.16); }
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { opacity: 1; }
+.orb:is(:hover, :focus-visible, :active)::before { transform: scale(1.1); opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > *, .orb:is(:hover, :focus-visible, :active)::before { transform: none; } }
 .world .prose { width: 100%; }
 .world .prose h2 { margin-bottom: .8rem; }
 .world .prose .lede { margin-bottom: .6rem; }
