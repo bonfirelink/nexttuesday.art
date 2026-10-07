@@ -59,7 +59,7 @@
 }
 .pivot > * { position: absolute; left: 0; top: 0; transform: var(--pose); animation: orbit var(--p, 80s) linear infinite; }
 @keyframes orbit { from { transform: var(--pose); } to { transform: var(--pose-end); } }
-.trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--w-fg) 12%, transparent), 0 2px 4px -1px rgba(0, 0, 0, .55); }
+.trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: 0 0 0 3px var(--w-bg), 0 0 0 4px color-mix(in srgb, var(--w-accent) 38%, transparent); }
 .trace-bead .nts-sigil { width: 1.5rem; height: 1.5rem; }
 .orrery .o-star { --r: 27.2cqi; --a: var(--a-star); --p: var(--p-star); }
 .orrery .o-embers { --r: 31.5cqi; --a: var(--a-embers); --p: var(--p-embers); }
@@ -221,7 +221,7 @@ html:not(.js) .compass { display: none; }
 .events-hero .mini-orrery .pivot > a { pointer-events: auto; }
 .events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: translate var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift); }
 /* the lift uses the individual `translate` property: the orbit animation owns `transform`, and `translate` composes with it, so it works moving or still */
-.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { translate: 0 var(--lift-y); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--w-fg) 12%, transparent), 0 6px 8px -4px rgba(0, 0, 0, .55); border-color: var(--w-accent); }
+.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { translate: 0 var(--lift-y); box-shadow: 0 0 0 3px var(--w-bg), 0 0 0 4px color-mix(in srgb, var(--w-accent) 38%, transparent); border-color: var(--w-accent); }
 .events-hero .o1, .events-hero .ring-1 { --r: 26cqi; --a: var(--a-embers); --p: var(--p-embers); }
 .events-hero .o2, .events-hero .ring-2 { --r: 38cqi; --a: var(--a-philo); --p: var(--p-philo); }
 .events-hero .o3, .events-hero .ring-3 { --r: 50cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
