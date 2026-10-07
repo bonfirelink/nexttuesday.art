@@ -37,9 +37,23 @@
        footer leaves again. The footer is not under the compass's transform,
        so this cannot feed back into itself. */
     var foot = document.querySelector(".nts-footer");
-    if (foot) new IntersectionObserver(function (es) {
-      compass.classList.toggle("is-aside", es[es.length - 1].isIntersecting);
-    }, { rootMargin: "0px 0px -80px 0px", threshold: 0 }).observe(foot);
+    if (foot) {
+      var footWatch = null, footTimer = 0;
+      /* "in view" starts when the footer's top reaches the compass's bottom
+         edge, so the root's bottom margin is that edge's distance from the
+         viewport bottom: the compass's computed `bottom` (the inset varies by
+         width). Read at setup and again after a resize settles. */
+      var watchFooter = function () {
+        if (footWatch) footWatch.disconnect();
+        var gap = parseFloat(getComputedStyle(compass).bottom) || 0;
+        footWatch = new IntersectionObserver(function (es) {
+          compass.classList.toggle("is-aside", es[es.length - 1].isIntersecting);
+        }, { rootMargin: "0px 0px -" + gap + "px 0px", threshold: 0 });
+        footWatch.observe(foot);
+      };
+      watchFooter();
+      addEventListener("resize", function () { clearTimeout(footTimer); footTimer = setTimeout(watchFooter, 150); });
+    }
   }
 
   /* falling in, and back */
