@@ -4,12 +4,14 @@ export const WORLDS = ["embers", "not-not-philo", "intersect"];
 // Init script: for each document, records what its `pagereveal` view transition
 // painted once `ready` resolves. window.__vt is a list of
 // { names: [pseudo-elements animating], entity: computed view-transition-name
-// of `.hero .entity` once it exists }, "no-vt" or "skipped ..." (one entry per reveal).
+// of `.hero .entity` once it exists, ready: document.readyState at the reveal },
+// "no-vt" or "skipped ..." (one entry per reveal).
 export function recordTransitions() {
   window.__vt = [];
   addEventListener("pagereveal", (e) => {
     if (!e.viewTransition) { window.__vt.push("no-vt"); return; }
     const vt = e.viewTransition;
+    const ready = document.readyState;
     let finished = false;
     vt.finished.then(() => { finished = true; }, () => { finished = true; });
     vt.ready.then(
@@ -23,7 +25,7 @@ export function recordTransitions() {
         while (!(ent = document.querySelector(".hero .entity")) && !finished) {
           await new Promise((r) => requestAnimationFrame(r));
         }
-        window.__vt.push({ names: [...names], entity: ent ? getComputedStyle(ent).viewTransitionName : null });
+        window.__vt.push({ names: [...names], entity: ent ? getComputedStyle(ent).viewTransitionName : null, ready });
       },
       (err) => window.__vt.push("skipped " + err)
     );
@@ -61,6 +63,30 @@ export async function arrivedTransition(page) {
 export async function clickWorldLink(page, world) {
   await page.locator(`a[href="/${world}/"]:visible`).first().click();
   await page.waitForURL(`**/${world}/`);
+}
+
+// A real click on the header's link home, from a world page.
+export async function clickHomeLink(page) {
+  await page.locator('a.nts-home[href="/"]:visible').first().click();
+  await page.waitForURL((u) => u.pathname === "/");
+}
+
+// Holds the parser of the next load of `url` for `ms` before the first `marker`
+// in its HTML: a blocking script is inserted there and answered late. Until it
+// is answered the browser may render what it has, as on a slow network that
+// splits the response at that point.
+export async function stallDocument(page, url, marker, ms) {
+  const stall = new URL("/__stall.js", url).href;
+  await page.route(stall, async (route) => {
+    await new Promise((r) => setTimeout(r, ms));
+    await route.fulfill({ body: "", contentType: "text/javascript" });
+  });
+  await page.route(url, async (route) => {
+    const res = await route.fetch();
+    const html = await res.text();
+    if (!html.includes(marker)) throw new Error(`stallDocument: no ${marker} in ${url}`);
+    await route.fulfill({ response: res, body: html.replace(marker, `<script src="${stall}"></script>` + marker) });
+  });
 }
 
 // A same-site navigation to `path` from a link that is not a world's own

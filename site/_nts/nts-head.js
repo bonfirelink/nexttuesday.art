@@ -11,19 +11,46 @@
 (function () {
   var d = document.documentElement;
   d.classList.add("js");
-  /* Arriving from a non-world page (the home orb), the hero entity is the
-     `orb` of the view transition. `pagereveal` can fire before the deferred
-     nts.js runs, and before the entity is parsed, so the name is a rule added
-     here, in the head: it applies whenever the entity exists, and goes when
-     the transition ends. World to world stays the plain crossfade. */
+  /* The orb morph between the home and the world pages (the events page is
+     one too). NTS.world(url): the world a same-site URL is, else null; the
+     one list of world paths. NTS.body(world): the home's body for it, its
+     bead if on screen, else its orb; null off the home. */
+  var NTS = window.NTS = window.NTS || {};
+  var BODY = { "embers": "embers", "not-not-philo": "philo", "intersect": "intersect", "events": "star" };
+  NTS.world = function (url) {
+    var u; try { u = new URL(url, location.href); } catch (err) { return null; }
+    var m = u.origin === location.origin && /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/.exec(u.pathname);
+    return m ? m[1] : null;
+  };
+  NTS.body = function (world) {
+    var b = BODY[world];
+    if (!b) return null;
+    var bead = document.querySelector('.bead[data-body="' + b + '"] .face');
+    var orb = document.querySelector('.orb[data-body="' + b + '"]');
+    var seen = function (el) { var r = el && el.getBoundingClientRect(); return !!r && r.bottom > 0 && r.top < innerHeight && r.width > 0; };
+    return seen(bead) ? bead : seen(orb) ? orb : bead || orb;
+  };
+  /* Arriving, the new side is named at `pagereveal`, the frame its snapshot
+     is taken. That can come before the deferred scripts run, so the listener
+     is here; each page's <link rel="expect" blocking="render"> holds that
+     frame until what is named here is parsed. From a non-world page the
+     hero entity is the `orb` (a rule, gone when the transition ends); from a
+     world, the home's body for it. World to world stays the plain
+     crossfade (no body off the home). */
   addEventListener("pagereveal", function (e) {
     var vt = e.viewTransition, a = window.navigation && navigation.activation;
     if (!vt || !a || !a.from) return;
-    if (/\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/.test(new URL(a.from.url).pathname)) return;
-    var st = document.createElement("style");
-    st.textContent = ".hero .entity{view-transition-name:orb}";
-    document.head.appendChild(st);
-    var clear = function () { st.remove(); };
+    var from = NTS.world(a.from.url), el = null, st = null;
+    if (from) {
+      el = NTS.body(from);
+      if (!el) return;
+      el.style.viewTransitionName = "orb";
+    } else {
+      st = document.createElement("style");
+      st.textContent = ".hero .entity{view-transition-name:orb}";
+      document.head.appendChild(st);
+    }
+    var clear = function () { if (st) st.remove(); if (el) el.style.viewTransitionName = ""; };
     vt.finished.then(clear, clear);
   });
   var s = document.currentScript;
