@@ -7,11 +7,12 @@
    "heptagram" (a ring, a {7/3} star of tubes, seven nodes), "seed" (seven
    rings, the seed of life).
    A <pre data-nts-ascii="tetra"> holds a baked still frame as its text (see
-   tools/gen-stills.mjs), so the page reads with scripts off; this replaces
-   it with a live one. <div data-nts-fragment="intersect"> gets a small
-   non-interactive one. Capped at 30 fps (15 for fragments), paused
-   off-screen and in hidden tabs; under prefers-reduced-motion it draws one
-   frame and only turns when dragged. Runs in node too (module.exports). */
+   tools/gen-stills.mjs), so the page reads with scripts off; this draws a
+   live one on a canvas over it (see mount). <div data-nts-fragment="intersect">
+   gets a small non-interactive one. Capped at 30 fps (15 for fragments),
+   paused off-screen, in hidden tabs and while NTS.live holds it (the home's
+   windows); under prefers-reduced-motion it draws one frame and only turns
+   when dragged. Runs in node too (module.exports). */
 (function () {
   "use strict";
   var RAMP = " .,:;-=+*#%@", TAU = Math.PI * 2;
@@ -147,10 +148,10 @@
      frame): writing the text into the pre instead made the page lay out
      every frame. The pre stays the box, the target of drag and keys, and
      the accessible element (role, label); its baked still text moves into a
-     span that is hidden once the canvas draws. GLOW: "canvas" blurs each
-     line's shadow in the canvas (as text-shadow does per line), "css" puts
-     the text-shadow on the canvas element as a drop-shadow filter. */
-  var GLOW = window.NTS_ASCII_GLOW || "canvas";
+     span that is hidden once the canvas draws. The glow (the pre's
+     text-shadow) is a drop-shadow filter on the canvas element: blurring
+     each line's shadow in the canvas looked the same but cost the main
+     thread more than the text did (software canvas, 4x throttle). */
   function look(el) {
     var cs = getComputedStyle(el), m = /^(.*?)\s+(-?[\d.]+)px\s+(-?[\d.]+)px(?:\s+([\d.]+)px)?/.exec(cs.textShadow || "");
     return { fill: cs.color, font: cs.fontStyle + " " + cs.fontWeight + " ", family: cs.fontFamily, glow: m ? { c: m[1], x: +m[2], y: +m[3], b: +(m[4] || 0) } : null };
@@ -202,14 +203,11 @@
       base = mark.getBoundingClientRect().top - line.getBoundingClientRect().top; document.body.removeChild(line);
       if (!(base > 0)) base = size * 0.8;
     }
-    function glow(c, el, st) {
-      if (GLOW === "css") { el.style.filter = st.glow ? "drop-shadow(" + st.glow.x + "px " + st.glow.y + "px " + st.glow.b + "px " + st.glow.c + ")" : ""; return; }
-    }
+    function glow(c, el, st) { el.style.filter = st.glow ? "drop-shadow(" + st.glow.x + "px " + st.glow.y + "px " + st.glow.b + "px " + st.glow.c + ")" : ""; }
     function paint(c, el, st, ls) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
       c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
-      if (GLOW === "canvas" && st.glow) { c.shadowColor = st.glow.c; c.shadowBlur = st.glow.b * dpr; c.shadowOffsetX = st.glow.x * dpr; c.shadowOffsetY = st.glow.y * dpr; } else c.shadowColor = "transparent";
       for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], 0, r * size + base);
     }
     var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
