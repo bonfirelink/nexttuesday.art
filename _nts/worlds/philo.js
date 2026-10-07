@@ -44,16 +44,21 @@
         }
         bbox = { x0, y0, x1, y1 };
       }
-      const rect = host.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect(), hr = host.getBoundingClientRect();
       dpr = Math.min(2, devicePixelRatio || 1);
       w = Math.round(rect.width); h = Math.round(rect.height);
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       /* the model's pivot is the closed triangle's centre (penrose.js), so it
-         goes on the host's centre; the size fits the furthest reach of any
-         pose from that point */
-      const reach = Math.max(-bbox.x0, bbox.x1, -bbox.y0, bbox.y1);
-      scale = (Math.min(w, h) * (lite ? 0.9 : 0.96)) / (2 * reach);
+         goes on the canvas's centre, which is the host's. The size is set
+         from the host (the canvas outgrows it on the page entity) so that the
+         rest pose is as large against its circle as the other worlds'
+         figures, which fill theirs: the factors scale the old fit-every-pose
+         size, whose rest pose took 0.62 of the ring (0.55 of the orb)
+         against about 1.0 (0.92) for the others (widest side). A tilted pose reaches further and
+         overshoots, as the others do at their circle's edge. */
+      const reach = Math.max(-bbox.x0, bbox.x1, -bbox.y0, bbox.y1), host0 = Math.min(hr.width, hr.height);
+      scale = (host0 * (lite ? 0.9 * 1.67 : 0.96 * 1.6)) / (2 * reach);
       cx = w / 2; cy = h / 2;
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */
