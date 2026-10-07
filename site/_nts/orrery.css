@@ -171,10 +171,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 .compass.is-on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
-/* where the content column reaches its corner, the compass steps aside while
-   text would sit under it, and on phones while the words band is in view
-   (orrery.js sets .is-aside) */
-.compass.is-on.is-aside { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px) scale(.9); }
+/* while the footer is in view the compass fades out and slips down
+   (orrery.js sets .is-aside); visibility waits for the fade */
+.compass.is-on.is-aside { opacity: 0; pointer-events: none; transform: translateY(10px) scale(.9); visibility: hidden; transition-delay: 0s, 0s, .5s; }
 html:not(.js) .compass { display: none; }
 .compass:focus-visible { outline-offset: 3px; }
 .compass .c-sun { width: 18px; height: 18px; color: var(--nts-coral); animation: turn 170s linear infinite reverse; grid-area: 1 / 1; }

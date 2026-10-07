@@ -231,8 +231,10 @@ world's live fragment) and its words. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
 (`.compass`, fixed, bottom right) shows once the sky has scrolled away and
 points at the nearest body; near a world, a moon in that world's ground
-slides over its sun (`.c-moon`); on phones it steps aside while text would
-sit under it. Falling into a world is a cross-document view transition
+slides over its sun (`.c-moon`). It steps aside (`.is-aside`) only while the
+footer is in view: one IntersectionObserver on `.nts-footer`, no layout reads.
+The header's `.is-scrolled` comes from an 8px
+sentinel at the top of the page, watched by an IntersectionObserver. Falling into a world is a cross-document view transition
 from the body you tapped (`orrery.js` names it `orb`), into the world
 page's `.hero .entity`, which carries the trace of the orbit.
 
