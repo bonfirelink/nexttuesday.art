@@ -22,8 +22,8 @@
     host.appendChild(canvas);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30;
-    let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0, bbox = null;
+    const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30, REST = lite ? 0.982 : 0.952;
+    let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0, reach = 0;
     let col = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
     function read(el) {
       const cs = getComputedStyle(el);
@@ -35,15 +35,7 @@
     }
     function colours() { col = read(host); }
     function measure() {
-      if (!bbox) {
-        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-        for (const psi of [0, 1, 2, 3, 4, 5]) for (const theta of [0, TILT, -TILT]) {
-          for (const f of frame({ theta, psi, phi: CLOSED.phi })) for (const [x, y] of f.poly) {
-            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-          }
-        }
-        bbox = { x0, y0, x1, y1 };
-      }
+      if (!reach) for (const f of frame(CLOSED)) for (const [x, y] of f.poly) reach = Math.max(reach, Math.abs(x), Math.abs(y));
       const rect = canvas.getBoundingClientRect(), hr = host.getBoundingClientRect();
       dpr = Math.min(2, devicePixelRatio || 1);
       w = Math.round(rect.width); h = Math.round(rect.height);
@@ -51,14 +43,14 @@
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       /* the model's pivot is the closed triangle's centre (penrose.js), so it
          goes on the canvas's centre, which is the host's. The size is set
-         from the host (the canvas outgrows it on the page entity) so that the
-         rest pose is as large against its circle as the other worlds'
-         figures, which fill theirs: the factors scale the old fit-every-pose
-         size, whose rest pose took 0.62 of the ring (0.55 of the orb)
-         against about 1.0 (0.92) for the others (widest side). A tilted pose reaches further and
+         from the host (the canvas outgrows it on the page entity) and the
+         rest pose, so that the rest pose is as large against its circle as
+         the other worlds' figures, which fill theirs (widest side about 1.0
+         of the ring, 0.92 of the orb): the rest pose's furthest point sits
+         at REST of the host's half-size. A tilted pose reaches further and
          overshoots, as the others do at their circle's edge. */
-      const reach = Math.max(-bbox.x0, bbox.x1, -bbox.y0, bbox.y1), host0 = Math.min(hr.width, hr.height);
-      scale = (host0 * (lite ? 0.9 * 1.67 : 0.96 * 1.6)) / (2 * reach);
+      const host0 = Math.min(hr.width, hr.height);
+      scale = (host0 * REST) / (2 * reach);
       cx = w / 2; cy = h / 2;
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */

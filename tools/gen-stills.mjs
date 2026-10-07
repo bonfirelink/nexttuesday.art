@@ -7,16 +7,22 @@
    The SVG uses the --penrose-* custom properties with fallbacks, so the
    same still follows day and night once inlined. tools/sync.mjs inlines
    these into the pages. */
-import { createRequire } from 'node:module';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const parts = join(here, '..', 'site', '_nts', 'parts');
-const require = createRequire(import.meta.url);
-const penrose = require('../site/_nts/worlds/penrose.js');
-const ascii = require('../site/_nts/worlds/ascii.js');
+/* The figures are classic browser scripts that also fill module.exports;
+   the repo's package.json makes .js files ES modules, so they are run here
+   with a module object of their own rather than through require. */
+const load = (rel) => {
+  const module = { exports: {} };
+  new Function('module', readFileSync(join(here, rel), 'utf8'))(module);
+  return module.exports;
+};
+const penrose = load('../site/_nts/worlds/penrose.js');
+const ascii = load('../site/_nts/worlds/ascii.js');
 const f2 = (x) => (Math.round(x * 100) / 100).toString();
 
 function clipSegment(p, q, poly) {
