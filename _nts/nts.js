@@ -304,10 +304,10 @@
     btn.addEventListener("click", function () { if (held) { held = false; return; } toggle(); });
     btn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   });
-  /* falling in: a world's hero entity is the `orb` of the cross-document view
-     transition only when the other page is not a world page (the home orb
-     becomes it, and it becomes the orb again going back). World to world is
-     the plain root crossfade: the two entities never morph. */
+  /* leaving a world: its hero entity is the `orb` of the cross-document view
+     transition only when the next page is not a world page (it becomes the
+     home orb again). World to world is the plain root crossfade: the two
+     entities never morph. The arriving side is named in nts-head.js. */
   (function () {
     var WORLD = /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/;
     function orb(other, vt) {
@@ -319,9 +319,6 @@
     }
     addEventListener("pageswap", function (e) {
       if (e.viewTransition && e.activation && e.activation.entry) orb(e.activation.entry.url, e.viewTransition);
-    });
-    addEventListener("pagereveal", function (e) {
-      if (e.viewTransition && window.navigation && navigation.activation && navigation.activation.from) orb(navigation.activation.from.url, e.viewTransition);
     });
   })();
 })();
