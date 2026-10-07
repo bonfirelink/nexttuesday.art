@@ -69,9 +69,12 @@
      throws. A light ground can only show the shadow and a near-black one
      only the light, so each world sets the pair so the two edges carry the
      same contrast against its ground: the dark worlds' lip is as strong as
-     the light worlds' shadow (tests/behaviour/orbs.spec.mjs measures it). */
+     the light worlds' shadow (tests/behaviour/orbs.spec.mjs measures it).
+     --w-deep is the inside of the world, deeper than its ground: the colour
+     an orb's well falls away to. */
   --w-rim: var(--nts-rim);
   --w-cast: var(--nts-cast);
+  --w-deep: var(--nts-ink);
 
   /* type. Fraunces is the display face and Instrument Sans the text face,
      everywhere by default. IM Fell lives only inside INTERSECT. Archivo is
