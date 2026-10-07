@@ -33,13 +33,19 @@ export function recordTransitions() {
 // Init script: remembers what the bleed looked like at DOMContentLoaded (before
 // nts.js, whose listener is added later) and every `nts:bleed` event.
 export function recordBleed() {
+  // Figure canvases restyle themselves in the world's colours when the bleed
+  // ends (INTERSECT's glow), so only the markup around them is compared.
+  window.__heroStyles = () => {
+    const hero = document.querySelector("main .hero");
+    return hero ? [hero, ...hero.querySelectorAll("*:not(canvas)")].map((e) => e.getAttribute("style")) : [];
+  };
   window.__bleed = { events: [], dcl: null };
   document.addEventListener("DOMContentLoaded", () => {
     const hero = document.querySelector("main .hero");
     window.__bleed.dcl = {
       state: document.documentElement.getAttribute("data-bleed-state"),
       night: !!document.querySelector(".nts-night"),
-      styles: hero ? [hero, ...hero.querySelectorAll("*")].map((e) => e.getAttribute("style")) : [],
+      styles: window.__heroStyles(),
     };
   });
   addEventListener("nts:bleed", (e) => window.__bleed.events.push(e.detail.phase));

@@ -86,11 +86,10 @@ function bleedTests(label, viewport, deviceScaleFactor, tag) {
         await scrollToY(page, 0);
         expect(await bleedState(page), "world stays world at the top").toBe("world");
         const after = await page.evaluate(() => {
-          const hero = document.querySelector("main .hero");
           return {
             night: document.querySelectorAll(".nts-night").length,
             old: document.querySelectorAll(".nts-bleed-old").length,
-            styles: [hero, ...hero.querySelectorAll("*")].map((e) => e.getAttribute("style")),
+            styles: window.__heroStyles(),
             events: window.__bleed.events,
           };
         });
