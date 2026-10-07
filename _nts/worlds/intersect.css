@@ -23,7 +23,8 @@
   --grain: .07;
   color-scheme: dark;
 }
-html[data-bleed-state="before"] [data-world="intersect"] { --grain: 0; }
+html[data-bleed-state="before"] [data-world="intersect"], html[data-bleed-state="in"] .nts-bleed-old { --grain: 0; }
+.intersect-grain { transition: opacity .4s ease; }
 [data-world="intersect"] { font-family: var(--font-intersect); font-size: 1.1875rem; }
 [data-world="intersect"] :is(h1, h2, h3, .display, .incant, .whisper, .mark, .ledger .what, details.reveal p) { font-family: var(--font-intersect); font-weight: 400; font-variation-settings: normal; letter-spacing: 0; }
 [data-world="intersect"] .label, [data-world="intersect"] .go, [data-world="intersect"] .ledger .when { font-family: var(--font-mono); font-weight: 500; }
@@ -36,7 +37,7 @@ html[data-bleed-state="before"] [data-world="intersect"] { --grain: 0; }
 [data-world="intersect"] { position: relative; }
 /* above the grain; the header keeps its own sticky position and z-index.
    :where() keeps the specificity of the old `> *`, so page rules still win. */
-[data-world="intersect"] > :where(:not(.nts-header, .intersect-grain, .nts-bleed-front)) { position: relative; z-index: 1; }
+[data-world="intersect"] > :where(:not(.nts-header, .intersect-grain, .nts-night)) { position: relative; z-index: 1; }
 
 /* the ASCII solid */
 /* the solid fills the orbit ring; the margins (percentages of the entity's
@@ -50,7 +51,7 @@ pre[data-nts-ascii] {
 }
 pre[data-nts-ascii]:active { cursor: grabbing; }
 pre[data-nts-ascii].is-live { text-shadow: 0 0 6px color-mix(in srgb, var(--w-fg) 35%, transparent); }
-html[data-bleed-state="before"] pre[data-nts-ascii].is-live { text-shadow: none; }
+html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-state="in"] .nts-bleed-old pre[data-nts-ascii].is-live { text-shadow: none; }
 
 /* the hacker table: a correspondence of worlds */
 .corr { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: .85rem; }

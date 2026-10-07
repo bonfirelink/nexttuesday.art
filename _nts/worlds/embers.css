@@ -25,7 +25,7 @@
   --hearth-base: rgba(229, 29, 71, 0.3);
   color-scheme: dark;
 }
-html[data-bleed-state="before"] [data-world="embers"] {
+html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in"] .nts-bleed-old {
   --embers-glow: none;
   --hearth-base: rgba(26, 21, 48, 0.22);
 }
@@ -62,6 +62,9 @@ html[data-bleed-state="before"] [data-world="embers"] {
   .embers-bar {
     position: absolute; right: 0; top: 0; bottom: 0; width: 42px; padding: 1.5rem .4rem;
     writing-mode: vertical-rl; transform: rotate(180deg);
+    /* over the bleed-in's night copy of the hero: its colours are the same
+       by day and by night, so it is never crossed */
+    z-index: 3;
   }
   .embers-bar .pipe { width: 2px; height: 1.4em; }
 }

@@ -1,7 +1,7 @@
 /* Runs in <head>, before paint, so nothing flashes. Two jobs:
    1. mark <html class="js">, which the stylesheet uses to hold things back
       until they draw themselves in (with scripts off everything is drawn);
-   2. on a world page loaded with data-bleed="scroll" or "time", decide
+   2. on a world page loaded with data-bleed="scroll", decide
       whether the world bleeds in. Only when the visitor arrived from the
       home page of the same site: a flag the home's links set in
       sessionStorage, or the same-origin referrer. Then
@@ -27,7 +27,5 @@
   } catch (e) { from = false; }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) from = false;
   d.setAttribute("data-bleed", mode || "scroll");
-  var after = s.getAttribute("data-bleed-after");
-  if (after) d.setAttribute("data-bleed-after", after);
   d.setAttribute("data-bleed-state", from ? "before" : "world");
 })();

@@ -97,9 +97,9 @@
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --ease-turn: cubic-bezier(.65, 0, .15, 1);
   --dur-draw: 1.6s;
-  /* the world bleed-in (section 11): how long the front takes to cross the
-     viewport. The easing is in nts.js, since it has to be inverted there. */
-  --dur-bleed: 1.6s;
+  /* the world bleed-in (section 11): how long a part outside the hero
+     (the header) takes to cross to the world's colours as the disc passes */
+  --dur-bleed-fade: 200ms;
 
   /* the ✴︎ mark as a mask, for pseudo-elements (the sprite covers markup) */
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
@@ -330,18 +330,16 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
 .js [data-nts-draw] .nts-sigil .dot, .js .nts-sigil[data-nts-draw] .dot { transition: opacity 400ms ease calc(var(--draw-delay) + var(--dur-draw)); }
 
 /* ---------- 11. the world bleed-in ---------- */
-/* A world page loaded with <script src="nts-head.js" data-bleed="scroll|time">
-   starts in the NTS colours when the visitor arrived from the home page
+/* A world page loaded with <script src="nts-head.js" data-bleed="scroll">
+   and reached from the home starts in the NTS colours
    (html[data-bleed-state="before"]): every [data-world] on the page reads
    the NTS tokens below, and each kit undoes what else its world brings
-   (EMBERS' glow, INTERSECT's grain). nts.js then lets the world in as a
-   front (the "bleed" block there): a layer carrying the world's ground
-   crosses the viewport, and every element switches to the world's colours
-   at the instant the front reaches it, text blocks whole, so nothing is
-   ever read at mid-contrast. Nothing interpolates colour: a surface that
-   transitions background-color or color on its own would smear across the
-   front, so token-coloured surfaces get no such transition. */
-html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world] {
+   (EMBERS' glow, INTERSECT's grain). nts.js then makes the crossing (the
+   "bleed" block there): from then on (data-bleed-state="in") the page is
+   the world's except what carries .nts-bleed-old (the hero, and the header
+   until the disc reaches it), which reads the same NTS tokens, and a copy
+   of the hero in the world's colours (.nts-night) opens over it as a disc. */
+html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old {
   --w-bg: var(--nts-paper);
   --w-bg-2: var(--nts-paper-2);
   --w-fg: var(--nts-ink);
@@ -357,19 +355,21 @@ html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world] {
   --w-bar-fg: var(--nts-ink);
   color-scheme: light;
 }
-/* the front: the world's ground, clipped to the shape nts.js gives it, under
-   everything but the body's own background (body isolates while it runs).
-   Fixed to the viewport, so a scroll still moving when it starts never
-   shows a strip outside it. */
-body > .nts-bleed-front { position: fixed !important; inset: 0; z-index: -1 !important; pointer-events: none; background: var(--w-bg); }
-/* an image made of text crossing: copies of its glyphs (nts.js places them
-   every frame), in its old colours under the front and in the world's over
-   the page, clipped like the front */
-body > .nts-bleed-glyphs { position: fixed !important; inset: 0; pointer-events: none; margin: 0; }
-body > .nts-bleed-glyphs.under { z-index: -2 !important; }
-.nts-bleed-glyphs > div { position: absolute; overflow: hidden; }
-.nts-bleed-glyphs pre { position: absolute; margin: 0; border-style: solid; border-color: transparent; box-sizing: border-box; overflow: hidden; }
-html[data-bleed-state="in"] body { isolation: isolate; }
+/* text inherits the body's colour as a value, not its token */
+html[data-bleed-state="in"] .nts-bleed-old { color: var(--w-fg); }
+/* the hero's own ground until the world settles, full-bleed from the top
+   of the page and ending at the hero's foot, where the world's begins */
+html:is([data-bleed-state="before"], [data-bleed-state="in"]) main .hero { background: var(--w-bg); box-shadow: 0 0 0 100vmax var(--w-bg); clip-path: inset(-100vmax -100vmax 0 -100vmax); }
+/* the night: the copy of the hero on the world's ground, over the hero and
+   under the header, in document px (nts.js sizes it). The disc is scaled,
+   the copy in it scaled back: both transforms, on layers of their own, so
+   the scroll moves them without a paint */
+body > .nts-night { position: absolute; left: 0; top: 0; z-index: 2; overflow: clip; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.nts-night-disc { position: absolute; border-radius: 50%; overflow: hidden; transform: scale(0); will-change: transform; }
+.nts-night-in { position: absolute; background: var(--w-bg); color: var(--w-fg); will-change: transform; }
+.nts-night * { view-transition-name: none !important; }
+/* the parts outside the hero crossfade as the disc passes their centre */
+html[data-bleed-state="in"] :is(body > :not(main, footer, .nts-night), body > :not(main, footer, .nts-night) *) { transition: color var(--dur-bleed-fade) ease, background-color var(--dur-bleed-fade) ease, border-color var(--dur-bleed-fade) ease, box-shadow var(--dur-bleed-fade) ease, text-shadow var(--dur-bleed-fade) ease, fill var(--dur-bleed-fade) ease, stroke var(--dur-bleed-fade) ease; }
 
 /* ---------- 12. the mega-sigil ---------- */
 .mega { position: relative; width: 100%; aspect-ratio: 1; }

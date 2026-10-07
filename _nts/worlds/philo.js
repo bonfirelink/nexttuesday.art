@@ -4,8 +4,10 @@
    by hand) and on every <div data-nts-fragment="philo"> (small, slower,
    not interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
-   host's computed --penrose-ink, --penrose-cut and --penrose-ground, so
-   a world bleed-in recolours it as the front reaches it. 30 fps, 15 for the
+   host's computed --penrose-ink, --penrose-cut and --penrose-ground. While
+   a world bleed-in's disc opens, the world's set goes to the canvas's twin
+   in the disc's copy (NTS.bleed.twin) and the NTS set stays here, each
+   drawn only while some of it is in view. 30 fps, 15 for the
    fragment; one closed frame under prefers-reduced-motion. */
 (() => {
   "use strict";
@@ -23,14 +25,15 @@
     const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30;
     let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0, bbox = null;
     let col = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
-    function colours() {
-      const cs = getComputedStyle(host);
-      col = {
+    function read(el) {
+      const cs = getComputedStyle(el);
+      return {
         ink: cs.getPropertyValue("--penrose-ink").trim() || col.ink,
         cut: cs.getPropertyValue("--penrose-cut").trim() || col.cut,
         ground: cs.getPropertyValue("--penrose-ground").trim() || col.ground,
       };
     }
+    function colours() { col = read(host); }
     function measure() {
       if (!bbox) {
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -45,12 +48,21 @@
       dpr = Math.min(2, devicePixelRatio || 1);
       w = Math.round(rect.width); h = Math.round(rect.height);
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       const span = Math.max(bbox.x1 - bbox.x0, bbox.y1 - bbox.y0);
       scale = (Math.min(w, h) * (lite ? 0.9 : 0.96)) / span;
       cx = w / 2 - ((bbox.x0 + bbox.x1) / 2) * scale;
       cy = h / 2 + ((bbox.y0 + bbox.y1) / 2) * scale;
     }
+    /* while the bleed-in's disc opens: the twin canvas and the world's set */
+    let twin = null, tctx = null, night = null;
     function draw(pose) {
+      if (!twin) { paint(ctx, col, pose); return; }
+      const q = window.NTS.bleed.progress();
+      if (q < 1) paint(ctx, col, pose);
+      if (q > 0) paint(tctx, night, pose);
+    }
+    function paint(ctx, col, pose) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       ctx.lineCap = "butt";
@@ -90,7 +102,16 @@
     /* without IntersectionObserver the host counts as always visible */
     if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
     document.addEventListener("visibilitychange", () => { hidden = document.hidden; if (!hidden) start(); });
-    addEventListener("nts:bleed", (e) => { if (e.detail.phase === "start") setTimeout(() => { colours(); redraw(); }, e.detail.at(host)); });
+    addEventListener("nts:bleed", (e) => {
+      const B = window.NTS && window.NTS.bleed;
+      if (e.detail.phase === "start") {
+        const th = B && B.twin(host), tc = B && B.twin(canvas);
+        if (!th || !tc) return;
+        twin = tc; tctx = twin.getContext("2d"); night = read(th);
+        twin.width = canvas.width; twin.height = canvas.height;
+        redraw();
+      } else if (e.detail.phase === "end") { twin = tctx = night = null; colours(); redraw(); }
+    });
     let timer = 0;
     addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { measure(); redraw(); }, 120); });
     if (!lite) {
