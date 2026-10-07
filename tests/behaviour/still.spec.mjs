@@ -6,6 +6,8 @@ import { VIEWPORTS, open, scrollTo } from "../helpers/behaviour.mjs";
 const SIZE_TOL = 0.5; // px: sizes read straight from CSS
 const OPACITY_DIGITS = 3; // opacity products agree to 0.0005
 const ORB_FRACS = [0.7, 0.6, 0.5, 0.4, 0.3]; // where the orb's top sits, as a share of the viewport height
+const ORB_ENTRY_K = [0.25, 0.5, 0.75]; // the share of its own height the orb has entered by
+const TOP_TOL = 1; // px: how closely a scroll must land on its target
 // The emblem's original box in CSS px, as recorded from the live site (the viewport's width on
 // a phone). A variant sized to the world ring (559 px at 1440) differs by more than the tolerance.
 const EMBLEM_WIDTH = { 390: 390, 1440: 565.72 };
@@ -21,32 +23,53 @@ for (const vp of VIEWPORTS) {
       await open(page);
       const count = await page.locator(".world .orb").count();
       expect(count).toBe(3);
+      // Where the orb's top should sit, in px from the viewport's top. Samples are
+      // the shares of the viewport height above, then ones where the orb is only
+      // partly in (`innerHeight - k * orbHeight`), which an entry-range animation
+      // is still running at.
+      const measure = ([i, skip]) => {
+        const orb = document.querySelectorAll(".world .orb")[i];
+        const r = orb.getBoundingClientRect();
+        let opacity = 1;
+        const own = [];
+        for (let el = orb; el && el !== document.documentElement; el = el.parentElement) {
+          const cs = getComputedStyle(el);
+          opacity *= parseFloat(cs.opacity);
+          if (!el.matches(skip)) own.push(`${cs.scale}|${cs.transform}`);
+        }
+        return { w: r.width, h: r.height, top: r.top, opacity, own: own.join(";"), inView: r.bottom > 0 && r.top < innerHeight };
+      };
       for (let i = 0; i < count; i++) {
         const seen = [];
-        for (const f of ORB_FRACS) {
-          await page.evaluate(([i, f]) => {
+        const sample = async (label, targetTop) => {
+          // The scroll lands on the target or the sample is void: a clamped scroll fails here.
+          const doc = await page.evaluate((i) => {
             const r = document.querySelectorAll(".world .orb")[i].getBoundingClientRect();
-            scrollTo({ top: r.top + scrollY - innerHeight * f, behavior: "instant" });
-          }, [i, f]);
-          await settle(page);
-          seen.push(
-            await page.evaluate(([i, skip]) => {
-              const orb = document.querySelectorAll(".world .orb")[i];
-              const r = orb.getBoundingClientRect();
-              let opacity = 1;
-              const own = [];
-              for (let el = orb; el && el !== document.documentElement; el = el.parentElement) {
-                const cs = getComputedStyle(el);
-                opacity *= parseFloat(cs.opacity);
-                if (!el.matches(skip)) own.push(`${cs.scale}|${cs.transform}`);
-              }
-              return { w: r.width, h: r.height, opacity, own: own.join(";"), inView: r.bottom > 0 && r.top < innerHeight };
-            }, [i, APERTURE_PART])
-          );
+            return r.top + scrollY;
+          }, i);
+          const y = doc - targetTop;
+          if (y < 0) return null; // the orb sits too near the page top to reach this position
+          await scrollTo(page, settle, y);
+          const s = await page.evaluate(measure, [i, APERTURE_PART]);
+          expect(Math.abs(s.top - targetTop), `orb ${i} at ${label}: top lands on ${targetTop.toFixed(0)}px`).toBeLessThanOrEqual(TOP_TOL);
+          return { ...s, label };
+        };
+        for (const f of ORB_FRACS) {
+          const s = await sample(`${f} of the viewport`, vp.height * f);
+          if (s) seen.push(s);
         }
+        const orbHeight = seen[seen.length - 1]?.h;
+        if (i > 0) {
+          for (const k of ORB_ENTRY_K) {
+            const s = await sample(`${k} of its height in`, vp.height - k * orbHeight);
+            if (s) seen.push(s);
+          }
+          expect(seen.length, `orb ${i} reached every sample`).toBe(ORB_FRACS.length + ORB_ENTRY_K.length);
+        }
+        expect(seen.length, `orb ${i} has samples`).toBeGreaterThan(0);
         const first = seen[0];
-        seen.forEach((s, k) => {
-          const at = `orb ${i} at ${ORB_FRACS[k]}`;
+        seen.forEach((s) => {
+          const at = `orb ${i} at ${s.label}`;
           expect(s.inView, `${at} is in view`).toBe(true);
           expect(Math.abs(s.w - first.w), `${at} width`).toBeLessThanOrEqual(SIZE_TOL);
           expect(Math.abs(s.h - first.h), `${at} height`).toBeLessThanOrEqual(SIZE_TOL);
