@@ -1,6 +1,6 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import {
-  WORLDS, recordBleed, clickWorldLink, bleedState, bleedEnd, scrollToY, bleedProgress,
+  WORLDS, groundLuma, recordBleed, clickWorldLink, bleedState, bleedEnd, scrollToY, bleedProgress,
 } from "../helpers/transitions.mjs";
 
 const UP = [0.15, 0.3, 0.45, 0.6, 0.75];
@@ -121,3 +121,53 @@ test.describe("no bleed on a direct landing or a reload", () => {
     });
   }
 });
+
+// The dark the visitor sees while the disc opens (inside the disc over the
+// hero, and on the ground below the hero) is the settled world's ground:
+// the same colour and the same texture (INTERSECT's grain), not a flatter or
+// lighter one that switches later. Median luminance, in 0..255.
+const GROUND_TOLERANCE = 2;
+
+for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["390x844", { width: 390, height: 844 }]]) {
+  test.describe(`bleed ground ${label}`, () => {
+    test.use({ viewport, deviceScaleFactor: 1 });
+    for (const world of WORLDS) {
+      test(`T3 the ${world} bleed shows the settled ground in the disc and below the hero, ${label}`, async ({ page }) => {
+        await arrive(page, world, "flag");
+        await page.waitForTimeout(700); // the grain's own fade, if any
+        const end = await bleedEnd(page);
+        // The section's own text and figures are not the ground: the median skips them.
+        const measure = () => page.evaluate(() => {
+          const hero = document.querySelector("main .hero").getBoundingClientRect();
+          const disc = document.querySelector(".nts-night-disc");
+          const d = disc && disc.getBoundingClientRect();
+          return {
+            heroBottom: hero.bottom,
+            disc: d && { cx: d.left + d.width / 2, cy: d.top + d.height / 2, r: d.width / 2 },
+          };
+        });
+        const regions = (m) => [
+          { x: 0, y: 60, w: viewport.width, h: Math.max(0, m.heroBottom - 60), disc: m.disc && { cx: m.disc.cx, cy: m.disc.cy, r: m.disc.r - 4 } },
+          { x: 0, y: m.heroBottom + 4, w: viewport.width, h: Math.max(0, viewport.height - m.heroBottom - 4) },
+        ];
+        const y = Math.round(0.5 * end);
+        await scrollToY(page, y);
+        expect(await bleedState(page)).toBe("in");
+        const m = await measure();
+        const during = await groundLuma(page, regions(m)); console.log(label, world, JSON.stringify(m), during);
+        // Settle, come back to the same scroll: the same view in the world.
+        await scrollToY(page, Math.round(end) + 5);
+        await expect.poll(() => bleedState(page)).toBe("world");
+        await scrollToY(page, y);
+        await page.waitForTimeout(700);
+        const after = await groundLuma(page, regions(m));
+        expect(during[0], "ground sampled inside the disc over the hero").not.toBeNull();
+        expect(after[0]).not.toBeNull();
+        expect(Math.abs(during[0] - after[0]), `disc ground ${during[0]} vs settled ${after[0]}`).toBeLessThanOrEqual(GROUND_TOLERANCE);
+        if (during[1] !== null && after[1] !== null) {
+          expect(Math.abs(during[1] - after[1]), `ground below the hero ${during[1]} vs settled ${after[1]}`).toBeLessThanOrEqual(GROUND_TOLERANCE);
+        }
+      });
+    }
+  });
+}

@@ -92,3 +92,38 @@ export const scrollToY = (page, y) =>
   }, y);
 
 export const bleedProgress = (page) => page.evaluate(() => window.NTS.bleed.progress());
+
+// Median luminance (0..255) of the pixels of a viewport screenshot inside
+// each region, `{ x, y, w, h, disc? }` in CSS px at scale 1; `disc: { cx, cy, r }`
+// keeps only the pixels inside that circle. The median ignores the text and
+// figures on the ground, so it reads the ground (colour and grain) alone.
+export async function groundLuma(page, regions) {
+  const png = (await page.screenshot()).toString("base64");
+  const aux = await page.context().newPage();
+  try {
+    return await aux.evaluate(async ({ png, regions }) => {
+      const img = new Image();
+      img.src = "data:image/png;base64," + png;
+      await img.decode();
+      const c = document.createElement("canvas");
+      c.width = img.width; c.height = img.height;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(img, 0, 0);
+      return regions.map((r) => {
+        const x0 = Math.max(0, Math.floor(r.x)), y0 = Math.max(0, Math.floor(r.y));
+        const w = Math.min(c.width - x0, Math.floor(r.w)), h = Math.min(c.height - y0, Math.floor(r.h));
+        if (w <= 0 || h <= 0) return null;
+        const d = g.getImageData(x0, y0, w, h).data, hist = new Array(256).fill(0);
+        let n = 0;
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          if (r.disc && Math.hypot(x0 + x - r.disc.cx, y0 + y - r.disc.cy) > r.disc.r) continue;
+          const i = (y * w + x) * 4;
+          hist[Math.round(0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2])]++; n++;
+        }
+        if (n < 500) return null;
+        let acc = 0;
+        for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= n / 2) return v; }
+      });
+    }, { png, regions });
+  } finally { await aux.close(); }
+}
