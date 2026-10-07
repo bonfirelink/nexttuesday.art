@@ -367,10 +367,9 @@
      home orb again). World to world is the plain root crossfade: the two
      entities never morph. The arriving side is named in nts-head.js. */
   (function () {
-    var WORLD = /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/;
     function orb(other, vt) {
       var ent = document.querySelector(".hero .entity");
-      if (!ent || !vt || WORLD.test(new URL(other, location.href).pathname)) return;
+      if (!ent || !vt || window.NTS.world(other)) return;
       ent.style.viewTransitionName = "orb";
       var clear = function () { ent.style.viewTransitionName = ""; };
       vt.finished.then(clear, clear);

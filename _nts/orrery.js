@@ -9,7 +9,7 @@
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
                "orb", so it grows into the world page's entity; coming back,
-               the entity shrinks into the same body
+               the entity shrinks into the same body (named in nts-head.js)
    Everything checks prefers-reduced-motion. */
 (function () {
   "use strict";
@@ -56,35 +56,15 @@
     }
   }
 
-  /* falling in, and back */
-  var WORLD = { "embers": "embers", "not-not-philo": "philo", "intersect": "intersect", "events": "star" };
-  function bodyOf(href) {
-    var u; try { u = new URL(href, location.href); } catch (err) { return null; }
-    if (u.origin !== location.origin) return null;
-    var m = /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/.exec(u.pathname);
-    return m ? WORLD[m[1]] : null;
-  }
-  function onScreen(el) { var r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && r.width > 0; }
-  function bodyEl(body) {
-    var bead = document.querySelector('.bead[data-body="' + body + '"] .face');
-    var orb = document.querySelector('.orb[data-body="' + body + '"]');
-    if (bead && onScreen(bead)) return bead;
-    if (orb && onScreen(orb)) return orb;
-    return bead || orb;
-  }
-  function name(el, vt) {
+  /* falling in (coming back is named in nts-head.js, which owns the world
+     list and the body lookup) */
+  var NTS = window.NTS;
+  addEventListener("pageswap", function (e) {
+    if (!e.viewTransition || !e.activation || !e.activation.entry || !NTS || !NTS.world) return;
+    var w = NTS.world(e.activation.entry.url), el = w && NTS.body(w);
     if (!el) return;
     el.style.viewTransitionName = "orb";
-    if (vt && vt.finished) vt.finished.then(function () { el.style.viewTransitionName = ""; }, function () { el.style.viewTransitionName = ""; });
-  }
-  addEventListener("pageswap", function (e) {
-    if (!e.viewTransition || !e.activation || !e.activation.entry) return;
-    var b = bodyOf(e.activation.entry.url);
-    if (b) name(bodyEl(b), e.viewTransition);
-  });
-  addEventListener("pagereveal", function (e) {
-    if (!e.viewTransition || !("navigation" in window) || !navigation.activation || !navigation.activation.from) return;
-    var b = bodyOf(navigation.activation.from.url);
-    if (b) name(bodyEl(b), e.viewTransition);
+    var clear = function () { el.style.viewTransitionName = ""; };
+    e.viewTransition.finished.then(clear, clear);
   });
 })();
