@@ -1,0 +1,21 @@
+{
+  "css": {
+    "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;1,500&display=swap": "f2da654ebefa.css",
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Archivo:wdth,wght@100..125,600..900&family=IM+Fell+DW+Pica:ital@0;1&family=Red+Hat+Mono:wght@400;500;700&display=swap": "a17a9e3bbe66.css",
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Archivo:wdth,wght@100..125,600..900&family=Red+Hat+Mono:wght@400;500;700&display=swap": "975e210b498e.css",
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=IM+Fell+DW+Pica:ital@0;1&family=Red+Hat+Mono:wght@400;500;700&display=swap": "a5b271a70f78.css",
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Red+Hat+Mono:wght@400;500;700&display=swap": "d5dbbe16d469.css"
+  },
+  "files": {
+    "https://fonts.gstatic.com/s/ebgaramond/v33/SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7eOQL99U6g.woff2": "45ccb2773767.woff2",
+    "https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-2fRkBI9_.woff2": "f2490a187a2f.woff2",
+    "https://fonts.gstatic.com/s/archivo/v25/k3kQo8UDI-1M0wlSfdnoLg.woff2": "4c18bbf2664b.woff2",
+    "https://fonts.gstatic.com/s/fraunces/v38/6NUT8FyLNQOQZAnv9ZwNpOskzA.woff2": "d1770f0e147d.woff2",
+    "https://fonts.gstatic.com/s/fraunces/v38/6NUV8FyLNQOQZAnv9ZwIlOk.woff2": "48a70ea0ceea.woff2",
+    "https://fonts.gstatic.com/s/imfelldwpica/v16/2sDEZGRQotv9nbn2qSl0TxXVYNwNZjnXlis.woff2": "fc238f9c6c9e.woff2",
+    "https://fonts.gstatic.com/s/imfelldwpica/v16/2sDGZGRQotv9nbn2qSl0TxXVYNwNYwnV.woff2": "2c69db45b0dc.woff2",
+    "https://fonts.gstatic.com/s/instrumentsans/v4/pxitypc9vsFDm051Uf6KVwgkfoSbSnNPooZAN0lInHGpCWNu15GR.woff2": "a98c6e59ad9d.woff2",
+    "https://fonts.gstatic.com/s/instrumentsans/v4/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0SZe1Q.woff2": "f587e7278012.woff2",
+    "https://fonts.gstatic.com/s/redhatmono/v16/jVyN7nDnA2uf2zVvFAhhzEsUWOxS.woff2": "ae4a02e7e137.woff2"
+  }
+}
