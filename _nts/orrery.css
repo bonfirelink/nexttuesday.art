@@ -11,9 +11,9 @@
    Nothing here redefines a --nts-* or --w-* token.
    Angles and periods: --a is where a body starts, --p how long one orbit
    takes. The compass repeats them so its dots stay in step with the sky.
-   Every orbit is a zero-size pivot that turns, with the body offset by the
-   radius and turned back upright: a rotated box of any size would push its
-   corners into the page's scrollable overflow. */
+   Every orbit is a zero-size pivot, with the body riding it at the radius,
+   turning round it and turned back upright: a rotated box of any size would
+   push its corners into the page's scrollable overflow. */
 
 :root {
   --a-star: 140deg;      --p-star: 70s;
@@ -43,10 +43,22 @@
 .orrery .sun-grain { position: absolute; left: 24.4%; top: 24.4%; width: 51.2%; height: 51.2%; border-radius: 50%; background: var(--orbit-noise) center / 220px 220px; mix-blend-mode: multiply; opacity: .42; pointer-events: none; }
 .orrery .sun { position: absolute; left: 25%; top: 25%; width: 50%; color: var(--nts-ink); }
 .orrery .sun:focus-visible { outline-color: var(--nts-ink); outline-offset: 6px; }
-/* the pivot: a zero-size point that turns; what rides it sits at --r
-   straight up and turns back the other way, so it stays upright */
-.pivot { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; rotate: var(--a, 20deg); animation: turn var(--p, 80s) linear infinite; }
-.pivot > * { position: absolute; left: 0; top: calc(-1 * var(--r, 50cqi)); rotate: calc(-1 * var(--a, 20deg)); animation: turn var(--p, 80s) linear infinite reverse; }
+/* the pivot: a zero-size point holding an orbit's angle (--a), radius (--r)
+   and period (--p). What rides it has one transform, rotate(θ)
+   translateY(-r) rotate(-θ): it sits at --r in the direction θ and stays
+   upright, and one animation takes θ from --a round a full turn. The pose
+   is built on the pivot and inherited (--pose, --pose-end), because the
+   animated rider must declare no custom property of its own: Chromium
+   re-resolves every animated element that does, selector matching and all,
+   on every frame while a ::selection rule reads a var() (nts.css has them).
+   Only transform animates, so the compositor runs the orbit. */
+.pivot {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none;
+  --pose: rotate(var(--a, 20deg)) translateY(calc(-1 * var(--r, 50cqi))) rotate(calc(-1 * var(--a, 20deg)));
+  --pose-end: rotate(calc(var(--a, 20deg) + 1turn)) translateY(calc(-1 * var(--r, 50cqi))) rotate(calc(-1 * var(--a, 20deg) - 1turn));
+}
+.pivot > * { position: absolute; left: 0; top: 0; transform: var(--pose); animation: orbit var(--p, 80s) linear infinite; }
+@keyframes orbit { from { transform: var(--pose); } to { transform: var(--pose-end); } }
 .trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--w-bg); border: 1px solid var(--w-line-strong); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--w-fg) 50%, transparent); }
 .trace-bead .nts-sigil { width: 1.5rem; height: 1.5rem; }
 .orrery .o-star { --r: 27.2cqi; --a: var(--a-star); --p: var(--p-star); }
@@ -69,11 +81,12 @@
 .bead:hover .face, .bead:focus-visible .face { transform: translateY(var(--lift-y)); box-shadow: 0 0 0 3px var(--nts-paper), 0 12px 22px -10px rgba(26, 21, 48, .65); border-color: var(--bead-fg); }
 .bead:active .face { transform: scale(.97); box-shadow: none; }
 .bead:focus-visible { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; border-radius: 50%; }
-.bead[data-body="embers"] { --bead-bg: var(--embers-night); --bead-fg: var(--embers-fire); --bead-line: rgba(229, 29, 71, .55); }
+/* the bead's colours sit on its face: the bead itself is the animated rider */
+.bead[data-body="embers"] .face { --bead-bg: var(--embers-night); --bead-fg: var(--embers-fire); --bead-line: rgba(229, 29, 71, .55); }
 .bead[data-body="embers"] .face { box-shadow: 0 0 0 3px var(--nts-paper), 0 6px 14px -8px rgba(26, 21, 48, .55), 0 0 18px -4px rgba(229, 29, 71, .45); }
-.bead[data-body="philo"] { --bead-bg: var(--philo-ground); --bead-fg: var(--philo-red); --bead-line: rgba(43, 45, 62, .6); }
-.bead[data-body="intersect"] { --bead-bg: var(--intersect-black); --bead-fg: var(--intersect-phosphor); --bead-line: rgba(233, 226, 207, .4); }
-.bead[data-body="star"] { --bead-bg: transparent; --bead-line: transparent; --bead-fg: var(--nts-gold); }
+.bead[data-body="philo"] .face { --bead-bg: var(--philo-ground); --bead-fg: var(--philo-red); --bead-line: rgba(43, 45, 62, .6); }
+.bead[data-body="intersect"] .face { --bead-bg: var(--intersect-black); --bead-fg: var(--intersect-phosphor); --bead-line: rgba(233, 226, 207, .4); }
+.bead[data-body="star"] .face { --bead-bg: transparent; --bead-line: transparent; --bead-fg: var(--nts-gold); }
 .bead[data-body="star"] .face { box-shadow: none; background: transparent; border: 0; }
 .bead[data-body="star"] .nts-sigil { width: 66%; filter: drop-shadow(0 1px 1px rgba(26, 21, 48, .35)); }
 .bead[data-body="star"]:hover .face, .bead[data-body="star"]:focus-visible .face { box-shadow: none; }
@@ -183,10 +196,11 @@ html:not(.js) .compass { display: none; }
 .compass .c-intersect { --a: var(--a-intersect); --p: var(--p-intersect); --c: var(--intersect-fire-text); }
 .compass .c-star { --a: var(--a-star); --p: var(--p-star); --c: var(--nts-gold); }
 .compass .c-orbit { --r: 19px; }
-.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
-.compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
-.compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: scale(1.9); }
-.compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; transform: none; }
+.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transition: opacity .4s, background-color .4s; }
+/* the needle stands upright on the sun and only fades in; it does not ride */
+.compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: none; animation: none; transition: opacity .4s; }
+.compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: var(--pose) scale(1.9); }
+.compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; }
 .compass[data-near="sun"] .c-sun { filter: drop-shadow(0 0 4px rgba(240, 74, 58, .6)); }
 .compass:hover, .compass:focus-visible { border-color: var(--nts-coral-ink); }
 
@@ -205,8 +219,8 @@ html:not(.js) .compass { display: none; }
 .events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--nts-ink); }
 .events-hero .mini-ring { position: absolute; inset: calc(50% - var(--r)); border-radius: 50%; border: 1px dashed var(--w-line); }
 .events-hero .mini-orrery .pivot > a { pointer-events: auto; }
-.events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: transform var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift); }
-.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { transform: translateY(var(--lift-y)); box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--w-fg) 55%, transparent); border-color: var(--w-accent); }
+.events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: box-shadow var(--dur-lift) var(--ease-lift); }
+.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { transform: var(--pose) translateY(var(--lift-y)); box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--w-fg) 55%, transparent); border-color: var(--w-accent); }
 .events-hero .o1, .events-hero .ring-1 { --r: 26cqi; --a: var(--a-embers); --p: var(--p-embers); }
 .events-hero .o2, .events-hero .ring-2 { --r: 38cqi; --a: var(--a-philo); --p: var(--p-philo); }
 .events-hero .o3, .events-hero .ring-3 { --r: 50cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
@@ -227,7 +241,7 @@ html:not(.js) .compass { display: none; }
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
 @media (prefers-reduced-motion: reduce) {
   .pivot, .pivot > *, .compass .c-sun { animation: none !important; }
-  .events-hero .mini-orrery a.trace-bead:hover { transform: none; }
+  .events-hero .mini-orrery a.trace-bead:hover { transform: var(--pose); }
   .js .orrery .r-embers { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 1; animation: none; }
   .js .bead .face { animation: none; }
