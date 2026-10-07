@@ -76,7 +76,59 @@
      share there fires exactly then (55% if the property is unreadable). Elements already past it (loaded
      scrolled, or tall ones) report a top above that line and latch at once. */
   var apertures = document.querySelectorAll(".ecl");
-  if (apertures.length && "IntersectionObserver" in window && CSS.supports("animation-timeline", "view()")) {
+  var latching = apertures.length && "IntersectionObserver" in window && CSS.supports("animation-timeline", "view()");
+
+  /* the live pictures in apertures (the home's world windows): one at a time.
+     A figure asks NTS.live.join(host, set) whether it may animate, and
+     set(on) tells it when that changes; between, it holds its last frame.
+     Live is the one figure whose window is open (.is-open: while its disc
+     still opens, a figure holds still) and whose host is nearest the middle
+     of the viewport: the most of it inside the middle band (the 40% of the
+     viewport's height around its centre), else, when no host reaches the
+     band, the one most in view if at least half of it is. Everything is
+     read from IntersectionObserver entries, so nothing is measured while
+     the page scrolls. A figure outside an aperture, or without
+     IntersectionObserver, is not held: join returns true. */
+  var live = (function () {
+    var items = new Map(), current = null, band = null, view = null, steps = [];
+    for (var i = 0; i <= 20; i++) steps.push(i / 20);
+    function pick() {
+      var best = null, top = 0;
+      items.forEach(function (it) {
+        if (latching && !still.matches && !it.ecl.classList.contains("is-open")) return;
+        var s = it.band > 0 ? 1 + it.band : it.ratio >= 0.5 ? it.ratio : 0;
+        if (s > top) { top = s; best = it; }
+      });
+      if (best === current) return;
+      if (current) current.set(false);
+      current = best;
+      if (best) best.set(true);
+    }
+    function take(key) {
+      return function (es) {
+        es.forEach(function (e) {
+          var it = items.get(e.target);
+          if (it) it[key] = !e.isIntersecting ? 0 : key === "band" ? e.intersectionRect.height : e.intersectionRatio;
+        });
+        pick();
+      };
+    }
+    function join(host, set) {
+      var ecl = host.closest && host.closest(".ecl");
+      if (!ecl || !("IntersectionObserver" in window)) return true;
+      if (!band) {
+        band = new IntersectionObserver(take("band"), { rootMargin: "-30% 0px -30% 0px", threshold: steps });
+        view = new IntersectionObserver(take("ratio"), { threshold: [0, 0.25, 0.5, 0.75, 1] });
+      }
+      items.set(host, { ecl: ecl, set: set, band: 0, ratio: 0 });
+      band.observe(host); view.observe(host);
+      return false;
+    }
+    (window.NTS = window.NTS || {}).live = { join: join };
+    return { pick: pick };
+  })();
+
+  if (latching) {
     var end = /^\s*([\d.]+)vh\s*$/.exec(getComputedStyle(document.documentElement).getPropertyValue("--ecl-open-end"));
     var radius = "ResizeObserver" in window ? new ResizeObserver(function (es) {
       es.forEach(function (e) {
@@ -89,6 +141,7 @@
         if (e.boundingClientRect.top > e.rootBounds.bottom) return;
         e.target.classList.add("is-open");
         latch.unobserve(e.target);
+        live.pick();
         var win = e.target.querySelector(".ecl-win");
         if (radius && win) radius.unobserve(win);
       });

@@ -91,9 +91,10 @@
     for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) o[r * 3 + c] = a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c];
     return o;
   }
-  /* One frame as a string. cols/rows: the cell grid; aspect: cell width over
-     height; pose: {phi, alpha, spin} for flat figures, {ax, ay} for solids. */
-  function render(fig, cols, rows, aspect, pose, zoom) {
+  /* One frame as lines of text (trailing spaces trimmed). cols/rows: the
+     cell grid; aspect: cell width over height; pose: {phi, alpha, spin} for
+     flat figures, {ax, ay} for solids. */
+  function lines(fig, cols, rows, aspect, pose, zoom) {
     var pts = fig.pts, n = pts.length / 6, faceEnd = fig.faceEnd || 0;
     var K2 = 6, K1 = (zoom || 0.9) * (cols / 2) * K2, cx = cols / 2, cy = rows / 2;
     var L = norm([0.25, 0.55, -0.8]);
@@ -127,32 +128,57 @@
         }
       }
     }
-    var lines = [];
-    for (var r = 0; r < rows; r++) lines.push(chars.slice(r * cols, (r + 1) * cols).join("").replace(/\s+$/, ""));
-    return lines.join("\n");
+    var out = [];
+    for (var r = 0; r < rows; r++) out.push(chars.slice(r * cols, (r + 1) * cols).join("").replace(/\s+$/, ""));
+    return out;
   }
+  /* the same frame as one string, as a <pre> holds it */
+  function render(fig, cols, rows, aspect, pose, zoom) { return lines(fig, cols, rows, aspect, pose, zoom).join("\n"); }
   var built = {};
   function figure(name) { if (!built[name]) built[name] = FIGURES[name](); return built[name]; }
-  var api = { render: render, figure: figure, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
+  var api = { render: render, lines: lines, figure: figure, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   if (typeof document === "undefined") return;
   window.NTS = window.NTS || {}; window.NTS.ascii = api;
 
+  /* Draws the live solid on a canvas over the <pre>'s box, one fillText
+     per line, in the pre's own face, size, colour and glow (its computed
+     color and text-shadow, read when the colours can change, never per
+     frame): writing the text into the pre instead made the page lay out
+     every frame. The pre stays the box, the target of drag and keys, and
+     the accessible element (role, label); its baked still text moves into a
+     span that is hidden once the canvas draws. GLOW: "canvas" blurs each
+     line's shadow in the canvas (as text-shadow does per line), "css" puts
+     the text-shadow on the canvas element as a drop-shadow filter. */
+  var GLOW = window.NTS_ASCII_GLOW || "canvas";
+  function look(el) {
+    var cs = getComputedStyle(el), m = /^(.*?)\s+(-?[\d.]+)px\s+(-?[\d.]+)px(?:\s+([\d.]+)px)?/.exec(cs.textShadow || "");
+    return { fill: cs.color, font: cs.fontStyle + " " + cs.fontWeight + " ", family: cs.fontFamily, glow: m ? { c: m[1], x: +m[2], y: +m[3], b: +(m[4] || 0) } : null };
+  }
   function mount(pre, name, cols, lite) {
     if (!FIGURES[name]) return;
+    var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.setAttribute("aria-hidden", "true");
+    var baked = document.createElement("span");
+    baked.className = "ascii-still";
+    while (pre.firstChild) baked.appendChild(pre.firstChild);
+    pre.appendChild(baked); pre.appendChild(canvas);
     var fig = figure(name);
     var still = matchMedia("(prefers-reduced-motion: reduce)");
-    var rows = 0, aspect = 0.6, FPS = lite ? 15 : 30;
+    var rows = 0, aspect = 0.6, FPS = lite ? 15 : 30, size = 0, base = 0, dpr = 1, day = null, night = null;
     var pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
-    var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, raf = 0, last = 0, acc = 0, tAcc = 0;
+    var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, held = false, raf = 0, last = 0, acc = 0, tAcc = 0;
     /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
-       CSS (a square), so only the font size changes here, never the layout.
-       The cell ratio comes from the loaded face: a fallback face measures
-       differently (and a face still in its block period measures nothing),
-       so the ratio is clamped to what a monospace face can be and the size
-       to a sane range, and fit() runs again once the face is in. The probe
-       is read with offsetWidth: getBoundingClientRect would include the
-       scale of a transformed ancestor (the home's windows are scaled). */
+       CSS (a square), so nothing here changes the layout. The cell ratio
+       comes from the loaded face: a fallback face measures differently (and
+       a face still in its block period measures nothing), so the ratio is
+       clamped to what a monospace face can be and the size to a sane range,
+       and fit() runs again once the face is in. The probe is read with
+       offsetWidth: getBoundingClientRect would include the scale of a
+       transformed ancestor (the home's windows are scaled). The baseline
+       sits where a line box of line-height 1 puts it: half the leading
+       above the face's ascent. */
     var fitted = 0, gaveUp = false;
     function fit() {
       var w = pre.clientWidth; if (!w) return;
@@ -162,8 +188,29 @@
       pre.appendChild(probe);
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
-      var fs = Math.min(24, Math.max(3, w / cols / ratio));
-      pre.style.fontSize = fs + "px"; if (twin) twin.style.fontSize = pre.style.fontSize; aspect = ratio; rows = Math.max(1, Math.floor(w / fs)); fitted = w;
+      size = Math.min(24, Math.max(3, w / cols / ratio)); aspect = ratio; rows = Math.max(1, Math.floor(w / size)); fitted = w;
+      dpr = Math.min(3, devicePixelRatio || 1);
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round((pre.clientHeight || w) * dpr);
+      if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
+      day = look(pre);
+      /* the baseline as the pre's lines put it: a line of the face at this
+         size, line-height 1, in a probe outside any transformed ancestor */
+      var line = document.createElement("div"), mark = document.createElement("span");
+      line.style.cssText = "position:absolute;left:0;top:0;visibility:hidden;white-space:pre;font:" + day.font + size + "px " + day.family + ";line-height:1";
+      mark.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+      line.textContent = "M"; line.appendChild(mark); document.body.appendChild(line);
+      base = mark.getBoundingClientRect().top - line.getBoundingClientRect().top; document.body.removeChild(line);
+      if (!(base > 0)) base = size * 0.8;
+    }
+    function glow(c, el, st) {
+      if (GLOW === "css") { el.style.filter = st.glow ? "drop-shadow(" + st.glow.x + "px " + st.glow.y + "px " + st.glow.b + "px " + st.glow.c + ")" : ""; return; }
+    }
+    function paint(c, el, st, ls) {
+      c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
+      if (GLOW === "canvas" && st.glow) { c.shadowColor = st.glow.c; c.shadowBlur = st.glow.b * dpr; c.shadowOffsetX = st.glow.x * dpr; c.shadowOffsetY = st.glow.y * dpr; } else c.shadowColor = "transparent";
+      for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], 0, r * size + base);
     }
     var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
     /* Before the face is in (or given up on) nothing is measured; while it
@@ -171,32 +218,38 @@
     function faceReady() { try { return !fonts || !fonts.check || fonts.check("400 100px " + family, "M"); } catch (e) { return true; } }
     function refit() {
       if (pending || !live || !(faceReady() || gaveUp)) return;
-      pending = requestAnimationFrame(function () { pending = 0; fit(); if (rows) draw(); });
+      pending = requestAnimationFrame(function () { pending = 0; fit(); glow(ctx, canvas, day); if (rows) draw(); });
     }
     /* while a world bleed-in's disc opens, the glyphs also go to the
-       solid's twin in the disc's copy (NTS.bleed.twin), which shows them in
-       the world's colours; each only while some of it is in view */
-    var twin = null;
+       canvas's twin in the disc's copy (NTS.bleed.twin), in the colours the
+       twin pre computes (the world's); each only while some of it is in view */
+    var twin = null, tctx = null;
+    function twinUp() {
+      var B = window.NTS && window.NTS.bleed, tp = B && B.twin(pre), tc = B && B.twin(canvas);
+      if (!tp || !tc) return;
+      tp.classList.add("is-live");
+      twin = tc; tctx = twin.getContext("2d"); night = look(tp);
+      twin.width = canvas.width; twin.height = canvas.height; glow(tctx, twin, night);
+    }
     addEventListener("nts:bleed", function (e) {
-      var B = window.NTS && window.NTS.bleed;
-      if (e.detail.phase === "start") { twin = B && B.twin(pre); if (twin) { twin.style.fontSize = pre.style.fontSize; twin.textContent = pre.textContent; } }
-      else if (e.detail.phase === "end") { twin = null; draw(); }
+      if (e.detail.phase === "start") { twinUp(); if (live && twin) draw(); }
+      else if (e.detail.phase === "end") { twin = tctx = night = null; if (live) { day = look(pre); glow(ctx, canvas, day); draw(); } }
     });
     function draw() {
-      var s = render(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9), q = twin ? window.NTS.bleed.progress() : 0;
-      if (q < 1) pre.textContent = s;
-      if (twin && q > 0) twin.textContent = s;
+      var ls = lines(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9), q = twin ? window.NTS.bleed.progress() : 0;
+      if (q < 1) paint(ctx, canvas, day, ls);
+      if (twin && q > 0) paint(tctx, twin, night, ls);
     }
     function frame(t) {
       raf = 0;
-      if (!visible || document.hidden) return;
+      if (!visible || held || document.hidden) return;
       var dt = last ? Math.min(0.1, (t - last) / 1000) : 0; last = t; acc += dt; tAcc += dt;
       if (!dragging) { pose.phi += dt * 0.55 * speed; pose.spin += dt * 0.22 * speed; pose.ax += dt * 0.35 * speed; pose.ay += dt * 0.6 * speed; pose.alpha = 0.52 + 0.14 * Math.sin(tAcc * 0.4); }
       if (speed > 1) speed = Math.max(1, speed - dt * 2.5);
       if (acc >= 1 / FPS) { acc = acc % (1 / FPS); draw(); }
       raf = requestAnimationFrame(frame);
     }
-    function start() { if (still.matches || raf || !visible || document.hidden) return; last = 0; raf = requestAnimationFrame(frame); }
+    function start() { if (still.matches || raf || !live || !visible || held || document.hidden) return; last = 0; raf = requestAnimationFrame(frame); }
     function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
     if (!lite) {
       pre.addEventListener("pointerdown", function (e) { dragging = true; lastX = e.clientX; lastY = e.clientY; pre.setPointerCapture(e.pointerId); });
@@ -205,7 +258,7 @@
         var dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
         pose.phi += dx * 0.01; pose.spin += dx * 0.004; pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + dy * 0.006));
         pose.ay += dx * 0.01; pose.ax += dy * 0.01;
-        if (still.matches) draw();
+        if (still.matches && live) draw();
       });
       var release = function () { dragging = false; speed = 1; };
       pre.addEventListener("pointerup", release); pre.addEventListener("pointercancel", release); pre.addEventListener("lostpointercapture", release);
@@ -216,14 +269,23 @@
         e.preventDefault();
         pose.phi += d * 0.25; pose.spin += d * 0.1; pose.ay += d * 0.25; pose.ax += v * 0.25;
         pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + v * 0.08));
-        if (still.matches) draw();
+        if (still.matches && live) draw();
       });
     }
+    /* in an aperture (the home's windows), NTS.live says when it may animate;
+       held, it keeps its last frame (start resets the clock) */
+    held = !(window.NTS && window.NTS.live ? window.NTS.live.join(pre.closest("[data-nts-fragment]") || pre, function (on) { held = !on; if (on) start(); else stop(); }) : true);
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); else stop(); }, { threshold: 0.05 }).observe(pre);
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else start(); });
     if ("ResizeObserver" in window) new ResizeObserver(function () { if (Math.abs(pre.clientWidth - fitted) > 0.5) refit(); }).observe(pre);
     else addEventListener("resize", refit);
-    function go() { live = true; fit(); draw(); pre.classList.add("is-live"); start(); }
+    function go() {
+      live = true; pre.classList.add("is-live");
+      fit(); glow(ctx, canvas, day);
+      if (!twin) twinUp();
+      if (twin) glow(tctx, twin, night);
+      draw(); start();
+    }
     if (!fonts || !fonts.load) { go(); return; }
     /* The first measure waits for the face (at most 3 s, for a blocked
        network); until then the baked still stays on screen. */

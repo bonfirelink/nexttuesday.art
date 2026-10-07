@@ -234,7 +234,7 @@
       if (acc >= 1 / fps) { acc = acc % (1 / fps); draw(); }
       schedule();
     }
-    function schedule() { if (!raf && visible && !document.hidden && !still.matches) raf = requestAnimationFrame(frame); }
+    function schedule() { if (!raf && visible && held !== true && !document.hidden && !still.matches) raf = requestAnimationFrame(frame); }
     function halt() { if (raf) cancelAnimationFrame(raf); raf = 0; last = 0; }
     function stokeIt() {
       stoke = Math.min(1.6, stoke + 0.85);
@@ -261,6 +261,11 @@
         if (e.key === "ArrowRight") { yaw += 0.2; if (still.matches) draw(); }
       });
     }
+    /* in an aperture (the home's windows), NTS.live says when this one may
+       animate; held, it keeps its last frame (halt resets the clock, so it
+       resumes where it stopped) */
+    let held = null;
+    held = !(window.NTS && window.NTS.live ? window.NTS.live.join(host, (on) => { held = !on; on ? schedule() : halt(); }) : true);
     if ("IntersectionObserver" in window) {
       new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; visible ? schedule() : halt(); }).observe(canvas);
     } else visible = true;
