@@ -7,6 +7,7 @@ const SIZE_TOL = 0.5; // px: sizes read straight from CSS
 const OPACITY_DIGITS = 3; // opacity products agree to 0.0005
 const ORB_FRACS = [0.7, 0.6, 0.5, 0.4, 0.3]; // where the orb's top sits, as a share of the viewport height
 const ORB_ENTRY_K = [0.25, 0.5, 0.75]; // the share of its own height the orb has entered by
+const TOP_TRIES = 4; // scrolls tried to land the orb on a target
 const TOP_TOL = 1; // px: how closely a scroll must land on its target
 // The emblem's original box in CSS px, as recorded from the live site (the viewport's width on
 // a phone). A variant sized to the world ring (559 px at 1440) differs by more than the tolerance.
@@ -49,8 +50,15 @@ for (const vp of VIEWPORTS) {
           }, i);
           const y = doc - targetTop;
           if (y < 0) return null; // the orb sits too near the page top to reach this position
-          await scrollTo(page, settle, y);
-          const s = await page.evaluate(measure, [i, APERTURE_PART]);
+          // A scaled orb's box moves as it scrolls, so correct the scroll until the box is on target.
+          let s;
+          let at = y;
+          for (let n = 0; n < TOP_TRIES; n++) {
+            await scrollTo(page, settle, at);
+            s = await page.evaluate(measure, [i, APERTURE_PART]);
+            if (Math.abs(s.top - targetTop) <= TOP_TOL) break;
+            at += s.top - targetTop;
+          }
           expect(Math.abs(s.top - targetTop), `orb ${i} at ${label}: top lands on ${targetTop.toFixed(0)}px`).toBeLessThanOrEqual(TOP_TOL);
           return { ...s, label };
         };
