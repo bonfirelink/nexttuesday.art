@@ -1,7 +1,7 @@
 {
   "p2": {
-    "_note": "Paints inside the aperture parts while the home is scrolled until its third world window latches, world scripts blocked, unthrottled. Allowance = observed median plus headroom; a regressed opening paints about once per frame (dozens).",
-    "observed": { "1440": 5, "390": 11 },
-    "eclPartPaints": { "1440": 8, "390": 14 }
+    "_note": "Paints inside .ecl (windows, rings and the content that first paints in them) while the home is scrolled, at a fixed 54 frames per viewport, until its third world window latches, world scripts blocked, unthrottled. Allowance is about 1.4x the observed median; with the openings animated by a custom property the same run paints 47 (390) and 82 (1440).",
+    "observed": { "1440": 17, "390": 11 },
+    "eclPartPaints": { "1440": 24, "390": 20 }
   }
 }

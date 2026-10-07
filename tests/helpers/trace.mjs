@@ -6,7 +6,8 @@ const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline"
 //   paints   Paint events on the renderer main thread, all nodes
 //   layouts  Layout events on the renderer main thread
 //   frames   requestAnimationFrame callbacks that ran while `action` did
-//   byNode   Map of `selectors[i]` -> Paint events whose node is inside one of that selector
+//   hits     labels of the nodes counted in a selector, for the failure message
+  //   byNode   Map of `selectors[i]` -> Paint events whose node is inside one of that selector
 //            (`closest`), plus "(no node)" and "(other)" buckets
 // The page needs to be loaded already. `selectors` is a list of CSS selectors.
 export async function trace(page, action, { selectors = [] } = {}) {
@@ -40,6 +41,7 @@ export async function trace(page, action, { selectors = [] } = {}) {
       perNode.set(id, (perNode.get(id) || 0) + 1);
     }
     const byNode = new Map([["(no node)", perNode.get(0) || 0], ["(other)", 0], ...selectors.map((s) => [s, 0])]);
+    const hits = [];
     const ids = [...perNode.keys()].filter(Boolean);
     for (const id of ids) {
       let hit = null;
@@ -56,14 +58,15 @@ export async function trace(page, action, { selectors = [] } = {}) {
           arguments: [{ value: selectors }],
         });
         hit = result.value;
-      } catch {
+      } catch (err) {
         hit = null; // node gone by the time the trace ended
+        try { const d = await session.send("DOM.describeNode", { backendNodeId: id }); hit = { label: "?" + d.node.nodeName + "(" + err.message.slice(0, 40) + ")", hit: null }; } catch (e2) { hit = { label: "?gone " + e2.message.slice(0, 30), hit: null }; }
       }
       const key = hit?.hit ?? "(other)";
       byNode.set(key, byNode.get(key) + perNode.get(id));
-      if (hit && !hit.hit) (byNode.others ??= []).push(`${perNode.get(id)}x ${hit.label}`);
+      if (hit) (hit.hit ? hits : (byNode.others ??= [])).push(`${perNode.get(id)}x ${hit.label}`);
     }
-    return { paints: paintEvents.length, layouts, frames, byNode, others: byNode.others ?? [] };
+    return { paints: paintEvents.length, layouts, frames, byNode, others: byNode.others ?? [], hits };
   } finally {
     await session.detach().catch(() => {});
   }

@@ -12,7 +12,7 @@ const AFTER_DRAW_IN_MS = 1500; // settling after the draw-in before the idle win
 const IDLE_WINDOW_MS = 3000; // P1: the traced idle window on the home
 const INTERSECT_IDLE_MS = 5000; // P3: the traced idle window on /intersect/
 const SETTLE_MS = 1500; // after load, before a scroll or a trace starts
-const SCROLL_MS_PER_VIEWPORT = 900; // P2: scroll speed, as a thumb would
+const FRAMES_PER_VIEWPORT = 54; // P2: scroll speed (0.9 s at 60 fps), counted in frames so a loaded machine renders the same number of them
 const WINDOWS = 3; // P2: world windows scrolled open
 const IDLE_PAINTS_PER_FRAME = 0.05; // P1: overall paint budget while idle (about one stray paint per 20 frames)
 const INTERSECT_IDLE_LAYOUTS = 2; // P3: a one-off layout at settle is fine, one per frame is the regression
@@ -66,28 +66,29 @@ for (const [name, view] of Object.entries(VIEWS)) {
           path: "/",
           block: true, // the figures' canvases would paint inside the windows
           wait: SETTLE_MS,
-          selectors: [".ecl-win", ".ecl-disc", ".ecl-in", ".ecl-ring"],
+          selectors: [".ecl"], // the windows, discs, rings and the content inside them
           action: async (p) => {
-            const open = await p.evaluate(({ n, ms }) => new Promise((ok) => {
+            const open = await p.evaluate(({ n, frames }) => new Promise((ok) => {
               const worlds = [...document.querySelectorAll(".world.ecl")].slice(0, n);
               const last = worlds[worlds.length - 1];
               const target = last.getBoundingClientRect().top + scrollY - innerHeight * 0.2;
-              const dur = (target / innerHeight) * ms, t0 = performance.now();
-              const step = (now) => {
-                const u = Math.min(1, (now - t0) / dur);
-                scrollTo({ top: target * u, behavior: "instant" });
-                if (u < 1) requestAnimationFrame(step);
+              const perFrame = innerHeight / frames;
+              let y = 0;
+              const step = () => {
+                y = Math.min(target, y + perFrame);
+                scrollTo({ top: y, behavior: "instant" });
+                if (y < target) requestAnimationFrame(step);
                 else requestAnimationFrame(() => requestAnimationFrame(() => ok(worlds.filter((w) => w.classList.contains("is-open")).length)));
               };
               requestAnimationFrame(step);
-            }), { n: WINDOWS, ms: SCROLL_MS_PER_VIEWPORT });
+            }), { n: WINDOWS, frames: FRAMES_PER_VIEWPORT });
             expect(open, "windows latched open").toBe(WINDOWS);
           },
         }));
       }
-      const parts = (r) => [".ecl-win", ".ecl-disc", ".ecl-in", ".ecl-ring"].reduce((a, s) => a + r.byNode.get(s), 0);
+      const parts = (r) => r.byNode.get(".ecl");
       await testInfo.attach("p2.json", { body: JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode], others: r.others })), null, 1), contentType: "application/json" });
-      if (process.env.PERF_LOG) console.log(name, "P2", JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode].slice(2), others: r.others }))));
+      if (process.env.PERF_LOG) console.log(name, "P2", JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, hits: r.hits }))));
       expect(median(runs.map(parts)), `paints inside .ecl parts over ${WINDOWS} windows`).toBeLessThanOrEqual(allowance);
     });
 
