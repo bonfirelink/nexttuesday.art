@@ -23,7 +23,7 @@
   --grain: .07;
   color-scheme: dark;
 }
-html[data-bleed-state="before"] [data-world="intersect"], html[data-bleed-state="in"] .nts-bleed-old { --grain: 0; }
+html[data-bleed-state="before"] [data-world="intersect"] { --grain: 0; }
 .intersect-grain { transition: opacity .4s ease; }
 [data-world="intersect"] { font-family: var(--font-intersect); font-size: 1.1875rem; }
 [data-world="intersect"] :is(h1, h2, h3, .display, .incant, .whisper, .mark, .ledger .what, details.reveal p) { font-family: var(--font-intersect); font-weight: 400; font-variation-settings: normal; letter-spacing: 0; }
@@ -32,8 +32,12 @@ html[data-bleed-state="before"] [data-world="intersect"], html[data-bleed-state=
 [data-world="intersect"] strong { font-weight: 400; color: var(--w-accent-text); }
 
 /* film grain, after the risograph pins: absolute, not fixed, so scrolling
-   never repaints the whole screen */
-.intersect-grain { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.88 0 0 0 0 0.8 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+   never repaints the whole screen. The grain is part of the world's ground:
+   it is on from the bleed-in's start (under the hero's own paper ground) and
+   the hero's night copy carries it too, so the disc, the page below it and
+   the settled page are the same dark. */
+.intersect-grain, .nts-night-in[data-world="intersect"]::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.88 0 0 0 0 0.8 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 [data-world="intersect"] { position: relative; }
 /* above the grain; the header keeps its own sticky position and z-index.
    :where() keeps the specificity of the old `> *`, so page rules still win. */

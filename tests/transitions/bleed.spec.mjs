@@ -154,7 +154,7 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
         await scrollToY(page, y);
         expect(await bleedState(page)).toBe("in");
         const m = await measure();
-        const during = await groundLuma(page, regions(m)); console.log(label, world, JSON.stringify(m), during);
+        const during = await groundLuma(page, regions(m));
         // Settle, come back to the same scroll: the same view in the world.
         await scrollToY(page, Math.round(end) + 5);
         await expect.poll(() => bleedState(page)).toBe("world");
