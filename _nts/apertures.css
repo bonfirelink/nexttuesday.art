@@ -17,7 +17,8 @@
    --ecl-bg (the aperture's ground), --ecl-fg (its marks) and --ecl-out
    (the ground around it): worlds set them from --w-*, bands from --band-*.
    Scroll-driven where animation-timeline: view() exists and html.js is
-   set; everywhere else, and under reduced motion, every disc is open.
+   set, until the disc is complete (then .is-open latches it); everywhere
+   else, and under reduced motion, every disc is open.
    Loaded after orrery.css. Nothing here redefines a --nts-* or --w-* token. */
 
 @property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
@@ -139,6 +140,9 @@ html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--nts-paper-2);
 .compass[data-near="intersect"] { --c-moon: var(--intersect-black); }
 .compass[data-near="embers"] .c-moon, .compass[data-near="philo"] .c-moon, .compass[data-near="intersect"] .c-moon { translate: -6px -3px; scale: 1; }
 .compass[data-near="star"] .c-moon { translate: 0 0; scale: .35; background: var(--nts-gold); box-shadow: none; }
+
+/* latched open by nts.js once the disc is complete: --ecl-p stays 1 whichever way the page scrolls */
+.js .ecl.is-open { animation: none; --ecl-p: 1; }
 
 /* ---------- reduced motion: every disc open, the moon simply there ---------- */
 @media (prefers-reduced-motion: reduce) {

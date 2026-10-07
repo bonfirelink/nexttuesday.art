@@ -61,6 +61,25 @@
     }
   }
 
+  /* apertures latch open.
+     An aperture follows the scroll (--ecl-p, apertures.css) only until its
+     disc is complete; then .is-open pins it open for the rest of the visit.
+     The complete point is where animation-range ends, the element's top
+     55vh above the viewport's bottom edge, so an observer whose root is
+     cut by 55% there fires exactly then. Elements already past it (loaded
+     scrolled, or tall ones) report a top above that line and latch at once. */
+  var apertures = document.querySelectorAll(".ecl");
+  if (apertures.length && "IntersectionObserver" in window && CSS.supports("animation-timeline", "view()")) {
+    var latch = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.boundingClientRect.top > e.rootBounds.bottom) return;
+        e.target.classList.add("is-open");
+        latch.unobserve(e.target);
+      });
+    }, { rootMargin: "0px 0px -55% 0px", threshold: 0 });
+    apertures.forEach(function (a) { latch.observe(a); });
+  }
+
   /* the world bleed-in.
      The world's ground arrives as a front: a layer (.nts-bleed-front,
      fixed to the viewport while it runs) clipped to a shape that grows
