@@ -54,6 +54,16 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; }
 .embers-hero .hint { font-family: var(--font-mono); font-size: .8rem; color: var(--w-muted); margin: .25rem 0 1.5rem; }
 .embers-hero .hint .cue { color: var(--w-accent-text); }
 @media (min-width: 900px) { .embers-hero .hero-text { container-type: inline-size; } .embers-hero h1.embers-display { font-size: min(7rem, 16cqi); } }
+/* the landing is the hearth's field: its lines fill the whole hero, edge to
+   edge, while the solid keeps the stage's place and size (the canvas's
+   data-anchor), in the same entity column and ring as the other worlds. The
+   hero spans the page and pads itself to the wrap, so the text keeps its
+   column; the canvas lies under everything in it, and only the words take
+   pointer events, so a drag anywhere else turns the solid. */
+.embers-hero.wrap { position: relative; isolation: isolate; width: 100%; padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2); }
+.embers-hero > .nts-hearth { position: absolute; inset: 0; z-index: -1; }
+.embers-hero .entity, .embers-hero .hero-text { pointer-events: none; }
+.embers-hero .hero-text > * { pointer-events: auto; }
 .embers-body .genres { margin: 1.25rem 0; }
 .embers-summon { --band-bg: var(--embers-fire); --band-fg: #0b0709; padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .embers-summon .embers-display { font-size: clamp(1.6rem, 6.4vw, 3.6rem); line-height: 1.05; letter-spacing: 0; max-width: 20ch; text-shadow: none; color: inherit; }

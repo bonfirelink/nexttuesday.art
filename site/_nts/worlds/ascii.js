@@ -163,7 +163,7 @@
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
       var fs = Math.min(24, Math.max(3, w / cols / ratio));
-      pre.style.fontSize = fs + "px"; aspect = ratio; rows = Math.max(1, Math.floor(w / fs)); fitted = w;
+      pre.style.fontSize = fs + "px"; if (twin) twin.style.fontSize = pre.style.fontSize; aspect = ratio; rows = Math.max(1, Math.floor(w / fs)); fitted = w;
     }
     var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
     /* Before the face is in (or given up on) nothing is measured; while it
@@ -173,7 +173,20 @@
       if (pending || !live || !(faceReady() || gaveUp)) return;
       pending = requestAnimationFrame(function () { pending = 0; fit(); if (rows) draw(); });
     }
-    function draw() { pre.textContent = render(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9); }
+    /* while a world bleed-in's disc opens, the glyphs also go to the
+       solid's twin in the disc's copy (NTS.bleed.twin), which shows them in
+       the world's colours; each only while some of it is in view */
+    var twin = null;
+    addEventListener("nts:bleed", function (e) {
+      var B = window.NTS && window.NTS.bleed;
+      if (e.detail.phase === "start") { twin = B && B.twin(pre); if (twin) { twin.style.fontSize = pre.style.fontSize; twin.textContent = pre.textContent; } }
+      else if (e.detail.phase === "end") { twin = null; draw(); }
+    });
+    function draw() {
+      var s = render(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9), q = twin ? window.NTS.bleed.progress() : 0;
+      if (q < 1) pre.textContent = s;
+      if (twin && q > 0) twin.textContent = s;
+    }
     function frame(t) {
       raf = 0;
       if (!visible || document.hidden) return;

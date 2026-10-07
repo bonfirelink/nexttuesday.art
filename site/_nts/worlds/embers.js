@@ -12,9 +12,20 @@
    Mounts on every <canvas class="nts-hearth"> (the page entity: drag to
    turn, tap to stoke) and on every <div data-nts-fragment="embers"> (a small,
    cheap, non-interactive one for the home page). Decorative only. Under
-   prefers-reduced-motion it draws one still frame. DPR capped at 2, paused
-   off-screen and in hidden tabs. Draws its day palette while the page waits
-   for the world to bleed in (html[data-bleed-state="before"]), night after.
+   prefers-reduced-motion it draws one still frame. DPR capped at 2 (and at
+   a backing-store budget, data-max-px), paused off-screen and in hidden
+   tabs. Draws its day palette while the page waits for the world to bleed
+   in (html[data-bleed-state="before"]), night after. While the bleed-in's
+   disc opens over the hero, the night goes to the canvas's twin in the
+   disc's copy (NTS.bleed.twin) and the day stays here, each drawn only
+   while some of it is in view, at the canvas's own frame rate: the disc
+   shows one or the other, so the lines change with the ground under them
+   and nothing is redrawn because the page scrolled.
+   Cost: the ray test runs only inside the solid's circumcircle; outside,
+   a line is plain base and is sampled every 12px, which its slow drift
+   (a 570px wavelength) cannot tell from 1.5px. Each colour is one path of
+   chained polylines, which strokes to the same union as separate segments
+   with round caps, for a fraction of the rasterising.
    Tuning, by data attribute on the canvas or the fragment:
      data-spacing  px between lines (14; fragments 9)
      data-wave     ripple frequency, rad/px (0.42)
@@ -23,6 +34,13 @@
      data-spin     resting turn, rad/s (0.32)
      data-size     circumradius, as a share of the shorter side (0.6)
      data-cx/cy    centre, as a share of width/height (0.5, 0.5)
+     data-anchor   a selector: the solid's centre and size are taken from
+                   that element's box instead of the canvas's, so the lines
+                   can fill a larger canvas around a solid of a set size
+     data-fps      frame rate cap (60; fragments 24), lifted to 60 while
+                   a stoke is hot
+     data-max-px   backing-store budget in device pixels: the resolution
+                   drops below the DPR to stay within it (no budget)
      data-embers   "off" to shed none
      data-stoke    starting heat, 0..1 (0) */
 (() => {
@@ -53,8 +71,13 @@
       spacing: num("spacing", lite ? 9 : 14), wave: num("wave", 0.42), amp: num("amp", lite ? 0.65 : 0.55),
       speed: num("speed", 5), spin: num("spin", lite ? 0.4 : 0.32), size: num("size", lite ? 0.78 : 0.6),
       cx: num("cx", 0.5), cy: num("cy", 0.5), embers: !lite && d.embers !== "off", stoke0: num("stoke", lite ? 0.25 : 0),
-      step: lite ? 2.5 : 1.5, fps: lite ? 24 : 60, interactive: !lite && d.interactive !== "off",
+      step: lite ? 2.5 : 1.5, fps: num("fps", lite ? 24 : 60), interactive: !lite && d.interactive !== "off",
+      maxPx: num("maxPx", Infinity),
     };
+    const anchor = d.anchor ? document.querySelector(d.anchor) : null;
+    let ax = 0, ay = 0, aw = 0, ah = 0;
+    /* while the bleed-in's disc opens: the twin canvas the night goes to */
+    let twin = null, tctx = null, dayBase = "", nightBase = "";
     let w = 0, h = 0, dpr = 1, yaw = 0.6, pitch = 0.5, pitchDrag = 0, spin = o.spin;
     let t = 0, stoke = o.stoke0, last = 0, raf = 0, acc = 0, visible = false;
     let dragging = false, lastX = 0, lastY = 0, lastT = 0, moved = 0;
@@ -63,81 +86,104 @@
 
     function resize() {
       const r = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = Math.round(r.width); h = Math.round(r.height);
       if (!w || !h) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(o.maxPx / (w * h)));
+      if (anchor) { const a = anchor.getBoundingClientRect(); ax = a.left - r.left; ay = a.top - r.top; aw = a.width; ah = a.height; }
+      else { ax = 0; ay = 0; aw = w; ah = h; }
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (twin) { twin.width = canvas.width; twin.height = canvas.height; tctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
       draw();
     }
     function rotate(v, cy, sy, cx, sx) {
       const x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy;
       return [x, v[1] * cx - z * sx, v[1] * sx + z * cx];
     }
+    const COARSE = 12;
     function draw() {
       if (!w || !h) return;
       ctx.clearRect(0, 0, w, h);
-      const gcx = o.cx * w, gcy = o.cy * h, size = Math.min(w, h) * o.size / Math.sqrt(3);
-      const dist = INRADIUS * size;
+      const gcx = ax + o.cx * aw, gcy = ay + o.cy * ah, size = Math.min(aw, ah) * o.size / Math.sqrt(3);
+      const dist = INRADIUS * size, R = size * Math.sqrt(3) + o.step;
       const cy = Math.cos(yaw), sy = Math.sin(yaw), p = pitch + pitchDrag, cx = Math.cos(p), sx = Math.sin(p);
       const n = FACES.map((f) => rotate(f, cy, sy, cx, sx));
       const fade = Math.min(12, size * 0.1), heat = Math.min(1.6, stoke);
-      const amp = o.spacing * o.amp * (1 + heat * 0.9), spacing = o.spacing, RAMP = pal.ramp;
-      if (!lite) {
-        const halo = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, size * 1.3);
-        halo.addColorStop(0, `rgba(${pal.halo[0]}, ${0.12 + heat * 0.16})`);
-        halo.addColorStop(0.5, `rgba(${pal.halo[1]}, ${0.06 + heat * 0.08})`);
-        halo.addColorStop(1, `rgba(${pal.halo[1]}, 0)`);
-        ctx.fillStyle = halo; ctx.fillRect(0, 0, w, h);
-      }
+      const amp = o.spacing * o.amp * (1 + heat * 0.9), spacing = o.spacing, NB = NIGHT.ramp.length, step = o.step;
       const lines = Math.max(3, Math.floor((h - 8) / spacing)), top = (h - (lines - 1) * spacing) / 2;
-      const paths = RAMP.map(() => new Path2D()), basePath = new Path2D(), glow = new Path2D();
+      const last = Math.floor(w / step) * step;
+      const N = { paths: NIGHT.ramp.map(() => new Path2D()), base: new Path2D(), glow: new Path2D() };
       hot.length = 0;
       for (let i = 0; i < lines; i++) {
         const y0 = top + i * spacing, py = y0 - gcy;
-        let prev = -2, px = 0, pyy = 0;
-        for (let sxp = 0; sxp <= w; sxp += o.step) {
-          const qx = sxp - gcx;
-          let tIn = -Infinity, tOut = Infinity, face = -1;
-          for (let k = 0; k < 4; k++) {
-            const nk = n[k], denom = -nk[2], numr = dist - (nk[0] * qx + nk[1] * py + nk[2] * 1e4);
-            if (Math.abs(denom) < 1e-6) { if (numr < 0) { tIn = Infinity; break; } continue; }
-            const tt = numr / denom;
-            if (denom < 0) { if (tt > tIn) { tIn = tt; face = k; } } else if (tt < tOut) tOut = tt;
-          }
+        /* the solid can only cross this line inside its circumcircle */
+        let a = Infinity, z = -Infinity;
+        if (Math.abs(py) < R) {
+          const half = Math.sqrt(R * R - py * py);
+          a = Math.max(0, Math.floor((gcx - half) / step) * step); z = Math.ceil((gcx + half) / step) * step;
+        }
+        let first = true, lb = -2, lg = 0, px = 0, pyy = 0, sxp = 0;
+        for (;;) {
           let y = y0 + Math.sin(sxp * 0.011 + t * 0.45 + i * 0.9) * 1.3, bucket = -1;
-          if (face >= 0 && tIn <= tOut) {
-            const pz = 1e4 - tIn, nf = n[face];
-            let edge = Infinity;
+          if (sxp >= a && sxp <= z) {
+            const qx = sxp - gcx;
+            let tIn = -Infinity, tOut = Infinity, face = -1;
             for (let k = 0; k < 4; k++) {
-              if (k === face) continue;
-              const nk = n[k], gap = (dist - (nk[0] * qx + nk[1] * py + nk[2] * pz)) / EDGE_SIN;
-              if (gap < edge) edge = gap;
+              const nk = n[k], denom = -nk[2], numr = dist - (nk[0] * qx + nk[1] * py + nk[2] * 1e4);
+              if (Math.abs(denom) < 1e-6) { if (numr < 0) { tIn = Infinity; break; } continue; }
+              const tt = numr / denom;
+              if (denom < 0) { if (tt > tIn) { tIn = tt; face = k; } } else if (tt < tOut) tOut = tt;
             }
-            let e = Math.max(0, Math.min(1, edge / fade)); e = e * (2 - e);
-            let a = Math.max(0, Math.min(1, 0.95 - nf[2] * 0.75)); a = a * a * (3 - 2 * a);
-            const k = Math.min(1, a * e + heat * 0.45 * e);
-            y += Math.sin(sxp * o.wave - t * o.speed + i * 0.7) * amp * k;
-            const hk = Math.min(1, k * (0.75 + heat * 0.6) + heat * 0.2 * e);
-            bucket = k < 0.03 ? -1 : Math.min(RAMP.length - 1, Math.floor(hk * (RAMP.length - 1) + 0.5));
-            if (o.embers && hk > 0.5 && hot.length < 240 && Math.random() < 0.08) hot.push(sxp, y, hk);
+            if (face >= 0 && tIn <= tOut) {
+              const pz = 1e4 - tIn, nf = n[face];
+              let edge = Infinity;
+              for (let k = 0; k < 4; k++) {
+                if (k === face) continue;
+                const nk = n[k], gap = (dist - (nk[0] * qx + nk[1] * py + nk[2] * pz)) / EDGE_SIN;
+                if (gap < edge) edge = gap;
+              }
+              let e = Math.max(0, Math.min(1, edge / fade)); e = e * (2 - e);
+              let al = Math.max(0, Math.min(1, 0.95 - nf[2] * 0.75)); al = al * al * (3 - 2 * al);
+              const k = Math.min(1, al * e + heat * 0.45 * e);
+              y += Math.sin(sxp * o.wave - t * o.speed + i * 0.7) * amp * k;
+              const hk = Math.min(1, k * (0.75 + heat * 0.6) + heat * 0.2 * e);
+              bucket = k < 0.03 ? -1 : Math.min(NB - 1, Math.floor(hk * (NB - 1) + 0.5));
+              if (o.embers && hk > 0.5 && hot.length < 240 && Math.random() < 0.08) hot.push(sxp, y, hk);
+            }
           }
-          if (prev !== -2) {
-            const path = bucket < 0 ? basePath : paths[bucket];
-            path.moveTo(px, pyy); path.lineTo(sxp, y);
-            if (bucket >= 3 && !lite) { glow.moveTo(px, pyy); glow.lineTo(sxp, y); }
+          if (!first) {
+            const path = bucket < 0 ? N.base : N.paths[bucket];
+            if (bucket !== lb) { path.moveTo(px, pyy); lb = bucket; }
+            path.lineTo(sxp, y);
+            if (bucket >= 3 && !lite) { if (!lg) N.glow.moveTo(px, pyy); N.glow.lineTo(sxp, y); lg = 1; } else lg = 0;
           }
-          prev = bucket; px = sxp; pyy = y;
+          first = false; px = sxp; pyy = y;
+          if (sxp >= last) break;
+          sxp = Math.min(last, sxp < a ? Math.min(a, sxp + COARSE) : sxp < z ? sxp + step : sxp + COARSE);
         }
       }
-      ctx.lineCap = "round"; ctx.lineJoin = "round";
-      ctx.lineWidth = 0.9; ctx.strokeStyle = base; ctx.stroke(basePath);
-      if (!lite) { ctx.lineWidth = 7; ctx.strokeStyle = `rgba(${pal.glow}, ${0.12 + heat * 0.1})`; ctx.stroke(glow); }
-      for (let b = 0; b < RAMP.length; b++) {
-        const f = b / (RAMP.length - 1);
-        ctx.lineWidth = (lite ? 1 : 1.1) + f * 1.6; ctx.strokeStyle = RAMP[b]; ctx.stroke(paths[b]);
-      }
-      drawEmbers();
+      /* one geometry, stroked in one palette per canvas */
+      const paint = (c, P, b) => {
+        if (!lite) {
+          const rr = size * 1.3, halo = c.createRadialGradient(gcx, gcy, 0, gcx, gcy, rr);
+          halo.addColorStop(0, `rgba(${P.halo[0]}, ${0.12 + heat * 0.16})`);
+          halo.addColorStop(0.5, `rgba(${P.halo[1]}, ${0.06 + heat * 0.08})`);
+          halo.addColorStop(1, `rgba(${P.halo[1]}, 0)`);
+          c.fillStyle = halo; c.fillRect(gcx - rr, gcy - rr, rr * 2, rr * 2);
+        }
+        c.lineCap = "round"; c.lineJoin = "round";
+        c.lineWidth = 0.9; c.strokeStyle = b; c.stroke(N.base);
+        if (!lite) { c.lineWidth = 7; c.strokeStyle = `rgba(${P.glow}, ${0.12 + heat * 0.1})`; c.stroke(N.glow); }
+        for (let k = 0; k < NB; k++) {
+          c.lineWidth = (lite ? 1 : 1.1) + (k / (NB - 1)) * 1.6; c.strokeStyle = P.ramp[k]; c.stroke(N.paths[k]);
+        }
+        drawEmbers(c, P);
+      };
+      if (!twin) { paint(ctx, pal, base); return; }
+      /* the disc shows the twin inside, this canvas outside */
+      const q = window.NTS.bleed.progress();
+      if (q < 1) paint(ctx, DAY, dayBase || base);
+      if (q > 0) { tctx.clearRect(0, 0, w, h); paint(tctx, NIGHT, nightBase || base); }
     }
     function shed(count, burst) {
       if (!o.embers || hot.length < 3) return;
@@ -158,18 +204,18 @@
         e.x += e.vx * dt; e.y += e.vy * dt;
       }
     }
-    function drawEmbers() {
+    function drawEmbers(c, P) {
       if (!embers.length) return;
-      ctx.save(); ctx.globalCompositeOperation = pal.composite;
+      c.save(); c.globalCompositeOperation = P.composite;
       for (const e of embers) {
-        const c = pal.embers[Math.min(pal.embers.length - 1, Math.floor((1 - e.life) * pal.embers.length))];
+        const col = P.embers[Math.min(P.embers.length - 1, Math.floor((1 - e.life) * P.embers.length))];
         const r = e.r * (0.4 + e.life * 0.8);
-        ctx.globalAlpha = Math.min(1, e.life * 1.6) * 0.3; ctx.fillStyle = c;
-        ctx.beginPath(); ctx.arc(e.x, e.y, r * 3, 0, TAU); ctx.fill();
-        ctx.globalAlpha = Math.min(1, e.life * 1.6);
-        ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, TAU); ctx.fill();
+        c.globalAlpha = Math.min(1, e.life * 1.6) * 0.3; c.fillStyle = col;
+        c.beginPath(); c.arc(e.x, e.y, r * 3, 0, TAU); c.fill();
+        c.globalAlpha = Math.min(1, e.life * 1.6);
+        c.beginPath(); c.arc(e.x, e.y, r, 0, TAU); c.fill();
       }
-      ctx.restore();
+      c.restore();
     }
     function frame(now) {
       raf = 0;
@@ -182,7 +228,10 @@
       if (o.embers && Math.random() < dt * (1.5 + stoke * 14)) shed(1 + Math.floor(stoke * 2), false);
       stepEmbers(dt);
       acc += dt;
-      if (acc >= 1 / o.fps) { acc = acc % (1 / o.fps); draw(); }
+      /* a burst of embers after a stoke is fast; the rest of the motion is
+         slow enough for the frame cap */
+      const fps = stoke > o.stoke0 + 0.15 ? 60 : o.fps;
+      if (acc >= 1 / fps) { acc = acc % (1 / fps); draw(); }
       schedule();
     }
     function schedule() { if (!raf && visible && !document.hidden && !still.matches) raf = requestAnimationFrame(frame); }
@@ -217,8 +266,23 @@
     } else visible = true;
     document.addEventListener("visibilitychange", () => { document.hidden ? halt() : schedule(); });
     still.addEventListener?.("change", () => { halt(); draw(); schedule(); });
-    addEventListener("nts:bleed", (e) => { if (e.detail.phase === "start") setTimeout(() => { pal = theme(); base = baseColour(host); draw(); }, e.detail.at(host)); });
-    if ("ResizeObserver" in window) new ResizeObserver(resize).observe(canvas); else addEventListener("resize", resize);
+    /* the bleed-in: the night goes to the twin while the disc opens; once
+       the world settles, this canvas takes the night itself, at once */
+    addEventListener("nts:bleed", (e) => {
+      const B = window.NTS && window.NTS.bleed;
+      if (e.detail.phase === "start") {
+        const tw = B && B.twin(canvas);
+        if (!tw) return;
+        twin = tw; tctx = twin.getContext("2d");
+        dayBase = baseColour(host); nightBase = baseColour(twin);
+        twin.width = canvas.width; twin.height = canvas.height; tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw();
+      } else if (e.detail.phase === "end") {
+        twin = tctx = null; pal = theme(); base = baseColour(host); draw();
+      }
+    });
+    if ("ResizeObserver" in window) { const ro = new ResizeObserver(resize); ro.observe(canvas); if (anchor) ro.observe(anchor); }
+    else addEventListener("resize", resize);
     if (still.matches) stoke = Math.max(stoke, 0.5);
     resize(); schedule();
   }
