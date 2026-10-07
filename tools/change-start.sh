@@ -2,13 +2,13 @@
 # Begin one refinement: a worktree of its own on a new branch off the working
 # branch, locked, with its preview running.
 #   tools/change-start.sh <name>
-# NTS_BASE overrides the working branch (default eclipse).
+# NTS_BRANCH overrides the working branch (default eclipse).
 # <name> becomes the branch, the worktree folder and the preview host, so it
 # must be a short lowercase slug.
 set -eu
 
 name=${1:-}
-base=${NTS_BASE:-eclipse}
+base=${NTS_BRANCH:-eclipse}
 project=nexttuesday-art
 
 case $name in
@@ -53,6 +53,9 @@ want=http://$name.$project.localhost:18000/
 if [ "$url" != "$want" ]; then
   echo "error: preview URL is $url, expected $want" >&2; exit 1
 fi
+
+# The machine's dev-shell rule: every preview says what it is for.
+(cd "$path" && devshell note --status working "$name: in progress" --step "Open $url")
 
 echo "worktree: $path"
 echo "branch:   $name (from $base)"

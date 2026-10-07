@@ -5,7 +5,7 @@ description: Publish the working branch to GitHub Pages (the `site` branch), rev
 
 # Publish
 
-GitHub Pages serves the `site` branch, a subtree split of `site/` from the working branch (`eclipse` now, `main` later; the script reads `NTS_BASE`, default `eclipse`). Publishing is public and `site` only moves forward, so the gate below is the first step.
+GitHub Pages serves the `site` branch, a subtree split of `site/` from the working branch (`eclipse` now, `main` later; the script reads `NTS_BRANCH`, default `eclipse`). Publishing is public and `site` only moves forward, so the gate below is the first step.
 
 ## Gate
 

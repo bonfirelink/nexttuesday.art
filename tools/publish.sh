@@ -10,11 +10,11 @@
 #   --marker     text that must appear on https://nexttuesday.art/ once live
 #   --gone       text that must disappear from it
 #
-# NTS_BASE names the working branch (default eclipse). The script never
+# NTS_BRANCH names the working branch (default eclipse). The script never
 # forces a push: a non-fast-forward split stops it.
 set -euo pipefail
 
-BASE=${NTS_BASE:-eclipse}
+BASE=${NTS_BRANCH:-eclipse}
 # This machine's DNS cannot resolve the domain: pin it to a GitHub Pages IP.
 RESOLVE=nexttuesday.art:443:185.199.108.153
 PAGES=(/ /embers/ /not-not-philo/ /intersect/ /events/)
@@ -108,7 +108,8 @@ echo "publishing $BASE @ $sha"
 
 # Publish suite on the exact commit that gets split.
 if [ -f "$base_wt/package.json" ] && grep -q '"test:publish"' "$base_wt/package.json"; then
-  (cd "$base_wt" && npm run test:publish)
+  # NTS_BASE is the suite's URL under test; unset so it never leaks in.
+  (cd "$base_wt" && env -u NTS_BASE npm run test:publish)
 else
   echo "WARNING: no test:publish script; only the sync check ran, the suite did not" >&2
   (cd "$base_wt" && node tools/sync.mjs --check)

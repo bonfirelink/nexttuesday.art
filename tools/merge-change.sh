@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lands an approved change branch into the working branch and cleans up.
-# Usage: tools/merge-change.sh <branch>     (working branch: $NTS_BASE, default eclipse)
+# Usage: tools/merge-change.sh <branch>     (working branch: $NTS_BRANCH, default eclipse)
 #
 # Order matters: the branch is rebased and checked in its own worktree first,
 # so a failing check or a conflict leaves the working branch untouched.
@@ -8,7 +8,7 @@
 set -eu
 
 b=${1:?usage: merge-change.sh <branch>}
-base=${NTS_BASE:-eclipse}
+base=${NTS_BRANCH:-eclipse}
 die() { echo "merge-change: $*" >&2; exit 1; }
 
 # Path of the worktree that has refs/heads/$1 checked out, or nothing.
@@ -58,7 +58,8 @@ echo "== check on the rebased $b"
 test_script=
 [ -f "$bwt/package.json" ] && test_script=$(cd "$bwt" && node -p 'require("./package.json").scripts?.test ?? ""')
 if [ -n "$test_script" ]; then
-  (cd "$bwt" && npm test) || die "npm test failed; nothing merged"
+  # NTS_BASE is the suite's URL under test; unset so it never leaks in.
+  (cd "$bwt" && env -u NTS_BASE npm test) || die "npm test failed; nothing merged"
 else
   (cd "$bwt" && node tools/sync.mjs --check) || die "sync check failed; nothing merged"
 fi
