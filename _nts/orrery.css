@@ -155,20 +155,18 @@
   .orb-stage { width: 100%; }
 }
 
-/* scrolling travels: as a world comes into view its body grows, its
-   ground blooms out from the body, and its words arrive. Scroll-driven,
-   so it never takes the scroll away. Only with scripts (html.js), so a
+/* scrolling travels: as a world comes into view its
+   ground blooms out from the body, and its words arrive; the body itself
+   stays at full size. Scroll-driven, so it never takes the scroll away. Only with scripts (html.js), so a
    page rendered without a scroll position, with scripts off or on paper,
    has every world simply there. */
 @supports (animation-timeline: view()) {
   .js .world::before { animation: bloom linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
-  .js .orb-stage { animation: orb-grow linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
   .js .world .prose { animation: arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 85%; }
   .js .sky { animation: sky-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; transform-origin: 50% 0; }
 }
-@media print { .world::before, .orb-stage, .world .prose, .sky, .pivot, .pivot > * { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
+@media print { .world::before, .world .prose, .sky, .pivot, .pivot > * { animation: none !important; } .world::before { clip-path: none; } .compass { display: none; } }
 @keyframes bloom { from { clip-path: circle(0% at var(--bloom-at)); } to { clip-path: circle(150% at var(--bloom-at)); } }
-@keyframes orb-grow { from { transform: scale(.6); opacity: .55; } to { transform: none; opacity: 1; } }
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
 @keyframes sky-leave { from { opacity: 1; transform: none; } to { opacity: .35; transform: scale(.86); } }
 
@@ -251,7 +249,7 @@ html:not(.js) .compass { display: none; }
   .js .orrery .r-embers { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 1; animation: none; }
   .js .bead .face { animation: none; }
-  .world::before, .orb-stage, .world .prose, .sky { animation: none !important; }
+  .world::before, .world .prose, .sky { animation: none !important; }
   .world::before { clip-path: none; }
   .bead:hover .face, .bead:focus-visible .face { transform: none; }
   .compass { transition: none; }
