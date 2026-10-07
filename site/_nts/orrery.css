@@ -223,8 +223,9 @@ html:not(.js) .compass { display: none; }
 .events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--nts-ink); }
 .events-hero .mini-ring { position: absolute; inset: calc(50% - var(--r)); border-radius: 50%; border: 1px dashed var(--w-line); }
 .events-hero .mini-orrery .pivot > a { pointer-events: auto; }
-.events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: box-shadow var(--dur-lift) var(--ease-lift); }
-.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { transform: var(--pose) translateY(var(--lift-y)); box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--w-fg) 55%, transparent); border-color: var(--w-accent); }
+.events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: translate var(--dur-lift) var(--ease-lift), box-shadow var(--dur-lift) var(--ease-lift); }
+/* the lift uses the individual `translate` property: the orbit animation owns `transform`, and `translate` composes with it, so it works moving or still */
+.events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { translate: 0 var(--lift-y); box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--w-fg) 55%, transparent); border-color: var(--w-accent); }
 .events-hero .o1, .events-hero .ring-1 { --r: 26cqi; --a: var(--a-embers); --p: var(--p-embers); }
 .events-hero .o2, .events-hero .ring-2 { --r: 38cqi; --a: var(--a-philo); --p: var(--p-philo); }
 .events-hero .o3, .events-hero .ring-3 { --r: 50cqi; --a: var(--a-intersect); --p: var(--p-intersect); }
@@ -245,7 +246,6 @@ html:not(.js) .compass { display: none; }
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
 @media (prefers-reduced-motion: reduce) {
   .pivot, .pivot > *, .compass .c-sun { animation: none !important; }
-  .events-hero .mini-orrery a.trace-bead:hover { transform: var(--pose); }
   .js .orrery .r-embers { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
   .js .orrery .r-philo, .js .orrery .r-intersect, .js .orrery .r-frame { opacity: 1; animation: none; }
   .js .bead .face { animation: none; }

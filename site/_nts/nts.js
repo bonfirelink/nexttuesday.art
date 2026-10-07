@@ -29,11 +29,15 @@
     var sentinel = document.createElement("div");
     sentinel.setAttribute("aria-hidden", "true");
     sentinel.style.cssText = "position:absolute;top:0;left:0;width:1px;height:8px;pointer-events:none;visibility:hidden";
-    document.body.appendChild(sentinel);
     if ("IntersectionObserver" in window) {
+      document.body.appendChild(sentinel);
       new IntersectionObserver(function (es) {
         header.classList.toggle("is-scrolled", !es[es.length - 1].isIntersecting);
       }, { threshold: 0 }).observe(sentinel);
+    } else {
+      var onScroll = function () { header.classList.toggle("is-scrolled", window.scrollY > 8); };
+      addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
     }
   }
 

@@ -72,7 +72,7 @@ main { --ecl-out: var(--w-bg); }
 .ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; rotate: calc(var(--ecl-p) * 1turn - 1turn); }
 
 /* scrolling opens the disc: from the ring the moment the aperture's top
-   edge enters, fully open after 55vh of travel, so the disc keeps pace with the scroll; scrolling back closes it */
+   edge enters, fully open after 55vh of travel, so the disc keeps pace with the scroll; once open it stays open (`.is-open` latches it) */
 @supports (animation-timeline: view()) {
   .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover var(--ecl-open-end); }
 }

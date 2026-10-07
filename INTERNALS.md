@@ -224,18 +224,20 @@ inside are the NTS tokens and assume coral behind them.
 
 The orrery: the mega-sigil is the sun on a coral disc, the sigils of the
 three worlds and the events star ride orbits that continue its rings
-(`.pivot` turns a zero-size point, the `.bead` on it stays upright), with
+(`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright), with
 a key under the sky. Scrolling travels to each world: `section.world`
 with `data-world` and `data-orbit-body`, its orb (`.orb`, holding the
 world's live fragment) and its words. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
 (`.compass`, fixed, bottom right) shows once the sky has scrolled away and
-points at the nearest body. It steps aside (`.is-aside`) only while the
-footer is in view: one IntersectionObserver on `.nts-footer`, no layout reads.
-The header's `.is-scrolled` comes from an 8px
-sentinel at the top of the page, watched by an IntersectionObserver. Falling into a world is a cross-document view transition
-from the body you tapped (`orrery.js` names it `orb`), into the world
-page's `.hero .entity`, which carries the trace of the orbit.
+points at the nearest body (its orbit turns with `c-turn`, through the
+`rotate` property). It steps aside (`.is-aside`) only while the footer is
+in view: one IntersectionObserver on `.nts-footer`, no layout reads. The
+header's `.is-scrolled` comes from an 8px sentinel at the top of the page,
+watched by an IntersectionObserver (a passive scroll listener where there is
+none). Falling into a world is a cross-document view transition from
+the body you tapped (`orrery.js` names it `orb`), into the world page's
+`.hero .entity`, which carries the trace of the orbit.
 
 The apertures. A section that changes ground is an aperture: `.ecl`,
 inset in the page so the ground around it stays in view, with the

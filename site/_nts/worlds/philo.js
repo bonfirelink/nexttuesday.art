@@ -87,7 +87,8 @@
     host.classList.add("is-live");
     redraw(); start();
     reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; draw(CLOSED); } else start(); });
-    new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
+    /* without IntersectionObserver the host counts as always visible */
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
     document.addEventListener("visibilitychange", () => { hidden = document.hidden; if (!hidden) start(); });
     addEventListener("nts:bleed", (e) => { if (e.detail.phase === "start") setTimeout(() => { colours(); redraw(); }, e.detail.at(host)); });
     let timer = 0;
