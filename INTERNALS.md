@@ -301,7 +301,7 @@ behave the same.
   reads the NTS `--w-*` tokens (section 11 of `nts.css`), and each kit
   undoes what else its world brings (`--embers-glow`, `--hearth-base`, the
   penrose colours, `--grain`). The same rules apply to `.nts-bleed-old`
-  while the state is `in`. Only three states exist: `before`, `in` (from
+  while the state is `in` (not the grain, below). Only three states exist: `before`, `in` (from
   `DOMContentLoaded` until the disc is complete) and `world`.
 - The crossing, in `nts.js`, only ever crosses the hero, and the
   compositor does it: during the scroll the main thread reads no layout
