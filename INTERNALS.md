@@ -340,8 +340,8 @@ behave the same.
 - Hooks, on `window.NTS.bleed`:
   - `twin(el)`: the copy of a hero element while the copy exists, else
     `null`. A live figure draws its night into its twin and its day into
-    itself: the hearth and the triangle draw on the twin canvas, the ASCII
-    solid writes its glyphs to the twin `<pre>`. Each side is drawn only
+    itself: the hearth, the triangle and the ASCII solid draw on their twin
+    canvas. Each side is drawn only
     while some of it shows (`progress()` above 0 for the night, below 1 for
     the day), at the figure's own frame rate; nothing is redrawn because
     the page scrolled.
@@ -399,7 +399,18 @@ Fell as the body and heading face and the mono for labels; the title is
 IM Fell behind a mono `>` prompt. Classes: `.corr` (the correspondence
 table), `.intersect-grain` (a grain div, first in body).
 The entity is `<pre data-nts-ascii="tetra" data-cols="84" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
-figures: `tetra`, `heptagram`, `seed`.
+figures: `tetra`, `heptagram`, `seed`. Live, `ascii.js` moves the baked
+still into a hidden `span.ascii-still` and draws the glyphs on a canvas
+over the pre's box, one `fillText` per line, in the pre's computed face,
+colour and `text-shadow` (as a `drop-shadow` filter on the canvas; a
+canvas shadow per line looked the same but cost more main thread);
+writing the text into the pre made the page lay out on
+every frame. Those values are read at mount, on a resize and at the
+bleed-in's start and end, never per frame, so a style that changes the
+pre's colour at any other moment needs a redraw. The pre stays the box,
+the accessible element and the target of drag and keys; the baseline
+comes from a probe line in the same face at line-height 1, so the glyphs
+sit where the pre's own lines put them (within a device pixel).
 
 ## Fragments (for the home page)
 
@@ -418,6 +429,20 @@ off-screen and in hidden tabs. Load the three world stylesheets and
 scripts on the home page (as `index.html` does); the fragments need
 them. For tuning, the same data attributes as the entities apply
 (`data-spacing`, `data-size`, `data-spin`, …).
+
+Inside an aperture (the home's world windows) one figure animates at a
+time. `nts.js` keeps the coordinator, `NTS.live.join(host, set)`: a figure
+calls it at mount (it returns whether the figure may animate; `true`
+outside an aperture) and `set(on)` tells it later. Live is the figure
+whose window is open (`.is-open`, so a figure holds still while its disc
+opens; every window counts as open where the latch does not run) and
+whose host is nearest the middle of the viewport: the most of it inside
+the middle 40% band, else the one most in view if at least half of it
+is. Two IntersectionObservers per host feed it (the band, and the whole
+viewport), and the latch calls it again when a window opens; nothing is
+measured during the scroll. A held figure keeps its last frame and its
+clock stops (each figure counts its own time from frames it drew), so it
+resumes from what it shows, with no jump.
 
 ## The content source and sync
 
