@@ -22,6 +22,7 @@
   --w-sigil: "intersect";
   --w-rim: rgba(233, 226, 207, 0.34);
   --w-cast: rgba(0, 0, 0, 0.7);
+  --w-deep: #000;
   --grain: .07;
   color-scheme: dark;
 }

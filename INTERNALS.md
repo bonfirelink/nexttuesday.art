@@ -233,7 +233,11 @@ three worlds and the events star ride orbits that continue its rings
 (`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright), with
 a key under the sky. Scrolling travels to each world: `section.world`
 with `data-world` and `data-orbit-body`, its orb (`.orb`, holding the
-world's live fragment) and its words. Between the sections sits a
+world's live fragment) and its words. The orb is a portal, not a card: hover, keyboard
+focus and a press open it into the disc and never lift it or cast a shadow
+off it (`orrery.css`, "the orb"). The opening moves and fades layers painted
+once (transform and opacity only), the same parts on every world; O3 and O4
+in `tests/behaviour/orbs.spec.mjs` hold that. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
 (`.compass`, fixed, bottom right) shows once the sky has scrolled away and
 points at the nearest body (its orbit turns with `c-turn`, through the
