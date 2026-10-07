@@ -1,7 +1,7 @@
 {
   "p2": {
-    "_note": "Paints inside .ecl (windows, rings and the content that first paints in them) while the home is scrolled, at a fixed 54 frames per viewport, until its third world window latches, world scripts blocked, unthrottled. Allowance is about 1.4x the observed median; with the openings animated by a custom property the same run paints 47 (390) and 82 (1440).",
-    "observed": { "1440": 17, "390": 11 },
-    "eclPartPaints": { "1440": 24, "390": 20 }
+    "_note": "Paints inside .ecl (windows, rings and the content that first paints in them) while the home is scrolled, at a fixed 54 frames per viewport, until its third world window latches, world scripts blocked, unthrottled. Observed median 11 at both widths (the same on three runs); the allowance is 14. The earlier apertures, which repainted their openings, measure 32 (390) and 46 (1440) on the same run; with the openings animated by a custom property it paints 47 (390) and 82 (1440).",
+    "observed": { "1440": 11, "390": 11 },
+    "eclPartPaints": { "1440": 14, "390": 14 }
   }
 }

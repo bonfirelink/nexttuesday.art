@@ -14,6 +14,8 @@ const LAYOUT_SPREAD = 0.5;
 const INK_SPREAD = 1;
 // The face is held this long on the delayed loads, longer than the page needs to start drawing.
 const FONT_DELAY = 1500;
+const FAST_TIMEOUT_MS = 120_000; // a describe's tests each load cold pages 3 to 4 times
+const SLOW_TIMEOUT_MS = 300_000; // 10 cold loads per test
 // A cover of the pre by the canvas, as for any box edge.
 const COVER_TOL = 1;
 
@@ -47,10 +49,13 @@ async function coldLoads(browser, { path, pre }, n, { delayed, ...options }) {
   const rows = [];
   for (let i = 0; i < n; i++) {
     const cold = await coldPage(browser, { fontDelay: delayed(i) ? FONT_DELAY : 0, ...options });
-    await cold.page.goto(process.env.NTS_BASE + path);
-    rows.push(await measure(cold.page, pre, options.reducedMotion === "reduce"));
-    expect(cold.external, "requests that left for an external host").toEqual([]);
-    await cold.close();
+    try {
+      await cold.page.goto(process.env.NTS_BASE + path);
+      rows.push(await measure(cold.page, pre, options.reducedMotion === "reduce"));
+      expect(cold.external, "requests that left for an external host").toEqual([]);
+    } finally {
+      await cold.close();
+    }
   }
   return rows;
 }
@@ -66,7 +71,7 @@ function expectStable(rows, reduced) {
 }
 
 test.describe("L3 ASCII size across cold loads", () => {
-  test.setTimeout(120_000);
+  test.setTimeout(FAST_TIMEOUT_MS);
   for (const p of PAGES) {
     test(`${p.name} is the same size on 3 cold loads at 390`, async ({ browser }) => {
       const opts = { viewport: { width: 390, height: 844 }, reducedMotion: "reduce", delayed: () => false };
@@ -81,7 +86,7 @@ test.describe("L3 ASCII size across cold loads", () => {
 });
 
 test.describe("L3 ASCII size across cold loads @slow", () => {
-  test.setTimeout(300_000);
+  test.setTimeout(SLOW_TIMEOUT_MS);
   for (const p of PAGES)
     for (const [width, height, deviceScaleFactor] of [[390, 844, 3], [1440, 900, 1]])
       for (const reducedMotion of ["reduce", "no-preference"])

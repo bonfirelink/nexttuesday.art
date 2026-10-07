@@ -11,6 +11,7 @@ const DRAW_IN_MS = 3000; // the emblem's draw-in on the home
 const AFTER_DRAW_IN_MS = 1500; // settling after the draw-in before the idle window
 const IDLE_WINDOW_MS = 3000; // P1: the traced idle window on the home
 const INTERSECT_IDLE_MS = 5000; // P3: the traced idle window on /intersect/
+const TEST_TIMEOUT_MS = 180_000; // RUNS traced runs, each with its own load and settle
 const SETTLE_MS = 1500; // after load, before a scroll or a trace starts
 const FRAMES_PER_VIEWPORT = 54; // P2: scroll speed (0.9 s at 60 fps), counted in frames so a loaded machine renders the same number of them
 const WINDOWS = 3; // P2: world windows scrolled open
@@ -25,7 +26,7 @@ const VIEWS = {
 for (const [name, view] of Object.entries(VIEWS)) {
   test.describe(`${name}`, () => {
     test.use(view);
-    test.setTimeout(180_000);
+    test.setTimeout(TEST_TIMEOUT_MS);
 
     // One run in a fresh page of the test's context (own sessionStorage, own state).
     async function run(context, { path, block = false, wait, selectors, action }) {

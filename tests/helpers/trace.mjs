@@ -7,7 +7,7 @@ const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline"
 //   layouts  Layout events on the renderer main thread
 //   frames   requestAnimationFrame callbacks that ran while `action` did
 //   hits     labels of the nodes counted in a selector, for the failure message
-  //   byNode   Map of `selectors[i]` -> Paint events whose node is inside one of that selector
+//   byNode   Map of `selectors[i]` -> Paint events whose node is inside one of that selector
 //            (`closest`), plus "(no node)" and "(other)" buckets
 // The page needs to be loaded already. `selectors` is a list of CSS selectors.
 export async function trace(page, action, { selectors = [] } = {}) {
