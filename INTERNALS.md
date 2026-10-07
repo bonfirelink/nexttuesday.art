@@ -329,12 +329,13 @@ behave the same.
   geometry) and crossfade (`--dur-bleed-fade`, 200ms). A texture that is
   part of the world's ground is not one of those parts: INTERSECT's grain
   (`.intersect-grain`, a body-level layer under the content) is on from the
-  start of `in` (it is off only in `before`), hidden under the hero's own
-  paper ground, and the copy carries the same grain (`::before` of
-  `.nts-night-in`, same tile and origin), so the disc, the page below it
-  and the settled page are the same dark. The copy's layer runs 2px past
-  the hero's foot, so its scaled bottom edge never lands in the hero's last
-  row and lets the paper show as a line. CSS animations in
+  start of `in` (it is off only in `before`). While the state is `in` it
+  lies over the copy (`z-index: 3`, above `.nts-night`, under the header),
+  so the disc and the page below it carry one grain at one raster scale (a
+  copy of it inside the scaled layer would be resampled and read as another
+  texture), and they are the same dark as the settled page. The copy's
+  layer runs 2px past the hero's foot, so its scaled bottom edge never lands
+  in the hero's last row and lets the paper show as a line. CSS animations in
   the copy are set in step with the original's; draw-ins in it are
   shown. When the scroll reaches the end the world settles for good: the
   copy goes, the classes go, the state is `world`. Scrolling back up before
