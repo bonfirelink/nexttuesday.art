@@ -64,10 +64,24 @@ for (const vp of VIEWPORTS) {
         });
       });
       const max = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+      // Scale of the discs of every card that has opened, read after each step: all stay at 1.
+      const stray = [];
+      const check = async (y) => {
+        const bad = await page.evaluate(() =>
+          [...document.querySelectorAll(".ecl.is-open")]
+            .map((el) => [el.id, getComputedStyle(el.querySelector(".ecl-disc")).scale])
+            .filter(([, s]) => s !== "none" && parseFloat(s) !== 1)
+        );
+        if (bad.length) stray.push(`y=${y}: ${JSON.stringify(bad)}`);
+      };
       const walk = [];
       for (let y = 0; y < max; y += LATCH_STEP) walk.push(y);
       walk.push(max);
-      for (const y of [...walk, ...walk.slice().reverse(), ...walk]) await scrollTo(page, settle, y);
+      for (const y of [...walk, ...walk.slice().reverse(), ...walk]) {
+        await scrollTo(page, settle, y);
+        await check(y);
+      }
+      expect(stray, "open cards whose disc is not at scale 1").toEqual([]);
 
       const changes = await page.evaluate(() => window.__opens);
       expect(changes.filter((c) => !c.on), "is-open removed").toEqual([]);
