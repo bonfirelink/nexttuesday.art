@@ -174,7 +174,7 @@
 
 /* ---------- the compass: the sun, small, once the sky has scrolled away ---------- */
 .compass {
-  position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); z-index: 30;
+  position: fixed; right: max(var(--compass-inset, 16px), env(safe-area-inset-right)); bottom: max(var(--compass-inset, 16px), env(safe-area-inset-bottom)); z-index: 30;
   width: 54px; height: 54px; border-radius: 50%;
   background: color-mix(in srgb, var(--nts-paper) 94%, transparent); border: 1px solid var(--nts-line-strong);
   box-shadow: 0 10px 22px -12px rgba(26, 21, 48, .6);

@@ -27,10 +27,17 @@
 @property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
 
 :root {
-  --ecl-inset: clamp(10px, 2.5vw, 2rem);   /* the page's ground around an aperture */
+  --ecl-inset: clamp(16px, 2.5vw, 2rem);   /* the page's ground around an aperture: never under the 16px gutter floor */
   --ecl-radius: clamp(1.25rem, 5vw, 2.75rem);
   --ecl-ring: 3.25rem;
   --ecl-gap: clamp(3rem, 8vw, 5rem);        /* between a section and the next aperture */
+  /* the compass's distance from the screen's corner: a window's inset plus
+     its corner radius. The button then sits clear inside a window's edge and
+     its rounded corner, never tangent to them (a circle touching a card's
+     edge at one point reads as a slip, and its paper fuses with the gutter);
+     on phones this is about where a window's text ends, so it lines up with
+     the words instead of the frame */
+  --compass-inset: calc(var(--ecl-inset) + var(--ecl-radius));
 }
 main { --ecl-out: var(--w-bg); }
 
