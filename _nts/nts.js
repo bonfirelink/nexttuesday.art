@@ -23,9 +23,18 @@
   /* header */
   var header = document.querySelector(".nts-header");
   if (header) {
-    var onScroll = function () { header.classList.toggle("is-scrolled", scrollY > 8); };
-    addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    /* a sentinel the height of the threshold at the very top of the page: the
+       header is marked once it has scrolled out of view, with no scroll
+       listener and no layout read */
+    var sentinel = document.createElement("div");
+    sentinel.setAttribute("aria-hidden", "true");
+    sentinel.style.cssText = "position:absolute;top:0;left:0;width:1px;height:8px;pointer-events:none;visibility:hidden";
+    document.body.appendChild(sentinel);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        header.classList.toggle("is-scrolled", !es[es.length - 1].isIntersecting);
+      }, { threshold: 0 }).observe(sentinel);
+    }
   }
 
   /* draw-in */
