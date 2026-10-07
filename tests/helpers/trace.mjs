@@ -3,7 +3,8 @@
 const SAME_FRAME_US = 5000; // Paint events of one node this close are one frame's paints
 const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline", "blink", "cc", "toplevel"];
 
-// Runs `action(page)` under a trace and returns { paints, layouts, frames, byNode }.
+// Runs `action(page)` under a trace and returns { paints, layouts, frames, byNode, events, main }.
+//   events   every raw trace event; main: the CrRendererMain thread's events
 //   paints   Paint events on the renderer main thread, all nodes
 //   layouts  Layout events on the renderer main thread
 //   frames   requestAnimationFrame callbacks that ran while `action` did
@@ -77,7 +78,7 @@ export async function trace(page, action, { selectors = [] } = {}) {
       if (repeats.has(key)) repeats.set(key, repeats.get(key) + (repaintsOf.get(id) || 0));
       if (hit) (hit.hit ? hits : (byNode.others ??= [])).push(`${perNode.get(id)}x ${hit.label}`);
     }
-    return { paints: paintEvents.length, layouts, frames, byNode, repeats, others: byNode.others ?? [], hits };
+    return { paints: paintEvents.length, layouts, frames, byNode, repeats, others: byNode.others ?? [], hits, events, main };
   } finally {
     await session.detach().catch(() => {});
   }
