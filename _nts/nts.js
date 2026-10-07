@@ -63,9 +63,13 @@
     }
   }
 
-  /* apertures latch open.
-     An aperture follows the scroll (--ecl-p, apertures.css) only until its
-     disc is complete; then .is-open pins it open for the rest of the visit.
+  /* apertures: the disc's radius, and the latch.
+     The disc (apertures.css) is clipped to a circle of radius --ecl-r, the
+     card's farthest corner from the ring point at its top centre, measured
+     by a ResizeObserver: read only when a card changes size, never while
+     the page scrolls.
+     An aperture follows the scroll only until its disc is complete; then
+     .is-open pins it open for the rest of the visit.
      The complete point is where animation-range ends (--ecl-open-end, in
      vh, read once at load, the one home of the value): the element's top that far above the
      viewport's bottom edge, so an observer whose root is cut by the same
@@ -74,14 +78,26 @@
   var apertures = document.querySelectorAll(".ecl");
   if (apertures.length && "IntersectionObserver" in window && CSS.supports("animation-timeline", "view()")) {
     var end = /^\s*([\d.]+)vh\s*$/.exec(getComputedStyle(document.documentElement).getPropertyValue("--ecl-open-end"));
+    var radius = "ResizeObserver" in window ? new ResizeObserver(function (es) {
+      es.forEach(function (e) {
+        var box = e.borderBoxSize && e.borderBoxSize[0], w = box ? box.inlineSize : e.contentRect.width, h = box ? box.blockSize : e.contentRect.height;
+        e.target.style.setProperty("--ecl-r", Math.ceil(Math.hypot(w / 2, h)) + "px");
+      });
+    }) : null;
     var latch = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (e.boundingClientRect.top > e.rootBounds.bottom) return;
         e.target.classList.add("is-open");
         latch.unobserve(e.target);
+        var win = e.target.querySelector(".ecl-win");
+        if (radius && win) radius.unobserve(win);
       });
     }, { rootMargin: "0px 0px -" + (end ? +end[1] : 55) + "% 0px", threshold: 0 });
-    apertures.forEach(function (a) { latch.observe(a); });
+    apertures.forEach(function (a) {
+      latch.observe(a);
+      var win = a.querySelector(".ecl-win");
+      if (radius && win) radius.observe(win);
+    });
   }
 
   /* the world bleed-in, driven by the scroll, crossing only the hero.
