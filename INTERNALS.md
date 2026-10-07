@@ -320,14 +320,21 @@ behave the same.
   are dense enough (every 4% of scale) that the two linear
   interpolations stay each other's inverse to well under a pixel. The
   page's tokens flip to the world's at the same moment, except on the
-  hero itself and the parts outside it (the header, a body-level layer
-  such as INTERSECT's grain), which keep `.nts-bleed-old`; so everything
+  hero itself and the header, which keep `.nts-bleed-old`; so everything
   below the hero is in the world from the start and is never crossed, and
   the hero keeps its NTS ground (`main .hero` gets a full-bleed paper
   ground, `box-shadow` clipped at its foot, while the state is `before`
   or `in`). The parts outside the hero drop `.nts-bleed-old` when the
   disc's edge passes their centre (a scroll position worked out with the
-  geometry) and crossfade (`--dur-bleed-fade`, 200ms). CSS animations in
+  geometry) and crossfade (`--dur-bleed-fade`, 200ms). A texture that is
+  part of the world's ground is not one of those parts: INTERSECT's grain
+  (`.intersect-grain`, a body-level layer under the content) is on from the
+  start of `in` (it is off only in `before`), hidden under the hero's own
+  paper ground, and the copy carries the same grain (`::before` of
+  `.nts-night-in`, same tile and origin), so the disc, the page below it
+  and the settled page are the same dark. The copy's layer runs 2px past
+  the hero's foot, so its scaled bottom edge never lands in the hero's last
+  row and lets the paper show as a line. CSS animations in
   the copy are set in step with the original's; draw-ins in it are
   shown. When the scroll reaches the end the world settles for good: the
   copy goes, the classes go, the state is `world`. Scrolling back up before

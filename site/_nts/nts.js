@@ -165,8 +165,9 @@
      where timelines are missing, still transform-only). The hero itself
      stays in the NTS colours under it (.nts-bleed-old); everything below
      the hero is in the world from the start, so nothing there is crossed.
-     The few parts outside the hero (the header, a fixed layer such as a
-     grain) keep .nts-bleed-old until the disc's edge passes their centre,
+     The few parts outside the hero (the header, a fixed layer that is not
+     the ground's own texture) keep .nts-bleed-old until the disc's edge
+     passes their centre,
      and crossfade (--dur-bleed-fade). When the disc is complete the world
      settles for good: the state is "world", the copy goes.
      Live figures in the hero draw their night into their twin in the copy:
@@ -230,9 +231,13 @@
       /* complete: every corner of what is in view of the hero at "end" */
       var R = Math.ceil(Math.max(Math.hypot(cx, bottom - cy), Math.hypot(W - cx, bottom - cy), Math.hypot(cx, end - cy), Math.hypot(W - cx, end - cy))) + 2;
       g = { end: end };
-      layer.style.cssText = "width:" + W + "px;height:" + Math.ceil(bottom) + "px";
+      /* the layer runs 2px past the hero's foot, over the ground below that
+         is the same dark: its own scaled bottom edge would otherwise land
+         inside the last row of the hero and let the hero's paper show */
+      var foot = Math.ceil(bottom) + 2;
+      layer.style.cssText = "width:" + W + "px;height:" + foot + "px";
       disc.style.cssText = "left:" + (cx - R) + "px;top:" + (cy - R) + "px;width:" + 2 * R + "px;height:" + 2 * R + "px";
-      inner.style.cssText = "left:" + (R - cx) + "px;top:" + (R - cy) + "px;width:" + W + "px;height:" + Math.ceil(bottom) + "px;transform-origin:" + cx + "px " + cy + "px";
+      inner.style.cssText = "left:" + (R - cx) + "px;top:" + (R - cy) + "px;width:" + W + "px;height:" + foot + "px;transform-origin:" + cx + "px " + cy + "px";
       copy.style.cssText = "position:absolute;box-sizing:border-box;margin:0;left:" + hr.left + "px;top:" + top + "px;width:" + hr.width + "px;height:" + hr.height + "px";
       at = toggles.map(function (el) {
         var r = el.getBoundingClientRect();
