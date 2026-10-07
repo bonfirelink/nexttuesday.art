@@ -145,13 +145,33 @@
     var rows = 0, aspect = 0.6, FPS = lite ? 15 : 30;
     var pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, raf = 0, last = 0, acc = 0, tAcc = 0;
+    /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
+       CSS (a square), so only the font size changes here, never the layout.
+       The cell ratio comes from the loaded face: a fallback face measures
+       differently (and a face still in its block period measures nothing),
+       so the ratio is clamped to what a monospace face can be and the size
+       to a sane range, and fit() runs again once the face is in. The probe
+       is read with offsetWidth: getBoundingClientRect would include the
+       scale of a transformed ancestor (the home's windows are scaled). */
+    var fitted = 0, gaveUp = false;
     function fit() {
       var w = pre.clientWidth; if (!w) return;
-      pre.style.fontSize = "100px"; pre.style.lineHeight = "1";
-      var probe = document.createElement("span"); probe.textContent = "MMMMMMMMMM"; pre.appendChild(probe);
-      var cw = probe.getBoundingClientRect().width / 10; pre.removeChild(probe);
-      var ratio = cw / 100 || 0.6, fs = w / cols / ratio;
-      pre.style.fontSize = fs + "px"; aspect = ratio; rows = Math.round(cols * ratio); pre.style.height = rows * fs + "px";
+      var probe = document.createElement("span");
+      probe.textContent = "M".repeat(100);
+      probe.style.cssText = "position:absolute;visibility:hidden;font-size:100px;line-height:1;letter-spacing:0";
+      pre.appendChild(probe);
+      var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
+      var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
+      var fs = Math.min(24, Math.max(3, w / cols / ratio));
+      pre.style.fontSize = fs + "px"; aspect = ratio; rows = Math.max(1, Math.floor(w / fs)); fitted = w;
+    }
+    var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
+    /* Before the face is in (or given up on) nothing is measured; while it
+       is still loading later, a refit would measure the fallback. */
+    function faceReady() { try { return !fonts || !fonts.check || fonts.check("400 100px " + family, "M"); } catch (e) { return true; } }
+    function refit() {
+      if (pending || !live || !(faceReady() || gaveUp)) return;
+      pending = requestAnimationFrame(function () { pending = 0; fit(); if (rows) draw(); });
     }
     function draw() { pre.textContent = render(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9); }
     function frame(t) {
@@ -188,10 +208,17 @@
     }
     if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); else stop(); }, { threshold: 0.05 }).observe(pre);
     document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else start(); });
-    var timer = 0;
-    addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(function () { fit(); draw(); }, 120); });
-    fit(); draw(); pre.classList.add("is-live"); start();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fit(); draw(); });
+    if ("ResizeObserver" in window) new ResizeObserver(function () { if (Math.abs(pre.clientWidth - fitted) > 0.5) refit(); }).observe(pre);
+    else addEventListener("resize", refit);
+    function go() { live = true; fit(); draw(); pre.classList.add("is-live"); start(); }
+    if (!fonts || !fonts.load) { go(); return; }
+    /* The first measure waits for the face (at most 3 s, for a blocked
+       network); until then the baked still stays on screen. */
+    Promise.race([fonts.load("400 100px " + family, "M"), new Promise(function (r) { setTimeout(r, 3000); })]).catch(function () {}).then(function () {
+      gaveUp = !faceReady();
+      go();
+      fonts.addEventListener("loadingdone", refit);
+    });
   }
   function init() {
     document.querySelectorAll("pre[data-nts-ascii]").forEach(function (pre) { mount(pre, pre.getAttribute("data-nts-ascii"), +pre.getAttribute("data-cols") || 84, false); });
