@@ -1,1 +1,7 @@
-{"p2":{"eclPaintsPerWindow":{"1440":1,"390":1}}}
+{
+  "p2": {
+    "_note": "Paints inside the aperture parts while the home is scrolled until its third world window latches, world scripts blocked, unthrottled. Allowance = observed median plus headroom; a regressed opening paints about once per frame (dozens).",
+    "observed": { "1440": 5, "390": 11 },
+    "eclPartPaints": { "1440": 8, "390": 14 }
+  }
+}

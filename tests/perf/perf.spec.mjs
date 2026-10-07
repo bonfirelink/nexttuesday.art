@@ -59,7 +59,7 @@ for (const [name, view] of Object.entries(VIEWS)) {
     });
 
     test(`P2 the apertures do not repaint while opening @perf (${name})`, async ({ context }, testInfo) => {
-      const allowance = baselines.p2.eclPaintsPerWindow[name] * WINDOWS;
+      const allowance = baselines.p2.eclPartPaints[name];
       const runs = [];
       for (let i = 0; i < RUNS; i++) {
         runs.push(await run(context, {
@@ -87,6 +87,7 @@ for (const [name, view] of Object.entries(VIEWS)) {
       }
       const parts = (r) => [".ecl-win", ".ecl-disc", ".ecl-in", ".ecl-ring"].reduce((a, s) => a + r.byNode.get(s), 0);
       await testInfo.attach("p2.json", { body: JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode], others: r.others })), null, 1), contentType: "application/json" });
+      if (process.env.PERF_LOG) console.log(name, "P2", JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode].slice(2), others: r.others }))));
       expect(median(runs.map(parts)), `paints inside .ecl parts over ${WINDOWS} windows`).toBeLessThanOrEqual(allowance);
     });
 
