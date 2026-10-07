@@ -21,8 +21,14 @@
    else, and under reduced motion, every disc is open.
    Loaded after orrery.css. Nothing here redefines a --nts-* or --w-* token. */
 
-/* where the disc is complete: this much scroll after the section enters the viewport (in vh; nts.js reads it to latch the aperture) */
-:root { --ecl-open-end: 55vh; }
+/* the disc opens while the aperture's top edge (where the ring sits) climbs
+   from --ecl-open-start to --ecl-open-end, both in vh of travel after the
+   edge enters at the bottom of the viewport. nts.js reads --ecl-open-end (vh
+   only) to latch the aperture. The ring travels from 75% down the screen to
+   30% while the disc opens, at every width: a window can be taller than the
+   screen, so a run counted from the moment its edge enters would finish
+   before the card is in view */
+:root { --ecl-open-start: 25vh; --ecl-open-end: 70vh; }
 
 @property --ecl-p { syntax: "<number>"; inherits: true; initial-value: 1; }
 
@@ -72,9 +78,9 @@ main { --ecl-out: var(--w-bg); }
 .ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; rotate: calc(var(--ecl-p) * 1turn - 1turn); }
 
 /* scrolling opens the disc: from the ring the moment the aperture's top
-   edge enters, fully open after 55vh of travel, so the disc keeps pace with the scroll; once open it stays open (`.is-open` latches it) */
+   edge enters (see --ecl-open-start/-end), so the disc keeps pace with the scroll; once open it stays open (`.is-open` latches it) */
 @supports (animation-timeline: view()) {
-  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover 0 cover var(--ecl-open-end); }
+  .js .ecl { animation: ecl-open linear both; animation-timeline: view(); animation-range: cover var(--ecl-open-start) cover var(--ecl-open-end); }
 }
 @keyframes ecl-open { from { --ecl-p: 0; } to { --ecl-p: 1; } }
 

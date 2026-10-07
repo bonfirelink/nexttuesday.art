@@ -69,7 +69,7 @@
      An aperture follows the scroll (--ecl-p, apertures.css) only until its
      disc is complete; then .is-open pins it open for the rest of the visit.
      The complete point is where animation-range ends (--ecl-open-end, in
-     vh, the one home of the value): the element's top that far above the
+     vh, read once at load, the one home of the value): the element's top that far above the
      viewport's bottom edge, so an observer whose root is cut by the same
      share there fires exactly then (55% if the property is unreadable). Elements already past it (loaded
      scrolled, or tall ones) report a top above that line and latch at once. */

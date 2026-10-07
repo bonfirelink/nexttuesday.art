@@ -249,7 +249,8 @@ open everywhere else and under reduced motion). It follows the scroll both
 ways only until the disc is complete: then it latches. `nts.js` watches
 each `.ecl` with an IntersectionObserver whose root is cut at the
 bottom by `--ecl-open-end` (`apertures.css`, in vh, also the end of
-`animation-range`), and adds `.is-open` (`animation: none; --ecl-p: 1`), so
+`animation-range`, which starts at `--ecl-open-start`: 25vh / 70vh at every width,
+so the disc opens while the ring climbs from 75% to 30% down the screen), and adds `.is-open` (`animation: none; --ecl-p: 1`), so
 scrolling back up never closes it again, for the rest of the page load. The
 limb, the ring's sigil and the words all derive from `--ecl-p`, so they
 latch with it. On the home the apertures are the world windows
