@@ -142,22 +142,12 @@ html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--nts-paper-2);
 /* EVENTS: the whole ledger is one aperture of paper-2 under the star */
 .events-ap { margin-top: 1.5rem; }
 
-/* ---------- the compass eclipse ---------- */
-/* near a world, a moon in that world's ground slides over the sun */
-.compass .c-moon { grid-area: 1 / 1; width: 18px; height: 18px; border-radius: 50%; background: var(--c-moon, var(--nts-ink)); box-shadow: 0 0 0 1px var(--nts-paper); translate: -14px -6px; scale: 0; transition: translate .7s var(--ease-out), scale .5s var(--ease-out); z-index: 1; }
-.compass[data-near="embers"] { --c-moon: var(--embers-night); }
-.compass[data-near="philo"] { --c-moon: var(--philo-ink); }
-.compass[data-near="intersect"] { --c-moon: var(--intersect-black); }
-.compass[data-near="embers"] .c-moon, .compass[data-near="philo"] .c-moon, .compass[data-near="intersect"] .c-moon { translate: -6px -3px; scale: 1; }
-.compass[data-near="star"] .c-moon { translate: 0 0; scale: .35; background: var(--nts-gold); box-shadow: none; }
-
 /* latched open by nts.js once the disc is complete: --ecl-p stays 1 whichever way the page scrolls */
 .js .ecl.is-open { animation: none; --ecl-p: 1; }
 
-/* ---------- reduced motion: every disc open, the moon simply there ---------- */
+/* ---------- reduced motion: every disc open ---------- */
 @media (prefers-reduced-motion: reduce) {
   .js .ecl { animation: none !important; --ecl-p: 1; }
-  .compass .c-moon { transition: none; }
 }
 @media print { .ecl { animation: none !important; --ecl-p: 1; } .ecl-win, .ecl-win::after { -webkit-mask: none; mask: none; } .ecl-win::after { display: none; } }
 

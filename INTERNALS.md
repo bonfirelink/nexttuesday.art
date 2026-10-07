@@ -28,8 +28,8 @@ site/              what GitHub Pages serves (the `site` branch, see Publishing)
                    world heroes and sections, the events page
     orrery.css     the home's orrery, the world windows, the compass, the
                    orbit trace on the world pages, falling into a world
-    apertures.css  sections opening as discs from their rings, the
-                   compass's moon; last, so it takes over the handovers
+    apertures.css  sections opening as discs from their rings; last, so
+                   it takes over the handovers
     nts-head.js    runs in <head>: html.js, and the bleed's before/world state
     nts.js         header state, draw-in, the bleed-in, mega-sigil tap
     orrery.js      the compass, and naming the body you fall into
@@ -230,8 +230,7 @@ with `data-world` and `data-orbit-body`, its orb (`.orb`, holding the
 world's live fragment) and its words. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
 (`.compass`, fixed, bottom right) shows once the sky has scrolled away and
-points at the nearest body; near a world, a moon in that world's ground
-slides over its sun (`.c-moon`). It steps aside (`.is-aside`) only while the
+points at the nearest body. It steps aside (`.is-aside`) only while the
 footer is in view: one IntersectionObserver on `.nts-footer`, no layout reads.
 The header's `.is-scrolled` comes from an 8px
 sentinel at the top of the page, watched by an IntersectionObserver. Falling into a world is a cross-document view transition
