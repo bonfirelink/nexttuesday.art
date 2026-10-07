@@ -172,7 +172,7 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 }
 .orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
 /* the opening, an approach: you move toward the window and through it. At
-   rest a faint shade at the rim. Opened, the world beyond rushes nearer (the
+   rest the rim is faintly warmed toward the limb. Opened, the world beyond rushes nearer (the
    figure grows past the rim, cut by it, a portal's overshoot), the rim
    kindles to the world's limb (a hairline of --w-accent) over a deeper
    vignette (::after, over the figure), and the orbit slips past you, out
@@ -180,10 +180,15 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .orb > [data-nts-fragment]::after {
   box-shadow: inset 0 0 0 1.25px var(--w-accent);
   background: radial-gradient(closest-side, transparent 62%, color-mix(in srgb, var(--w-deep) 50%, transparent) 100%);
-  opacity: .3;
+  opacity: 0; visibility: hidden;
+  transition: transform var(--portal-out) var(--ease-portal), opacity var(--portal-out) var(--ease-portal), visibility 0s var(--portal-out);
 }
+/* the rest hint is the disc's own rim, warmed toward the limb: the layer
+   over the figure stays hidden (unpainted) at rest, so the windows' scroll
+   opening never repaints it */
+.orb > [data-nts-fragment] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--w-accent) 45%, var(--w-line)); }
 .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(1.16); }
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { opacity: 1; }
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { opacity: 1; visibility: visible; transition-delay: 0s; }
 .orb:is(:hover, :focus-visible, :active)::before { transform: scale(1.1); opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > *, .orb:is(:hover, :focus-visible, :active)::before { transform: none; } }
 .world .prose { width: 100%; }
