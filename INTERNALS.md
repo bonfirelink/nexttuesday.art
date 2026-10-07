@@ -212,7 +212,13 @@ The mega-sigil: on the home page,
 <div class="turn"><p class="hint label" aria-hidden="true">Turn the sigil</p><p class="secret incant" id="secret">…</p></div>
 ```
 It is complete from the first frame and its layers turn by themselves (CSS
-animations, five speeds, two directions). With `html.js` the heptagram and
+animations, five speeds, two directions). The mega-sigil is a stack of nine square SVGs
+(`.mega-svg`, one per layer, absolutely stacked), not one SVG with turning
+`<g>`s: a transform animated on an SVG child re-lays-out and repaints the
+whole drawing each frame, whereas a rotating HTML-level box is a compositor
+layer. A turning layer's class starts with `l-` (`nts.js` finds them with
+`[class^='l-']`), so keep it first in the `class` attribute; the waves'
+`transform-origin` is their bounding-box centre, a hair off the middle. With `html.js` the heptagram and
 the three gold circles draw themselves in over the first three seconds and
 the stars pop in; under reduced motion everything is simply there. A tap or
 a long press aligns the layers (`.is-aligned`), opens the hole and shows
