@@ -241,18 +241,26 @@ the body you tapped (`orrery.js` names it `orb`), into the world page's
 The apertures. A section that changes ground is an aperture: `.ecl`,
 inset in the page so the ground around it stays in view, with the
 section's sigil in a ring on its top edge (`.ecl-ring`) and its content in
-`.ecl-win`. As it scrolls into view, its ground opens as a disc from the
-ring, with a thin bright limb on the disc's edge (scroll-driven through
-`--ecl-p` where `animation-timeline: view()` exists and `html.js` is set;
-open everywhere else and under reduced motion). It follows the scroll both
+`.ecl-win > .ecl-disc > .ecl-in` (the card, the disc, the card's ground
+and content). As it scrolls into view, its ground opens as a disc from the
+ring, with a thin bright limb on the disc's edge, scroll-driven on the
+aperture's view timeline where `animation-timeline: view()` exists and
+`html.js` is set; open everywhere else and under reduced motion. The
+compositor runs it: each part animates `scale`, `rotate` or `opacity` on
+its own, nothing animates a custom property or a mask. `.ecl-disc` is
+scaled from the ring point under a fixed circular clip of radius `--ecl-r`
+(the card's farthest corner, set by a ResizeObserver in `nts.js`),
+`.ecl-in` by the inverse, so the edge passes over a still card; the limb
+is a disc of its colour behind the ground, scaled a step ahead of it. The
+disc rests at scale .001, never 0, so a figure measuring itself with
+`getBoundingClientRect` reads its real size while closed. It follows the scroll both
 ways only until the disc is complete: then it latches. `nts.js` watches
 each `.ecl` with an IntersectionObserver whose root is cut at the
 bottom by `--ecl-open-end` (`apertures.css`, in vh, also the end of
 `animation-range`, which starts at `--ecl-open-start`: 25vh / 70vh at every width,
-so the disc opens while the ring climbs from 75% to 30% down the screen), and adds `.is-open` (`animation: none; --ecl-p: 1`), so
-scrolling back up never closes it again, for the rest of the page load. The
-limb, the ring's sigil and the words all derive from `--ecl-p`, so they
-latch with it. On the home the apertures are the world windows
+so the disc opens while the ring climbs from 75% to 30% down the screen), and adds `.is-open` (every part's animation off), so
+scrolling back up never closes it again, for the rest of the page load
+(every part's animation stops, so each rests open). On the home the apertures are the world windows
 (`.world.ecl`) and the two NTS bands; inside a world they are its bands.
 Colours come from `--ecl-bg`, `--ecl-fg`, `--ecl-out` and `--ecl-limb`
 (the file head has the markup). A band's words fade in only once the disc
