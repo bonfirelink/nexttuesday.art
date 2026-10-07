@@ -21,6 +21,8 @@
   --w-bar-bg: rgba(11, 7, 9, 0.78);
   --w-bar-fg: #ffe9d0;
   --w-sigil: "embers";
+  --w-rim: rgba(255, 233, 208, 0.3);
+  --w-cast: rgba(0, 0, 0, 0.7);
   --embers-glow: 0 0 .12em rgba(255, 200, 140, .55), 0 0 .5em rgba(242, 89, 27, .45), 0 0 1.4em rgba(229, 29, 71, .3);
   --hearth-base: rgba(229, 29, 71, 0.3);
   color-scheme: dark;
