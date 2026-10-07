@@ -8,6 +8,8 @@ from the working branch (currently `eclipse`, later `main`). How the code fits:
 
 - `nexttuesday-art-change-start`: starting any change (worktree, preview).
 - `nexttuesday-art-change-merge`: landing an approved change on the working branch.
+- `nexttuesday-art-preview-sheet`: before/after screenshot sheets of a visual change, for review on a phone.
+- `nexttuesday-art-perf`: measuring smoothness (frame pacing, paints/layouts per frame) of a change, before vs after.
 - `nexttuesday-art-publish`: publishing to `site`, only when a publish is explicitly requested.
 
 ## Branches and worktrees

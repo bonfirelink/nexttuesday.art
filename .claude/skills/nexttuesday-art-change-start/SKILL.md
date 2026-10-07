@@ -23,4 +23,4 @@ One change, one worktree, one preview, one commit. `<name>` is a short lowercase
 
 - Never touch `main`, `site`, the working branch or any tag; no merge and no push (a separate step lands approved changes).
 - Bind servers to `127.0.0.1` and `$DEVSHELL_PORT` only, never `0.0.0.0`.
-- Before/after screenshots, performance traces and publishing are separate skills.
+- Before/after screenshots (`nexttuesday-art-preview-sheet`), performance traces (`nexttuesday-art-perf`) and publishing are separate skills.
