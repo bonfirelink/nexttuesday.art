@@ -17,7 +17,10 @@
     { axis: 1, min: [L - S - T, S - T, -T], max: [L - T, L - T, S - T] },
     { axis: 2, min: [L - S - 2 * T, L - S - 2 * T, S - 2 * T], max: [L - 2 * T, L - 2 * T, L - 2 * T] },
   ];
-  const centre = [0, 1, 2].map((k) => BARS.reduce((a, b) => a + (b.min[k] + b.max[k]) / 2, 0) / BARS.length);
+  /* The model's pivot (the origin of every pose), in model coordinates. It
+     starts at the mean of the bars' centres; see PIVOT below for where it
+     ends up. */
+  let centre = [0, 1, 2].map((k) => BARS.reduce((a, b) => a + (b.min[k] + b.max[k]) / 2, 0) / BARS.length);
   const E = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
   const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -72,7 +75,7 @@
     }
     return slabs;
   }
-  const PIECES = pieces();
+  let PIECES = pieces();
   const LIGHT = norm([-0.45, 0.75, 0.55]);
   /* One frame: the visible face pieces, far to near, each with its screen
      polygon, hatch segments, a colour role ('ink' or 'cut') and a line
@@ -113,6 +116,32 @@
     return out;
   }
   const CLOSED = { theta: 0, psi: 0, phi: Math.PI / 6 };
+  /* PIVOT: the mean of the bars' centres is not where the closed triangle's
+     centre is on screen (the loop is lopsided in depth), so the figure sat
+     off its ring. Move the pivot, once, to the area centroid of the closed
+     pose's silhouette (the hull's: the closed loop is three-fold symmetric,
+     so it is also the circumcentre of the triangle). Every pose then turns
+     about that point and the rest pose is centred at (0, 0) by
+     construction, with no per-frame measuring. */
+  (function () {
+    const pts = [];
+    for (const f of frame(CLOSED)) for (const p of f.poly) pts.push(p);
+    pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const half = (list) => { const h = []; for (const p of list) { while (h.length > 1 && cr(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop(); h.push(p); } h.pop(); return h; };
+    const hull = half(pts).concat(half(pts.slice().reverse()));
+    let A = 0, gx = 0, gy = 0;
+    hull.forEach((p, i) => {
+      const q = hull[(i + 1) % hull.length], k = p[0] * q[1] - q[0] * p[1];
+      A += k; gx += (p[0] + q[0]) * k; gy += (p[1] + q[1]) * k;
+    });
+    const x = gx / (3 * A), y = gy / (3 * A);
+    /* the view is the camera frame turned by CLOSED.phi about the view axis */
+    const c = Math.cos(CLOSED.phi), s = Math.sin(CLOSED.phi);
+    const a = c * x + s * y, b = -s * x + c * y;
+    centre = add(add(centre, RIGHT, a), UP, b);
+    PIECES = pieces();
+  })();
   const api = { frame, CLOSED, EXTENT: 3.6 };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.penrose = api; }

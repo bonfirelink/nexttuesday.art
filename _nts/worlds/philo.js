@@ -49,10 +49,12 @@
       w = Math.round(rect.width); h = Math.round(rect.height);
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
-      const span = Math.max(bbox.x1 - bbox.x0, bbox.y1 - bbox.y0);
-      scale = (Math.min(w, h) * (lite ? 0.9 : 0.96)) / span;
-      cx = w / 2 - ((bbox.x0 + bbox.x1) / 2) * scale;
-      cy = h / 2 + ((bbox.y0 + bbox.y1) / 2) * scale;
+      /* the model's pivot is the closed triangle's centre (penrose.js), so it
+         goes on the host's centre; the size fits the furthest reach of any
+         pose from that point */
+      const reach = Math.max(-bbox.x0, bbox.x1, -bbox.y0, bbox.y1);
+      scale = (Math.min(w, h) * (lite ? 0.9 : 0.96)) / (2 * reach);
+      cx = w / 2; cy = h / 2;
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */
     let twin = null, tctx = null, night = null;
