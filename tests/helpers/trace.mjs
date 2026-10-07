@@ -74,5 +74,3 @@ export async function trace(page, action, { selectors = [] } = {}) {
 
 export const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)];
 
-// Resolves after `ms` of page time spent on animation frames (an idle window).
-export const idle = (page, ms) => page.waitForTimeout(ms);
