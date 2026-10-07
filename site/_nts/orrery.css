@@ -153,7 +153,7 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 /* at rest the window stands off its ground like a disc (lip and short
    shadow); lifted, the lift's layer deepens both */
 .orb { box-shadow: 0 2px 6px -1px var(--w-cast); }
-.orb::after { inset: 0; box-shadow: inset 0 1px 0 var(--w-rim), 0 18px 36px -16px var(--w-cast); }
+.orb::after { inset: 0; box-shadow: inset 0 1px 0 var(--w-rim), inset 0 16px 24px -20px var(--w-rim), 0 14px 26px -16px var(--w-cast); }
 .orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
 .world .prose { width: 100%; }
 .world .prose h2 { margin-bottom: .8rem; }
