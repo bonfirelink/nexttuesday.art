@@ -142,7 +142,7 @@
     centre = add(add(centre, RIGHT, a), UP, b);
     PIECES = pieces();
   })();
-  const api = { frame, CLOSED, EXTENT: 3.6 };
+  const api = { frame, CLOSED, EXTENT: 2.6 };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.penrose = api; }
 })();

@@ -64,7 +64,14 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .nts-penrose { position: relative; width: 100%; aspect-ratio: 1; touch-action: pan-y; cursor: grab; }
 .nts-penrose:active { cursor: grabbing; }
 .nts-penrose img, .nts-penrose > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.nts-penrose canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.nts-penrose canvas { position: absolute; inset: -35%; width: 170%; max-width: none; height: 170%; pointer-events: none; }
+/* The rest pose is drawn as large as the other worlds' figures, so the
+   tilted poses (up to 1.7x its reach) outgrow the host: the canvas is
+   bigger than the host on every side, and the hero keeps text above it and
+   clips what would scroll sideways. */
+.philo-hero { overflow-x: clip; }
+.philo-hero .hero-text, .philo-hero .fig { position: relative; z-index: 1; }
+.philo-hero .fig { position: absolute; }
 .nts-penrose.is-live img, .nts-penrose.is-live > svg { display: none; }
 .fig { position: absolute; top: 100%; left: 0; right: 0; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: .95rem; color: var(--w-muted); margin: .5rem 0 0; }
 .fig b { font-style: normal; font-weight: 400; }
