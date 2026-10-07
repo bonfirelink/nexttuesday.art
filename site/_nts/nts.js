@@ -418,4 +418,24 @@
     btn.addEventListener("click", function () { if (held) { held = false; return; } toggle(); });
     btn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   });
+  /* falling in: a world's hero entity is the `orb` of the cross-document view
+     transition only when the other page is not a world page (the home orb
+     becomes it, and it becomes the orb again going back). World to world is
+     the plain root crossfade: the two entities never morph. */
+  (function () {
+    var WORLD = /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/;
+    function orb(other, vt) {
+      var ent = document.querySelector(".hero .entity");
+      if (!ent || !vt || WORLD.test(new URL(other, location.href).pathname)) return;
+      ent.style.viewTransitionName = "orb";
+      var clear = function () { ent.style.viewTransitionName = ""; };
+      vt.finished.then(clear, clear);
+    }
+    addEventListener("pageswap", function (e) {
+      if (e.viewTransition && e.activation && e.activation.entry) orb(e.activation.entry.url, e.viewTransition);
+    });
+    addEventListener("pagereveal", function (e) {
+      if (e.viewTransition && window.navigation && navigation.activation && navigation.activation.from) orb(navigation.activation.from.url, e.viewTransition);
+    });
+  })();
 })();

@@ -39,9 +39,11 @@ html[data-bleed-state="before"] [data-world="intersect"] { --grain: 0; }
 [data-world="intersect"] > :where(:not(.nts-header, .intersect-grain, .nts-bleed-front)) { position: relative; z-index: 1; }
 
 /* the ASCII solid */
+/* the solid fills the orbit ring; the margins (percentages of the entity's
+   width, on every side) pad it out to the same square box as the other figures */
 pre[data-nts-ascii] {
-  display: block; margin: 0 auto;
-  width: min(100%, 48svh, 520px); aspect-ratio: 1; overflow: hidden;
+  display: block; margin: calc((100% - var(--ring)) / 2) auto;
+  width: var(--ring); aspect-ratio: 1; overflow: hidden;
   font-family: var(--font-mono); font-weight: 400; line-height: 1; font-size: 4.2px;
   color: var(--w-fg); white-space: pre; user-select: none; -webkit-user-select: none;
   touch-action: pan-y; cursor: grab;

@@ -208,12 +208,10 @@ html:not(.js) .compass { display: none; }
 
 /* ---------- the trace of the orbit on the world pages ---------- */
 /* a dashed ring inside the entity's box, the page's sigil riding it */
-.hero .entity { position: relative; }
-.trace { position: absolute; left: 50%; top: 50%; width: calc(min(100%, 92svh) - 2.6rem); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; container-type: inline-size; }
+.hero .entity { position: relative; --ring: calc(min(100%, 92svh) - 2.6rem); }
+.trace { position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; container-type: inline-size; }
 .trace .trace-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--w-line-strong); }
-.embers-hero .trace { width: calc(min(100%, 70svh) - 2.6rem); }
 .embers-hero .trace-orbit { --a: 215deg; }
-.intersect-hero .trace { width: calc(min(100%, 48svh, 520px) - 2.6rem); }
 .events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
 .events-hero .mini-orrery { position: relative; width: min(64%, 13rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.5rem auto 2.5rem; container-type: inline-size; }
@@ -232,7 +230,6 @@ html:not(.js) .compass { display: none; }
 /* ---------- falling in: cross-document view transitions ---------- */
 @view-transition { navigation: auto; }
 .nts-header { view-transition-name: nts-header; }
-.hero .entity { view-transition-name: orb; }
 ::view-transition-old(root) { animation: vt-out 320ms ease both; }
 ::view-transition-new(root) { animation: vt-in 420ms ease both; }
 ::view-transition-group(orb) { animation-duration: 640ms; animation-timing-function: var(--ease-out); }
