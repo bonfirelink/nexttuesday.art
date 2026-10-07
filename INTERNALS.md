@@ -242,10 +242,16 @@ The apertures. A section that changes ground is an aperture: `.ecl`,
 inset in the page so the ground around it stays in view, with the
 section's sigil in a ring on its top edge (`.ecl-ring`) and its content in
 `.ecl-win`. As it scrolls into view, its ground opens as a disc from the
-ring, with a thin bright limb on the disc's edge, and closes again on the
-way back up (scroll-driven through `--ecl-p` where `animation-timeline:
-view()` exists and `html.js` is set; open everywhere else and under
-reduced motion). On the home the apertures are the world windows
+ring, with a thin bright limb on the disc's edge (scroll-driven through
+`--ecl-p` where `animation-timeline: view()` exists and `html.js` is set;
+open everywhere else and under reduced motion). It follows the scroll both
+ways only until the disc is complete: then it latches. `nts.js` watches
+each `.ecl` with an IntersectionObserver whose root is cut 55% at the
+bottom, the line where `animation-range` (`cover 0 cover 55vh`) ends, and
+adds `.is-open` (`animation: none; --ecl-p: 1`), so scrolling back up never
+closes it again, for the rest of the page load. The limb, the ring's sigil
+and the words all derive from `--ecl-p`, so they latch with it. If you
+change the animation range, change the observer's `rootMargin` to match. On the home the apertures are the world windows
 (`.world.ecl`) and the two NTS bands; inside a world they are its bands.
 Colours come from `--ecl-bg`, `--ecl-fg`, `--ecl-out` and `--ecl-limb`
 (the file head has the markup). A band's words fade in only once the disc
