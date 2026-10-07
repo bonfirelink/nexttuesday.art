@@ -1,5 +1,6 @@
 // CDP tracing for the perf guards: what the renderer's main thread painted
 // (by node), laid out and ran frames for during a window. Counts, not times.
+const SAME_FRAME_US = 5000; // Paint events of one node this close are one frame's paints
 const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline", "blink", "cc", "toplevel"];
 
 // Runs `action(page)` under a trace and returns { paints, layouts, frames, byNode }.
@@ -7,6 +8,10 @@ const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline"
 //   layouts  Layout events on the renderer main thread
 //   frames   requestAnimationFrame callbacks that ran while `action` did
 //   hits     labels of the nodes counted in a selector, for the failure message
+//   repeats  Map of `selectors[i]` -> repaints inside it: for each node, the frames it was painted
+//            in beyond the first (events less than SAME_FRAME_US apart are one frame). A node's first
+//            paint in the trace is when it first comes into view, whenever that happens on a loaded
+//            machine; a repaint is the regression.
 //   byNode   Map of `selectors[i]` -> Paint events whose node is inside one of that selector
 //            (`closest`), plus "(no node)" and "(other)" buckets
 // The page needs to be loaded already. `selectors` is a list of CSS selectors.
@@ -36,10 +41,15 @@ export async function trace(page, action, { selectors = [] } = {}) {
     const layouts = main.filter((e) => e.name === "Layout" && e.ph === "X").length;
 
     const perNode = new Map();
-    for (const e of paintEvents) {
+    const repaintsOf = new Map(); // nodeId -> paint frames beyond its first
+    const lastTs = new Map();
+    for (const e of [...paintEvents].sort((a, b) => a.ts - b.ts)) {
       const id = e.args?.data?.nodeId || 0;
       perNode.set(id, (perNode.get(id) || 0) + 1);
+      if (lastTs.has(id) && e.ts - lastTs.get(id) >= SAME_FRAME_US) repaintsOf.set(id, (repaintsOf.get(id) || 0) + 1);
+      lastTs.set(id, e.ts);
     }
+    const repeats = new Map(selectors.map((s) => [s, 0]));
     const byNode = new Map([["(no node)", perNode.get(0) || 0], ["(other)", 0], ...selectors.map((s) => [s, 0])]);
     const hits = [];
     const ids = [...perNode.keys()].filter(Boolean);
@@ -64,9 +74,10 @@ export async function trace(page, action, { selectors = [] } = {}) {
       }
       const key = hit?.hit ?? "(other)";
       byNode.set(key, byNode.get(key) + perNode.get(id));
+      if (repeats.has(key)) repeats.set(key, repeats.get(key) + (repaintsOf.get(id) || 0));
       if (hit) (hit.hit ? hits : (byNode.others ??= [])).push(`${perNode.get(id)}x ${hit.label}`);
     }
-    return { paints: paintEvents.length, layouts, frames, byNode, others: byNode.others ?? [], hits };
+    return { paints: paintEvents.length, layouts, frames, byNode, repeats, others: byNode.others ?? [], hits };
   } finally {
     await session.detach().catch(() => {});
   }

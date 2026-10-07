@@ -87,10 +87,10 @@ for (const [name, view] of Object.entries(VIEWS)) {
           },
         }));
       }
-      const parts = (r) => r.byNode.get(".ecl");
+      const parts = (r) => r.repeats.get(".ecl");
       await testInfo.attach("p2.json", { body: JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode], others: r.others })), null, 1), contentType: "application/json" });
       if (process.env.PERF_LOG) console.log(name, "P2", JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, hits: r.hits }))));
-      expect(median(runs.map(parts)), `paints inside .ecl parts over ${WINDOWS} windows`).toBeLessThanOrEqual(allowance);
+      expect(median(runs.map(parts)), `repaints of .ecl parts (paints after a node's first) over ${WINDOWS} windows`).toBeLessThanOrEqual(allowance);
     });
 
     test(`P3 INTERSECT does no layout when idle @perf (${name})`, async ({ context }, testInfo) => {
