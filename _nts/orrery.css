@@ -128,12 +128,6 @@
 .orb::before { content: ""; position: absolute; inset: -.6rem; border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
 .orb:hover, .orb:focus-visible { box-shadow: 0 18px 36px -18px color-mix(in srgb, var(--w-fg) 55%, transparent); }
 .orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
-.orb-orbit { --r: calc(50cqi + .6rem); }
-.orb-orbit .trace-bead { width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; }
-.orb-orbit .trace-bead .nts-sigil { width: 1.75rem; height: 1.75rem; }
-.world[data-world="embers"] .orb-orbit { --a: 320deg; --p: 90s; }
-.world[data-world="philo"] .orb-orbit { --a: 40deg; --p: 110s; }
-.world[data-world="intersect"] .orb-orbit { --a: 230deg; --p: 130s; }
 .world .prose { width: 100%; }
 .world .prose h2 { margin-bottom: .8rem; }
 .world .prose .lede { margin-bottom: .6rem; }

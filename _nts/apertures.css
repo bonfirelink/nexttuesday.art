@@ -69,7 +69,8 @@ main { --ecl-out: var(--w-bg); }
 
 /* ---------- home: the windows into the worlds ---------- */
 .world.ecl { overflow: visible; --ecl-bg: var(--w-bg); --ecl-fg: var(--w-accent); --ecl-limb: var(--w-accent); padding: 0; }
-.world.ecl .ecl-win { padding: clamp(2.75rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); color: var(--w-fg); }
+/* the top padding keeps the ring on the seam clear of the orb's dashed orbit */
+.world.ecl .ecl-win { padding: clamp(3.75rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); color: var(--w-fg); }
 .world.ecl .ecl-ring { color: var(--w-accent); }
 .world.ecl > .ecl-win .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
 @media (min-width: 760px) { .world.ecl .ecl-win { padding-inline: clamp(1rem, 3vw, 3rem); } }
