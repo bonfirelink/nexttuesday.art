@@ -26,6 +26,43 @@
   --nts-rim: rgba(255, 255, 255, 0.5);
   --nts-cast: rgba(26, 21, 48, 0.3);
 
+  /* The colour code: the home emblem and its ground draw only
+     from these. Neutrals by role:
+       plywood    the plate under the Black sun's opening
+       ink        the black of the sun's dial, the keylines, the Black opening
+       bone       the light of the bone dial and of text on the black
+       bone-muted small text on the black
+       muted      small text on the plywood
+       voice      the italic voice and the secret on a light ground
+       shade      the pyramid's lower face, a shadow of the Philo grey
+       etch       the faint geometry: the sunburst and the star on stop
+       grid       the faint red grid of the opening, on light and on dark
+     The code: each initiative has its colour, wherever it appears (orbit
+     dots, pyramid faces, marks):
+       embers     red, EMBERS (the rave): fire
+       philo      grey, NOT NOT PHILO (the salons)
+       intersect  phosphor, INTERSECT
+       events     ochre, the events and what is yet to come; also the eye
+                  and the north
+       sky        the sun's inner band, no initiative
+       reserve    green, for what is none of the above (experiments) */
+  --pal-plywood: #e6d8c0;
+  --pal-ink: #141312;
+  --pal-bone: #e8dcc6;
+  --pal-bone-muted: #a59d8f;
+  --pal-muted: #5e5a52;
+  --pal-voice: #9e1430;
+  --pal-shade: #55544f;
+  --pal-etch: #77726a;
+  --pal-grid: rgb(229 29 71 / .08);
+  --pal-grid-dark: rgb(229 29 71 / .2);
+  --code-embers: #e51d47;
+  --code-philo: #858481;
+  --code-intersect: #e9e2cf;
+  --code-events: #d9a414;
+  --pal-sky: #3a8fc6;
+  --pal-reserve: #2f9a5a;
+
   /* the worlds, for use outside their pages (ledger marks, fragments) */
   --embers-night: #0b0709;
   --embers-plum: #2a0a22;
@@ -398,54 +435,12 @@ body > .nts-night { position: absolute; left: 0; top: 0; z-index: 2; overflow: c
 /* the parts outside the hero crossfade as the disc passes their centre */
 html[data-bleed-state="in"] :is(body > :not(main, footer, .nts-night), body > :not(main, footer, .nts-night) *) { transition: color var(--dur-bleed-fade) ease, background-color var(--dur-bleed-fade) ease, border-color var(--dur-bleed-fade) ease, box-shadow var(--dur-bleed-fade) ease, text-shadow var(--dur-bleed-fade) ease, fill var(--dur-bleed-fade) ease, stroke var(--dur-bleed-fade) ease; }
 
-/* ---------- 12. the mega-sigil ---------- */
-.mega { position: relative; width: 100%; aspect-ratio: 1; }
-/* the sigil is a stack of square SVGs, one per layer, so each turning layer
-   is an HTML-level box the compositor rotates: animating transform on a <g>
-   inside one SVG re-lays-out and repaints the whole drawing every frame.
-   transform-origin is each layer's bounding-box centre in viewBox percent
-   (the waves' sits a hair off centre, as their old fill-box origin did). */
-.mega .mega-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.mega [class^="l-"] { will-change: transform; }
-.mega .l-waves { transform-origin: 49.875% 50.0096%; }
-.mega .l-ticks { animation: turn 240s linear infinite; }
-.mega .l-hept { animation: turn 170s linear infinite reverse; }
-.mega .l-waves { animation: turn 220s linear infinite; }
-.mega .l-knot { animation: turn 95s linear infinite; }
-.mega .l-stars { animation: turn 130s linear infinite reverse; }
-.mega .tet { transition: transform 2.2s var(--ease-turn); }
-.mega .hole { opacity: 0; transition: opacity 1.6s ease .6s; }
-.mega.is-aligned [class^="l-"] { animation: none; transition: transform 2.2s var(--ease-turn); }
-.mega.is-aligned .hole { opacity: 1; }
-.mega.is-aligned .tet { transform: rotate(180deg); }
-.mega .multiply { mix-blend-mode: multiply; }
-.mega .misreg { transform: translate(.9615%, -.7692%); }
+/* ---------- 12. shared keyframes ---------- */
 @keyframes turn { to { transform: rotate(360deg); } }
-/* the small details draw themselves in, once, on arrival; the figure itself
-   is there from the first frame */
-.js .mega .l-hept path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.6s var(--ease-out) .2s forwards; }
-.js .mega .l-ticks circle { opacity: 0; animation: appear 1.2s ease .9s forwards; }
-.js .mega .l-ticks circle + circle { animation-delay: 1.4s; }
-.js .mega .l-stars use { opacity: 0; transform-box: fill-box; transform-origin: center; animation: pop 900ms var(--ease-out) forwards; }
-.js .mega .l-stars use:nth-child(2) { animation-delay: 1.6s; }
-.js .mega .l-stars use:nth-child(3) { animation-delay: 1.9s; }
-.js .mega .l-stars use:nth-child(4) { animation-delay: 2.2s; }
-.js .mega .l-stars use:nth-child(5) { animation-delay: 2.5s; }
-.js .mega .l-knot circle { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.2s var(--ease-out) 1s forwards; }
-.js .mega .l-knot circle:nth-child(3) { animation-delay: 1.3s; }
-.js .mega .l-knot circle:nth-child(4) { animation-delay: 1.6s; }
-@keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes appear { to { opacity: 1; } }
-@keyframes pop { from { opacity: 0; transform: scale(.2) rotate(-45deg); } to { opacity: 1; transform: none; } }
-.mega-btn { appearance: none; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; color: inherit; width: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; border-radius: 50%; }
-.mega-btn:focus-visible { outline-offset: 10px; }
 
 /* ---------- 13. reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-  .mega [class^="l-"] { animation: none !important; }
-  .js .mega .l-hept path, .js .mega .l-knot circle { stroke-dasharray: none; stroke-dashoffset: 0; }
-  .js .mega .l-ticks circle, .js .mega .l-stars use { opacity: 1; }
   .js [data-nts-draw]:not(.is-in) .nts-sigil use, .js .nts-sigil[data-nts-draw]:not(.is-in) use, .js [data-nts-draw]:not(.is-in) .drawn, .js [data-nts-draw]:not(.is-in) .drawn * { stroke-dasharray: none; stroke-dashoffset: 0; }
   .js [data-nts-draw="fade"]:not(.is-in) { opacity: 1; transform: none; }
   .js .rule.draw:not(.is-in) { transform: none; }

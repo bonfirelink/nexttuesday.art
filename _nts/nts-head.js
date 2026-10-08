@@ -11,6 +11,9 @@
 (function () {
   var d = document.documentElement;
   d.classList.add("js");
+  /* the home's ground, as last picked (orrery.js stores it): Black opening
+     sets html[data-ground]; Black sun, the default, sets nothing */
+  try { if (localStorage.getItem("nts:ground") === "opening") d.setAttribute("data-ground", "opening"); } catch (err) { /* storage off: the default */ }
   /* The orb morph between the home and the world pages (the events page is
      one too). NTS.world(url): the world a same-site URL is, else null; the
      one list of world paths. NTS.body(world): the home's body for it, its
