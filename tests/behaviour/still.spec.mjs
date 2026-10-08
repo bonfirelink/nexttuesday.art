@@ -9,9 +9,10 @@ const ORB_FRACS = [0.7, 0.6, 0.5, 0.4, 0.3]; // where the orb's top sits, as a s
 const ORB_ENTRY_K = [0.25, 0.5, 0.75]; // the share of its own height the orb has entered by
 const TOP_TRIES = 4; // scrolls tried to land the orb on a target
 const TOP_TOL = 1; // px: how closely a scroll must land on its target
-// The emblem's original box in CSS px, as recorded from the live site (the viewport's width on
-// a phone). A variant sized to the world ring (559 px at 1440) differs by more than the tolerance.
-const EMBLEM_WIDTH = { 390: 390, 1440: 565.72 };
+// The emblem's original box in CSS px, as recorded from the live site; on a phone it is sized so
+// its outer orbit lands on the gutter ((390 - 2 * 19.5) / .9572). A variant sized to the world
+// ring (559 px at 1440) differs by more than the tolerance.
+const EMBLEM_WIDTH = { 390: 366.69, 1440: 565.72 };
 
 // Everything the aperture parts add (the opening disc and its inverse) is left out.
 const APERTURE_PART = ".ecl-disc, .ecl-in";

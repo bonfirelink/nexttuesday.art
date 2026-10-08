@@ -192,7 +192,9 @@ which is what lets draw-in work with one dash rule.
 
 Header and footer come from sync (`<!-- nts:header -->`, `<!-- nts:footer -->`).
 The header is sticky, one row, 52px; on phones the wordmark hides and the
-four destinations stay in one tap. It takes `--w-bar-bg`/`--w-bar-fg`, so
+four destinations stay in one tap, spread from the sigil to the gutter
+(the `nav` takes the free width), as far from the sigil as from each
+other. It takes `--w-bar-bg`/`--w-bar-fg`, so
 its colours follow the world; its type never does: the nav is Instrument
 Sans 600 at .72rem (.7rem under 640px, .6875rem under 360px) on every page,
 and `intersect.css` leaves it alone. The current page is marked by its
@@ -258,13 +260,25 @@ faint grid); `html[data-ground="opening"]` (set by `nts-head.js` from
 `localStorage["nts:ground"]` before paint) or the checked radio (`:has`,
 which works without scripts) switches every `--e-*`. Each bead rides in a
 moat of the plate's colour (`.bead::before`) that lifts with its face.
+The click hint is the bead's `::after`: a thin ring in `--e-halo` that
+grows off the moat and fades, the eye's beam in small, on every pointer
+type; one bead at a time (18 s cycle, staggered 4.5 s, set clear of the
+eye's touch beam). It rides the bead, outside the `.face` that the fall
+names `orb`, so the morph never captures it; no ring under reduced
+motion (S5, S6).
 
 ## The home (`orrery.css`, `orrery.js`) and the apertures (`apertures.css`)
 
 The orrery: the emblem is the sun, the sigils of the
 three worlds and the events star ride its orbits
-(`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright), with
-a key under the sky. Scrolling travels to each world: `section.world`
+(`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright).
+No key names the bodies: the name follows the emblem, and a quiet pulse
+(below) is the only hint that a bead opens. On a phone the emblem is sized
+so its outer orbit lands on the gutter, with the same margin under the
+header, and `.sky` runs to the screen's edges and does the clipping, so a
+body riding past the emblem's box (the events star at three o'clock) is
+never cut by the box; S1 in `tests/behaviour/sky.spec.mjs` holds the
+margin. Scrolling travels to each world: `section.world`
 with `data-world` and `data-orbit-body`, its orb (`.orb`, holding the
 world's live fragment) and its words. The orb is a portal, not a card: hover, keyboard
 focus and a press open it into the disc and never lift it or cast a shadow

@@ -157,7 +157,7 @@ below 3:1 on plywood, are held the same way.
 The red that marks things is the embers red, in small shapes.
 
 **The Named Colour Rule.** A code colour that means something is named in
-text: the key names the page each code colour stands for.
+text where it leads: each bead's accessible name, and the world it opens.
 
 **The Contrast Rule.** Text holds 4.5:1 on its ground; marks hold 3:1, or
 take an ink keyline.
@@ -181,7 +181,7 @@ sun, bone and bone muted on the Black opening.
 - **Voice** (italic 400, clamp(1.15rem, 3.2vw, 1.5rem)): the secret that
   appears on stop, in voice red on the Black sun and ochre on the Black
   opening.
-- **Label** (600, 0.72rem, 0.14em, uppercase): the key under the emblem.
+- **Label** (600, 0.72rem, 0.16em, uppercase): the whisper under the name.
 
 ## Layout
 

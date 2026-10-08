@@ -28,13 +28,18 @@
 
 /* ---------- the opener: the orrery ---------- */
 .threshold { display: grid; gap: clamp(1rem, 3vw, 2rem); padding: 0 0 clamp(2.5rem, 6vw, 4rem); align-items: center; }
-.sky { display: grid; gap: .9rem; justify-items: center; }
+/* On a phone the sky runs to the screen's edges and clips there, so a body
+   riding past the emblem's box is cut by the screen, never by the box. The
+   emblem is sized so its outer orbit (96.675 of 202 across: .9572 of the
+   box) lands on the gutter, and the sky's top pads it to the same margin
+   below the header (2.237% of the column is the box's own .0214 margin). */
+.sky { display: grid; justify-items: center; margin-inline: calc(-1 * var(--gutter)); padding-top: calc(var(--gutter) - 2.237%); overflow-x: clip; }
 .orrery {
   position: relative; aspect-ratio: 1; container-type: inline-size;
-  width: calc(100% + 2 * var(--gutter)); margin-inline: calc(-1 * var(--gutter));
-  touch-action: pan-y; overflow: clip;
+  width: calc((100% - 2 * var(--gutter)) / .9572);
+  touch-action: pan-y;
 }
-@media (min-width: 600px) { .orrery { width: min(100%, 34rem); margin-inline: auto; overflow: visible; } }
+@media (min-width: 600px) { .sky { margin-inline: 0; padding-top: 0; overflow-x: visible; } .orrery { width: min(100%, 34rem); margin-inline: auto; } }
 
 /* ---------- the emblem ---------- */
 /* The ground: the opener sits on a plate with a faint red grid, plywood
@@ -276,7 +281,31 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .bead:focus-visible .face { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; }
 /* INTERSECT's sigil is the phosphor on the orrery, where its red would sink into the black */
 .bead[data-body="intersect"] .nts-sigil { color: var(--intersect-phosphor); }
+.bead[data-body="star"] .face { display: grid; place-items: center; }
 .bead[data-body="star"] .nts-sigil { width: 66%; color: var(--code-events); filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--pal-ink) 35%, transparent)); }
+
+/* the hint that a bead opens: now and then a thin ring grows off it and
+   fades, the eye's beam in small (scale and opacity only), with a pointer
+   and on a touch screen. One bead at a time: an 18 s cycle, each bead 4.5 s
+   after the last, a quarter second past each half of the eye's touch beam
+   (every 9 s from 2.5 s), so neither meets another. The ring is the bead's
+   ::after, so it rides the orbit, outside the face that falling into a world
+   names orb, and under the round beads' moats, so it rises from the moat's
+   edge. Its box is the ring at full size, scaled down to start, so it is
+   drawn sharp at its widest; the star, with no moat, starts at the glyph's
+   own size. Under reduced motion there is no ring. */
+@media (prefers-reduced-motion: no-preference) {
+  .orrery .bead::after {
+    content: ""; position: absolute; z-index: -1; inset: -35%; border-radius: 50%; border: 1px solid var(--e-halo);
+    opacity: 0; transform: scale(.59); pointer-events: none;
+    animation: bead-pulse 18s cubic-bezier(.2, .7, .2, 1) 4.75s infinite;
+  }
+  .orrery .bead[data-body="star"]::after { inset: -2.7%; }
+  .orrery .o-philo .bead::after { animation-delay: 9.25s; }
+  .orrery .o-intersect .bead::after { animation-delay: 13.75s; }
+  .orrery .o-star .bead::after { animation-delay: 18.25s; }
+}
+@keyframes bead-pulse { 0% { transform: scale(.59); opacity: 0; } 1.8% { opacity: .6; } 8%, 100% { transform: scale(1); opacity: 0; } }
 
 /* arrival: the beads pop in */
 .js .bead .face { animation: bead-pop 500ms var(--ease-out) backwards; }
@@ -284,13 +313,6 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .js .o-intersect .face { animation-delay: 160ms; }
 .js .o-star .face { animation-delay: 240ms; }
 @keyframes bead-pop { from { transform: scale(.5); } to { transform: none; } }
-
-/* the key under the sky */
-.orrery-key { display: flex; flex-wrap: wrap; justify-content: center; gap: .2rem 1.1rem; margin: 0; padding: 0; list-style: none; max-width: 21rem; }
-@media (min-width: 600px) { .orrery-key { max-width: none; } }
-.orrery-key a { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; text-decoration: none; color: var(--e-muted); font-family: var(--font-text); font-weight: 600; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
-.orrery-key a:hover, .orrery-key a:focus-visible { color: var(--e-text); }
-.orrery-key .nts-sigil { width: 1.1rem; height: 1.1rem; }
 
 /* the name, under the sky on phones, beside it from 900px */
 .intro { display: grid; justify-items: center; text-align: center; gap: clamp(.7rem, 2vh, 1.1rem); }
