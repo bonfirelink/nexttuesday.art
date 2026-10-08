@@ -288,7 +288,7 @@ The orrery: the emblem is the sun, the sigils of the
 three worlds and the events star ride its orbits
 (`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright).
 No key names the bodies: the name follows the emblem, and a quiet pulse
-(below) is the only hint that a bead opens. On a phone the emblem is sized
+(below, paused while the machine is stopped) is the only hint that a bead opens. On a phone the emblem is sized
 so its outer orbit lands on the gutter, with the same margin under the
 header, and `.sky` runs to the screen's edges and does the clipping, so a
 body riding past the emblem's box (the events star at three o'clock) is

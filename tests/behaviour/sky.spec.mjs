@@ -6,7 +6,8 @@
 // gutter, the sigil-to-first gap like the gaps between them, one centre line;
 // S4 no key under the emblem: the name is the next thing after it;
 // S5 the four beads pulse now and then, with a pointer and on a touch screen,
-// never two at once, the ring outside the face the morph names; S6 under
+// never two at once, the ring outside the face the morph names, and none
+// runs while the machine is stopped; S6 under
 // reduced motion they do not pulse. The eye's own beam is E6 (emblem.spec).
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
@@ -161,6 +162,29 @@ for (const [label, ctx] of [["with a pointer", { viewport: { width: 1440, height
     });
   });
 }
+
+test("S5b the pulse rings stop with the machine and resume with it, keeping their stagger", async ({ page }) => {
+  await open(page);
+  const state = () => page.evaluate(() => [...document.querySelectorAll(".orrery .bead")].map((b) => {
+    const a = b.getAnimations({ subtree: true }).find((x) => x.animationName === "bead-pulse");
+    return a ? { body: b.dataset.body, state: a.playState, at: a.currentTime } : { body: b.dataset.body, state: "none" };
+  }));
+  const running = (xs) => xs.filter((x) => x.state === "running").length;
+  expect(running(await state()), "running at first").toBe(4);
+  await page.locator(".orrery .e-stop").click();
+  await expect(page.locator(".threshold")).toHaveClass(/is-stopped/);
+  const a = await state();
+  expect(running(a), "none runs while stopped").toBe(0);
+  await page.waitForTimeout(400);
+  const b = await state();
+  expect(b.map((x) => x.at), "and none advances").toEqual(a.map((x) => x.at));
+  await page.locator(".orrery .e-stop").click();
+  await expect(page.locator(".threshold")).not.toHaveClass(/is-stopped/);
+  const c = await state();
+  expect(running(c), "all run again").toBe(4);
+  const gaps = (xs) => xs.map((x, i) => x.at - xs[0].at);
+  expect(gaps(c).map((g) => Math.round(g / 100)), "same stagger as before").toEqual(gaps(a).map((g) => Math.round(g / 100)));
+});
 
 test.describe("S6 under reduced motion", () => {
   test.use({ reducedMotion: "reduce", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
