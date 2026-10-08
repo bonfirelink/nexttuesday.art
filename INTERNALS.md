@@ -68,8 +68,8 @@ Fonts only, one `<link>` per page with only the families that page uses;
 no Solstice, farm, WhatsApp, payment links or personal names; no RAVEMBER
 2026 date or venue; English; copy only from `_nts/content/copy.json`;
 `<title>`, description, og:title, og:description, theme-color, the one
-favicon (the NTS sigil on coral, the same `<link rel="icon">` on every
-page); no horizontal scroll at 320/360/390; 16px minimum gutter; AA
+favicon (the NTS sigil in ink on the beige, the same `<link rel="icon">`
+on the home, the worlds and events; 404 has its own); no horizontal scroll at 320/360/390; 16px minimum gutter; AA
 contrast, settled and in every transition (the bleed-in's crossing keeps
 each glyph in the colours of the ground under it); functional text 11px
 or more; canvases cap DPR at 2, pause off-screen and in hidden tabs, and
@@ -121,12 +121,24 @@ since white on the bar needs it that dark); INTERSECT black `#0a0a0a`,
 phosphor `#e9e2cf`, fire-hi `#ff3b63`.
 
 The colour code, `--pal-*` by role and `--code-*` by meaning;
-the comment at their definition says what each is for. The home emblem,
-its plate and the ground picker use only these; the rest of the home
-still uses the NTS palette above (coral and all) until it moves over.
+the comment at their definition says what each is for. The home uses
+only these. Its own parts read them through the `--w-*` set on
+`body[data-nts-home]` (after section 1 of `nts.css`); the ledger's black
+plate has a set of its own on `body[data-nts-home] .ledger-ap`. The world
+windows on the home set their kits' tokens on `[data-world]`, which wins
+over the body's set. The world pages, events, and the NTS state a world
+page opens in when reached from the home (section 11) still read the NTS
+palette above; the legacy tokens stay for them. `.sigil-nts` takes
+`--w-accent`, so it follows whichever set is in force.
+Rules on the home that are not tokens: the hints (`.tuesdays .cta`, the
+reveal) in `--pal-voice`; the words band (`#words`) and ledger
+(`#yet-to-come`) colours, selection, focus and tag dots in `pages.css`;
+the compass's colours in `orrery.css`. C1-C5 in
+`tests/behaviour/home-palette.spec.mjs` assert each by token, with its
+contrast.
 `--code-embers` red, `--code-philo` grey, `--code-intersect` phosphor,
 `--code-events` ochre (also the eye and the north); neutrals
-`--pal-plywood`, `--pal-ink`, `--pal-bone`, `--pal-bone-muted`,
+`--pal-beige`, `--pal-plywood`, `--pal-ink`, `--pal-bone`, `--pal-bone-muted`,
 `--pal-muted`, `--pal-voice`, `--pal-shade`, `--pal-etch`, `--pal-grid`,
 `--pal-grid-dark`, `--pal-sky`, `--pal-reserve`. A new colour on the home
 is a token here first.
@@ -216,7 +228,8 @@ event, upcoming then past, newest past first. Options on the open marker:
 `upcoming` or `past` (one group), `world=embers` (one world), `limit=3`,
 `heading=h2|h3|none`. Each row is `li[data-of="<world>"]` with the world's
 sigil, a mono date, a Fraunces title (linked when the event has a page), a
-`.kind` chip in the world's colour, the place and the line. Rows have ids
+`.kind` chip in the world's colour (on the home: a bone label with the
+initiative's code dot), the place and the line. Rows have ids
 `ev-<id>` from events.json.
 
 The emblem: the home's sun, inside `.orrery`. Its drawing is static,
@@ -293,7 +306,8 @@ as it fades. The opening moves and fades layers painted once (transform and
 opacity only), the same parts on every world, and nothing is drawn over the
 figure but the limb; O3 and O4 in `tests/behaviour/orbs.spec.mjs` hold that. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
-(`.compass`, fixed, bottom right) shows once the sky has scrolled away and
+(`.compass`, fixed, bottom right; a small black sun, its dots and needles
+in the code colours) shows once the sky has scrolled away and
 points at the nearest body (its orbit turns with `c-turn`, through the
 `rotate` property). It steps aside (`.is-aside`) only while the footer is
 in view: one IntersectionObserver on `.nts-footer`, no layout reads. The

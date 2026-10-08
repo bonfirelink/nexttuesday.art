@@ -2,6 +2,7 @@
 name: Next Tuesday Society
 description: The home emblem and its colour code, as shipped.
 colors:
+  beige: "#f4ecdc"
   plywood: "#e6d8c0"
   ink: "#141312"
   bone: "#e8dcc6"
@@ -57,6 +58,15 @@ components:
     backgroundColor: "{colors.code-events}"
   star-dot-reserve:
     backgroundColor: "{colors.reserve}"
+  words-band:
+    backgroundColor: "{colors.plywood}"
+    textColor: "{colors.ink}"
+  ledger-plate:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bone}"
+  compass:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bone}"
 ---
 
 # Design System: Next Tuesday Society
@@ -86,9 +96,6 @@ architecture without shouting.
 - Ink keylines between colours and around the light ones.
 - Slow, compositor-only motion; the dial ticks like a seconds hand, backwards.
 - Two grounds, Black sun (default) and Black opening, picked on the page.
-
-The coral still used elsewhere on the home (sigil, links, nav dots, compass,
-ledger) is legacy, to move onto these tokens in a later change.
 
 ## Colors
 
@@ -123,7 +130,9 @@ marks.
 
 ### Neutral
 
-- **Plywood** (`--pal-plywood`, #e6d8c0): the plate under the Black sun.
+- **Beige** (`--pal-beige`, #f4ecdc): the page's ground.
+- **Plywood** (`--pal-plywood`, #e6d8c0): the plate under the Black sun,
+  and the words band.
 - **Ink** (`--pal-ink`, #141312): the Black sun's dial, every keyline, the
   plate of the Black opening. 13.2:1 on plywood.
 - **Bone** (`--pal-bone`, #e8dcc6): the Black opening's dial, text on the
@@ -131,8 +140,9 @@ marks.
 - **Bone Muted** (`--pal-bone-muted`, #a59d8f): small text on the black
   (6.9:1).
 - **Muted** (`--pal-muted`, #5e5a52): small text on the plywood (4.9:1).
-- **Voice** (`--pal-voice`, #9e1430): the italic voice and the secret on a
-  light ground (5.8:1 on plywood).
+- **Voice** (`--pal-voice`, #9e1430): the italic voice, the secret and the
+  hints (the call to come next Tuesday, "Where?") on a light ground (5.8:1
+  on plywood, 6.9:1 on the beige).
 
 - **Shade** (`--pal-shade`, #55544f): the pyramid's lower face.
 - **Etch** (`--pal-etch`, #77726a): faint geometry only: the sunburst in the
@@ -166,6 +176,28 @@ take an ink keyline.
 It never stands in for an initiative.
 
 **The Token Rule.** A new colour on the home is a token in section 1 first.
+
+### Around the emblem
+
+The rest of the home takes the same tokens, by role:
+
+- **Type, sigils and links:** ink on the beige; links underlined. The
+  header's sigil and the Tuesdays sigils are ink.
+- **Hints:** voice on the beige; ochre on the black (the Black opening's
+  secret, the ledger's upcoming dates).
+- **Focus rings:** the ground's ink: ink on the beige and the plywood,
+  bone on the black.
+- **Selection:** ink with bone text; bone with ink text on the black.
+- **The words band:** a plywood plate, ink text.
+- **The ledger ("Yet to come"):** a black plate. Bone titles and sigils,
+  bone muted places, ochre upcoming dates and star. Each tag is a bone
+  label on a faint bone chip with its initiative's code dot: red EMBERS,
+  grey NOT NOT PHILO, phosphor INTERSECT, ochre the Tuesdays gathering.
+- **The compass:** a small black sun, a bone sigil and ring, each body's
+  dot and needle in its code colour (4:1 or more on the ink).
+- **The favicon:** the sigil in ink on the beige.
+
+The world windows on the home and the world pages keep their own colours.
 
 ## Typography
 

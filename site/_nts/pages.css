@@ -17,7 +17,9 @@
 html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; }
 
 /* ---------- home: sections ---------- */
-.tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--nts-coral-ink); }
+/* the hints speak in the voice (5.8:1 on the beige) */
+.tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--pal-voice); }
+.tuesdays details.reveal summary { color: var(--pal-voice); }
 .tuesdays .sigil-stage { display: none; }
 @media (min-width: 760px) {
   .tuesdays { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: 1.5rem 3rem; align-items: center; }
@@ -32,10 +34,30 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .words h2 { font-size: clamp(2.4rem, 8vw, 4.5rem); line-height: .98; }
 .words .prose p { font-size: 1.05rem; }
 .words .contact { font-family: var(--font-display); font-weight: 500; font-variation-settings: var(--fraunces-small); font-size: 1.25rem; line-height: 1.5; }
-.words .contact a { text-decoration-color: color-mix(in srgb, var(--nts-ink) 40%, transparent); }
+.words .contact a { text-decoration-color: color-mix(in srgb, var(--pal-ink) 40%, transparent); }
 .words-star { position: absolute; right: -2rem; bottom: -3rem; width: clamp(9rem, 22vw, 16rem); opacity: .55; pointer-events: none; }
 @media (min-width: 760px) { .words-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
 #yet-to-come .after { margin: 1.5rem 0 0; }
+/* the two NTS bands in the colour code: the words on a plywood plate, the
+   ledger on a black one (its --w-* set is in nts.css, section 1). Their
+   selection and focus follow the plate, not the bands' shared defaults. */
+#words { --band-bg: var(--pal-plywood); --band-fg: var(--pal-ink); }
+#yet-to-come { --band-bg: var(--pal-ink); --band-fg: var(--pal-bone); --ecl-limb: var(--code-events); }
+:is(#words, #yet-to-come) ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
+:is(#words, #yet-to-come) :focus-visible { outline-color: var(--w-fg); }
+/* ochre for what is yet to come: the ring's star, the heading's, the dates */
+#yet-to-come :is(.ecl-ring, .sect-head .nts-sigil) { color: var(--code-events); }
+#yet-to-come .ecl-ring .nts-sigil { filter: none; }
+#yet-to-come .ledger li { border-color: var(--w-line); }
+#yet-to-come .ledger .nts-sigil { color: var(--w-accent); }
+#yet-to-come .ledger li.upcoming .when { color: var(--w-accent-text); }
+/* each tag carries its initiative's code dot; the tag names the kind */
+#yet-to-come .ledger .kind { --kind-bg: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); --kind-fg: var(--pal-bone); }
+#yet-to-come .ledger .kind::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; vertical-align: .02em; background: var(--kind-dot); }
+#yet-to-come li[data-of="nts"] { --kind-dot: var(--code-events); }
+#yet-to-come li[data-of="embers"] { --kind-dot: var(--code-embers); }
+#yet-to-come li[data-of="philo"] { --kind-dot: var(--code-philo); }
+#yet-to-come li[data-of="intersect"] { --kind-dot: var(--code-intersect); }
 
 /* ---------- world pages: the hero ---------- */
 .hero { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }

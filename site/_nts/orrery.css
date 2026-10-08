@@ -278,7 +278,7 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .bead:active .face::after { opacity: 0; }
 /* the focus ring is the face's, so it rises with the face and stays round it */
 .bead:focus-visible { outline: none; }
-.bead:focus-visible .face { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; }
+.bead:focus-visible .face { outline: 2px solid var(--e-text); outline-offset: 3px; }
 /* INTERSECT's sigil is the phosphor on the orrery, where its red would sink into the black */
 .bead[data-body="intersect"] .nts-sigil { color: var(--intersect-phosphor); }
 .bead[data-body="star"] .face { display: grid; place-items: center; }
@@ -414,12 +414,14 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
 
 /* ---------- the compass: the sun, small, once the sky has scrolled away ---------- */
+/* A black sun: bone sigil and ring, each body's dot and needle in its code
+   colour, all of them 4:1 or more on the ink. */
 .compass {
   position: fixed; right: max(var(--compass-inset, 16px), env(safe-area-inset-right)); bottom: max(var(--compass-inset, 16px), env(safe-area-inset-bottom)); z-index: 30;
   width: 54px; height: 54px; border-radius: 50%;
-  background: color-mix(in srgb, var(--nts-paper) 94%, transparent); border: 1px solid var(--nts-line-strong);
-  box-shadow: 0 10px 22px -12px rgba(26, 21, 48, .6);
-  display: grid; place-items: center; color: var(--nts-ink);
+  background: var(--pal-ink); border: 1px solid color-mix(in srgb, var(--pal-bone) 28%, transparent);
+  box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--pal-ink) 60%, transparent);
+  display: grid; place-items: center; color: var(--pal-bone);
   opacity: 0; visibility: hidden; transform: translateY(10px) scale(.9); pointer-events: none;
   transition: opacity .5s ease, transform .6s var(--ease-out), visibility 0s .5s;
   -webkit-tap-highlight-color: transparent;
@@ -430,12 +432,12 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .compass.is-on.is-aside { opacity: 0; pointer-events: none; transform: translateY(10px) scale(.9); visibility: hidden; transition-delay: 0s, 0s, .5s; }
 html:not(.js) .compass { display: none; }
 .compass:focus-visible { outline-offset: 3px; }
-.compass .c-sun { width: 18px; height: 18px; color: var(--nts-coral); animation: turn 170s linear infinite reverse; grid-area: 1 / 1; }
-.compass .c-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--nts-line); }
-.compass .c-embers { --a: var(--a-embers); --p: var(--p-embers); --d: var(--d-embers); --c: var(--embers-fire); }
-.compass .c-philo { --a: var(--a-philo); --p: var(--p-philo); --d: var(--d-philo); --c: var(--philo-red); }
-.compass .c-intersect { --a: var(--a-intersect); --p: var(--p-intersect); --d: var(--d-intersect); --c: var(--intersect-fire-text); }
-.compass .c-star { --a: var(--a-star); --p: var(--p-star); --d: var(--d-star); --c: var(--nts-gold); }
+.compass .c-sun { width: 18px; height: 18px; color: var(--pal-bone); animation: turn 170s linear infinite reverse; grid-area: 1 / 1; }
+.compass .c-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--pal-bone) 22%, transparent); }
+.compass .c-embers { --a: var(--a-embers); --p: var(--p-embers); --d: var(--d-embers); --c: var(--code-embers); }
+.compass .c-philo { --a: var(--a-philo); --p: var(--p-philo); --d: var(--d-philo); --c: var(--code-philo); }
+.compass .c-intersect { --a: var(--a-intersect); --p: var(--p-intersect); --d: var(--d-intersect); --c: var(--code-intersect); }
+.compass .c-star { --a: var(--a-star); --p: var(--p-star); --d: var(--d-star); --c: var(--code-events); }
 .compass .c-orbit { --r: 19px; }
 /* the compass's dot and needle turn about the sun with the rotate property,
    in step with the sky (same --a, --p), so the needle always points at its
@@ -448,12 +450,12 @@ html:not(.js) .compass { display: none; }
    under an invisible element still makes every main frame rebuild the page's
    layers. orrery.js sets the dots back to their beads' angles as it shows. */
 .compass:not(.is-on) :is(.c-sun, .c-orbit > *), .compass.is-aside :is(.c-sun, .c-orbit > *) { animation-play-state: paused; }
-.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transform: translateY(calc(-1 * var(--r))); transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
+.compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--pal-bone); opacity: .5; transform: translateY(calc(-1 * var(--r))); transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
 .compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
 .compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: translateY(calc(-1 * var(--r))) scale(1.9); }
 .compass[data-near="embers"] .c-embers .c-needle, .compass[data-near="philo"] .c-philo .c-needle, .compass[data-near="intersect"] .c-intersect .c-needle, .compass[data-near="star"] .c-star .c-needle { opacity: 1; transform: none; }
-.compass[data-near="sun"] .c-sun { filter: drop-shadow(0 0 4px rgba(240, 74, 58, .6)); }
-.compass:hover, .compass:focus-visible { border-color: var(--nts-coral-ink); }
+.compass[data-near="sun"] .c-sun { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--pal-bone) 60%, transparent)); }
+.compass:hover, .compass:focus-visible { border-color: var(--pal-bone); }
 
 /* ---------- the trace of the orbit on the world pages ---------- */
 /* a dashed ring inside the entity's box, the page's sigil riding it */
