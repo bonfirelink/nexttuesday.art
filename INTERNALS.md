@@ -110,10 +110,7 @@ a world; the ledger rows use `data-of` for that reason.
 
 ## Tokens (`nts.css`, section 1)
 
-NTS palette: paper `#f4ecdc`, paper-2 `#ebe1cc`, ink `#1a1530`, ink-soft
-`#5b5577`, coral `#f04a3a` (fields, marks, type at 24px and up; 3.1:1 on
-paper), coral-ink `#c42b1f` (coral for small text, 4.8:1), gold `#f5b31b`,
-cobalt `#2f3fd9`. Worlds: EMBERS night `#0b0709`, fire `#e51d47`, ember
+Worlds: EMBERS night `#0b0709`, fire `#e51d47`, ember
 `#f2591b`, cream `#ffe9d0`; NOT NOT PHILO ground `#e6e6e8`, ink `#2b2d3e`,
 red `#e5174a`, key red `#e81e4c` (`--philo-red-key`, only for `.philo-key`:
 3:1 on the grey and on the word's own charcoal plate; `--philo-red` stays,
@@ -121,34 +118,39 @@ since white on the bar needs it that dark); INTERSECT black `#0a0a0a`,
 phosphor `#e9e2cf`, fire-hi `#ff3b63`.
 
 The colour code, `--pal-*` by role and `--code-*` by meaning;
-the comment at their definition says what each is for. The home uses
-only these. Its own parts read them through the `--w-*` set on
-`body[data-nts-home]` (after section 1 of `nts.css`); the ledger's black
-plate has a set of its own on `body[data-nts-home] .ledger-ap`. The world
-windows on the home set their kits' tokens on `[data-world]`, which wins
-over the body's set. The world pages, events, and the NTS state a world
-page opens in when reached from the home (section 11) still read the NTS
-palette above; the legacy tokens stay for them. `.sigil-nts` takes
+the comment at their definition says what each is for. The NTS chrome on
+every page uses only these; there is no other NTS palette. It reads them
+through one `--w-*` set, right after section 1 of `nts.css`, on `:root`
+(the home, `/events/`) and on the arrival selectors of section 11 (a world
+page reached from the home), so the home hands over to a world in the
+same colours. The ledger's black plate has a set of its own on
+`.ledger-ap` (the home's "Yet to come" and `/events/`). World kits set
+their tokens on `[data-world]`, which wins over the root's set; the
+arrival selectors outrank the kits while they apply. `.sigil-nts` takes
 `--w-accent`, so it follows whichever set is in force.
-Rules on the home that are not tokens: the hints (`.tuesdays .cta`, the
-reveal) in `--pal-voice`; the words band (`#words`) and ledger
-(`#yet-to-come`) colours, selection, focus and tag dots in `pages.css`;
-the compass's colours in `orrery.css`. C1-C5 in
-`tests/behaviour/home-palette.spec.mjs` assert each by token, with its
-contrast.
+Rules that are not tokens: the home's hints (`.tuesdays .cta`, the
+reveal) in `--pal-voice`; the words band (`#words`) in `pages.css`; the
+ledger plate's selection, focus, ochre marks and tag dots in
+`apertures.css`; the compass's and the events page's small orrery's
+colours in `orrery.css`; the arrival colours of the worlds' figures
+(`--penrose-*`, `--hearth-base`) in their kits. C1-C5 in
+`tests/behaviour/home-palette.spec.mjs` and S1-S2 in
+`site-palette.spec.mjs` assert each by token, with its contrast; S3
+scans every page, at rest and on arrival, for a colour of the old coral
+palette.
 `--code-embers` red, `--code-philo` grey, `--code-intersect` phosphor,
 `--code-events` ochre (also the eye and the north); neutrals
 `--pal-beige`, `--pal-plywood`, `--pal-ink`, `--pal-bone`, `--pal-bone-muted`,
 `--pal-muted`, `--pal-voice`, `--pal-shade`, `--pal-etch`, `--pal-grid`,
-`--pal-grid-dark`, `--pal-sky`, `--pal-reserve`. A new colour on the home
-is a token here first.
+`--pal-grid-dark`, `--pal-sky`, `--pal-reserve`. A new NTS colour, on any
+page, is a token here first.
 
 The skeleton reads only the `--w-*` tokens: `--w-bg`, `--w-bg-2`, `--w-fg`,
 `--w-muted`, `--w-accent` (shapes and large type), `--w-accent-text` (small
 text), `--w-link`, `--w-line`, `--w-line-strong`, `--w-selection`,
 `--w-selection-fg`, `--w-bar-bg`, `--w-bar-fg`. A world kit redefines them
 under `[data-world="…"]`, once: there is no separate day set, since
-the state before the bleed-in is the NTS set itself (section 11 of
+the state before the bleed-in is the NTS set itself (section 1 and 11 of
 `nts.css`). Style the pages through them.
 
 Type, five families, each with one job:
@@ -216,8 +218,8 @@ belongs to the word, not to the bar's bottom edge, where it would float. Hover a
 colour. Do not add a menu button or hide the header.
 
 Sections: `.sect` (vertical rhythm), `.sect-head` (sigil + h2), `.rule`
-(and `.rule.draw` to grow in), `.band` (a bold field: coral by default,
-`.gold`, `.cobalt`, `.ink`), `.go` (a link that leads somewhere, with the
+(and `.rule.draw` to grow in), `.band` (a field in `--band-bg` and
+`--band-fg`, which each band sets), `.go` (a link that leads somewhere, with the
 star), `details.reveal` (a whisper on tap).
 
 The lift: add `.lift` to any block link or card. Hover and focus lift it 4px
@@ -405,7 +407,7 @@ behave the same.
   page's tokens flip to the world's at the same moment, except on the
   hero itself and the header, which keep `.nts-bleed-old`; so everything
   below the hero is in the world from the start and is never crossed, and
-  the hero keeps its NTS ground (`main .hero` gets a full-bleed paper
+  the hero keeps its NTS ground (`main .hero` gets a full-bleed beige
   ground, `box-shadow` clipped at its foot, while the state is `before`
   or `in`). The parts outside the hero drop `.nts-bleed-old` when the
   disc's edge passes their centre (a scroll position worked out with the

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-08T17:24:36+00:00",
+  "generatedAt": "2026-10-08T21:18:36+00:00",
   "title": "Design System: Next Tuesday Society",
   "extensions": {
     "colorMeta": {
@@ -33,6 +33,11 @@
         "role": "secondary",
         "displayName": "Reserve Green",
         "cssVar": "--pal-reserve"
+      },
+      "beige": {
+        "role": "neutral",
+        "displayName": "Beige",
+        "cssVar": "--pal-beige"
       },
       "plywood": {
         "role": "neutral",
@@ -96,11 +101,7 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "The key under the emblem."
-      },
-      "caption": {
-        "displayName": "Caption",
-        "purpose": "The star's caption."
+        "purpose": "The whisper under the name."
       }
     },
     "motion": [
@@ -169,9 +170,9 @@
       "name": "Star dot",
       "kind": "custom",
       "refersTo": "star-dot-events",
-      "description": "A code-colour disc with a fine ink ring; a halo on hover and focus.",
-      "html": "<button class=\"ds-star\" type=\"button\" aria-label=\"A star: Yet to come: the events\"><svg viewBox=\"-9.5 -9.5 19 19\" width=\"44\" height=\"44\" aria-hidden=\"true\"><circle class=\"ds-star-halo\" r=\"4.6\" fill=\"none\" stroke=\"var(--pal-ink)\" stroke-width=\".6\"/><circle r=\"2.3\" fill=\"var(--code-events)\" stroke=\"var(--pal-ink)\" stroke-width=\".45\"/></svg></button>",
-      "css": ".ds-star { background: none; border: 0; padding: 0; cursor: pointer; } .ds-star-halo { opacity: 0; transition: opacity .2s; } .ds-star:hover .ds-star-halo, .ds-star:focus-visible .ds-star-halo { opacity: 1; } .ds-star:focus-visible { outline: none; } .ds-star:focus-visible .ds-star-halo { stroke-width: .9px; }"
+      "description": "A code-colour disc with a fine ink ring: a quiet decorative mark until its page exists. Not focusable, hidden from assistive tech, a tap does nothing; a halo ring on a pointer's hover.",
+      "html": "<span class=\"ds-star\" aria-hidden=\"true\"><svg viewBox=\"-9.5 -9.5 19 19\" width=\"44\" height=\"44\"><circle class=\"ds-star-halo\" r=\"4.6\" fill=\"none\" stroke=\"var(--pal-ink)\" stroke-width=\".6\"/><circle r=\"2.3\" fill=\"var(--code-events)\" stroke=\"var(--pal-ink)\" stroke-width=\".45\"/></svg></span>",
+      "css": ".ds-star { display: inline-block; } .ds-star-halo { opacity: 0; transition: opacity .2s; } @media (hover: hover) { .ds-star:hover .ds-star-halo { opacity: 1; } }"
     },
     {
       "name": "Sun bands",
@@ -186,11 +187,43 @@
       "description": "Two round swatches switching Black sun and Black opening.",
       "html": "<div class=\"ds-pick\"><input class=\"ds-pick-sun\" type=\"radio\" name=\"ds-ground\" aria-label=\"Black sun\" checked><input class=\"ds-pick-opening\" type=\"radio\" name=\"ds-ground\" aria-label=\"Black opening\"></div>",
       "css": ".ds-pick { display: flex; gap: 18px; padding: 9px; background: var(--pal-plywood); } .ds-pick input { appearance: none; margin: 0; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 1px var(--pal-muted); transition: box-shadow .2s; } .ds-pick-sun { background: radial-gradient(circle, var(--pal-ink) 0 44%, var(--pal-plywood) 47%); } .ds-pick-opening { background: radial-gradient(circle, var(--pal-bone) 0 44%, var(--pal-ink) 47%); } .ds-pick input:checked { box-shadow: 0 0 0 2px var(--pal-plywood), 0 0 0 3px var(--pal-ink); } .ds-pick input:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 4px; }"
+    },
+    {
+      "name": "Words band",
+      "kind": "card",
+      "refersTo": "words-band",
+      "description": "The home's words on a plywood plate, ink text.",
+      "html": "<div class=\"ds-words\"><p>Futures are conspired into existence one word at a time.</p></div>",
+      "css": ".ds-words { background: var(--pal-plywood); color: var(--pal-ink); padding: 32px; } .ds-words p { margin: 0; }"
+    },
+    {
+      "name": "Ledger plate",
+      "kind": "card",
+      "refersTo": "ledger-plate",
+      "description": "The ledger on the home and the events page: a black plate, bone titles, bone muted places, ochre upcoming dates; each tag a bone label on a faint bone chip with its initiative's code dot.",
+      "html": "<div class=\"ds-ledger\"><p class=\"ds-when\">Tue 3 Nov</p><p class=\"ds-what\">A Tuesday <span class=\"ds-kind\">NTS</span></p><p class=\"ds-where\">Geneva</p></div>",
+      "css": ".ds-ledger { background: var(--pal-ink); color: var(--pal-bone); padding: 24px; } .ds-ledger p { margin: 0 0 4px; } .ds-when { color: var(--code-events); font-family: var(--font-mono, monospace); } .ds-where { color: var(--pal-bone-muted); } .ds-kind { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; padding: .15em .5em; border-radius: 3px; background: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); } .ds-kind::before { content: \"\"; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; background: var(--code-events); }"
+    },
+    {
+      "name": "Compass",
+      "kind": "custom",
+      "refersTo": "compass",
+      "description": "The sun, small, once the sky has scrolled away: a black disc, a bone sigil and ring, each body's dot and needle in its code colour.",
+      "html": "<span class=\"ds-compass\" aria-hidden=\"true\"><span class=\"ds-compass-ring\"></span><span class=\"ds-compass-dot\"></span></span>",
+      "css": ".ds-compass { position: relative; display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: var(--pal-ink); border: 1px solid color-mix(in srgb, var(--pal-bone) 28%, transparent); } .ds-compass-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--pal-bone) 22%, transparent); } .ds-compass-dot { position: absolute; top: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--code-embers); }"
+    },
+    {
+      "name": "Events orrery sun",
+      "kind": "custom",
+      "refersTo": "events-orrery-sun",
+      "description": "The events page's small orrery: a black sun with a bone sigil, ink dashed rings.",
+      "html": "<span class=\"ds-mini\" aria-hidden=\"true\"><span class=\"ds-mini-sun\"></span><span class=\"ds-mini-ring\"></span></span>",
+      "css": ".ds-mini { position: relative; display: inline-block; width: 120px; height: 120px; } .ds-mini-sun { position: absolute; inset: 32%; border-radius: 50%; background: var(--pal-ink); } .ds-mini-ring { position: absolute; inset: 10%; border-radius: 50%; border: 1px dashed color-mix(in srgb, var(--pal-ink) 18%, transparent); }"
     }
   ],
   "narrative": {
     "northStar": "The Machine of Cogwheels",
-    "overview": "The home opens on an emblem that reads as a slow machine: a black sun with a ticking dial, colour bands, a pyramid with an eye at its centre, and rings that turn against each other like meshed gears. Stopping it is the start of a puzzle: everything settles into one symmetric pose and a seven-point star draws itself behind it.\n\nColour is a code, not decoration. Each initiative has one colour, and that colour appears only as small solid shapes on quiet neutrals: beige, plywood, ink and bone. A faint red grid under the emblem brings in technique and architecture without shouting.\n\nThe coral still used elsewhere on the home (sigil, links, nav dots, compass, ledger) is legacy, to move onto these tokens in a later change.",
+    "overview": "The home opens on an emblem that reads as a slow machine: a black sun with a ticking dial, colour bands, a pyramid with an eye at its centre, and rings that turn against each other like meshed gears. Stopping it is the start of a puzzle: everything settles into one symmetric pose and a seven-point star draws itself behind it.\n\nColour is a code, not decoration. Each initiative has one colour, and that colour appears only as small solid shapes on quiet neutrals: beige, plywood, ink and bone. A faint red grid under the emblem brings in technique and architecture without shouting.",
     "keyCharacteristics": [
       "Neutral grounds, colour only in small solid shapes.",
       "One colour per initiative, the same everywhere it appears.",
@@ -221,7 +254,7 @@
       },
       {
         "name": "The Named Colour Rule",
-        "body": "A code colour that means something is named in text: each star dot names its page in its label and in the caption.",
+        "body": "A code colour that means something is named in text where it leads: each bead's accessible name, and the world it opens.",
         "section": "colors"
       },
       {
@@ -236,12 +269,12 @@
       },
       {
         "name": "The Token Rule",
-        "body": "A new colour on the home is a token in section 1 first.",
+        "body": "A new NTS colour, on any page, is a token in section 1 first.",
         "section": "colors"
       }
     ],
     "dos": [
-      "Do take every colour on the home from the section 1 tokens.",
+      "Do take every NTS colour, on every page, from the section 1 tokens.",
       "Do keep code colour to small solid shapes: dots, triangles, thin bands.",
       "Do put an ink keyline between code colours and round ochre and phosphor on the beige.",
       "Do name a code colour in text wherever it means something.",

@@ -1,7 +1,7 @@
 /* The pages' own layout: the home's turn and sections, the world pages'
    heroes and sections, the events page. The orrery, the world windows and
    the orbit traces are in orrery.css; the apertures in apertures.css.
-   Nothing here redefines a --nts-* or --w-* token. */
+   Nothing here redefines a --pal-*, --code-* or --w-* token. */
 
 /* ---------- home: the opener is orrery.css; only the turn (the secret) is here ---------- */
 /* The secret comes in over the last .6 s of the emblem's stop and goes over
@@ -38,26 +38,12 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .words-star { position: absolute; right: -2rem; bottom: -3rem; width: clamp(9rem, 22vw, 16rem); opacity: .55; pointer-events: none; }
 @media (min-width: 760px) { .words-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
 #yet-to-come .after { margin: 1.5rem 0 0; }
-/* the two NTS bands in the colour code: the words on a plywood plate, the
-   ledger on a black one (its --w-* set is in nts.css, section 1). Their
-   selection and focus follow the plate, not the bands' shared defaults. */
+/* the words band in the colour code: a plywood plate (the ledger's black
+   one is in apertures.css). Its selection and focus follow the plate, not
+   the bands' shared defaults. */
 #words { --band-bg: var(--pal-plywood); --band-fg: var(--pal-ink); }
-#yet-to-come { --band-bg: var(--pal-ink); --band-fg: var(--pal-bone); --ecl-limb: var(--code-events); }
-:is(#words, #yet-to-come) ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
-:is(#words, #yet-to-come) :focus-visible { outline-color: var(--w-fg); }
-/* ochre for what is yet to come: the ring's star, the heading's, the dates */
-#yet-to-come :is(.ecl-ring, .sect-head .nts-sigil) { color: var(--code-events); }
-#yet-to-come .ecl-ring .nts-sigil { filter: none; }
-#yet-to-come .ledger li { border-color: var(--w-line); }
-#yet-to-come .ledger .nts-sigil { color: var(--w-accent); }
-#yet-to-come .ledger li.upcoming .when { color: var(--w-accent-text); }
-/* each tag carries its initiative's code dot; the tag names the kind */
-#yet-to-come .ledger .kind { --kind-bg: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); --kind-fg: var(--pal-bone); }
-#yet-to-come .ledger .kind::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; vertical-align: .02em; background: var(--kind-dot); }
-#yet-to-come li[data-of="nts"] { --kind-dot: var(--code-events); }
-#yet-to-come li[data-of="embers"] { --kind-dot: var(--code-embers); }
-#yet-to-come li[data-of="philo"] { --kind-dot: var(--code-philo); }
-#yet-to-come li[data-of="intersect"] { --kind-dot: var(--code-intersect); }
+#words ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
+#words :focus-visible { outline-color: var(--w-fg); }
 
 /* ---------- world pages: the hero ---------- */
 .hero { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }

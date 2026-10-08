@@ -33,9 +33,9 @@
   color-scheme: light;
 }
 html[data-bleed-state="before"] [data-world="philo"], html[data-bleed-state="in"] .nts-bleed-old {
-  --penrose-ink: var(--nts-ink);
-  --penrose-cut: var(--nts-coral);
-  --penrose-ground: var(--nts-paper);
+  --penrose-ink: var(--pal-ink);
+  --penrose-cut: var(--pal-voice);
+  --penrose-ground: var(--pal-beige);
 }
 
 /* the poster's red label bar, misregistered */

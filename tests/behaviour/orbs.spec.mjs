@@ -30,8 +30,9 @@ const WORLDS = [
 const look = (sel) => (s) => {
   const el = document.querySelector(s);
   const cs = getComputedStyle(el), after = getComputedStyle(el, "::after");
-  const shape = (v) => v.replace(/rgba?\([^)]*\)/g, "C");
-  const colours = (v) => v.match(/rgba?\([^)]*\)/g);
+  // a colour computes to rgb()/rgba(), or to color(srgb …) from a color-mix()
+  const shape = (v) => v.replace(/(rgba?|color)\([^)]*\)/g, "C");
+  const colours = (v) => v.match(/(rgba?|color)\([^)]*\)/g);
   // the shadows run edge line, cast
   return {
     background: cs.backgroundColor, radius: cs.borderTopLeftRadius, shadow: shape(cs.boxShadow),

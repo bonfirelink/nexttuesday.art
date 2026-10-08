@@ -8,54 +8,7 @@
 // favicon, the sigil on the ground, on every page.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
-
-const TOKENS = ["--pal-beige", "--pal-plywood", "--pal-ink", "--pal-bone", "--pal-bone-muted", "--pal-muted", "--pal-voice",
-  "--code-embers", "--code-philo", "--code-intersect", "--code-events"];
-
-// Each token resolved to the computed rgb() string a property would carry.
-const tokens = (page) =>
-  page.evaluate((names) => {
-    const probe = document.createElement("i");
-    document.body.appendChild(probe);
-    const out = {};
-    for (const n of names) {
-      probe.style.color = `var(${n})`;
-      out[n] = getComputedStyle(probe).color;
-    }
-    probe.remove();
-    return out;
-  }, TOKENS);
-
-// [r, g, b, a] of a computed colour: rgb()/rgba(), or color(srgb …), which color-mix() computes to.
-const rgb = (s) => {
-  const n = s.replace(/^color\(srgb/, "").match(/[\d.]+/g).map(Number);
-  return s.startsWith("color(srgb") ? [n[0] * 255, n[1] * 255, n[2] * 255, n[3] ?? 1] : n;
-};
-// WCAG contrast of two computed colours, the first composited on the second.
-function contrast(fg, bg) {
-  const [r, g, b, a = 1] = rgb(fg), [R, G, B] = rgb(bg);
-  const mix = [r * a + R * (1 - a), g * a + G * (1 - a), b * a + B * (1 - a)];
-  const lum = (c) => {
-    const [x, y, z] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
-    return 0.2126 * x + 0.7152 * y + 0.0722 * z;
-  };
-  const [l1, l2] = [lum(mix), lum([R, G, B])].sort((p, q) => q - p);
-  return (l1 + 0.05) / (l2 + 0.05);
-}
-
-const style = (page, sel, prop, pseudo = null) =>
-  page.evaluate(([s, p, ps]) => {
-    const el = document.querySelector(s);
-    if (!el) throw new Error(`no ${s}`);
-    return getComputedStyle(el, ps)[p];
-  }, [sel, prop, pseudo]);
-
-// Keyboard-focus an element (so :focus-visible applies) and read its outline colour.
-async function focusRing(page, sel, ringSel = sel) {
-  await page.keyboard.press("Tab");
-  await page.evaluate((s) => document.querySelector(s).focus(), sel);
-  return style(page, ringSel, "outlineColor");
-}
+import { tokens, rgb, contrast, style, focusRing, composite } from "../helpers/palette.mjs";
 
 test("C1 header sigil, links, hints, focus and selection take the palette's ink and voice", async ({ page }) => {
   await open(page);
@@ -119,11 +72,6 @@ test("C2 the words band is a plywood plate; the ledger a black one, bone text, o
   expect(await focusRing(page, `${L} .after .go`), "focus ring on the black").toBe(t["--pal-bone"]);
 });
 
-// A translucent colour flattened onto its ground, as an rgb() string.
-function composite(c, ground) {
-  const [r, g, b, a = 1] = rgb(c), [R, G, B] = rgb(ground);
-  return `rgb(${Math.round(r * a + R * (1 - a))}, ${Math.round(g * a + G * (1 - a))}, ${Math.round(b * a + B * (1 - a))})`;
-}
 
 test("C3 the compass is a small black sun: bone sigil, a dot in the code for each body", async ({ page }) => {
   await open(page);

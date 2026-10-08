@@ -1,6 +1,6 @@
 ---
 name: Next Tuesday Society
-description: The home emblem and its colour code, as shipped.
+description: The colour code of the NTS chrome on every page, and the home emblem, as shipped.
 colors:
   beige: "#f4ecdc"
   plywood: "#e6d8c0"
@@ -67,12 +67,15 @@ components:
   compass:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.bone}"
+  events-orrery-sun:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bone}"
 ---
 
 # Design System: Next Tuesday Society
 
-This file records the colour palette and the home emblem as they ship. The
-tokens live in `site/_nts/nts.css`, section 1; how the code is wired is in
+This file records the colour palette, which the NTS chrome on every page
+takes, and the home emblem, as they ship. The tokens live in `site/_nts/nts.css`, section 1; how the code is wired is in
 [INTERNALS.md](INTERNALS.md).
 
 ## Overview
@@ -175,11 +178,13 @@ take an ink keyline.
 **The Reserve Rule.** Green is kept for things distinct from the main code.
 It never stands in for an initiative.
 
-**The Token Rule.** A new colour on the home is a token in section 1 first.
+**The Token Rule.** A new NTS colour, on any page, is a token in section 1
+first.
 
-### Around the emblem
+### The NTS chrome
 
-The rest of the home takes the same tokens, by role:
+The rest of the home, `/events/`, and a world page while it opens in the
+NTS colours take the same tokens, by role:
 
 - **Type, sigils and links:** ink on the beige; links underlined. The
   header's sigil and the Tuesdays sigils are ink.
@@ -189,15 +194,24 @@ The rest of the home takes the same tokens, by role:
   bone on the black.
 - **Selection:** ink with bone text; bone with ink text on the black.
 - **The words band:** a plywood plate, ink text.
-- **The ledger ("Yet to come"):** a black plate. Bone titles and sigils,
+- **The ledger** (the home's "Yet to come", the events page): a black plate. Bone titles and sigils,
   bone muted places, ochre upcoming dates and star. Each tag is a bone
   label on a faint bone chip with its initiative's code dot: red EMBERS,
   grey NOT NOT PHILO, phosphor INTERSECT, ochre the Tuesdays gathering.
 - **The compass:** a small black sun, a bone sigil and ring, each body's
   dot and needle in its code colour (4:1 or more on the ink).
+- **The events page's small orrery:** a black sun with a bone sigil, ink
+  dashed rings; the worlds' beads keep their own discs.
+- **A world's arrival:** a world page reached from the home opens with
+  its header and hero in the home's set (beige, ink type, sigil and marker,
+  the voice for the figure's cut on NOT NOT PHILO), so the hand-over is
+  seamless; the world's colours bleed in as it scrolls.
+- **The scrollbar:** an ink line on the beige.
 - **The favicon:** the sigil in ink on the beige.
 
-The world windows on the home and the world pages keep their own colours.
+The worlds keep their own colours: the windows on the home, and the world
+pages once their colours have bled in. The world sigils in the header and
+footer are the worlds' own marks.
 
 ## Typography
 
@@ -307,7 +321,7 @@ pointer's hover. One dot pulses now and then.
 ## Do's and Don'ts
 
 ### Do:
-- **Do** take every colour on the home from the section 1 tokens.
+- **Do** take every NTS colour, on every page, from the section 1 tokens.
 - **Do** keep code colour to small solid shapes: dots, triangles, thin bands.
 - **Do** put an ink keyline between code colours and round ochre and
   phosphor on the beige.
