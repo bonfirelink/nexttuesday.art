@@ -126,25 +126,30 @@ for (const vp of VIEWPORTS) {
       const sel = `.orb[data-body="${body}"]`;
       await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center" }), sel);
       await page.waitForTimeout(800);
-      // one row of pixels through the centre, from the bare ground on each side
-      const g = await page.evaluate(([s, out]) => {
-        const o = document.querySelector(s).getBoundingClientRect();
-        return { x: Math.floor(o.left) - out, w: Math.ceil(o.width) + 2 * out + 1, y: Math.round(o.top + o.height / 2) };
-      }, [sel, GROUND_AT]);
-      const png = await page.screenshot({ clip: { x: g.x, y: g.y, width: g.w, height: 1 }, scale: "css" });
-      const width = await page.evaluate(async ([b64, diff, limb]) => {
-        const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
-        const c = new OffscreenCanvas(bmp.width, 1), ctx = c.getContext("2d");
-        ctx.drawImage(bmp, 0, 0);
-        const px = ctx.getImageData(0, 0, bmp.width, 1).data;
-        const at = (i) => [px[i * 4], px[i * 4 + 1], px[i * 4 + 2]];
-        const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > diff;
-        const groundL = at(0), groundR = at(bmp.width - 1);
-        let l = 0; while (l < bmp.width && !far(at(l), groundL)) l++;
-        let r = bmp.width - 1; while (r > 0 && !far(at(r), groundR)) r--;
-        return r - l + 1 - 2 * limb;
-      }, [png.toString("base64"), EDGE_DIFF, LIMB_OUTSIDE]);
-      expect(Math.abs(width - RESTING_WINDOW[vp.name]), `${body}: window ${width}px, before the lid ${RESTING_WINDOW[vp.name]}px`).toBeLessThanOrEqual(WINDOW_TOL);
+      // the world's window may still be opening as it scrolls in: measure until it settles
+      const measure = async () => {
+        // one row of pixels through the centre, from the bare ground on each side
+        const g = await page.evaluate(([s, out]) => {
+          const o = document.querySelector(s).getBoundingClientRect();
+          return { x: Math.floor(o.left) - out, w: Math.ceil(o.width) + 2 * out + 1, y: Math.round(o.top + o.height / 2) };
+        }, [sel, GROUND_AT]);
+        const png = await page.screenshot({ clip: { x: g.x, y: g.y, width: g.w, height: 1 }, scale: "css" });
+        return page.evaluate(async ([b64, diff, limb]) => {
+          const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+          const c = new OffscreenCanvas(bmp.width, 1), ctx = c.getContext("2d");
+          ctx.drawImage(bmp, 0, 0);
+          const px = ctx.getImageData(0, 0, bmp.width, 1).data;
+          const at = (i) => [px[i * 4], px[i * 4 + 1], px[i * 4 + 2]];
+          const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > diff;
+          const groundL = at(0), groundR = at(bmp.width - 1);
+          let l = 0; while (l < bmp.width && !far(at(l), groundL)) l++;
+          let r = bmp.width - 1; while (r > 0 && !far(at(r), groundR)) r--;
+          return r - l + 1 - 2 * limb;
+        }, [png.toString("base64"), EDGE_DIFF, LIMB_OUTSIDE]);
+      };
+      await expect.poll(measure, { message: `${body}: the resting window, ${RESTING_WINDOW[vp.name]}px before the lid`, timeout: 10_000 })
+        .toBeGreaterThanOrEqual(RESTING_WINDOW[vp.name] - WINDOW_TOL);
+      expect(await measure(), `${body}: the resting window`).toBeLessThanOrEqual(RESTING_WINDOW[vp.name] + WINDOW_TOL);
     }
   });
 }
