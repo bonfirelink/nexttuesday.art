@@ -236,12 +236,15 @@ with `data-world` and `data-orbit-body`, its orb (`.orb`, holding the
 world's live fragment) and its words. The orb is a portal, not a card: hover, keyboard
 focus and a press open it into the disc and never lift it or cast a shadow
 off it (`orrery.css`, "the orb"). The orb's box is the window, as wide as
-it always was (O5); the disc (the fragment) reaches `--lid` past it into a
-ring, where the iris's lid rests, and the figure rests scaled into the
-window: a figure script that sizes its drawing against its host measures
-both in layout boxes (`clientWidth`), since a rect includes that scale. The opening moves and fades layers painted once (transform and
+it always was (O5), and at rest the figure in it is untouched: no transform
+and no clip but the disc's own round edge (O6), so a live figure costs no
+more to composite than on a plain disc (P6 checks the idle orbs paint
+nothing but their canvases). Around it lie a ring of bare ground (`--lid`)
+and the orbit's gap (`--orbit-gap`), both in cqi of the window, so the
+limb (`.orb::after`) can grow from the window's edge exactly to the orbit
+as it fades. The opening moves and fades layers painted once (transform and
 opacity only), the same parts on every world, and nothing is drawn over the
-figure; O3 and O4 in `tests/behaviour/orbs.spec.mjs` hold that. Between the sections sits a
+figure but the limb; O3 and O4 in `tests/behaviour/orbs.spec.mjs` hold that. Between the sections sits a
 `.handover`, the gap where the next aperture's ring sits. The compass
 (`.compass`, fixed, bottom right) shows once the sky has scrolled away and
 points at the nearest body (its orbit turns with `c-turn`, through the
