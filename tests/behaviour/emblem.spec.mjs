@@ -286,3 +286,41 @@ test("E7 the star dots are quiet marks: a tap changes nothing, and they are not 
   expect(dots.filter((d) => d.tabbable), "none in the tab order").toEqual([]);
   expect(dots.filter((d) => !d.hidden), "all hidden from assistive tech").toEqual([]);
 });
+
+test.describe("E8 the plate's grid ends on the plate's edge", () => {
+  test.use({ deviceScaleFactor: 4 });
+  for (const width of [375, 390, 393, 430]) {
+    test(`the last row is a whole cell at ${width} px wide`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await open(page);
+      const bottom = await page.evaluate(() => document.querySelector(".threshold").getBoundingClientRect().bottom + scrollY);
+      const top = Math.floor(bottom) - 100;
+      const png = await page.screenshot({ fullPage: true, clip: { x: 60, y: top, width: width - 120, height: 100 } });
+      const rows = await page.evaluate(async (b64) => {
+        const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+        const c = new OffscreenCanvas(bmp.width, bmp.height), ctx = c.getContext("2d");
+        ctx.drawImage(bmp, 0, 0);
+        const d = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+        // per row the median over the width: the vertical lines are a few columns, so only a horizontal line moves it
+        return Array.from({ length: bmp.height }, (_, y) => {
+          const px = Array.from({ length: bmp.width }, (_, x) => d[(y * bmp.width + x) * 4] + d[(y * bmp.width + x) * 4 + 1] + d[(y * bmp.width + x) * 4 + 2]).sort((a, b) => a - b);
+          return px[px.length >> 1];
+        });
+      }, png.toString("base64"));
+      const plate = [...rows].sort((a, b) => a - b)[rows.length >> 1];
+      const lines = [];
+      rows.forEach((g, y) => {
+        if (Math.abs(g - plate) > 6) {
+          const last = lines[lines.length - 1];
+          if (last && y - last.end <= 1) last.end = y; else lines.push({ start: y, end: y });
+        }
+      });
+      expect(lines.length, "two grid rows in view").toBeGreaterThanOrEqual(2);
+      const centre = (l) => (l.start + l.end) / 2 / 4;
+      const bottomIn = bottom - top;
+      // a faint closing line on the edge itself is fine; the rows above it are the cells
+      const [prev, last] = lines.map(centre).filter((c) => c < bottomIn - 1.5).slice(-2);
+      expect(Math.abs(bottomIn - last - (last - prev)), "the last cell is as tall as the others").toBeLessThanOrEqual(1.5);
+    });
+  }
+});

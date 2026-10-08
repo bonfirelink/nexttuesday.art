@@ -274,3 +274,29 @@ test.describe("O8", () => {
     });
   }
 });
+
+// O9 a body's moat is a round patch no wider than the body plus a small gap,
+// and the star, a thin glyph, has none: a fill behind it would cut the grid
+// and its orbit in a patch.
+for (const vp of VIEWPORTS) {
+  test(`O9 a body's moat is round and snug at ${vp.name}`, async ({ page, freeze }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await open(page, "/");
+    await freeze(page, 1000);
+    const moats = await page.evaluate(() =>
+      [...document.querySelectorAll(".orrery .bead")].map((b) => {
+        const m = getComputedStyle(b, "::before"), face = b.querySelector(".face").getBoundingClientRect();
+        const filled = m.content !== "none" && m.backgroundColor !== "rgba(0, 0, 0, 0)";
+        return { body: b.dataset.body, filled, w: parseFloat(m.width), h: parseFloat(m.height), r: m.borderTopLeftRadius, face: face.width, orrery: b.closest(".orrery").getBoundingClientRect().width };
+      })
+    );
+    expect(moats.length).toBe(4);
+    for (const m of moats) {
+      if (m.body === "star") { expect(m.filled, "the star has no moat").toBe(false); continue; }
+      expect(m.filled, `${m.body} has a moat`).toBe(true);
+      expect(Math.abs(m.w - m.h), `${m.body} moat is square-boxed`).toBeLessThan(0.5);
+      expect(parseFloat(m.r), `${m.body} moat is round`).toBeGreaterThanOrEqual(m.w / 2 - 0.5);
+      expect(m.w, `${m.body} moat is the body plus a small gap`).toBeLessThanOrEqual(m.face + 0.03 * m.orrery);
+    }
+  });
+}

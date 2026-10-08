@@ -69,6 +69,9 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
   content: ""; position: absolute; z-index: -1; inset: var(--plate-top) var(--plate-x) 0; border-radius: var(--plate-r);
   background: linear-gradient(var(--e-grid) 1px, transparent 1px) 0 0 / var(--e-grid-step) var(--e-grid-step),
     linear-gradient(90deg, var(--e-grid) 1px, transparent 1px) 0 0 / var(--e-grid-step) var(--e-grid-step), var(--e-plate);
+  /* the cells stretch to fill the plate whole, so the grid ends on the edge
+     and the rounded corners clip it, never a part-row */
+  background-repeat: round;
 }
 .threshold :focus-visible { outline-color: var(--e-text); }
 
@@ -92,11 +95,11 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
 }
 .orrery :is(.e-ly, .e-star, .e-tick, .e-bm, .e-orbit) { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orrery .pivot { z-index: 1; }
-/* each body rides in a moat of the plate's colour, so the dotted ring and
-   the orbits it crosses stop short of its edge; the star's moat is its own
-   size, not its box's */
-.orrery .bead::before { content: ""; position: absolute; inset: -.8cqi; border-radius: 50%; background: var(--e-plate); pointer-events: none; }
-.orrery .bead[data-body="star"]::before { inset: 19%; }
+/* each disc rides in a round moat of the plate's colour, so the dotted ring
+   and the orbits it crosses stop short of its edge. The star is a thin
+   glyph: a fill behind it would cut the grid and the orbit in a patch, so
+   the orbit passes behind it */
+.orrery .bead:not([data-body="star"])::before { content: ""; position: absolute; inset: -.8cqi; border-radius: 50%; background: var(--e-plate); pointer-events: none; }
 .orrery .bead::before { transition: transform var(--dur-lift) var(--ease-lift); }
 .orrery .bead:is(:hover, :focus-visible)::before { transform: translateY(var(--lift-y)); }
 @media (prefers-reduced-motion: reduce) { .orrery .bead:is(:hover, :focus-visible)::before { transform: none; } }
