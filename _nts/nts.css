@@ -264,7 +264,10 @@ h1.caps { letter-spacing: -.005em; }
 .nts-nav a[aria-current="page"] .nts-sigil { display: block; }
 @media (max-width: 639px) {
   .nts-home .wordmark { display: none; }
-  .nts-nav { flex: 1; justify-content: space-between; margin-left: .25rem; }
+  /* the destinations spread from the sigil to the gutter, as far from the
+     sigil as from each other */
+  .nts-header nav { flex: 1; }
+  .nts-nav { justify-content: space-between; }
   .nts-nav a { font-size: .7rem; letter-spacing: .05em; }
   .nts-nav .nts-sigil { display: none !important; }
 }
