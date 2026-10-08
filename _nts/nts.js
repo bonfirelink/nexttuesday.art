@@ -189,7 +189,7 @@
     var world = document.body.getAttribute("data-world");
     var entity = hero.querySelector(".entity") || hero;
     var timeline = typeof ScrollTimeline === "function" ? new ScrollTimeline({ source: d, axis: "block" }) : null;
-    var toggles = all(document.body.children).filter(function (el) { return !el.matches("main, footer, script, style, .nts-sprite, .compass"); });
+    var toggles = all(document.body.children).filter(function (el) { return !el.matches("main, footer, script, style, .nts-sprite"); });
 
     /* 1. the copy: the hero cloned as it is now, paired element by element
        for twin(); CSS animations in it run in step with the original's */
