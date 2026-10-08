@@ -154,19 +154,21 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
    it always had, and at rest the figure in it is exactly as on a plain
    disc: no transform and no clip but the disc's own round edge, so a live
    figure costs nothing more to composite. Around the window lies a ring of
-   bare ground, --lid (in cqi of the window) wide, then the orbit. Under the
+   bare ground, --lid (in cqi of the window) wide, then --orbit-gap more
+   to the orbit. Under the
    pointer, the keyboard or a press the portal opens (below). Every part of
    the opening is painted once and only moved or faded (transform,
    opacity): the window (the fragment, with the figure in it) and its limb
    (.orb::after). Opening is slow and eased out, closing quicker: the
    transition is the one of the state arrived at. */
 :root { --portal-in: 640ms; --portal-out: 380ms; --ease-portal: cubic-bezier(.16, 1, .3, 1); }
-.orb { --lid: 3.5; display: block; position: relative; aspect-ratio: 1; border-radius: 50%; color: inherit; text-decoration: none; container-type: inline-size; -webkit-tap-highlight-color: transparent; }
+.orb { --lid: 3.5; --orbit-gap: 2.7; display: block; position: relative; aspect-ratio: 1; border-radius: 50%; color: inherit; text-decoration: none; container-type: inline-size; -webkit-tap-highlight-color: transparent; }
 .orb > [data-nts-fragment] { border-radius: 50%; --frag-bg: var(--w-bg-2); box-shadow: inset 0 0 0 1px var(--w-line); }
-.orb::before { content: ""; position: absolute; inset: calc(-.6rem - var(--lid) * 1cqi); border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
+.orb::before { content: ""; position: absolute; inset: calc((var(--lid) + var(--orbit-gap)) * -1cqi); border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
 .orb > [data-nts-fragment], .orb::after {
   transition: transform var(--portal-out) var(--ease-portal), opacity var(--portal-out) var(--ease-portal);
 }
+.orb::after { transition-timing-function: var(--ease-portal), cubic-bezier(.5, 0, .9, .4); }
 .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment], .orb:is(:hover, :focus-visible, :active)::after {
   transition-duration: var(--portal-in);
 }
@@ -180,12 +182,15 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
    antialiased edge, so the rim is one clean line; the ring beyond is bare
    ground: the lid. Opened, the window widens over the
    ring (the fragment scales by the ring, the figure coming nearer with
-   it), and the limb draws back past the new rim and dissolves, so no
-   circle is left inside the orbit but the open disc's own edge. Reduced
+   it), and the limb draws back over the ring until it meets the orbit,
+   fading as it arrives (its opacity eases in while its scale eases out),
+   so no circle is left inside the orbit but the open disc's own edge.
+   The orbit's gap (--orbit-gap) is in cqi of the window, like the ring, so
+   the limb's scale lands on it at every width. Reduced
    motion: the limb only fades. */
 .orb::after { content: ""; position: absolute; inset: -.5px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)); pointer-events: none; }
 .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] { transform: scale(calc(1 + var(--lid) / 50)); }
-.orb:is(:hover, :focus-visible, :active)::after { transform: scale(calc(1 + var(--lid) / 25)); opacity: 0; }
+.orb:is(:hover, :focus-visible, :active)::after { transform: scale(calc(1 + (var(--lid) + var(--orbit-gap)) / 50)); opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment], .orb:is(:hover, :focus-visible, :active)::after { transform: none; }
 }
