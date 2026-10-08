@@ -5,7 +5,7 @@ description: Measure smoothness of nexttuesday.art. Use when the site is laggy, 
 
 # Measure smoothness
 
-Output is numbers for the working branch (`eclipse` today, `main` later) against the change, never adjectives. The principle under every verdict: motion runs on the compositor (transform, opacity) and nothing reads layout per frame.
+Output is numbers for the working branch (`main`) against the change, never adjectives. The principle under every verdict: motion runs on the compositor (transform, opacity) and nothing reads layout per frame.
 
 ## Steps
 

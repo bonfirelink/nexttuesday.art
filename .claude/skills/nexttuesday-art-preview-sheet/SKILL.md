@@ -5,7 +5,7 @@ description: Make labelled BEFORE/AFTER contact sheets of a visual change (worki
 
 # Preview sheets
 
-A sheet is one PNG per view: BEFORE | AFTER columns, a labelled row per page and position. The working branch is `eclipse` today and `main` later; `NTS_BRANCH` names it. Its preview is `http://$NTS_BRANCH.nexttuesday-art.localhost:18000/` (`eclipse` when unset); the change's preview is `devshell url` in its worktree. Both must be running (`devshell up`).
+A sheet is one PNG per view: BEFORE | AFTER columns, a labelled row per page and position. The working branch is `main`; `NTS_BRANCH` names it. Its preview is `http://$NTS_BRANCH.nexttuesday-art.localhost:18000/` (`main` when unset); the change's preview is `devshell url` in its worktree. Both must be running (`devshell up`).
 
 ## Steps
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lands an approved change branch into the working branch and cleans up.
-# Usage: tools/merge-change.sh <branch>     (working branch: $NTS_BRANCH, default eclipse)
+# Usage: tools/merge-change.sh <branch>     (working branch: $NTS_BRANCH, default main)
 #
 # Order matters: the branch is rebased and checked in its own worktree first,
 # so a failing check or a conflict leaves the working branch untouched.
@@ -8,7 +8,7 @@
 set -eu
 
 b=${1:?usage: merge-change.sh <branch>}
-base=${NTS_BRANCH:-eclipse}
+base=${NTS_BRANCH:-main}
 die() { echo "merge-change: $*" >&2; exit 1; }
 
 # Path of the worktree that has refs/heads/$1 checked out, or nothing.

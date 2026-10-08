@@ -2,13 +2,13 @@
 # Begin one refinement: a worktree of its own on a new branch off the working
 # branch, locked, with its preview running.
 #   tools/change-start.sh <name>
-# NTS_BRANCH overrides the working branch (default eclipse).
+# NTS_BRANCH overrides the working branch (default main).
 # <name> becomes the branch, the worktree folder and the preview host, so it
 # must be a short lowercase slug.
 set -eu
 
 name=${1:-}
-base=${NTS_BRANCH:-eclipse}
+base=${NTS_BRANCH:-main}
 project=nexttuesday-art
 
 case $name in

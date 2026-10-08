@@ -5,7 +5,7 @@ description: Land an approved change branch into the working branch and clean up
 
 # Merge an approved change
 
-Landing means: rebased, checked, fast-forwarded into the working branch, worktree and branch gone. The working branch is `eclipse`; `NTS_BRANCH` overrides it.
+Landing means: rebased, checked, fast-forwarded into the working branch, worktree and branch gone. The working branch is `main`; `NTS_BRANCH` overrides it.
 
 ## Gate
 

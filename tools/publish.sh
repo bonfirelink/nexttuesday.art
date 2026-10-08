@@ -10,11 +10,11 @@
 #   --marker     text that must appear on https://nexttuesday.art/ once live
 #   --gone       text that must disappear from it
 #
-# NTS_BRANCH names the working branch (default eclipse). The script never
+# NTS_BRANCH names the working branch (default main). The script never
 # forces a push: a non-fast-forward split stops it.
 set -euo pipefail
 
-BASE=${NTS_BRANCH:-eclipse}
+BASE=${NTS_BRANCH:-main}
 # This machine's DNS cannot resolve the domain: pin it to a GitHub Pages IP.
 RESOLVE=nexttuesday.art:443:185.199.108.153
 PAGES=(/ /embers/ /not-not-philo/ /intersect/ /events/)

@@ -1,7 +1,7 @@
 # nexttuesday.art
 
 Static site. GitHub Pages serves the `site` branch, a subtree split of `site/`
-from the working branch (currently `eclipse`, later `main`). How the code fits:
+from the working branch (`main`). How the code fits:
 [INTERNALS.md](INTERNALS.md).
 
 ## Skills

@@ -5,7 +5,7 @@ description: Start one small site refinement (a tweak, fix or removal on nexttue
 
 # Start a change
 
-One change, one worktree, one preview, one commit. `<name>` is a short lowercase slug (`compass-moon`). The working branch is `eclipse` today and `main` later; `NTS_BRANCH=<branch>` points the script at it.
+One change, one worktree, one preview, one commit. `<name>` is a short lowercase slug (`compass-moon`). The working branch is `main`; `NTS_BRANCH=<branch>` points the script at it.
 
 ## Steps
 
