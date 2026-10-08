@@ -37,9 +37,8 @@
     function measure() {
       if (!reach) for (const f of frame(CLOSED)) for (const [x, y] of f.poly) reach = Math.max(reach, Math.abs(x), Math.abs(y));
       /* layout sizes, not getBoundingClientRect: a rect includes the scale
-         of a transformed ancestor or of the figure itself (the home's orb
-         rests its figure scaled into the window), and the drawing is in
-         the canvas's own units */
+         of a transformed ancestor (the home's windows as they open, an orb
+         as it opens), and the drawing is in the canvas's own units */
       dpr = Math.min(2, devicePixelRatio || 1);
       w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
