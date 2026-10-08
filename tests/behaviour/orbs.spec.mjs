@@ -165,3 +165,93 @@ test("O6 at rest the figure is neither transformed nor clipped beyond the disc's
   );
   for (const p of parts) expect(p, p.el).toMatchObject({ transform: "none", clip: "none", mask: "none" });
 });
+
+// O7 a body on the orrery keeps its focus ring round its face: the ring is
+// drawn by the box that lifts, so the face never sits off-centre in it.
+// O8 a disc's edge is one line: the light on its upper lip lights that line
+// and is not drawn as a second line inside it, resting or lifted, so the rim
+// is as thin at the top as at the bottom.
+const BODIES = ["embers", "philo", "intersect", "star"];
+const RIM_DIFF = 40; // summed RGB difference that marks an edge
+const RIM_TOL = 1; // device px the top rim may exceed the bottom one by
+
+async function focusBody(page, body) {
+  const sel = `.bead[data-body="${body}"]`;
+  await page.locator(sel).focus();
+  await page.keyboard.press("Shift");
+  return sel;
+}
+
+for (const vp of VIEWPORTS) {
+  test(`O7 a focused body's ring is round its face at ${vp.name}`, async ({ page, freeze }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await open(page, "/");
+    await freeze(page, 1000);
+    for (const body of BODIES) {
+      for (const hover of vp.width > 900 ? [false, true] : [false]) {
+        const sel = await focusBody(page, body);
+        if (hover) await page.hover(sel); else await page.mouse.move(1, 1);
+        await page.waitForTimeout(600);
+        const g = await page.evaluate((s) => {
+          const bead = document.querySelector(s), face = bead.querySelector(".face");
+          const ringed = [bead, ...bead.querySelectorAll("*")].filter((el) => {
+            const cs = getComputedStyle(el);
+            return cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0;
+          });
+          const c = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+          return { focused: bead.matches(":focus-visible"), rings: ringed.length, ring: ringed[0] && c(ringed[0]), face: c(face) };
+        }, sel);
+        const what = `${body}${hover ? " hovered" : ""}`;
+        expect(g.focused, `${what}: keyboard focus`).toBe(true);
+        expect(g.rings, `${what}: one focus ring`).toBe(1);
+        expect(Math.abs(g.ring[0] - g.face[0]), `${what}: ring centred on the face (x)`).toBeLessThan(0.5);
+        expect(Math.abs(g.ring[1] - g.face[1]), `${what}: ring centred on the face (y)`).toBeLessThan(0.5);
+      }
+    }
+  });
+}
+
+test.describe("O8", () => {
+  test.use({ deviceScaleFactor: 2 });
+  for (const vp of VIEWPORTS) {
+    test(`O8 a disc's edge is one line, as thin at the top as at the bottom, at ${vp.name}`, async ({ page, freeze }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await open(page, "/");
+      await freeze(page, 1000);
+      for (const body of BODIES.filter((b) => b !== "star")) {
+        for (const hover of vp.width > 900 ? [false, true] : [false]) {
+          const sel = `.bead[data-body="${body}"]`;
+          if (hover) await page.hover(sel); else await page.mouse.move(1, 1);
+          await page.waitForTimeout(600);
+          const f = await page.evaluate((s) => document.querySelector(s + " .face").getBoundingClientRect().toJSON(), sel);
+          const x = Math.round(f.left + f.width / 2), depth = f.height * 0.12, out = 2;
+          // one column of device pixels through the face's centre, from the ground outside each edge inwards
+          const column = async (y0, y1) => {
+            const png = await page.screenshot({ clip: { x, y: y0, width: 1, height: y1 - y0 } });
+            return page.evaluate(async (b64) => {
+              const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+              const c = new OffscreenCanvas(bmp.width, bmp.height), ctx = c.getContext("2d");
+              ctx.drawImage(bmp, 0, 0);
+              const d = ctx.getImageData(0, 0, 1, bmp.height).data;
+              return Array.from({ length: bmp.height }, (_, i) => [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]]);
+            }, png.toString("base64"));
+          };
+          // the rim: from the first sharp step off the ground (a cast shadow fades, an edge steps)
+          // to the first pixel that is the face's own colour
+          const rim = (px) => {
+            const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > RIM_DIFF;
+            const face = px[px.length - 1];
+            let i = 1; while (i < px.length && !far(px[i], px[i - 1])) i++;
+            let n = 0; while (i < px.length && far(px[i], face)) { i++; n++; }
+            return n;
+          };
+          const top = rim(await column(f.top - out, f.top + depth));
+          const bottom = rim((await column(f.bottom - depth, f.bottom + out)).reverse());
+          const what = `${body}${hover ? " lifted" : ""}`;
+          expect(top, `${what}: an edge at the top`).toBeGreaterThan(0);
+          expect(top, `${what}: the top rim (${top}) against the bottom one (${bottom}), in device px`).toBeLessThanOrEqual(bottom + RIM_TOL);
+        }
+      }
+    });
+  }
+});
