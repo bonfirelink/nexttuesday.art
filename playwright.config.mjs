@@ -27,6 +27,8 @@ export default defineConfig({
   testDir: "tests",
   retries: 0,
   fullyParallel: true,
+  // One run must not saturate the machine; `--workers` overrides.
+  workers: 4,
   reporter: [["list"], ["html", { open: "never" }]],
   globalSetup: "./tests/helpers/global-setup.mjs",
   use: base,

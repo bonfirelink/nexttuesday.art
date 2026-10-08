@@ -509,6 +509,14 @@ offline copy of the fonts. `npm run test:publish` before a publish: adds
 the `@slow` sweeps and the `@perf` guards. Tiers are tags in test titles
 (`playwright.config.mjs`); each spec file belongs to one project.
 
+The npm scripts go through `tools/run-suite.mjs`, which takes a machine-wide
+exclusive lock (an O_EXCL file in `$XDG_RUNTIME_DIR`, shared by every
+worktree; a dead holder's lock is taken over) so concurrent agents' runs
+queue instead of loading the CPU and tripping the timing tests; Playwright
+uses 4 workers (`--workers` overrides). Direct `npx playwright test` is
+unlocked: use the npm scripts when other agents may be running. `NTS_SUITE_LOCK=0`
+skips the lock (CI, deliberate parallel runs).
+
 They replaced these hand checks: phone widths 320, 360 and 390 with no
 horizontal overflow, and a clean console with no 404s (the page walk in
 `tests/static`); the bleed-in sequence on arrival, scroll and back
