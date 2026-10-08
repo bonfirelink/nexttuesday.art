@@ -45,7 +45,8 @@ for (const [width, height] of [[390, 844], [1440, 900]]) {
     await openPage(page, "/", { live: ["[data-nts-fragment=philo]"] });
     await freeze(page);
     await settle(page);
-    const box = await rectOf(page, "[data-nts-fragment=philo]");
+    // the orb's box is its window: the disc reaches past it, for the lid
+    const box = await rectOf(page, ".orb[data-body=philo]");
     const ink = await canvasInk(page, "[data-nts-fragment=philo] canvas");
     expect(ink.n, "drawn pixels").toBeGreaterThan(0);
     expect(Math.abs(ink.cx - box.cx), "centroid x vs box centre").toBeLessThanOrEqual(FRAGMENT_CENTROID_TOL);

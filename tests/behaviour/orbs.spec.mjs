@@ -3,9 +3,17 @@
 // O3 the home's three orbs are one portal: opening one moves and fades its
 // layers (transform, opacity) and nothing else, the same parts on every
 // world, and the orb itself never rises; O4 under reduced motion the
-// portal still opens, by fading alone.
+// portal still opens, by fading alone; O5 at rest the window a world's
+// figure shows through is as wide as it was before the lid: the lid rides a
+// ring outside it.
 import { test, expect } from "../helpers/fixtures.mjs";
-import { open } from "../helpers/behaviour.mjs";
+import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
+
+// The resting window's diameter in CSS px per viewport width: the whole disc,
+// as it was before the orbs had a lid.
+const RESTING_WINDOW = { 390: 239, 1440: 352 };
+const WINDOW_TOL = 1; // px
+const EDGE_DIFF = 30; // summed RGB difference from the lid that marks the window's edge
 
 const WORLDS = [
   { body: "embers", path: "/embers/" },
@@ -104,3 +112,37 @@ test("O4 under reduced motion the portal opens by fading alone", async ({ page }
     for (const p of o.parts) expect(p, `${body}: no motion`).toMatch(/ opacity$/);
   }
 });
+
+for (const vp of VIEWPORTS) {
+  test(`O5 at rest each orb's window is as wide as before the lid at ${vp.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await open(page, "/");
+    await page.mouse.move(1, 1);
+    for (const { body } of WORLDS) {
+      const sel = `.orb[data-body="${body}"]`;
+      await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center" }), sel);
+      await page.waitForTimeout(800);
+      // one row of pixels through the centre, from inside the lid's ring on each side
+      const g = await page.evaluate((s) => {
+        const o = document.querySelector(s).getBoundingClientRect();
+        const d = document.querySelector(`${s} > [data-nts-fragment]`).getBoundingClientRect();
+        return { x: Math.floor(d.left), w: Math.ceil(d.width) + 1, y: Math.round(o.top + o.height / 2), ring: Math.max(1, Math.floor((o.left - d.left) / 2)) };
+      }, sel);
+      expect(g.ring, `${body}: the disc reaches past the window`).toBeGreaterThan(1);
+      const png = await page.screenshot({ clip: { x: g.x, y: g.y, width: g.w, height: 1 }, scale: "css" });
+      const width = await page.evaluate(async ([b64, ring, diff]) => {
+        const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+        const c = new OffscreenCanvas(bmp.width, 1), ctx = c.getContext("2d");
+        ctx.drawImage(bmp, 0, 0);
+        const px = ctx.getImageData(0, 0, bmp.width, 1).data;
+        const at = (i) => [px[i * 4], px[i * 4 + 1], px[i * 4 + 2]];
+        const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > diff;
+        const lidL = at(ring), lidR = at(bmp.width - 1 - ring);
+        let l = ring; while (l < bmp.width && !far(at(l), lidL)) l++;
+        let r = bmp.width - 1 - ring; while (r > 0 && !far(at(r), lidR)) r--;
+        return r - l + 1;
+      }, [png.toString("base64"), g.ring, EDGE_DIFF]);
+      expect(Math.abs(width - RESTING_WINDOW[vp.name]), `${body}: window ${width}px, before the lid ${RESTING_WINDOW[vp.name]}px`).toBeLessThanOrEqual(WINDOW_TOL);
+    }
+  });
+}
