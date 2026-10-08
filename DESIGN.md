@@ -33,10 +33,6 @@ typography:
     fontSize: "0.72rem"
     fontWeight: 600
     letterSpacing: "0.14em"
-  caption:
-    fontFamily: "Instrument Sans, Helvetica Neue, Arial, sans-serif"
-    fontSize: "0.75rem"
-    lineHeight: 1.35
 rounded:
   plate: "22px"
 spacing:
@@ -161,7 +157,7 @@ below 3:1 on plywood, are held the same way.
 The red that marks things is the embers red, in small shapes.
 
 **The Named Colour Rule.** A code colour that means something is named in
-text: each star dot names its page in its label and in the caption.
+text: the key names the page each code colour stands for.
 
 **The Contrast Rule.** Text holds 4.5:1 on its ground; marks hold 3:1, or
 take an ink keyline.
@@ -186,7 +182,6 @@ sun, bone and bone muted on the Black opening.
   appears on stop, in voice red on the Black sun and ochre on the Black
   opening.
 - **Label** (600, 0.72rem, 0.14em, uppercase): the key under the emblem.
-- **Caption** (0.75rem, 1.35): the star's caption, its page name in 600.
 
 ## Layout
 
@@ -253,9 +248,10 @@ choice is remembered.
 ### Star dots
 
 A code-colour disc with a fine ink ring. Its hit area is about 43px on a
-phone on the inner and outer orbits, smaller on the two middle ones. On hover or focus a halo ring appears; a tap names the page in the
-caption under the emblem (a proposal: nothing navigates yet). One dot
-pulses now and then.
+phone on the inner and outer orbits, smaller on the two middle ones. The
+dots are decorative marks until their pages exist: not focusable, hidden
+from assistive tech, and a tap does nothing. A halo ring appears on a
+pointer's hover. One dot pulses now and then.
 
 ### Motion
 

@@ -9,8 +9,7 @@
      emblem    the eye (.e-stop) stops the machine: every part glides to the
                symmetric stop pose and .is-stopped on .threshold hollows
                the dial, flips the pyramid, draws the star and shows the
-               secret; again, it carries on from where it stands. A star
-               dot names its page in .e-cap. The ground picker (.e-pick)
+               secret; again, it carries on from where it stands. The ground picker (.e-pick)
                sets html[data-ground] and stores the choice
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
@@ -199,18 +198,6 @@
         q.currentTime = norm((a - a0) * d) / 360 * q.effect.getComputedTiming().duration;
       });
     }
-
-    /* a star names its page under the emblem; nothing navigates yet */
-    var cap = hero.querySelector(".e-cap"), capName = cap && cap.querySelector(".to-name");
-    emb.addEventListener("click", function (e) {
-      var st = e.target.closest && e.target.closest(".st");
-      if (!st || !capName) return;
-      emb.querySelectorAll(".st.on").forEach(function (x) { x.classList.remove("on"); });
-      st.classList.add("on");
-      cap.classList.remove("is-on");
-      capName.textContent = st.getAttribute("data-to");
-      cap.classList.add("is-on");
-    });
   }
 
   /* the ground picker: html[data-ground] carries the choice (nts-head.js

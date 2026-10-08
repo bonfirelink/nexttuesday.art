@@ -9,7 +9,7 @@
 // sun and Black opening, remembers it, works from the keyboard, without
 // storage and without scripts; E5 under reduced motion nothing turns but the
 // stop still works, and going again undoes it; E6 the eye beams only on hover or focus where there is a
-// pointer, now and then on a touch screen; E7 a star names its page in a caption and does not navigate.
+// pointer, now and then on a touch screen; E7 the star dots are quiet marks: a tap changes nothing, and they are not in the tab order.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
 
@@ -79,7 +79,7 @@ test("E1 the emblem: dial, 60 marks with a north, the pyramid with its eye, the 
       back: o.firstElementChild.classList.contains("e-star"),
       edges: o.querySelectorAll(".e-star .he").length,
       beads: o.querySelectorAll(".bead[data-body]").length,
-      stars: o.querySelectorAll(".st[aria-label]").length,
+      stars: o.querySelectorAll(".st").length,
       stop: o.querySelector("button.e-stop")?.getAttribute("aria-pressed"),
     };
   });
@@ -268,14 +268,21 @@ test.describe("E6 the eye's beam", () => {
   });
 });
 
-test("E7 a star names its page in a caption and does not navigate", async ({ page, freeze }) => {
+test("E7 the star dots are quiet marks: a tap changes nothing, and they are not in the tab order", async ({ page, freeze }) => {
   await open(page);
   await freeze(page, 0);
   const url = page.url();
-  const dot = page.locator('.orrery .st[data-to="INTERSECT"]');
-  await dot.click();
-  const cap = page.locator(".e-cap");
-  await expect(cap).toContainText("INTERSECT");
-  await expect(cap).toContainText("proposal");
+  const before = await page.evaluate(() => document.body.innerHTML);
+  await page.locator(".orrery .st").nth(5).click({ force: true });
   expect(page.url()).toBe(url);
+  expect(await page.evaluate(() => document.body.innerHTML), "a tap changes nothing").toBe(before);
+  const dots = await page.evaluate(() =>
+    [...document.querySelectorAll(".orrery .st")].map((s) => ({
+      tabbable: s.tabIndex >= 0,
+      hidden: !!s.closest("[aria-hidden='true']"),
+    }))
+  );
+  expect(dots.length, "ten star dots").toBe(10);
+  expect(dots.filter((d) => d.tabbable), "none in the tab order").toEqual([]);
+  expect(dots.filter((d) => !d.hidden), "all hidden from assistive tech").toEqual([]);
 });

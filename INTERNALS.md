@@ -224,9 +224,8 @@ and `emblem-orbits.html` and inlined by sync:
 <div class="orrery">
   <!-- nts:emblem core --><!-- /nts:emblem -->     the star, ring, dial, bands, sunburst, marks, pyramids, the eye (.e-stop), beams
   <div class="pivot orbit o-embers"><a class="bead" …>…</a></div>   …the four beads, by hand
-  <!-- nts:emblem orbits --><!-- /nts:emblem -->   the four orbits with their star dots (.st)
+  <!-- nts:emblem orbits --><!-- /nts:emblem -->   the four orbits with their star dots (.st, decorative: aria-hidden)
 </div>
-<p class="e-cap" aria-live="polite">…</p>            a star's caption, in the key's place while it shows
 <div class="turn"><p class="secret incant">…</p></div>
 <fieldset class="e-pick">…two radios: sun, opening…</fieldset>
 ```

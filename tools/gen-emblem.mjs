@@ -160,22 +160,22 @@ const ORBITS = [
   ['e-o78', 78.4, 'class="k-orbit" stroke="currentColor" stroke-opacity=".7" stroke-width=".6" stroke-dasharray=".4 1.4"'],
   ['e-o84', 84, 'class="k-orbit" stroke="currentColor" stroke-opacity=".6" stroke-width=".8" stroke-dasharray=".1 1.6"'],
   ['e-o96', 96.4, `stroke="${C.red}" stroke-opacity=".55" stroke-width=".55" stroke-dasharray="18 3.6 1.8 3.6"`]];
-/* the stars: the code dots, each naming a page it would open (a proposal:
-   nothing navigates yet). [orbit r, code, start angle, what it would open] */
+/* the stars: the code dots, quiet marks that go nowhere until their pages
+   exist. [orbit r, code, start angle] */
 const STARS = [
-  [66, 'e', 45, 'an EMBERS night, 2025'], [66, 'e', 160, 'EMBERS, into the night'], [66, 'e', 290, 'an EMBERS night, 2026'],
-  [78.4, 'p', 110, 'NOT NOT PHILO, Vol. 1: Do-ocracy'], [78.4, 'p', 235, 'NOT NOT PHILO, Vol. 2: The Power of Fictions'],
-  [84, 'i', 25, 'INTERSECT'], [84, 'i', 255, 'an INTERSECT session'],
-  [96.4, 's', 70, 'Yet to come: the events'], [96.4, 's', 190, 'a past Tuesday, in the archive'], [96.4, 'g', 320, 'Experiments, a page to come']];
+  [66, 'e', 45], [66, 'e', 160], [66, 'e', 290],
+  [78.4, 'p', 110], [78.4, 'p', 235],
+  [84, 'i', 25], [84, 'i', 255],
+  [96.4, 's', 70], [96.4, 's', 190], [96.4, 'g', 320]];
 /* the one star that pulses, now and then */
 const PULSE = 7;
 /* hit radius per orbit: r 14 (about 43 px on a phone) on the inner and
    outer orbits; the two middle orbits sit 5.6 apart, so theirs stay r 11 */
 const HIT = { 66: 14, 78.4: 11, 84: 11, 96.4: 14 };
-const star = ([r, k, deg, to], i) =>
-  `<span class="e-pv" style="transform:rotate(${deg}deg)"><button class="st" type="button" data-orbit="${r}" data-code="${k}" data-to="${to}" aria-label="A star: ${to}" style="top:${f(-4.703 - r / 2.02)}cqi">`
+const star = ([r, k, deg], i) =>
+  `<span class="e-pv" style="transform:rotate(${deg}deg)"><span class="st" aria-hidden="true" data-orbit="${r}" data-code="${k}" style="top:${f(-4.703 - r / 2.02)}cqi">`
   + `<svg viewBox="-9.5 -9.5 19 19" aria-hidden="true" focusable="false"><circle class="hit" r="${HIT[r]}" fill="transparent"/><circle class="halo k-halo" r="4.6" fill="none" stroke="currentColor" stroke-width=".6"/>`
-  + `<circle r="2.3" fill="${K[k]}" stroke="${C.ink}" stroke-width="${FINE}"/></svg>${i === PULSE ? '<span class="e-pulse" aria-hidden="true"></span>' : ''}</button></span>`;
+  + `<circle r="2.3" fill="${K[k]}" stroke="${C.ink}" stroke-width="${FINE}"/></svg>${i === PULSE ? '<span class="e-pulse" aria-hidden="true"></span>' : ''}</span></span>`;
 
 const core = [
   `<div class="e-star" aria-hidden="true">\n${starEdges()}\n</div>`,
