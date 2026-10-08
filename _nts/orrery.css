@@ -424,7 +424,7 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
 .events-hero .mini-orrery { position: relative; width: min(64%, 13rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.5rem auto 2.5rem; container-type: inline-size; }
-/* the sun a black sun with a bone sigil */
+/* the sun: a black sun with a bone sigil */
 .events-hero .mini-orrery .sun-disc { position: absolute; left: 32%; top: 32%; width: 36%; height: 36%; border-radius: 50%; background: var(--pal-ink); }
 .events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--pal-bone); }
 .events-hero .mini-ring { position: absolute; inset: calc(50% - var(--r)); border-radius: 50%; border: 1px dashed var(--w-line); }
