@@ -458,3 +458,24 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
   .events-hero .mini-orrery a.trace-bead:hover, .events-hero .mini-orrery a.trace-bead:focus-visible { translate: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* ---------- landing variant: dark ground, inset like the apertures ---------- */
+/* The opening (ink) set always, whatever the picker or the scheme says; the
+   repeated class outranks the picker's :has() rule. */
+.threshold.threshold.threshold.threshold.threshold {
+  --e-plate: var(--pal-ink); --e-grid: var(--pal-grid-dark); --e-grid-step: 28px;
+  --e-text: var(--pal-bone); --e-muted: var(--pal-bone-muted); --e-hint: var(--code-events);
+  --e-dial: var(--pal-bone); --e-run: var(--pal-ink); --e-stop: var(--pal-bone);
+  --e-dot: var(--pal-bone); --e-orbit: var(--pal-bone); --e-halo: var(--pal-bone);
+  --e-geo-op: .45; --e-star-op: 1;
+  --plate-x: 0px; --plate-top: 0px; --plate-r: var(--ecl-radius);
+}
+/* The band's width and inset; the plate is the section's own box. Its height is its content's. */
+.threshold {
+  width: min(100% - 2 * var(--ecl-inset), 88rem); margin-inline: auto;
+  padding-inline: var(--gutter); box-sizing: border-box;
+  border-radius: var(--ecl-radius); overflow: clip;
+}
+.e-pick { display: none; }
+@media (min-width: 600px) { .threshold { padding-top: 1.5rem; } }
+@media (min-width: 900px) { .threshold { min-height: 0; padding-inline: clamp(1.5rem, 3vw, 3rem); } }
