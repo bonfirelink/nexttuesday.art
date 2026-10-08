@@ -123,25 +123,16 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
 .orrery .e-beam { position: absolute; left: 50%; top: 50%; width: 22.77cqi; height: 22.77cqi; margin: -11.385cqi 0 0 -11.385cqi; opacity: 0; transform: scale(.35); }
 .orrery .e-beam svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
-/* the stars: code dots on the orbits, each a button naming the page it
-   would open (a proposal: nothing navigates yet) */
+/* the stars: code dots on the orbits, decorative marks (no pages yet to
+   open): not focusable, hidden from assistive tech; the halo shows on a
+   pointer's hover only */
 .orrery .e-pv { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
-.orrery .st { position: absolute; left: -4.703cqi; width: 9.406cqi; height: 9.406cqi; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.orrery .st { position: absolute; left: -4.703cqi; width: 9.406cqi; height: 9.406cqi; margin: 0; padding: 0; border: 0; background: none; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
 .orrery .st svg { display: block; width: 100%; height: 100%; max-width: none; overflow: visible; }
 .orrery .st .hit { pointer-events: all; }
-.orrery .st:focus-visible { outline: none; }
 .orrery .st .halo { opacity: 0; transition: opacity .2s; }
-.orrery .st:is(:hover, :focus-visible, .on) .halo { opacity: 1; }
-.orrery .st:focus-visible .halo { stroke-width: .9px; }
+@media (hover: hover) { .orrery .st:hover .halo { opacity: 1; } }
 .orrery .e-pulse { position: absolute; left: 50%; top: 50%; width: 2.574cqi; height: 2.574cqi; margin: -1.287cqi 0 0 -1.287cqi; border-radius: 50%; border: .2475cqi solid var(--e-halo); opacity: .55; pointer-events: none; }
-/* the caption under the emblem, in the key's place while it shows */
-.sky > .e-cap, .sky > .orrery-key { grid-area: 2 / 1; }
-.e-cap { margin: 0; display: grid; gap: 2px; justify-items: center; align-content: start; text-align: center; font-size: .75rem; line-height: 1.35; color: var(--e-muted); }
-.e-cap:not(.is-on) > * { display: none; }
-.e-cap .to { font-weight: 600; letter-spacing: .04em; color: var(--e-text); }
-.e-cap .to .nts-sigil { display: inline-block; width: .95em; height: .95em; vertical-align: -.12em; margin-right: .35em; }
-.e-cap .pp { font-style: italic; font-size: .6875rem; }
-.sky:has(.e-cap.is-on) .orrery-key { visibility: hidden; }
 
 /* stopping: one swap, the same both ways, inside --swap (1.6 s). The dial
    fades out, and the marks and the sunburst with it, so the plate shows
