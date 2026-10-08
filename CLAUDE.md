@@ -31,7 +31,6 @@ Run `npm test` before asking for review and before merging; `npm run test:publis
 - A figure overshooting its circle reads as a portal: wanted.
 - Scroll-linked motion that means nothing goes.
 - The home emblem keeps its original size and position.
-- The compass hides only over the footer.
 
 ## Previews and checks
 

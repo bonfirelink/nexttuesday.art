@@ -3,8 +3,7 @@
 // token, and text and marks hold their contrast on their own ground.
 // C1 the header's sigil, links, hints, focus and selection; C2 the words band
 // and the ledger's black plate (bone text, ochre dates, tags with code dots);
-// C3 the compass, a small black sun with code dots; C4 on the emblem's plate,
-// in both grounds: the beads' focus ring; C5 the one
+// C4 on the emblem's plate, in both grounds: the beads' focus ring; C5 the one
 // favicon, the sigil on the ground, on every page.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
@@ -72,19 +71,6 @@ test("C2 the words band is a plywood plate; the ledger a black one, bone text, o
   expect(await focusRing(page, `${L} .after .go`), "focus ring on the black").toBe(t["--pal-bone"]);
 });
 
-
-test("C3 the compass is a small black sun: bone sigil, a dot in the code for each body", async ({ page }) => {
-  await open(page);
-  const t = await tokens(page);
-  const bg = await style(page, ".compass", "backgroundColor");
-  expect(bg, "compass").toBe(t["--pal-ink"]);
-  expect(await style(page, ".compass .c-sun", "color"), "its sigil").toBe(t["--pal-bone"]);
-  const CODE = { embers: "--code-embers", philo: "--code-philo", intersect: "--code-intersect", star: "--code-events" };
-  for (const [body, k] of Object.entries(CODE)) {
-    expect(await style(page, `.compass .c-${body} .c-needle`, "backgroundColor"), `${body} needle`).toBe(t[k]);
-    expect(contrast(t[k], bg), `${body} on the compass`).toBeGreaterThanOrEqual(3);
-  }
-});
 
 for (const ground of ["sun", "opening"]) {
   test(`C4 on the ${ground === "sun" ? "Black sun" : "Black opening"}: the beads' focus ring takes the plate's ink`, async ({ page }) => {

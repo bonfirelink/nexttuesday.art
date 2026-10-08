@@ -64,9 +64,6 @@ components:
   ledger-plate:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.bone}"
-  compass:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.bone}"
   events-orrery-sun:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.bone}"
@@ -198,8 +195,6 @@ NTS colours take the same tokens, by role:
   bone muted places, ochre upcoming dates and star. Each tag is a bone
   label on a faint bone chip with its initiative's code dot: red EMBERS,
   grey NOT NOT PHILO, phosphor INTERSECT, ochre the Tuesdays gathering.
-- **The compass:** a small black sun, a bone sigil and ring, each body's
-  dot and needle in its code colour (4:1 or more on the ink).
 - **The events page's small orrery:** a black sun with a bone sigil, ink
   dashed rings; the worlds' beads keep their own discs.
 - **A world's arrival:** a world page reached from the home opens with

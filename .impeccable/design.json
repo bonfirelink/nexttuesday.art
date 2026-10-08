@@ -205,14 +205,6 @@
       "css": ".ds-ledger { background: var(--pal-ink); color: var(--pal-bone); padding: 24px; } .ds-ledger p { margin: 0 0 4px; } .ds-when { color: var(--code-events); font-family: var(--font-mono, monospace); } .ds-where { color: var(--pal-bone-muted); } .ds-kind { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; padding: .15em .5em; border-radius: 3px; background: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); } .ds-kind::before { content: \"\"; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; background: var(--code-events); }"
     },
     {
-      "name": "Compass",
-      "kind": "custom",
-      "refersTo": "compass",
-      "description": "The sun, small, once the sky has scrolled away: a black disc, a bone sigil and ring, each body's dot and needle in its code colour.",
-      "html": "<span class=\"ds-compass\" aria-hidden=\"true\"><span class=\"ds-compass-ring\"></span><span class=\"ds-compass-dot\"></span></span>",
-      "css": ".ds-compass { position: relative; display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: var(--pal-ink); border: 1px solid color-mix(in srgb, var(--pal-bone) 28%, transparent); } .ds-compass-ring { position: absolute; inset: 7px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--pal-bone) 22%, transparent); } .ds-compass-dot { position: absolute; top: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--code-embers); }"
-    },
-    {
       "name": "Events orrery sun",
       "kind": "custom",
       "refersTo": "events-orrery-sun",

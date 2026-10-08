@@ -9,7 +9,7 @@
    never a blob. The compositor does the opening: nothing repaints and no
    style is recomputed while it runs (see "the opening" below).
    Markup:
-     <section class="ecl …" data-orbit-body="…">
+     <section class="ecl …">
        <span class="ecl-ring" aria-hidden="true"><svg class="nts-sigil"><use href="#sigil-…"/></svg></span>
        <div class="ecl-win"><div class="ecl-disc"><div class="ecl-in"> … the section's content … </div></div></div>
      </section>
@@ -39,13 +39,6 @@
   --ecl-radius: clamp(1.25rem, 5vw, 2.75rem);
   --ecl-ring: 3.25rem;
   --ecl-gap: clamp(3rem, 8vw, 5rem);        /* between a section and the next aperture */
-  /* the compass's distance from the screen's corner: a window's inset plus
-     its corner radius. The button then sits clear inside a window's edge and
-     its rounded corner, never tangent to them (a circle touching a card's
-     edge at one point reads as a slip, and its paper fuses with the gutter);
-     on phones this is about where a window's text ends, so it lines up with
-     the words instead of the frame */
-  --compass-inset: calc(var(--ecl-inset) + var(--ecl-radius));
 }
 main { --ecl-out: var(--w-bg); }
 
