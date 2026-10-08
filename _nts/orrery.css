@@ -150,43 +150,52 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 /* the orb: the world's live figure in a circle, its orbit dashed round it,
    and the way into the world (tapped, it grows into the world's hero: the
    view transition named orb). Its depth goes into it, never off the
-   ground: it does not rise or cast. At rest a faint well at the rim says it
-   can be entered; under the pointer, the keyboard or a press the portal
-   opens (below). Every part of the opening is painted once and only moved
-   or faded (transform, opacity): the figure (the fragment's children), the
-   fragment's ::after (over the figure) and, where an opening needs one, its
-   ::before (under it), both inside its round clip, and the orbit
-   (.orb::before). Opening is slow and eased
-   out, closing quicker: the transition is the one of the state arrived at. */
+   ground: it does not rise or cast. The orb's box is the window, the size
+   it always had; the disc (the fragment) reaches --lid (in cqi of the
+   window) past it on every side, a ring for the iris's lid to draw back
+   into, and the orbit rides outside the disc. Under the pointer, the
+   keyboard or a press the portal opens (below). Every part of the opening
+   is painted once and only moved or faded (transform, opacity): the figure
+   (the fragment's children) and the lid (the fragment's ::before, under
+   the figure, inside its round clip). Nothing is drawn over the figure, so
+   nothing over it repaints while the world windows scroll open. Opening is
+   slow and eased out, closing quicker: the transition is the one of the
+   state arrived at. */
 :root { --portal-in: 640ms; --portal-out: 380ms; --ease-portal: cubic-bezier(.16, 1, .3, 1); }
-.orb { display: block; position: relative; aspect-ratio: 1; border-radius: 50%; color: inherit; text-decoration: none; container-type: inline-size; -webkit-tap-highlight-color: transparent; }
-.orb > [data-nts-fragment] { border-radius: 50%; --frag-bg: var(--w-bg-2); box-shadow: inset 0 0 0 1px var(--w-line); }
-.orb > [data-nts-fragment]::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
-.orb::before { content: ""; position: absolute; inset: -.6rem; border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
-.orb::before, .orb > [data-nts-fragment] > *, .orb > [data-nts-fragment]::before, .orb > [data-nts-fragment]::after {
+.orb { --lid: 3.5; --figure-rest: calc(100 / (100 + 2 * var(--lid))); display: block; position: relative; aspect-ratio: 1; border-radius: 50%; color: inherit; text-decoration: none; container-type: inline-size; -webkit-tap-highlight-color: transparent; }
+.orb > [data-nts-fragment] { position: absolute; inset: calc(var(--lid) * -1cqi); width: auto; height: auto; border-radius: 50%; --frag-bg: var(--w-bg-2); box-shadow: inset 0 0 0 1px var(--w-line); }
+.orb::before { content: ""; position: absolute; inset: calc(-.6rem - var(--lid) * 1cqi); border-radius: 50%; border: 1px dashed var(--w-line-strong); pointer-events: none; }
+.orb > [data-nts-fragment] > *, .orb > [data-nts-fragment]::before {
   transition: transform var(--portal-out) var(--ease-portal), opacity var(--portal-out) var(--ease-portal);
 }
-.orb:is(:hover, :focus-visible, :active)::before, .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > *,
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::before, .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after {
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > *, .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::before {
   transition-duration: var(--portal-in);
 }
-.orb:focus-visible { outline-color: var(--w-accent-text); outline-offset: 6px; }
+/* the focus ring follows the disc, not the window inside it */
+.orb:focus-visible { outline: none; }
+.orb:focus-visible > [data-nts-fragment] { outline: 2px solid var(--w-accent-text); outline-offset: 4px; }
 /* the opening, an iris: the window is an aperture, the same opening as the
-   world windows' own as they scroll in. At rest a lid of the window's ground
-   covers the outer edge of the disc, its edge drawn by the world's limb (a
-   hairline of --w-accent) and shading the figure under it, so the window
-   reads as a door ajar. Opened, the lid draws back past the rim and the
-   figure comes a little nearer. The lid is one radial gradient on ::after,
-   inside the disc's round clip, scaled out. Reduced motion: the lid fades
-   instead. */
-.orb > [data-nts-fragment]::after {
-  background: radial-gradient(closest-side, transparent 80%, var(--w-cast) 92.6%, color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)) 92.8% 93.5%, var(--w-bg) 93.7%);
+   world windows' own as they scroll in. At rest the figure fills the window
+   exactly (scaled to --figure-rest of the disc) and a lid of the window's
+   ground covers the ring beyond it, its edge drawn by the world's limb (a
+   hairline of --w-accent) with a faint shade inside, on the window's floor.
+   Opened, the lid draws back past the disc's rim and the figure comes
+   nearer, out to the whole disc. The lid sits under the figure: each child
+   of the fragment is clipped to the disc's circle in its own coordinates,
+   so scaled to rest the clip is the window's edge and the figure never
+   reaches the lid; the clip scales with the figure and never animates. Reduced motion: the lid fades instead, and the
+   figure stays. A child's transform is never none, so the figure keeps its
+   own stacking context and paints over the lid. */
+.orb > [data-nts-fragment]::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, transparent calc(50cqi - 2.5cqi), var(--w-cast) calc(50cqi - 1px), color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)) calc(50cqi - 1px) 50cqi, var(--w-bg) 50cqi);
 }
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(1.05); }
-.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { transform: scale(1.12); }
+.orb > [data-nts-fragment] > * { transform: scale(var(--figure-rest)); clip-path: circle(calc((50 + var(--lid)) * 1cqi) at 50% 50%); }
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(1); }
+.orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::before { transform: scale(1.16); }
 @media (prefers-reduced-motion: reduce) {
-  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: none; }
-  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::after { transform: none; opacity: 0; }
+  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] > * { transform: scale(var(--figure-rest)); }
+  .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment]::before { transform: none; opacity: 0; }
 }
 .world .prose { width: 100%; }
 .world .prose h2 { margin-bottom: .8rem; }
