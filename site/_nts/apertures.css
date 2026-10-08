@@ -71,7 +71,7 @@ main { --ecl-out: var(--w-bg); }
    Scrolling opens the disc from the ring while the aperture's top edge
    climbs through --ecl-open-start/-end; once open it stays open (.is-open,
    nts.js, latches it). Every part runs its own animation of a compositor
-   property (scale, rotate, opacity) on the aperture's view timeline, over
+   property (scale, opacity) on the aperture's view timeline, over
    the same range, so the compositor runs the whole opening: no inheriting
    variable restyles the subtree, no mask or gradient repaints the card.
    - The disc: .ecl-disc is scaled from the ring point and clipped to a
@@ -91,13 +91,13 @@ main { --ecl-out: var(--w-bg); }
      radius), so a ring of about 2px (1.2-2.5px from a phone band to a
      desk window) shows round the ground at every size, with no stroke to
      thicken as it grows. It is gone under the corners when complete.
-   - The ring's sigil turns once (ecl-turn) and a band's words fade in
-     (ecl-words) on sub-ranges of the same timeline.
+   - A band's words fade in (ecl-words) on a sub-range of the same
+     timeline. The ring's sigil sits still.
    Where there is no view timeline, no --ecl-r (no ResizeObserver) or
    reduced motion, every disc is open. */
 @supports (animation-timeline: view()) {
   .js .ecl { view-timeline: --ecl block; }
-  .js :is(.ecl-disc, .ecl-in, .ecl-ring .nts-sigil, .band.ecl .ecl-in > .wrap), .js .ecl-win::before {
+  .js :is(.ecl-disc, .ecl-in, .band.ecl .ecl-in > .wrap), .js .ecl-win::before {
     animation-duration: auto; animation-timing-function: linear; animation-fill-mode: both;
     animation-timeline: --ecl; animation-range: cover var(--ecl-open-start) cover var(--ecl-open-end);
   }
@@ -109,7 +109,6 @@ main { --ecl-out: var(--w-bg); }
     border-radius: 50%; background: var(--ecl-limb, var(--ecl-fg)); opacity: .9; pointer-events: none;
     animation-name: ecl-limb;
   }
-  .js .ecl-ring .nts-sigil { animation-name: ecl-turn; }
   /* a band's words: from progress --ecl-hold, over --ecl-show of the range */
   .js .band.ecl .ecl-in > .wrap {
     animation-name: ecl-words;
@@ -136,7 +135,6 @@ main { --ecl-out: var(--w-bg); }
   86.16% { scale: 1.1636; } 88.78% { scale: 1.1292; } 91.44% { scale: 1.0963; } 94.14% { scale: 1.0647; } 96.88% { scale: 1.0346; } 99.66% { scale: 1.0056; }
   100% { scale: 1.0022; }
 }
-@keyframes ecl-turn { from { rotate: -1turn; } to { rotate: 0turn; } }
 @keyframes ecl-words { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- home: the windows into the worlds ---------- */

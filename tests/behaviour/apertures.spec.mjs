@@ -43,6 +43,18 @@ for (const vp of VIEWPORTS) {
       await checkOpening(page, settle, "#not-not-philo");
     });
 
+    test("B2 the ring's sigil sits still while its aperture opens", async ({ page, settle }) => {
+      await open(page);
+      for (const f of [0.8, 0.55, 0.45, PAST_LINE]) {
+        await putTop(page, settle, "#not-not-philo", f);
+        const sigil = await page.evaluate(() => {
+          const el = document.querySelector("#not-not-philo .ecl-ring .nts-sigil");
+          return { rotate: getComputedStyle(el).rotate, anims: el.getAnimations().length };
+        });
+        expect(sigil, `ring sigil at ${f * 100}%`).toEqual({ rotate: "none", anims: 0 });
+      }
+    });
+
     for (const path of WORLD_PAGES) {
       test(`B2 a band on ${path} opens across the screen`, async ({ page, settle }) => {
         await open(page, path);
