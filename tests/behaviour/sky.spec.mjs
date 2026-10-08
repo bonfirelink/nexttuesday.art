@@ -1,7 +1,6 @@
 // The home's sky on a phone and what hints at the beads.
 // S1 the emblem keeps a margin: its outer orbit stays MARGIN px inside the
 // screen's sides and below the header, and the events star is never clipped;
-// S2 the ground picker in the plate's corner stays clear of the outer orbit;
 // S3 the header is balanced: the destinations spread from the sigil to the
 // gutter, the sigil-to-first gap like the gaps between them, one centre line;
 // S4 no key under the emblem: the name is the next thing after it;
@@ -51,17 +50,6 @@ for (const width of PHONES) {
         return out;
       });
       expect(clipped, "boxes that clip the events star").toEqual([]);
-    });
-
-    test("S2 the ground picker stays clear of the outer orbit", async ({ page }) => {
-      await open(page);
-      const b = await orbitBox(page);
-      const near = await page.evaluate(({ cx, cy }) => {
-        const p = document.querySelector(".e-pick").getBoundingClientRect();
-        const x = Math.max(p.left, Math.min(cx, p.right)), y = Math.max(p.top, Math.min(cy, p.bottom));
-        return Math.hypot(x - cx, y - cy);
-      }, b);
-      expect(near - b.r, "the picker's nearest corner outside the orbit").toBeGreaterThanOrEqual(8);
     });
 
     test("S4 the name follows the emblem, with no key between", async ({ page }) => {

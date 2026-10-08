@@ -244,7 +244,6 @@ and `emblem-orbits.html` and inlined by sync:
   <!-- nts:emblem orbits --><!-- /nts:emblem -->   the four orbits with their star dots (.st, decorative: aria-hidden)
 </div>
 <div class="turn"><p class="secret incant">…</p></div>
-<fieldset class="e-pick">…two radios: sun, opening…</fieldset>
 ```
 Edit the generator, run it, then `node tools/sync.mjs`; never edit the
 parts by hand. Every layer is a whole SVG or box that the compositor
@@ -264,16 +263,14 @@ each part's angle is read once, its animation dropped (`.orrery.is-still`)
 and pinned inline, then `.is-gliding` eases it in 1.6 s to the stop pose
 (beads and dots at the hours of a clock, layers at 0); `.is-stopped` on
 `.threshold` fades the dial and its marks (the north stays), hands the
-pyramid and beam over to their plate-inked copies, flips the pyramid,
+pyramid and beam over to their ink copies, flips the pyramid,
 draws the star at the back and shows `.turn .secret`. Again, each part's
 animation restarts at the time matching where it stands. Under reduced
 motion nothing turns or draws, the fades keep their 1.6 s (they beat the
 global .01ms rule), and the pyramid hands over to an upside-down copy.
-The ground: `.threshold::before` is the plate (plywood or ink, with the
-faint grid); `html[data-ground="opening"]` (set by `nts-head.js` from
-`localStorage["nts:ground"]` before paint) or the checked radio (`:has`,
-which works without scripts) switches every `--e-*`. Each bead rides in a
-moat of the plate's colour (`.bead::before`) that lifts with its face.
+The ground: the emblem sits on the page's beige, no plate, grid or picker;
+the `--e-*` on `.threshold` are the Black sun's inks. Each bead rides in a
+moat of the beige (`.bead::before`) that lifts with its face.
 The click hint is the bead's `::after`: a thin ring in `--e-halo` that
 grows off the moat and fades, the eye's beam in small, on every pointer
 type; one bead at a time (18 s cycle, staggered 4.5 s, set clear of the

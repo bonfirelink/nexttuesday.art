@@ -3,7 +3,7 @@
 // token, and text and marks hold their contrast on their own ground.
 // C1 the header's sigil, links, hints, focus and selection; C2 the words band
 // and the ledger's black plate (bone text, ochre dates, tags with code dots);
-// C4 on the emblem's plate, in both grounds: the beads' focus ring; C5 the one
+// C4 on the beige, the beads' focus ring; C5 the one
 // favicon, the sigil on the ground, on every page.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
@@ -72,18 +72,13 @@ test("C2 the words band is a plywood plate; the ledger a black one, bone text, o
 });
 
 
-for (const ground of ["sun", "opening"]) {
-  test(`C4 on the ${ground === "sun" ? "Black sun" : "Black opening"}: the beads' focus ring takes the plate's ink`, async ({ page }) => {
-    await open(page);
-    if (ground === "opening") await page.click('.e-pick input[value="opening"]');
-    const t = await tokens(page);
-    const plate = ground === "sun" ? t["--pal-plywood"] : t["--pal-ink"];
-    expect(await style(page, ".threshold", "backgroundColor", "::before")).toContain(rgb(plate).slice(0, 3).join(", "));
-    const ink = ground === "sun" ? t["--pal-ink"] : t["--pal-bone"];
-    expect(await focusRing(page, '.bead[data-body="philo"]', '.bead[data-body="philo"] .face'), "bead focus ring").toBe(ink);
-    expect(contrast(ink, plate), "focus ring on the plate").toBeGreaterThanOrEqual(3);
-  });
-}
+test("C4 on the Black sun: the beads' focus ring takes the ink, on the page's beige", async ({ page }) => {
+  await open(page);
+  const t = await tokens(page);
+  expect(await style(page, '.bead[data-body="philo"]', "backgroundColor", "::before")).toBe(t["--pal-beige"]);
+  expect(await focusRing(page, '.bead[data-body="philo"]', '.bead[data-body="philo"] .face'), "bead focus ring").toBe(t["--pal-ink"]);
+  expect(contrast(t["--pal-ink"], t["--pal-beige"]), "focus ring on the beige").toBeGreaterThanOrEqual(3);
+});
 
 test("C5 one favicon on every page: the sigil in ink on the beige", async ({ page, request }) => {
   await open(page);

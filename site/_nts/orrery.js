@@ -3,8 +3,7 @@
      emblem    the eye (.e-stop) stops the machine: every part glides to the
                symmetric stop pose and .is-stopped on .threshold hollows
                the dial, flips the pyramid, draws the star and shows the
-               secret; again, it carries on from where it stands. The ground picker (.e-pick)
-               sets html[data-ground] and stores the choice
+               secret; again, it carries on from where it stands
      falling   on a cross-document view transition, the body you tapped
                (its bead if the sky is on screen, else its orb) is named
                "orb", so it grows into the world page's entity; coming back,
@@ -109,20 +108,6 @@
         q.currentTime = norm((a - a0) * d) / 360 * q.effect.getComputedTiming().duration;
       });
     }
-  }
-
-  /* the ground picker: html[data-ground] carries the choice (nts-head.js
-     sets it before paint from storage); the radios follow it */
-  var pick = document.querySelector(".e-pick");
-  if (pick) {
-    var root = document.documentElement;
-    var chosen = pick.querySelector('input[value="' + (root.getAttribute("data-ground") === "opening" ? "opening" : "sun") + '"]');
-    if (chosen) chosen.checked = true;
-    pick.addEventListener("change", function (e) {
-      var v = e.target.value;
-      if (v === "opening") root.setAttribute("data-ground", "opening"); else root.removeAttribute("data-ground");
-      try { localStorage.setItem("nts:ground", v); } catch (err) { /* storage off: the choice lasts this page */ }
-    });
   }
 
   /* falling in (coming back is named in nts-head.js, which owns the world

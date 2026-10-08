@@ -12,17 +12,16 @@
   /* The colour code: the NTS chrome on every page draws only from these
      (the worlds keep their kits). Neutrals by role:
        beige      the page's ground
-       plywood    the plate under the Black sun's opening, the words band
-       ink        the black of the sun's dial, the keylines, the Black opening,
-                  the ledger's plate; type, sigils, links and
+       plywood    the words band
+       ink        the black of the sun's dial, the keylines, the ledger's
+                  plate; type, sigils, links and
                   focus rings on the light grounds
        bone       the light of the bone dial and of text on the black
        bone-muted small text on the black
-       muted      small text on the plywood
+       muted      small text on the beige and the plywood
        voice      the italic voice, the secret and the hints on a light ground
        shade      the pyramid's lower face, a shadow of the Philo grey
        etch       the faint geometry: the sunburst and the star on stop
-       grid       the faint red grid of the opening, on light and on dark
      The code: each initiative has its colour, wherever it appears (orbit
      dots, pyramid faces, marks):
        embers     red, EMBERS (the rave): fire
@@ -41,8 +40,6 @@
   --pal-voice: #9e1430;
   --pal-shade: #55544f;
   --pal-etch: #77726a;
-  --pal-grid: rgb(229 29 71 / .08);
-  --pal-grid-dark: rgb(229 29 71 / .2);
   --code-embers: #e51d47;
   --code-philo: #858481;
   --code-intersect: #e9e2cf;

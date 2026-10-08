@@ -41,53 +41,19 @@
 @media (min-width: 600px) { .sky { margin-inline: 0; padding-top: 0; overflow-x: visible; } .orrery { width: min(100%, 34rem); margin-inline: auto; } }
 
 /* ---------- the emblem ---------- */
-/* The ground: the opener sits on a plate with a faint red grid, plywood
-   under the Black sun (a black dial), ink under the Black opening (a bone
-   dial). The picker (.e-pick, radios) switches it, with scripts or without
-   (:has); orrery.js stores the choice and nts-head.js sets
-   html[data-ground] from it before the first paint. Every colour below is a
-   palette token (nts.css, section 1); --e-* name what each one does here:
-   --e-run is the marks' ink on the dial, --e-stop the ink on the plate the
-   dial fades to. The plate runs to the screen's edges on a phone, where the
-   orbits do, and is a card from 600px. */
+/* The emblem sits on the page's beige: a black dial, no plate, no grid.
+   Every colour below is a palette token (nts.css, section 1); --e-* name
+   what each one does here: --e-run is the marks' ink on the dial, --e-stop
+   the ink on the beige the dial fades to. */
 .threshold {
   position: relative; isolation: isolate; color: var(--e-text);
-  --e-plate: var(--pal-plywood); --e-grid: var(--pal-grid); --e-grid-step: 30px;
   --e-text: var(--pal-ink); --e-muted: var(--pal-muted); --e-hint: var(--pal-voice);
   --e-dial: var(--pal-ink); --e-run: var(--pal-bone); --e-stop: var(--pal-ink);
   --e-dot: var(--pal-ink); --e-orbit: var(--pal-ink); --e-halo: var(--pal-ink);
-  /* the sunburst is fainter on the black; the star's strokes are lifted for
-     the black and taken back down on the plywood */
+  /* the sunburst is fainter on the black */
   --e-geo-op: .32; --e-star-op: .87;
-  --plate-x: calc(-1 * var(--gutter)); --plate-top: 0px; --plate-r: 0 0 22px 22px;
-}
-html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]:checked) {
-  --e-plate: var(--pal-ink); --e-grid: var(--pal-grid-dark); --e-grid-step: 28px;
-  --e-text: var(--pal-bone); --e-muted: var(--pal-bone-muted); --e-hint: var(--code-events);
-  --e-dial: var(--pal-bone); --e-run: var(--pal-ink); --e-stop: var(--pal-bone);
-  --e-dot: var(--pal-bone); --e-orbit: var(--pal-bone); --e-halo: var(--pal-bone);
-  --e-geo-op: .45; --e-star-op: 1;
-}
-@media (min-width: 600px) { .threshold { --plate-x: calc(10px - var(--gutter)); --plate-top: 10px; --plate-r: 22px; } }
-.threshold::before {
-  content: ""; position: absolute; z-index: -1; inset: var(--plate-top) var(--plate-x) 0; border-radius: var(--plate-r);
-  background: linear-gradient(var(--e-grid) 1px, transparent 1px) 0 0 / var(--e-grid-step) var(--e-grid-step),
-    linear-gradient(90deg, var(--e-grid) 1px, transparent 1px) 0 0 / var(--e-grid-step) var(--e-grid-step), var(--e-plate);
-  /* the cells stretch to fill the plate whole, so the grid ends on the edge
-     and the rounded corners clip it, never a part-row */
-  background-repeat: round;
 }
 .threshold :focus-visible { outline-color: var(--e-text); }
-
-/* the picker: two small swatches in the plate's top corner, quiet but in
-   sight; arrows switch them, as radios do */
-.e-pick { position: absolute; z-index: 3; top: calc(var(--plate-top) + 6px); right: calc(var(--plate-x) + 6px); display: flex; margin: 0; padding: 0; border: 0; min-inline-size: 0; }
-.e-pick label { position: relative; display: grid; place-items: center; width: 36px; height: 36px; cursor: pointer; }
-.e-pick input { appearance: none; margin: 0; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 1px var(--e-muted); transition: box-shadow .2s; }
-.e-pick input[value="sun"] { background: radial-gradient(circle, var(--pal-ink) 0 44%, var(--pal-plywood) 47%); }
-.e-pick input[value="opening"] { background: radial-gradient(circle, var(--pal-bone) 0 44%, var(--pal-ink) 47%); }
-.e-pick input:checked { box-shadow: 0 0 0 2px var(--e-plate), 0 0 0 3px var(--e-text); }
-.e-pick input:focus-visible { outline: 2px solid var(--e-text); outline-offset: 4px; }
 
 /* the layers, back to front: the star drawn on stop, the dotted ring, the
    dial, the keylines and bands, the sunburst, the ticking marks and the
@@ -99,11 +65,11 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
 }
 .orrery :is(.e-ly, .e-star, .e-tick, .e-bm, .e-orbit) { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .orrery .pivot { z-index: 1; }
-/* each disc rides in a round moat of the plate's colour, so the dotted ring
+/* each disc rides in a round moat of the page's beige, so the dotted ring
    and the orbits it crosses stop short of its edge. The star is a thin
-   glyph: a fill behind it would cut the grid and the orbit in a patch, so
-   the orbit passes behind it */
-.orrery .bead:not([data-body="star"])::before { content: ""; position: absolute; inset: -.8cqi; border-radius: 50%; background: var(--e-plate); pointer-events: none; }
+   glyph: a fill behind it would cut the orbit in a patch, so the orbit
+   passes behind it */
+.orrery .bead:not([data-body="star"])::before { content: ""; position: absolute; inset: -.8cqi; border-radius: 50%; background: var(--pal-beige); pointer-events: none; }
 .orrery .bead::before { transition: transform var(--dur-lift) var(--ease-lift); }
 .orrery .bead:is(:hover, :focus-visible)::before { transform: translateY(var(--lift-y)); }
 @media (prefers-reduced-motion: reduce) { .orrery .bead:is(:hover, :focus-visible)::before { transform: none; } }
@@ -125,7 +91,7 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
 @media (hover: hover) { .orrery:has(.e-stop:hover) .eye { fill: var(--pal-bone); } }
 /* the beam: a ring that grows from the pyramid's incircle out past its
    outline and fades (scale and opacity only), in the ink of what is behind
-   it: one copy on the dial's ink, one on the plate's, handing over with the
+   it: one copy on the dial's ink, one on the beige's, handing over with the
    pyramid */
 .orrery .e-beam { position: absolute; left: 50%; top: 50%; width: 22.77cqi; height: 22.77cqi; margin: -11.385cqi 0 0 -11.385cqi; opacity: 0; transform: scale(.35); }
 .orrery .e-beam svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -142,9 +108,9 @@ html[data-ground="opening"] .threshold, .threshold:has(.e-pick [value="opening"]
 .orrery .e-pulse { position: absolute; left: 50%; top: 50%; width: 2.574cqi; height: 2.574cqi; margin: -1.287cqi 0 0 -1.287cqi; border-radius: 50%; border: .2475cqi solid var(--e-halo); opacity: .55; pointer-events: none; }
 
 /* stopping: one swap, the same both ways, inside --swap (1.6 s). The dial
-   fades out, and the marks and the sunburst with it, so the plate shows
+   fades out, and the marks and the sunburst with it, so the beige shows
    through the centre; the north stays. The pyramid and the beam come in two
-   copies, one inked for the dial and one for the plate, and hand over at
+   copies, one inked for the dial and one for the beige, and hand over at
    the midpoint in .1 s (the one on top comes in over [.7, .8] before the
    one below goes over [.8, .9]; resuming mirrors it), so the pyramid never
    thins. The pyramid flips over its eye with the glide; the star at the

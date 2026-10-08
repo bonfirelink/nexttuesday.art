@@ -5,9 +5,8 @@
 // and neighbouring orbits turn against each other, the beads with theirs;
 // E3 tapping the eye stops it in the symmetric pose, hollows the dial, flips
 // the pyramid, draws the star and says the secret, and a second tap resumes
-// from where it stands; E4 the ground picker switches the hero between Black
-// sun and Black opening, remembers it, works from the keyboard, without
-// storage and without scripts; E5 under reduced motion nothing turns but the
+// from where it stands; E4 the hero sits on the page's beige, with no
+// picker, plate or grid; E5 under reduced motion nothing turns but the
 // stop still works, and going again undoes it; E6 the eye beams only on hover or focus where there is a
 // pointer, now and then on a touch screen; E7 the star dots are quiet marks: a tap changes nothing, and they are not in the tab order.
 import { test, expect } from "../helpers/fixtures.mjs";
@@ -17,9 +16,8 @@ const ANGLE_TOL = 1.5; // degrees: positions read from boxes on a 390 px emblem
 const GLIDE_MS = 2000; // the stop's 1.6 s glide and fade, and a margin
 const STOP_BODY = { embers: 240, philo: 0, intersect: 120, star: 180 };
 const STOP_DOTS = { 66: [60, 180, 300], 78.4: [90, 270], 84: [150, 210], 96.4: [0, 30, 330] };
-const PLYWOOD = "rgb(230, 216, 192)";
+const BEIGE = "rgb(244, 236, 220)";
 const INK = "rgb(20, 19, 18)";
-const BONE = "rgb(232, 220, 198)";
 
 const norm = (a) => ((a % 360) + 360) % 360;
 const gap = (a, b) => Math.abs(((((a - b) % 360) + 540) % 360) - 180);
@@ -51,10 +49,15 @@ const turnOf = (page, sel) =>
 
 const opacity = (page, sel) => page.evaluate((s) => parseFloat(getComputedStyle(document.querySelector(s)).opacity), sel);
 const ground = (page) =>
-  page.evaluate(() => ({
-    plate: getComputedStyle(document.querySelector(".threshold"), "::before").backgroundColor,
-    dial: getComputedStyle(document.querySelector(".orrery .e-dial circle")).fill,
-  }));
+  page.evaluate(() => {
+    const before = getComputedStyle(document.querySelector(".threshold"), "::before");
+    return {
+      plate: before.backgroundColor, plateImage: before.backgroundImage, content: before.content,
+      dial: getComputedStyle(document.querySelector(".orrery .e-dial circle")).fill,
+      moat: getComputedStyle(document.querySelector('.orrery .bead[data-body="philo"]'), "::before").backgroundColor,
+      page: getComputedStyle(document.body).backgroundColor,
+    };
+  });
 
 function expectStopPose(p) {
   for (const [body, a] of Object.entries(STOP_BODY)) expect(gap(p.beads[body], a), `${body} at ${a}`).toBeLessThanOrEqual(ANGLE_TOL);
@@ -159,57 +162,21 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-test.describe("E4 the ground picker", () => {
-  test("switches the hero and the dial, and remembers the choice", async ({ page }) => {
-    await open(page);
-    expect(await page.locator(".e-pick input[type=radio]").count()).toBe(2);
-    await expect(page.locator(".e-pick input[value=sun]")).toBeChecked();
-    expect(await ground(page)).toEqual({ plate: PLYWOOD, dial: INK });
-    await page.locator(".e-pick input[value=opening]").check();
-    expect(await ground(page)).toEqual({ plate: INK, dial: BONE });
-    expect(await page.evaluate(() => localStorage.getItem("nts:ground"))).toBe("opening");
-    await page.reload();
-    await page.evaluate(() => document.fonts.ready);
-    await expect(page.locator(".e-pick input[value=opening]")).toBeChecked();
-    expect(await ground(page)).toEqual({ plate: INK, dial: BONE });
-  });
-
-  test("works from the keyboard", async ({ page }) => {
-    await open(page);
-    await page.locator(".e-pick input[value=sun]").focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(page.locator(".e-pick input[value=opening]")).toBeChecked();
-    await expect(page.locator(".e-pick input[value=opening]")).toBeFocused();
-    expect((await ground(page)).plate).toBe(INK);
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(".e-pick input[value=sun]")).toBeChecked();
-    expect((await ground(page)).plate).toBe(PLYWOOD);
-  });
-
-  test("still works when storage throws", async ({ page, watch }) => {
-    await page.addInitScript(() => {
-      const no = () => { throw new DOMException("denied", "SecurityError"); };
-      Storage.prototype.getItem = no;
-      Storage.prototype.setItem = no;
-    });
-    await open(page);
-    expect((await ground(page)).plate).toBe(PLYWOOD);
-    await page.locator(".e-pick input[value=opening]").check();
-    expect((await ground(page)).plate).toBe(INK);
-    expect(watch.errors).toEqual([]);
-  });
-
-  test.describe("without scripts", () => {
-    test.use({ javaScriptEnabled: false });
-    test("starts on Black sun and still switches", async ({ page }) => {
-      await page.goto(process.env.NTS_BASE + "/");
-      expect(await ground(page)).toEqual({ plate: PLYWOOD, dial: INK });
-      await page.locator(".e-pick input[value=opening]").check();
-      expect(await ground(page)).toEqual({ plate: INK, dial: BONE });
-      await page.goto(process.env.NTS_BASE + "/");
-      expect((await ground(page)).plate, "nothing remembered without scripts").toBe(PLYWOOD);
-    });
-  });
+test("E4 the home sits on the page's beige: no picker, no plate, no grid, one black dial", async ({ page }) => {
+  await open(page);
+  expect(await page.locator(".e-pick, input[name=ground]").count(), "no ground picker").toBe(0);
+  expect(await page.evaluate(() => document.documentElement.hasAttribute("data-ground")), "no ground attribute").toBe(false);
+  const g = await ground(page);
+  expect(g.plate, "nothing painted behind the emblem").toBe("rgba(0, 0, 0, 0)");
+  expect(g.plateImage, "no grid behind the emblem").toBe("none");
+  expect(g.content, "no plate box").toBe("normal");
+  expect(g.dial).toBe(INK);
+  expect(g.moat, "the beads' moats are the page's beige").toBe(BEIGE);
+  expect(g.page).toBe(BEIGE);
+  await page.evaluate(() => localStorage.setItem("nts:ground", "opening"));
+  await page.reload();
+  await page.evaluate(() => document.fonts.ready);
+  expect((await ground(page)).dial, "a stored old choice does nothing").toBe(INK);
 });
 
 test("E5 under reduced motion nothing turns, and the stop still works", async ({ page }) => {

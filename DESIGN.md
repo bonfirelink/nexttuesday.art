@@ -11,8 +11,6 @@ colors:
   voice: "#9e1430"
   shade: "#55544f"
   etch: "#77726a"
-  grid: "rgb(229 29 71 / .08)"
-  grid-dark: "rgb(229 29 71 / .2)"
   code-embers: "#e51d47"
   code-philo: "#858481"
   code-intersect: "#e9e2cf"
@@ -34,20 +32,7 @@ typography:
     fontSize: "0.72rem"
     fontWeight: 600
     letterSpacing: "0.14em"
-rounded:
-  plate: "22px"
-spacing:
-  grid-sun: "30px"
-  grid-opening: "28px"
 components:
-  plate-black-sun:
-    backgroundColor: "{colors.plywood}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.plate}"
-  plate-black-opening:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.bone}"
-    rounded: "{rounded.plate}"
   star-dot-embers:
     backgroundColor: "{colors.code-embers}"
   star-dot-philo:
@@ -87,15 +72,15 @@ seven-point star draws itself behind it.
 
 Colour is a code, not decoration. Each initiative has one colour, and that
 colour appears only as small solid shapes on quiet neutrals: beige, plywood,
-ink and bone. A faint red grid under the emblem brings in technique and
-architecture without shouting.
+ink and bone. The emblem sits straight on the beige, with no plate or
+grid behind it.
 
 **Key Characteristics:**
 - Neutral grounds, colour only in small solid shapes.
 - One colour per initiative, the same everywhere it appears.
 - Ink keylines between colours and around the light ones.
 - Slow, compositor-only motion; the dial ticks like a seconds hand, backwards.
-- Two grounds, Black sun (default) and Black opening, picked on the page.
+- One ground: the Black sun, a black dial straight on the page's beige.
 
 ## Colors
 
@@ -118,8 +103,7 @@ marks.
   the beige (1.09:1 on plywood), so it always sits inside an ink keyline
   there.
 - **Ochre** (`--code-events`, #d9a414): the events and what is yet to come.
-  Also the eye and the north mark, and the secret line on the Black opening
-  (8.2:1 on ink). Weak on the beige (1.61:1 on plywood): ink keyline always.
+  Also the eye and the north mark. Weak on the beige (1.61:1 on plywood): ink keyline always.
 
 ### Secondary
 
@@ -131,15 +115,14 @@ marks.
 ### Neutral
 
 - **Beige** (`--pal-beige`, #f4ecdc): the page's ground.
-- **Plywood** (`--pal-plywood`, #e6d8c0): the plate under the Black sun,
-  and the words band.
-- **Ink** (`--pal-ink`, #141312): the Black sun's dial, every keyline, the
-  plate of the Black opening. 13.2:1 on plywood.
-- **Bone** (`--pal-bone`, #e8dcc6): the Black opening's dial, text on the
+- **Plywood** (`--pal-plywood`, #e6d8c0): the words band.
+- **Ink** (`--pal-ink`, #141312): the Black sun's dial, every keyline.
+  13.2:1 on plywood.
+- **Bone** (`--pal-bone`, #e8dcc6): text on the
   black, the eye lit on hover and focus. 13.7:1 on ink.
 - **Bone Muted** (`--pal-bone-muted`, #a59d8f): small text on the black
   (6.9:1).
-- **Muted** (`--pal-muted`, #5e5a52): small text on the plywood (4.9:1).
+- **Muted** (`--pal-muted`, #5e5a52): small text on the plywood (4.9:1) and the beige (6.1:1).
 - **Voice** (`--pal-voice`, #9e1430): the italic voice, the secret and the
   hints (the call to come next Tuesday, "Where?") on a light ground (5.8:1
   on plywood, 6.9:1 on the beige).
@@ -147,8 +130,6 @@ marks.
 - **Shade** (`--pal-shade`, #55544f): the pyramid's lower face.
 - **Etch** (`--pal-etch`, #77726a): faint geometry only: the sunburst in the
   dial and the chalk star on stop, both at reduced opacity.
-- **Grid** (`--pal-grid`, `--pal-grid-dark`): the faint red grid on the
-  plate, on light and on dark.
 
 ### Named Rules
 
@@ -185,8 +166,8 @@ NTS colours take the same tokens, by role:
 
 - **Type, sigils and links:** ink on the beige; links underlined. The
   header's sigil and the Tuesdays sigils are ink.
-- **Hints:** voice on the beige; ochre on the black (the Black opening's
-  secret, the ledger's upcoming dates).
+- **Hints:** voice on the beige; ochre on the black (the ledger's
+  upcoming dates).
 - **Focus rings:** the ground's ink: ink on the beige and the plywood,
   bone on the black.
 - **Selection:** ink with bone text; bone with ink text on the black.
@@ -213,15 +194,13 @@ footer are the worlds' own marks.
 **Display Font:** Fraunces (with Iowan Old Style, Georgia)
 **Body Font:** Instrument Sans (with Helvetica Neue, Arial)
 
-On the plate, type takes the ground's inks only: ink and muted on the Black
-sun, bone and bone muted on the Black opening.
+Beside the emblem, type takes ink and muted on the beige.
 
 ### Hierarchy
 - **Display** (700, clamp(2.6rem, 11.5vw, 5.5rem), 0.92): the society's name
   beside the emblem.
 - **Voice** (italic 400, clamp(1.15rem, 3.2vw, 1.5rem)): the secret that
-  appears on stop, in voice red on the Black sun and ochre on the Black
-  opening.
+  appears on stop, in voice red.
 - **Label** (600, 0.72rem, 0.16em, uppercase): the whisper under the name.
 
 ## Layout
@@ -262,8 +241,7 @@ Back to front:
 - **The star:** a seven-point {7/3} star with its points at r 90, drawn in
   chalk in etch, hidden while the machine runs.
 - **The dotted ring:** 132 round dots at r 55.
-- **The dial:** a disc to r 35, ink on the Black sun, bone on the Black
-  opening.
+- **The dial:** a disc to r 35, ink.
 - **The bands:** an ink ring from r 35 to the rim at r 50, carrying three
   bands, sky inside, then ochre, then red, with equal .9 keylines, and a
   60-mark bezel just outside.
@@ -278,13 +256,11 @@ Back to front:
   grey dots), r 84 (INTERSECT, two phosphor dots), r 96.4 (two ochre event
   dots and the green Experiments dot). The world beads ride between them.
 
-### The two grounds
+### The ground
 
-- **Black sun** (default): plywood plate, ink dial, bone marks.
-- **Black opening:** ink plate, bone dial, ink marks, ochre secret.
-
-A pair of small round swatches in the plate's top corner switches them; the
-choice is remembered.
+One look, the Black sun: an ink dial with bone marks, straight on the page's
+beige. There is no plate, no grid and no picker. On stop the dial fades to
+the beige.
 
 ### Star dots
 
