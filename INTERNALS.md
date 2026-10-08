@@ -133,7 +133,7 @@ reveal) in `--pal-voice`; the words band (`#words`) in `pages.css`; the
 ledger plate's selection, focus, ochre marks and tag dots in
 `apertures.css`; the events page's small orrery's
 colours in `orrery.css`; the arrival colours of the worlds' figures
-(`--penrose-*`, `--hearth-base`) in their kits. C1-C5 in
+(`--penrose-*`, `--hearth-base`) in their kits. C1, C2, C4, C5 (C3 retired) in
 `tests/behaviour/home-palette.spec.mjs` and S1-S2 in
 `site-palette.spec.mjs` assert each by token, with its contrast; S3
 scans every page, at rest and on arrival, for a colour of the old coral
@@ -251,8 +251,8 @@ parts by hand. Every layer is a whole SVG or box that the compositor
 turns (a transform on an SVG child repaints the drawing every frame):
 the orbits (`.e-o66` … `.e-o96`, each with its dots, `.e-pv`) and the
 ring and bands turn on `turn`, neighbours in opposite directions; the
-beads ride their orbits (`--r`, `--a`, `--p`, `--d` in `orrery.css`). The dial ticks counter-clockwise in 60 eased
-steps a minute: `.e-tick` runs two animations, `e-minute` on `rotate`
+beads ride their orbits (`--r`, `--a`, `--p`, `--d` in `orrery.css`). The dial ticks
+counter-clockwise in 60 eased steps a minute: `.e-tick` runs two animations, `e-minute` on `rotate`
 (steps of -6deg) and `e-tick` on `transform` (each second's eased last
 .24 s); their sum is the tick, so set both to the same `currentTime`.
 Inks that change with the ground are `currentColor` on a `k-*` class, set
