@@ -60,25 +60,23 @@
 .pivot > * { position: absolute; left: 0; top: 0; transform: var(--pose); animation: orbit var(--p, 80s) linear infinite; }
 @keyframes orbit { from { transform: var(--pose); } to { transform: var(--pose-end); } }
 /* the disc: a body on its orbit, its sigil on a small round face of its own
-   world (the face's --w-* tokens), standing off the ground it rides: lit on
-   its upper lip, casting a short shadow, and lifted further when it is a
-   link under the pointer or the keyboard (the same pair of depth tokens as
-   the lift, on a layer that fades in). The orrery's bodies, the orbit traced
-   on each world page and the events' small orrery all wear it. The ground's
-   shadow is --disc-cast: the orrery sets it from its own ground, because its
-   bodies' faces belong to other worlds. The edge is one line: an inset
-   ring, not a border, so the lip (listed first, painted on top) lights the
-   top of that line instead of drawing a second, grey one inside it. The
-   lifted layer brings its own ring in the accent over the face's, with one
-   lip of its own: the face's lip lies under it, so the light never doubles. */
+   world (the face's --w-* tokens), standing off the ground it rides: casting
+   a short shadow, and lifted further when it is a link under the pointer or
+   the keyboard (the same pair of depth tokens as the lift, on a layer that
+   fades in). The orrery's bodies, the orbit traced on each world page and the
+   events' small orrery all wear it. The ground's shadow is --disc-cast: the
+   orrery sets it from its own ground, because its bodies' faces belong to
+   other worlds. The edge is flat: one inset ring of one colour and one
+   thickness all round, not a border, lit by nothing on its upper side. The
+   lifted layer brings its own ring in the accent over the face's. */
 .disc {
   border-radius: 50%; display: grid; place-items: center;
   background: var(--w-bg);
-  box-shadow: inset 0 1px 0 var(--w-rim), inset 0 0 0 1px var(--w-line-strong), 0 1px 3px var(--disc-cast, var(--w-cast));
+  box-shadow: inset 0 0 0 1px var(--w-line-strong), 0 1px 3px var(--disc-cast, var(--w-cast));
 }
 .disc::after {
   content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-  box-shadow: inset 0 1px 0 var(--w-rim), inset 0 0 0 1px var(--w-accent), 0 6px 10px -4px var(--disc-cast, var(--w-cast));
+  box-shadow: inset 0 0 0 1px var(--w-accent), 0 6px 10px -4px var(--disc-cast, var(--w-cast));
   opacity: 0; transition: opacity var(--dur-lift) var(--ease-lift);
 }
 a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::after { opacity: 1; }
