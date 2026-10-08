@@ -16,6 +16,7 @@ const SETTLE_MS = 1500; // after load, before a scroll or a trace starts
 const FRAMES_PER_VIEWPORT = 54; // P2: scroll speed (0.9 s at 60 fps), counted in frames so a loaded machine renders the same number of them
 const WINDOWS = 3; // P2: world windows scrolled open
 const IDLE_PAINTS_PER_FRAME = 0.05; // P1: overall paint budget while idle (about one stray paint per 20 frames)
+const ORB_IDLE_MS = 3000; // P6: the traced idle window per orb, in view and not hovered
 const INTERSECT_IDLE_LAYOUTS = 2; // P3: a one-off layout at settle is fine, one per frame is the regression
 
 const VIEWS = {
@@ -91,6 +92,36 @@ for (const [name, view] of Object.entries(VIEWS)) {
       await testInfo.attach("p2.json", { body: JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, byNode: [...r.byNode], others: r.others })), null, 1), contentType: "application/json" });
       if (process.env.PERF_LOG) console.log(name, "P2", JSON.stringify(runs.map((r) => ({ parts: parts(r), paints: r.paints, frames: r.frames, hits: r.hits }))));
       expect(median(runs.map(parts)), `repaints of .ecl parts (paints after a node's first) over ${WINDOWS} windows`).toBeLessThanOrEqual(allowance);
+    });
+
+    test(`P6 the home's orbs cause no paints when idle in view @perf (${name})`, async ({ context }, testInfo) => {
+      const runs = [];
+      for (let i = 0; i < RUNS; i++) {
+        const page = await context.newPage();
+        try {
+          await page.goto(process.env.NTS_BASE + "/", { waitUntil: "load" });
+          await page.evaluate(() => document.fonts.ready);
+          await page.mouse.move(1, 1);
+          let parts = 0;
+          const hits = [];
+          for (const body of ["embers", "philo", "intersect"]) {
+            const sel = `.orb[data-body="${body}"]`;
+            await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center" }), sel);
+            await page.waitForTimeout(SETTLE_MS);
+            const r = await trace(page, (p) => p.waitForTimeout(ORB_IDLE_MS), { selectors: [sel] });
+            // the live figures' canvases are meant to paint; nothing else in the orb is
+            const own = r.hits.filter((h) => !/ canvas/.test(h));
+            parts += own.reduce((n, h) => n + parseInt(h, 10), 0);
+            hits.push(...own.map((h) => `${body}: ${h}`));
+          }
+          runs.push({ parts, hits });
+        } finally {
+          await page.close();
+        }
+      }
+      await testInfo.attach("p6.json", { body: JSON.stringify(runs, null, 1), contentType: "application/json" });
+      if (process.env.PERF_LOG) console.log(name, "P6", JSON.stringify(runs));
+      expect(median(runs.map((r) => r.parts)), `paints of orb parts other than the figures' canvases: ${runs.map((r) => r.hits.join(", ")).join(" / ")}`).toBe(0);
     });
 
     test(`P3 INTERSECT does no layout when idle @perf (${name})`, async ({ context }, testInfo) => {

@@ -5,7 +5,9 @@
 // world, and the orb itself never rises; O4 under reduced motion the
 // portal still opens, by fading alone; O5 at rest the window a world's
 // figure shows through is as wide as it was before the lid: the lid rides a
-// ring outside it.
+// ring outside it; O6 at rest the figure is exactly as on a plain disc: no
+// transform and no clip but the disc's own round edge, so a live figure
+// costs no more to composite than before the lid.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
 
@@ -146,3 +148,15 @@ for (const vp of VIEWPORTS) {
     }
   });
 }
+
+test("O6 at rest the figure is neither transformed nor clipped beyond the disc's edge", async ({ page }) => {
+  await open(page, "/");
+  await page.mouse.move(1, 1);
+  const parts = await page.evaluate(() =>
+    [...document.querySelectorAll(".orb > [data-nts-fragment], .orb > [data-nts-fragment] *")].map((el) => {
+      const cs = getComputedStyle(el);
+      return { el: `${el.closest(".orb").dataset.body} ${el.tagName.toLowerCase()}`, transform: cs.transform, clip: cs.clipPath, mask: cs.maskImage };
+    })
+  );
+  for (const p of parts) expect(p, p.el).toMatchObject({ transform: "none", clip: "none", mask: "none" });
+});
