@@ -36,9 +36,12 @@
     function colours() { col = read(host); }
     function measure() {
       if (!reach) for (const f of frame(CLOSED)) for (const [x, y] of f.poly) reach = Math.max(reach, Math.abs(x), Math.abs(y));
-      const rect = canvas.getBoundingClientRect(), hr = host.getBoundingClientRect();
+      /* layout sizes, not getBoundingClientRect: a rect includes the scale
+         of a transformed ancestor or of the figure itself (the home's orb
+         rests its figure scaled into the window), and the drawing is in
+         the canvas's own units */
       dpr = Math.min(2, devicePixelRatio || 1);
-      w = Math.round(rect.width); h = Math.round(rect.height);
+      w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       /* the model's pivot is the closed triangle's centre (penrose.js), so it
@@ -49,7 +52,7 @@
          of the ring, 0.92 of the orb): the rest pose's furthest point sits
          at REST of the host's half-size. A tilted pose reaches further and
          overshoots, as the others do at their circle's edge. */
-      const host0 = Math.min(hr.width, hr.height);
+      const host0 = Math.min(host.clientWidth, host.clientHeight);
       scale = (host0 * REST) / (2 * reach);
       cx = w / 2; cy = h / 2;
     }
