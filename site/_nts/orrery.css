@@ -66,16 +66,19 @@
    the lift, on a layer that fades in). The orrery's bodies, the orbit traced
    on each world page and the events' small orrery all wear it. The ground's
    shadow is --disc-cast: the orrery sets it from its own ground, because its
-   bodies' faces belong to other worlds. */
+   bodies' faces belong to other worlds. The edge is one line: an inset
+   ring, not a border, so the lip (listed first, painted on top) lights the
+   top of that line instead of drawing a second, grey one inside it. The
+   lifted layer brings its own ring in the accent over the face's, with one
+   lip of its own: the face's lip lies under it, so the light never doubles. */
 .disc {
   border-radius: 50%; display: grid; place-items: center;
-  background: var(--w-bg); border: 1px solid var(--w-line-strong);
-  box-shadow: inset 0 1px 0 var(--w-rim), 0 1px 3px var(--disc-cast, var(--w-cast));
+  background: var(--w-bg);
+  box-shadow: inset 0 1px 0 var(--w-rim), inset 0 0 0 1px var(--w-line-strong), 0 1px 3px var(--disc-cast, var(--w-cast));
 }
 .disc::after {
-  content: ""; position: absolute; inset: -1px; border-radius: 50%; pointer-events: none;
-  border: 1px solid var(--w-accent);
-  box-shadow: inset 0 1px 0 var(--w-rim), 0 6px 10px -4px var(--disc-cast, var(--w-cast));
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  box-shadow: inset 0 1px 0 var(--w-rim), inset 0 0 0 1px var(--w-accent), 0 6px 10px -4px var(--disc-cast, var(--w-cast));
   opacity: 0; transition: opacity var(--dur-lift) var(--ease-lift);
 }
 a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::after { opacity: 1; }
@@ -92,12 +95,14 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
   -webkit-tap-highlight-color: transparent;
 }
 .orrery { --disc-cast: var(--w-cast); }
-.bead .face { position: relative; width: 100%; aspect-ratio: 1; height: auto; transition: transform var(--dur-lift) var(--ease-lift); }
+.bead .face { position: relative; width: 100%; aspect-ratio: 1; height: auto; border-radius: 50%; transition: transform var(--dur-lift) var(--ease-lift); }
 .bead .nts-sigil { width: 58%; height: auto; aspect-ratio: 1; }
 .bead:hover .face, .bead:focus-visible .face { transform: translateY(var(--lift-y)); }
 .bead:active .face { transform: scale(.97); }
 .bead:active .face::after { opacity: 0; }
-.bead:focus-visible { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; border-radius: 50%; }
+/* the focus ring is the face's, so it rises with the face and stays round it */
+.bead:focus-visible { outline: none; }
+.bead:focus-visible .face { outline: 2px solid var(--nts-coral-ink); outline-offset: 3px; }
 /* INTERSECT's sigil is the phosphor on the orrery, where its red would sink into the black */
 .bead[data-body="intersect"] .nts-sigil { color: var(--intersect-phosphor); }
 .bead[data-body="star"] .nts-sigil { width: 66%; color: var(--nts-gold); filter: drop-shadow(0 1px 1px rgba(26, 21, 48, .35)); }
