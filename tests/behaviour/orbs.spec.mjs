@@ -16,7 +16,7 @@ import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
 const RESTING_WINDOW = { 390: 239, 1440: 352 };
 const WINDOW_TOL = 1; // px
 const EDGE_DIFF = 30; // summed RGB difference from the bare ground that marks the limb
-const LIMB_OUTSIDE = 1; // px the window's limb reaches past the window's edge
+const LIMB_OUTSIDE = 0.5; // px the window's limb reaches past the window's edge
 const GROUND_AT = 5; // px outside the window where the scan starts, on the bare ground before the orbit
 
 const WORLDS = [

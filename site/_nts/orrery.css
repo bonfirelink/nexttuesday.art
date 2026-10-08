@@ -175,14 +175,15 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 .orb:focus-visible > [data-nts-fragment] { outline: 2px solid var(--w-accent-text); outline-offset: 4px; }
 /* the opening, an iris: the window is an aperture, the same opening as the
    world windows' own as they scroll in. At rest its limb (a hairline of
-   --w-accent on .orb::after) rims the window, over the disc's edge by half
-   a pixel so the figure's antialiased edge never shows past it, and the
-   ring beyond is bare ground: the lid. Opened, the window widens over the
+   --w-accent on .orb::after) rims the window, half a pixel past its edge
+   and a pixel over it, covering the disc's own edge line and the figure's
+   antialiased edge, so the rim is one clean line; the ring beyond is bare
+   ground: the lid. Opened, the window widens over the
    ring (the fragment scales by the ring, the figure coming nearer with
    it), and the limb draws back past the new rim and dissolves, so no
    circle is left inside the orbit but the open disc's own edge. Reduced
    motion: the limb only fades. */
-.orb::after { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)); pointer-events: none; }
+.orb::after { content: ""; position: absolute; inset: -.5px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--w-accent) 65%, var(--w-bg)); pointer-events: none; }
 .orb:is(:hover, :focus-visible, :active) > [data-nts-fragment] { transform: scale(calc(1 + var(--lid) / 50)); }
 .orb:is(:hover, :focus-visible, :active)::after { transform: scale(calc(1 + var(--lid) / 25)); opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
