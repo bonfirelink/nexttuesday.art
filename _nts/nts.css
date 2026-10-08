@@ -17,23 +17,24 @@
   --nts-ink-soft: #5b5577;
   --nts-coral: #f04a3a;
   --nts-coral-ink: #c42b1f;
-  --nts-coral-deep: #d63a2b;
   --nts-gold: #f5b31b;
   --nts-cobalt: #2f3fd9;
-  --nts-cobalt-tint: #cfcbf2;
   --nts-line: rgba(26, 21, 48, 0.18);
   --nts-line-strong: rgba(26, 21, 48, 0.42);
   --nts-rim: rgba(255, 255, 255, 0.5);
   --nts-cast: rgba(26, 21, 48, 0.3);
 
-  /* The colour code: the home emblem and its ground draw only
-     from these. Neutrals by role:
-       plywood    the plate under the Black sun's opening
-       ink        the black of the sun's dial, the keylines, the Black opening
+  /* The colour code: the home draws only from these (the world windows
+     on it keep their kits). Neutrals by role:
+       beige      the page's ground
+       plywood    the plate under the Black sun's opening, the words band
+       ink        the black of the sun's dial, the keylines, the Black opening,
+                  the ledger's plate and the compass; type, sigils, links and
+                  focus rings on the light grounds
        bone       the light of the bone dial and of text on the black
        bone-muted small text on the black
        muted      small text on the plywood
-       voice      the italic voice and the secret on a light ground
+       voice      the italic voice, the secret and the hints on a light ground
        shade      the pyramid's lower face, a shadow of the Philo grey
        etch       the faint geometry: the sunburst and the star on stop
        grid       the faint red grid of the opening, on light and on dark
@@ -42,10 +43,11 @@
        embers     red, EMBERS (the rave): fire
        philo      grey, NOT NOT PHILO (the salons)
        intersect  phosphor, INTERSECT
-       events     ochre, the events and what is yet to come; also the eye
-                  and the north
+       events     ochre, the events and what is yet to come; also the eye,
+                  the north, and the hints and upcoming dates on the black
        sky        the sun's inner band, no initiative
        reserve    green, for what is none of the above (experiments) */
+  --pal-beige: #f4ecdc;
   --pal-plywood: #e6d8c0;
   --pal-ink: #141312;
   --pal-bone: #e8dcc6;
@@ -156,6 +158,40 @@
   --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6L35.25 28.75L58 32L35.25 35.25L32 58L28.75 35.25L6 32L28.75 28.75Z'/%3E%3C/svg%3E");
 }
 
+/* The home speaks the colour code: its own parts (header, sections, the
+   two NTS bands, footer) read these instead of the NTS palette above. The
+   world windows on it set their kits' tokens on [data-world] below, so they
+   keep their own; the world pages, and the NTS state they open in when
+   reached from the home (section 11), keep the NTS palette. Accent and
+   accent text are ink: the voice and the ochre mark hints by name. */
+body[data-nts-home] {
+  --w-bg: var(--pal-beige);
+  --w-bg-2: var(--pal-plywood);
+  --w-fg: var(--pal-ink);
+  --w-muted: var(--pal-muted);
+  --w-accent: var(--pal-ink);
+  --w-accent-text: var(--pal-ink);
+  --w-link: var(--pal-ink);
+  --w-line: color-mix(in srgb, var(--pal-ink) 18%, transparent);
+  --w-line-strong: color-mix(in srgb, var(--pal-ink) 42%, transparent);
+  --w-selection: var(--pal-ink);
+  --w-selection-fg: var(--pal-bone);
+  --w-bar-bg: color-mix(in srgb, var(--pal-beige) 86%, transparent);
+  --w-bar-fg: var(--pal-ink);
+}
+/* the ledger's black plate: bone text, ochre for what is yet to come */
+body[data-nts-home] .ledger-ap {
+  --w-bg: var(--pal-ink);
+  --w-fg: var(--pal-bone);
+  --w-muted: var(--pal-bone-muted);
+  --w-accent: var(--pal-bone);
+  --w-accent-text: var(--code-events);
+  --w-link: var(--pal-bone);
+  --w-line: color-mix(in srgb, var(--pal-bone) 18%, transparent);
+  --w-selection: var(--pal-bone);
+  --w-selection-fg: var(--pal-ink);
+}
+
 /* ---------- 2. ground ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html {
@@ -223,7 +259,7 @@ h1.caps { letter-spacing: -.005em; }
 .sigil-embers { color: var(--embers-fire); }
 .sigil-philo { color: var(--philo-red); }
 .sigil-intersect { color: var(--intersect-fire-text); }
-.sigil-nts { color: var(--nts-coral); }
+.sigil-nts { color: var(--w-accent); }
 
 /* ---------- 5. the skeleton: header ---------- */
 .nts-header {
