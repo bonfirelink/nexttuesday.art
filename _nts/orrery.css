@@ -255,6 +255,10 @@ html:not(.js) .compass { display: none; }
    neither declares a custom property (see the pivot above). */
 .compass .c-orbit > * { rotate: var(--a, 20deg); animation: c-turn var(--p, 80s) linear infinite; }
 @keyframes c-turn { from { rotate: var(--a, 20deg); } to { rotate: calc(var(--a, 20deg) + 1turn); } }
+/* hidden or stepped aside, the compass does not turn: a running animation
+   under an invisible element still makes every main frame rebuild the page's
+   layers. orrery.js sets the dots back to their beads' angles as it shows. */
+.compass:not(.is-on) :is(.c-sun, .c-orbit > *), .compass.is-aside :is(.c-sun, .c-orbit > *) { animation-play-state: paused; }
 .compass .c-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--nts-ink); opacity: .5; transform: translateY(calc(-1 * var(--r))); transition: transform .5s var(--ease-out), opacity .4s, background-color .4s; }
 .compass .c-needle { top: -17px; height: 17px; width: 2px; margin-left: -1px; background: var(--c); opacity: 0; transform: scaleY(0); transform-origin: 50% 100%; transition: opacity .4s, transform .6s var(--ease-out); }
 .compass[data-near="embers"] .c-embers .c-dot, .compass[data-near="philo"] .c-philo .c-dot, .compass[data-near="intersect"] .c-intersect .c-dot, .compass[data-near="star"] .c-star .c-dot { background: var(--c); opacity: 1; transform: translateY(calc(-1 * var(--r))) scale(1.9); }

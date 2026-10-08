@@ -19,8 +19,28 @@
   var sky = document.querySelector(".orrery");
   if (compass && sky && "IntersectionObserver" in window) {
     var names = { sun: "the great sigil", embers: "EMBERS", philo: "NOT NOT PHILO", intersect: "INTERSECT", star: "what is yet to come" };
+    /* paused while hidden (orrery.css), the dots fall behind their beads: as
+       the compass shows they take the beads' time again, so each dot sits
+       where its bead is */
+    var shown = false;
+    var rejoin = function () {
+      var now = compass.classList.contains("is-on") && !compass.classList.contains("is-aside");
+      if (now && !shown) {
+        ["star", "embers", "philo", "intersect"].forEach(function (b) {
+          var bead = sky.querySelector('.bead[data-body="' + b + '"]');
+          var orbit = compass.querySelector(".c-" + b);
+          if (!bead || !orbit) return;
+          var t = null;
+          bead.getAnimations().forEach(function (a) { if (a.animationName === "orbit") t = a.currentTime; });
+          if (t === null) return;
+          orbit.getAnimations({ subtree: true }).forEach(function (a) { if (a.animationName === "c-turn") a.currentTime = t; });
+        });
+      }
+      shown = now;
+    };
     var away = new IntersectionObserver(function (es) {
       es.forEach(function (e) { compass.classList.toggle("is-on", !e.isIntersecting && e.boundingClientRect.bottom < 0); });
+      rejoin();
     }, { threshold: 0 });
     away.observe(sky);
     var near = new IntersectionObserver(function (es) {
@@ -48,6 +68,7 @@
         var gap = parseFloat(getComputedStyle(compass).bottom) || 0;
         footWatch = new IntersectionObserver(function (es) {
           compass.classList.toggle("is-aside", es[es.length - 1].isIntersecting);
+          rejoin();
         }, { rootMargin: "0px 0px -" + gap + "px 0px", threshold: 0 });
         footWatch.observe(foot);
       };
