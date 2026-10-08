@@ -32,11 +32,11 @@ const look = (sel) => (s) => {
   const cs = getComputedStyle(el), after = getComputedStyle(el, "::after");
   const shape = (v) => v.replace(/rgba?\([^)]*\)/g, "C");
   const colours = (v) => v.match(/rgba?\([^)]*\)/g);
-  // the shadows run lip, edge line, cast
+  // the shadows run edge line, cast
   return {
     background: cs.backgroundColor, radius: cs.borderTopLeftRadius, shadow: shape(cs.boxShadow),
-    lip: colours(cs.boxShadow)[0], line: colours(cs.boxShadow)[1],
-    hover: shape(after.boxShadow), hoverLine: colours(after.boxShadow)[1],
+    line: colours(cs.boxShadow)[0],
+    hover: shape(after.boxShadow), hoverLine: colours(after.boxShadow)[0],
   };
 };
 
@@ -170,13 +170,13 @@ test("O6 at rest the figure is neither transformed nor clipped beyond the disc's
 
 // O7 a body on the orrery keeps its focus ring round its face: the ring is
 // drawn by the box that lifts, so the face never sits off-centre in it.
-// O8 a disc's edge is one line: the light on its upper lip lights that line
-// and is not drawn as a second line inside it, resting or lifted, so the rim
-// is no thicker at the top than at the bottom (a light face lit from above
-// may lose its line at the top: that is the light, not a defect).
+// O8 a disc's edge is flat: one line of one colour and one thickness all
+// round, resting or lifted, so the rim at the top is the rim at the bottom
+// and at either side.
 const BODIES = ["embers", "philo", "intersect", "star"];
 const RIM_DIFF = 40; // summed RGB difference that marks an edge
-const RIM_TOL = 1; // device px the top rim may exceed the bottom one by
+const RIM_TOL = 1; // device px the rim's thickness may differ between two sides
+const RIM_COLOUR_TOL = 30; // summed RGB difference between the rim's colour on two sides
 
 async function focusBody(page, body) {
   const sel = `.bead[data-body="${body}"]`;
@@ -215,9 +215,9 @@ for (const vp of VIEWPORTS) {
 }
 
 test.describe("O8", () => {
-  test.use({ deviceScaleFactor: 2 });
+  test.use({ deviceScaleFactor: 4 });
   for (const vp of VIEWPORTS) {
-    test(`O8 a disc's edge is one line, as thin at the top as at the bottom, at ${vp.name}`, async ({ page, freeze }) => {
+    test(`O8 a disc's edge is flat, one colour and thickness all round, at ${vp.name}`, async ({ page, freeze }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await open(page, "/");
       await freeze(page, 1000);
@@ -227,32 +227,48 @@ test.describe("O8", () => {
           if (hover) await page.hover(sel); else await page.mouse.move(1, 1);
           await page.waitForTimeout(600);
           const f = await page.evaluate((s) => document.querySelector(s + " .face").getBoundingClientRect().toJSON(), sel);
-          const x = Math.round(f.left + f.width / 2), depth = f.height * 0.12, out = 2;
-          // one column of device pixels through the face's centre, from the ground outside each edge inwards
-          const column = async (y0, y1) => {
-            const png = await page.screenshot({ clip: { x, y: y0, width: 1, height: y1 - y0 } });
-            return page.evaluate(async (b64) => {
-              const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
-              const c = new OffscreenCanvas(bmp.width, bmp.height), ctx = c.getContext("2d");
-              ctx.drawImage(bmp, 0, 0);
-              const d = ctx.getImageData(0, 0, 1, bmp.height).data;
-              return Array.from({ length: bmp.height }, (_, i) => [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]]);
-            }, png.toString("base64"));
-          };
-          // the rim: from the first sharp step off the ground (a cast shadow fades, an edge steps)
-          // to the first pixel that is the face's own colour
-          const rim = (px) => {
-            const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > RIM_DIFF;
-            const face = px[px.length - 1];
-            let i = 1; while (i < px.length && !far(px[i], px[i - 1])) i++;
-            let n = 0; while (i < px.length && far(px[i], face)) { i++; n++; }
-            return n;
-          };
-          const top = rim(await column(f.top - out, f.top + depth));
-          const bottom = rim((await column(f.bottom - depth, f.bottom + out)).reverse());
+          const out = 3, dpr = 4;
+          const png = await page.screenshot({ clip: { x: f.left - out, y: f.top - out, width: f.width + 2 * out, height: f.height + 2 * out } });
+          // four rays through the centre, from the ground outside each edge inwards:
+          // the rim runs from the first sharp step off the ground (a cast shadow
+          // fades, an edge steps) to the first pixel that is the face's own colour
+          const sides = await page.evaluate(async ([b64, diff, outPx]) => {
+            const bmp = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+            const c = new OffscreenCanvas(bmp.width, bmp.height), ctx = c.getContext("2d");
+            ctx.drawImage(bmp, 0, 0);
+            const d = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+            const W = bmp.width, H = bmp.height, reach = outPx + Math.round(0.12 * (W - 2 * outPx)), cx = Math.floor(W / 2), cy = Math.floor(H / 2);
+            const at = (x, y) => [d[(y * W + x) * 4], d[(y * W + x) * 4 + 1], d[(y * W + x) * 4 + 2]];
+            const far = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > diff;
+            const ray = {
+              top: Array.from({ length: reach }, (_, i) => at(cx, i)),
+              bottom: Array.from({ length: reach }, (_, i) => at(cx, H - 1 - i)),
+              left: Array.from({ length: reach }, (_, i) => at(i, cy)),
+              right: Array.from({ length: reach }, (_, i) => at(W - 1 - i, cy)),
+            };
+            const out = {};
+            for (const [side, px] of Object.entries(ray)) {
+              const face = px[px.length - 1];
+              let i = 1; while (i < px.length && !far(px[i], px[i - 1])) i++;
+              let n = 0; for (let j = i; j < px.length && far(px[j], face); j++) n++;
+              // the line's own colour: the one its pixels repeat (the line is several device pixels wide, its
+              // two edges blends with the ground and the face), apart from the face's
+              const gap = (p, q) => Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) + Math.abs(p[2] - q[2]);
+              const line = px.slice(i, i + 9).filter((p) => far(p, face));
+              const mean = line.reduce((best, p) => (line.filter((q) => gap(p, q) < 8).length > line.filter((q) => gap(best, q) < 8).length ? p : best));
+              out[side] = { n, mean };
+            }
+            return out;
+          }, [png.toString("base64"), RIM_DIFF, out * dpr]);
           const what = `${body}${hover ? " lifted" : ""}`;
-          expect(bottom, `${what}: an edge at the bottom`).toBeGreaterThan(0);
-          expect(top, `${what}: the top rim (${top}) against the bottom one (${bottom}), in device px`).toBeLessThanOrEqual(bottom + RIM_TOL);
+          const bottom = sides.bottom;
+          expect(bottom.n, `${what}: an edge at the bottom`).toBeGreaterThan(0);
+          for (const side of ["top", "left", "right"]) {
+            const s = sides[side];
+            expect(Math.abs(s.n - bottom.n), `${what}: the ${side} rim (${s.n}) against the bottom one (${bottom.n}), in device px`).toBeLessThanOrEqual(RIM_TOL);
+            const dc = s.mean.reduce((a, v, k) => a + Math.abs(v - bottom.mean[k]), 0);
+            expect(dc, `${what}: the ${side} rim colour ${s.mean} against the bottom one ${bottom.mean}`).toBeLessThanOrEqual(RIM_COLOUR_TOL);
+          }
         }
       }
     });
