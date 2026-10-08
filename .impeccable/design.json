@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T17:24:36+00:00",
+  "title": "Design System: Next Tuesday Society",
+  "extensions": {
+    "colorMeta": {
+      "code-embers": {
+        "role": "primary",
+        "displayName": "Embers Red",
+        "cssVar": "--code-embers"
+      },
+      "code-philo": {
+        "role": "primary",
+        "displayName": "Philo Grey",
+        "cssVar": "--code-philo"
+      },
+      "code-intersect": {
+        "role": "primary",
+        "displayName": "Phosphor",
+        "cssVar": "--code-intersect"
+      },
+      "code-events": {
+        "role": "primary",
+        "displayName": "Ochre",
+        "cssVar": "--code-events"
+      },
+      "sky": {
+        "role": "secondary",
+        "displayName": "Sky",
+        "cssVar": "--pal-sky"
+      },
+      "reserve": {
+        "role": "secondary",
+        "displayName": "Reserve Green",
+        "cssVar": "--pal-reserve"
+      },
+      "plywood": {
+        "role": "neutral",
+        "displayName": "Plywood",
+        "cssVar": "--pal-plywood"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "cssVar": "--pal-ink"
+      },
+      "bone": {
+        "role": "neutral",
+        "displayName": "Bone",
+        "cssVar": "--pal-bone"
+      },
+      "bone-muted": {
+        "role": "neutral",
+        "displayName": "Bone Muted",
+        "cssVar": "--pal-bone-muted"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "cssVar": "--pal-muted"
+      },
+      "voice": {
+        "role": "neutral",
+        "displayName": "Voice",
+        "cssVar": "--pal-voice"
+      },
+      "shade": {
+        "role": "neutral",
+        "displayName": "Shade",
+        "cssVar": "--pal-shade"
+      },
+      "etch": {
+        "role": "neutral",
+        "displayName": "Etch",
+        "cssVar": "--pal-etch"
+      },
+      "grid": {
+        "role": "neutral",
+        "displayName": "Grid",
+        "cssVar": "--pal-grid"
+      },
+      "grid-dark": {
+        "role": "neutral",
+        "displayName": "Grid on dark",
+        "cssVar": "--pal-grid-dark"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The society's name beside the emblem."
+      },
+      "voice": {
+        "displayName": "Voice",
+        "purpose": "The secret that appears on stop."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The key under the emblem."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "The star's caption."
+      }
+    },
+    "motion": [
+      {
+        "name": "swap",
+        "value": "1.6s cubic-bezier(.45, 0, .55, 1)",
+        "purpose": "The dial's fade on stop and resume, the same both ways."
+      },
+      {
+        "name": "glide",
+        "value": "1.6s cubic-bezier(.65, 0, .15, 1)",
+        "purpose": "Every part gliding to or from the stop pose (--ease-turn)."
+      },
+      {
+        "name": "tick",
+        "value": "steps(60) over 60s, each step eased over .24s with cubic-bezier(.18, 1.7, .4, 1)",
+        "purpose": "The dial's counter-clockwise seconds tick."
+      },
+      {
+        "name": "handover",
+        "value": ".1s at .7s/.8s of the swap",
+        "purpose": "The pyramid and beam copies handing over mid-fade."
+      }
+    ],
+    "lineTiers": [
+      {
+        "name": "keyline",
+        "value": ".9",
+        "purpose": "Between the bands, round the north."
+      },
+      {
+        "name": "fine",
+        "value": ".45",
+        "purpose": "Pyramid outline, eye border, star dot rings, beam."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "card",
+        "value": "600px"
+      },
+      {
+        "name": "side-by-side",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Black sun plate",
+      "kind": "card",
+      "refersTo": "plate-black-sun",
+      "description": "The default ground: plywood with the faint red grid.",
+      "html": "<div class=\"ds-plate\"><p class=\"ds-plate-text\">Next Tuesday Society</p></div>",
+      "css": ".ds-plate { background: linear-gradient(var(--pal-grid) 1px, transparent 1px) 0 0 / 30px 30px, linear-gradient(90deg, var(--pal-grid) 1px, transparent 1px) 0 0 / 30px 30px, var(--pal-plywood); border-radius: 22px; padding: 32px; } .ds-plate-text { color: var(--pal-ink); margin: 0; }"
+    },
+    {
+      "name": "Black opening plate",
+      "kind": "card",
+      "refersTo": "plate-black-opening",
+      "description": "The other ground: ink with a stronger red grid.",
+      "html": "<div class=\"ds-plate-dark\"><p class=\"ds-plate-dark-text\">Next Tuesday Society</p></div>",
+      "css": ".ds-plate-dark { background: linear-gradient(var(--pal-grid-dark) 1px, transparent 1px) 0 0 / 28px 28px, linear-gradient(90deg, var(--pal-grid-dark) 1px, transparent 1px) 0 0 / 28px 28px, var(--pal-ink); border-radius: 22px; padding: 32px; } .ds-plate-dark-text { color: var(--pal-bone); margin: 0; }"
+    },
+    {
+      "name": "Star dot",
+      "kind": "custom",
+      "refersTo": "star-dot-events",
+      "description": "A code-colour disc with a fine ink ring; a halo on hover and focus.",
+      "html": "<button class=\"ds-star\" type=\"button\" aria-label=\"A star: Yet to come: the events\"><svg viewBox=\"-9.5 -9.5 19 19\" width=\"44\" height=\"44\" aria-hidden=\"true\"><circle class=\"ds-star-halo\" r=\"4.6\" fill=\"none\" stroke=\"var(--pal-ink)\" stroke-width=\".6\"/><circle r=\"2.3\" fill=\"var(--code-events)\" stroke=\"var(--pal-ink)\" stroke-width=\".45\"/></svg></button>",
+      "css": ".ds-star { background: none; border: 0; padding: 0; cursor: pointer; } .ds-star-halo { opacity: 0; transition: opacity .2s; } .ds-star:hover .ds-star-halo, .ds-star:focus-visible .ds-star-halo { opacity: 1; } .ds-star:focus-visible { outline: none; } .ds-star:focus-visible .ds-star-halo { stroke-width: .9px; }"
+    },
+    {
+      "name": "Sun bands",
+      "kind": "custom",
+      "description": "The ink ring with its three bands and equal .9 keylines, round the dial.",
+      "html": "<svg class=\"ds-bands\" viewBox=\"-51 -51 102 102\" width=\"160\" height=\"160\" aria-hidden=\"true\"><circle r=\"35.45\" fill=\"var(--pal-ink)\"/><circle r=\"42.5\" fill=\"none\" stroke=\"var(--pal-ink)\" stroke-width=\"15\"/><circle r=\"38.55\" fill=\"none\" stroke=\"var(--pal-sky)\" stroke-width=\"3.8\"/><circle r=\"43.25\" fill=\"none\" stroke=\"var(--code-events)\" stroke-width=\"3.8\"/><circle r=\"47.95\" fill=\"none\" stroke=\"var(--code-embers)\" stroke-width=\"3.8\"/></svg>",
+      "css": ".ds-bands { display: block; }"
+    },
+    {
+      "name": "Ground picker",
+      "kind": "chip",
+      "description": "Two round swatches switching Black sun and Black opening.",
+      "html": "<div class=\"ds-pick\"><input class=\"ds-pick-sun\" type=\"radio\" name=\"ds-ground\" aria-label=\"Black sun\" checked><input class=\"ds-pick-opening\" type=\"radio\" name=\"ds-ground\" aria-label=\"Black opening\"></div>",
+      "css": ".ds-pick { display: flex; gap: 18px; padding: 9px; background: var(--pal-plywood); } .ds-pick input { appearance: none; margin: 0; width: 18px; height: 18px; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 1px var(--pal-muted); transition: box-shadow .2s; } .ds-pick-sun { background: radial-gradient(circle, var(--pal-ink) 0 44%, var(--pal-plywood) 47%); } .ds-pick-opening { background: radial-gradient(circle, var(--pal-bone) 0 44%, var(--pal-ink) 47%); } .ds-pick input:checked { box-shadow: 0 0 0 2px var(--pal-plywood), 0 0 0 3px var(--pal-ink); } .ds-pick input:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Machine of Cogwheels",
+    "overview": "The home opens on an emblem that reads as a slow machine: a black sun with a ticking dial, colour bands, a pyramid with an eye at its centre, and rings that turn against each other like meshed gears. Stopping it is the start of a puzzle: everything settles into one symmetric pose and a seven-point star draws itself behind it.\n\nColour is a code, not decoration. Each initiative has one colour, and that colour appears only as small solid shapes on quiet neutrals: beige, plywood, ink and bone. A faint red grid under the emblem brings in technique and architecture without shouting.\n\nThe coral still used elsewhere on the home (sigil, links, nav dots, compass, ledger) is legacy, to move onto these tokens in a later change.",
+    "keyCharacteristics": [
+      "Neutral grounds, colour only in small solid shapes.",
+      "One colour per initiative, the same everywhere it appears.",
+      "Ink keylines between colours and around the light ones.",
+      "Slow, compositor-only motion; the dial ticks like a seconds hand, backwards.",
+      "Two grounds, Black sun (default) and Black opening, picked on the page."
+    ],
+    "rules": [
+      {
+        "name": "The Small Shapes Rule",
+        "body": "Code colour comes only as small solid shapes: dots, triangles, thin bands. Never a background, a panel or a text block.",
+        "section": "colors"
+      },
+      {
+        "name": "The Keyline Rule",
+        "body": "No two code colours meet as fields: an ink keyline (.9) separates the sun's bands. The pyramid is the one drawn object whose faces meet edge to edge; its fine ink outline holds them together.",
+        "section": "colors"
+      },
+      {
+        "name": "The Light Code Rule",
+        "body": "Ochre and phosphor take an ink keyline on the beige. Every star dot carries a fine ink ring, so the grey and the green, below 3:1 on plywood, are held the same way.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Coral Rule",
+        "body": "No flat warm orange or coral accent on the beige. The red that marks things is the embers red, in small shapes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Named Colour Rule",
+        "body": "A code colour that means something is named in text: each star dot names its page in its label and in the caption.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast Rule",
+        "body": "Text holds 4.5:1 on its ground; marks hold 3:1, or take an ink keyline.",
+        "section": "colors"
+      },
+      {
+        "name": "The Reserve Rule",
+        "body": "Green is kept for things distinct from the main code. It never stands in for an initiative.",
+        "section": "colors"
+      },
+      {
+        "name": "The Token Rule",
+        "body": "A new colour on the home is a token in section 1 first.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do take every colour on the home from the section 1 tokens.",
+      "Do keep code colour to small solid shapes: dots, triangles, thin bands.",
+      "Do put an ink keyline between code colours and round ochre and phosphor on the beige.",
+      "Do name a code colour in text wherever it means something.",
+      "Do hold 4.5:1 for text and 3:1 for marks.",
+      "Do move only transform and opacity, on whole layers."
+    ],
+    "donts": [
+      "Don't use a code colour as a field, a background or body text.",
+      "Don't let two code colours touch without a keyline.",
+      "Don't put a flat warm orange or coral accent on the beige.",
+      "Don't use the reserve green for an initiative.",
+      "Don't thicken the pyramid's outline, the eye's border or the dots' rings past the fine tier.",
+      "Don't change the emblem's size or position."
+    ]
+  }
+}

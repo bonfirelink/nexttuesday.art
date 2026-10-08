@@ -11,7 +11,7 @@
      <!-- nts:sprite -->…<!-- /nts:sprite -->        the sigil sprite
      <!-- nts:header -->…<!-- /nts:header -->        the header; aria-current from the file's place
      <!-- nts:footer -->…<!-- /nts:footer -->        the footer
-     <!-- nts:mega-sigil -->…<!-- /nts:mega-sigil --> the mega-sigil SVG
+     <!-- nts:emblem core|orbits -->…<!-- /nts:emblem --> the home emblem (tools/gen-emblem.mjs)
      <!-- nts:events -->…<!-- /nts:events -->        the ledger, upcoming then past
      <!-- nts:events upcoming -->, <!-- nts:events past -->, <!-- nts:events world=embers -->,
      <!-- nts:events upcoming limit=3 heading=none -->  subsets (same close marker; heading=h2|h3|none)
@@ -36,7 +36,7 @@ const SITE = json(join(nts, 'content', 'site.json'));
 const EVENTS = json(join(nts, 'content', 'events.json'));
 const COPY = json(join(nts, 'content', 'copy.json'));
 const SPRITE = read(join(nts, 'sigils.svg')).trim();
-const MEGA = read(join(nts, 'parts', 'mega-sigil.svg')).trim();
+const EMBLEM = { core: read(join(nts, 'parts', 'emblem-core.html')).trim(), orbits: read(join(nts, 'parts', 'emblem-orbits.html')).trim() };
 const STILLS = {
   embers: read(join(nts, 'parts', 'still-embers.svg')).trim(),
   philo: read(join(nts, 'parts', 'still-philo.svg')).trim(),
@@ -149,7 +149,7 @@ function sync(file) {
   html = region(html, 'sprite', () => SPRITE);
   html = region(html, 'header', () => header(prefix, page));
   html = region(html, 'footer', () => footer(prefix));
-  html = region(html, 'mega-sigil', () => MEGA);
+  html = region(html, 'emblem', (args) => EMBLEM[args.trim()] || '');
   html = region(html, 'events', (args) => ledger(prefix, parseOpts(args)));
   html = region(html, 'still', (args) => STILLS[args.trim()] || '');
   html = replaceInner(html, 'data-nts-copy', (k, tag) => {

@@ -81,7 +81,7 @@ function intersect() {
   return P(ring) + P(roads, ' stroke-linecap="round"') + P(sq, ' stroke-linejoin="round"');
 }
 
-/* The four-point star, Ome's ✴︎ mark, for events and dividers. */
+/* The four-point star ✴︎, the mark for events and dividers. */
 function star() {
   const o = 26, i = 4.6;
   const pts = [];

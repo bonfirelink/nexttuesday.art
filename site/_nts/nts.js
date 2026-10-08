@@ -9,9 +9,6 @@
                 settles once the hero is half gone; see the block below.
                 On a page whose <body data-nts-home>, links to a world page
                 set the sessionStorage flag that nts-head.js reads
-     mega-sigil .mega-btn tap toggles .is-aligned on .mega: the layers freeze
-                where they are and turn to their aligned pose, the hole
-                opens, and the .turn secret shows; tap again to resume
    Everything checks prefers-reduced-motion. */
 (function () {
   "use strict";
@@ -317,51 +314,6 @@
     }, true);
   }
 
-  /* mega-sigil */
-  document.querySelectorAll(".mega-btn").forEach(function (btn) {
-    var mega = btn.querySelector(".mega");
-    if (!mega) return;
-    var scope = btn.closest("section, header, main") || document;
-    var turn = scope.querySelector(".turn");
-    var layers = mega.querySelectorAll("[class^='l-']");
-    var aligned = false, timer = 0;
-    function angleOf(el) {
-      var m = getComputedStyle(el).transform;
-      if (!m || m === "none") return 0;
-      var v = m.match(/matrix\(([^)]+)\)/);
-      if (!v) return 0;
-      var a = v[1].split(",").map(Number);
-      return Math.atan2(a[1], a[0]) * 180 / Math.PI;
-    }
-    function toggle() {
-      aligned = !aligned;
-      btn.setAttribute("aria-pressed", String(aligned));
-      if (turn) turn.classList.toggle("is-open", aligned);
-      if (aligned) {
-        // freeze each layer where the animation left it, then turn it home
-        layers.forEach(function (l) { l.style.transform = "rotate(" + angleOf(l).toFixed(2) + "deg)"; });
-        mega.classList.add("is-aligned");
-        void mega.offsetWidth;
-        layers.forEach(function (l) { l.style.transform = "rotate(0deg)"; });
-      } else {
-        mega.classList.remove("is-aligned");
-        clearTimeout(timer);
-        timer = setTimeout(function () { layers.forEach(function (l) { l.style.transform = ""; }); }, 50);
-      }
-    }
-    var hold = 0, held = false;
-    btn.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return;
-      held = false;
-      hold = setTimeout(function () { held = true; toggle(); }, 480);
-    });
-    var release = function () { clearTimeout(hold); };
-    btn.addEventListener("pointerup", release);
-    btn.addEventListener("pointercancel", release);
-    btn.addEventListener("pointerleave", release);
-    btn.addEventListener("click", function () { if (held) { held = false; return; } toggle(); });
-    btn.addEventListener("contextmenu", function (e) { e.preventDefault(); });
-  });
   /* leaving a world: its hero entity is the `orb` of the cross-document view
      transition only when the next page is not a world page (it becomes the
      home orb again). World to world is the plain root crossfade: the two

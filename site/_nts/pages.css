@@ -3,17 +3,18 @@
    the orbit traces are in orrery.css; the apertures in apertures.css.
    Nothing here redefines a --nts-* or --w-* token. */
 
-/* ---------- home: the opener is orrery.css; only the turn (hint and secret) is here ---------- */
+/* ---------- home: the opener is orrery.css; only the turn (the secret) is here ---------- */
+/* The secret comes in over the last .6 s of the emblem's stop and goes over
+   the first .6 s of the resume, on mirrored curves; hidden, it leaves the
+   accessibility tree, and orrery.js writes it afresh on each stop so it is
+   announced. With scripts off it is simply there. */
 .turn { position: relative; min-height: 3.4em; display: grid; width: min(100%, 30rem); }
 .turn > * { grid-area: 1 / 1; margin: 0; }
-.turn .hint { color: var(--nts-coral-ink); transition: opacity .6s; }
-.turn .hint { display: inline-flex; align-items: center; justify-content: center; gap: .6em; }
-.turn .hint::before, .turn .hint::after { content: ""; width: .9em; height: .9em; background: currentColor; -webkit-mask: var(--star-mask) center / contain no-repeat; mask: var(--star-mask) center / contain no-repeat; }
-.turn .secret { opacity: 0; transform: translateY(6px); transition: opacity 1.4s ease .9s, transform 1.4s var(--ease-out) .9s; font-size: clamp(1.15rem, 3.2vw, 1.5rem); }
-.turn.is-open .hint { opacity: 0; }
-.turn.is-open .secret { opacity: 1; transform: none; }
-html:not(.js) .turn .hint { display: none; }
-html:not(.js) .turn .secret { opacity: 1; transform: none; }
+.turn .secret { color: var(--e-hint); font-size: clamp(1.15rem, 3.2vw, 1.5rem); opacity: 0; transform: translateY(6px); visibility: hidden;
+  transition: opacity .6s cubic-bezier(.8, 0, .8, .3), transform .6s cubic-bezier(.8, 0, .8, .3), visibility 0s .6s; }
+.is-stopped .turn .secret { opacity: 1; transform: none; visibility: visible;
+  transition: opacity .6s cubic-bezier(.2, .7, .2, 1) 1s, transform .6s cubic-bezier(.2, .7, .2, 1) 1s, visibility 0s 1s; }
+html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; }
 
 /* ---------- home: sections ---------- */
 .tuesdays .cta { margin: 1.1rem 0 .4rem; color: var(--nts-coral-ink); }
