@@ -30,7 +30,8 @@
 }
 html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in"] .nts-bleed-old {
   --embers-glow: none;
-  --hearth-base: rgba(26, 21, 48, 0.22);
+  /* the ink (--pal-ink) at 22%, as a plain colour: a canvas reads it */
+  --hearth-base: rgba(20, 19, 18, 0.22);
 }
 
 /* the flyer's voice: Archivo at full width, caps, with a restrained glow */

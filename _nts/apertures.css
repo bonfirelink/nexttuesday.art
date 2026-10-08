@@ -23,7 +23,7 @@
    Scroll-driven where animation-timeline: view() exists and html.js is
    set, until the disc is complete (then .is-open latches it); everywhere
    else, and under reduced motion, every disc is open.
-   Loaded after orrery.css. Nothing here redefines a --nts-* or --w-* token. */
+   Loaded after orrery.css. Nothing here redefines a --pal-*, --code-* or --w-* token. */
 
 /* the disc opens while the aperture's top edge (where the ring sits) climbs
    from --ecl-open-start to --ecl-open-end, both in vh of travel after the
@@ -62,7 +62,7 @@ main { --ecl-out: var(--w-bg); }
   display: grid; place-items: center; color: var(--ecl-fg);
   background: var(--ecl-bg);
   border: 1px solid color-mix(in srgb, var(--ecl-fg) 62%, transparent);
-  box-shadow: 0 0 0 3px var(--ecl-out), 0 8px 18px -10px rgba(26, 21, 48, .5);
+  box-shadow: 0 0 0 3px var(--ecl-out), 0 8px 18px -10px color-mix(in srgb, var(--pal-ink) 50%, transparent);
   pointer-events: none;
 }
 .ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; }
@@ -151,9 +151,9 @@ main { --ecl-out: var(--w-bg); }
 .handover { height: var(--ecl-gap); background: none; opacity: 1; }
 @media (min-width: 900px) { .handover { height: var(--ecl-gap); } }
 
-/* the two NTS apertures: the words band (coral) and the ledger (paper-2) */
-.band.ecl { background: none; color: inherit; --ecl-bg: var(--band-bg, var(--nts-coral)); --ecl-fg: var(--band-fg, var(--nts-ink)); }
-.band.ecl .ecl-win { color: var(--band-fg, var(--nts-ink)); }
+/* the NTS apertures: the home's words band (plywood) and the ledger (ink) */
+.band.ecl { background: none; color: inherit; --ecl-bg: var(--band-bg, var(--w-bg-2)); --ecl-fg: var(--band-fg, var(--w-fg)); }
+.band.ecl .ecl-win { color: var(--band-fg, var(--w-fg)); }
 /* a band's words sit right at its top edge, where the disc is still small:
    they come in whole once the disc has passed them, so no line is ever
    shown cut by the edge (ecl-words, above). --ecl-hold is the progress at
@@ -164,13 +164,25 @@ main { --ecl-out: var(--w-bg); }
 .words.ecl { padding: 0; overflow: visible; --ecl-hold: .55; --ecl-show: .15; }
 .words.ecl .ecl-in { padding: clamp(3rem, 8vw, 6rem) 0; }
 .words.ecl .ecl-win::before { opacity: .7; }
-.ledger-ap { --ecl-hold: .15; --ecl-show: .2; --band-bg: var(--nts-paper-2); --band-fg: var(--nts-ink); --ecl-limb: var(--nts-gold); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
+/* the ledger, on the home and /events/: a black plate (its --w-* set is in
+   nts.css, section 1). Bone text and sigils; ochre for what is yet to come:
+   the ring's star, the heading's, the upcoming dates. Selection and focus
+   follow the plate, not the bands' shared defaults. */
+.ledger-ap { --ecl-hold: .15; --ecl-show: .2; --band-bg: var(--pal-ink); --band-fg: var(--pal-bone); --ecl-limb: var(--code-events); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
 .ledger-ap .ecl-in { padding: clamp(2.5rem, 6vw, 4rem) 0; }
-.ledger-ap .ecl-ring { color: var(--nts-gold); }
-.ledger-ap .ecl-ring .nts-sigil { filter: drop-shadow(0 1px 1px rgba(26, 21, 48, .35)); }
-.ledger-ap .ledger li { border-color: var(--nts-line); }
-/* coral-ink is 4.4:1 on paper-2; the upcoming dates take a deeper red there (5:1) */
-.ledger-ap .ledger li.upcoming .when { color: #b4261b; }
+.ledger-ap :is(.ecl-ring, .sect-head .nts-sigil) { color: var(--code-events); }
+.ledger-ap ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
+.ledger-ap :focus-visible { outline-color: var(--w-fg); }
+.ledger-ap .ledger li { border-color: var(--w-line); }
+.ledger-ap .ledger .nts-sigil { color: var(--w-accent); }
+.ledger-ap .ledger li.upcoming .when { color: var(--w-accent-text); }
+/* each tag carries its initiative's code dot; the tag names the kind */
+.ledger-ap .ledger .kind { --kind-bg: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); --kind-fg: var(--pal-bone); }
+.ledger-ap .ledger .kind::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; vertical-align: .02em; background: var(--kind-dot); }
+.ledger-ap li[data-of="nts"] { --kind-dot: var(--code-events); }
+.ledger-ap li[data-of="embers"] { --kind-dot: var(--code-embers); }
+.ledger-ap li[data-of="philo"] { --kind-dot: var(--code-philo); }
+.ledger-ap li[data-of="intersect"] { --kind-dot: var(--code-intersect); }
 
 /* ---------- inside the worlds: the bands ---------- */
 .band.ecl.sect-band { margin-block: var(--section); }
@@ -190,10 +202,10 @@ main { --ecl-out: var(--w-bg); }
 .philo-next.ecl .ecl-in { padding: clamp(3rem, 7vw, 4.5rem) 0; }
 .philo-next.ecl .ecl-win::before { opacity: 1; }
 /* INTERSECT: the correspondence sits on a lifted black (bg-2 is too close to
-   the ground to read as a disc; fixed, with paper-2 while the page is still
+   the ground to read as a disc; fixed, with plywood while the page is still
    in the NTS colours before the bleed), phosphor ring */
 .intersect-corr { --band-bg: #2a2925; --band-fg: var(--w-fg); --ecl-limb: #ff3b63; --ecl-hold: .4; --ecl-show: .15; }
-html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--nts-paper-2); }
+html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--pal-plywood); }
 .intersect-corr .ecl-win::before { opacity: 1; }
 .intersect-corr .ecl-ring { color: var(--w-accent-text); }
 .intersect-corr .ecl-in { padding: clamp(2.5rem, 6vw, 4rem) 0; }

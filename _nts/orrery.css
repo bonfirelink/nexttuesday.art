@@ -9,7 +9,7 @@
    Loaded after nts.css, the world kits and pages.css, and before
    apertures.css, which turns each world window and the handovers into
    apertures (it switches off the bloom and the plumb line below).
-   Nothing here redefines a --nts-* or --w-* token.
+   Nothing here redefines a --pal-*, --code-* or --w-* token.
    Angles, periods and directions: --a is where a body starts, --p how long
    one orbit takes, --d normal (clockwise) or reverse; each body turns with
    its orbit in the emblem. The compass repeats them so its dots stay in
@@ -332,7 +332,7 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 /* The handover between two sections: a short dotted plumb line in the
    page's ink, centred, the orbit's own dash; apertures.css makes it the
    plain gap where the next ring sits. Markup: <div class="handover" aria-hidden="true"></div>. */
-.handover { display: block; height: clamp(3.5rem, 10vw, 6rem); background: repeating-linear-gradient(to bottom, var(--nts-ink) 0 3px, transparent 3px 11px) 50% 0 / 1px calc(100% - 1rem) no-repeat; opacity: .45; }
+.handover { display: block; height: clamp(3.5rem, 10vw, 6rem); background: repeating-linear-gradient(to bottom, var(--pal-ink) 0 3px, transparent 3px 11px) 50% 0 / 1px calc(100% - 1rem) no-repeat; opacity: .45; }
 
 .world { position: relative; isolation: isolate; overflow: clip; color: var(--w-fg); padding: clamp(2.5rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); --bloom-at: 50% 30%; }
 .world::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--w-bg); clip-path: circle(150% at var(--bloom-at)); }
@@ -466,8 +466,9 @@ html:not(.js) .compass { display: none; }
 .events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
 .events-hero .mini-orrery { position: relative; width: min(64%, 13rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.5rem auto 2.5rem; container-type: inline-size; }
-.events-hero .mini-orrery .sun-disc { position: absolute; left: 32%; top: 32%; width: 36%; height: 36%; border-radius: 50%; background: var(--nts-coral); }
-.events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--nts-ink); }
+/* the sun a black sun with a bone sigil, as the compass is */
+.events-hero .mini-orrery .sun-disc { position: absolute; left: 32%; top: 32%; width: 36%; height: 36%; border-radius: 50%; background: var(--pal-ink); }
+.events-hero .mini-orrery > .nts-sigil { position: relative; width: 24%; height: 24%; color: var(--pal-bone); }
 .events-hero .mini-ring { position: absolute; inset: calc(50% - var(--r)); border-radius: 50%; border: 1px dashed var(--w-line); }
 .events-hero .mini-orrery .pivot > a { pointer-events: auto; }
 .events-hero .mini-orrery .trace-bead { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; transition: translate var(--dur-lift) var(--ease-lift); }
