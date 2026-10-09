@@ -56,3 +56,13 @@ for (const [width, height] of [[390, 844], [1440, 900]]) {
     expect(ratio, "drawn width over orb diameter").toBeLessThan(ORB_RATIO * (1 + RATIO_TOL));
   });
 }
+
+test("PHILO title is the one key line, with nothing above it", async ({ page }) => {
+  await openPage(page, "/not-not-philo/");
+  const h1 = await page.evaluate(() => {
+    const el = document.querySelector("#title");
+    return { text: el.textContent.trim(), kids: el.children.length };
+  });
+  expect(h1.text).toBe("NOT NOT PHILO");
+  expect(h1.kids, "only the key span").toBe(1);
+});
