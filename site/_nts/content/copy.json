@@ -1,7 +1,7 @@
 {
   "_": "The site's copy, one key per slot. tools/sync.mjs writes each value into every element with data-nts-copy=\"<key>\". Values may hold a little inline HTML. Three dots are always ... and there are no dashes.",
   "home.meta.title": "Next Tuesday Society",
-  "home.meta.description": "An association in Geneva. We gather every Tuesday, and from there come raves, philo salons and an endless field of possibilities.",
+  "home.meta.description": "Arts and philosophy association based in Geneva, conspiring futures into existence, day and night, and especially next Tuesday. Raves, poetry and transcendence.",
   "home.og.description": "Conspiring futures into existence",
   "home.threshold.title": "Next Tuesday Society",
   "home.threshold.line": "Conspiring futures into existence",
