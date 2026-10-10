@@ -1,26 +1,27 @@
 /* The orrery: the initiatives circle the great sigil.
    An alchemical orrery. The emblem is the sun: colour bands round a dial
    that ticks, the pyramid with its eye at the centre; the sigils of EMBERS,
-   NOT NOT PHILO and INTERSECT and the events star ride its orbits, which
-   turn against each other like meshed gears. Scrolling travels out
-   to each body in turn: the body grows, its world blooms around it, its
-   words arrive. Falling into a world is a
-   cross-document view transition from the body you tapped.
+   NOT NOT PHILO and INTERSECT and the events star ride its orbits, all
+   anticlockwise and slower the farther out, like planets. The clockwork
+   (ring, bands, dial) turns against itself like meshed gears. Scrolling
+   travels out to each body in turn: the body grows, its world blooms around
+   it, its words arrive. Falling into a world is a cross-document view
+   transition from the body you tapped.
    Loaded after nts.css, the world kits and pages.css, and before
    apertures.css, which turns each world window and the handovers into
    apertures (it switches off the bloom and the plumb line below).
    Nothing here redefines a --pal-*, --code-* or --w-* token.
    Angles, periods and directions: --a is where a body starts, --p how long
-   one orbit takes, --d normal (clockwise) or reverse; each body turns with
-   its orbit in the emblem.
+   one orbit takes, --d normal (clockwise) or reverse (anticlockwise, which
+   every orbit uses); each body turns with its orbit in the emblem.
    Every orbit is a zero-size pivot, with the body riding it at the radius,
    turning round it and turned back upright: a rotated box of any size would
    push its corners into the page's scrollable overflow. */
 
 :root {
-  --a-star: 15deg;       --p-star: 300s;       --d-star: normal;
+  --a-star: 15deg;       --p-star: 300s;       --d-star: reverse;
   --a-embers: 205deg;    --p-embers: 120s;     --d-embers: reverse;
-  --a-philo: 330deg;     --p-philo: 170s;      --d-philo: normal;
+  --a-philo: 330deg;     --p-philo: 170s;      --d-philo: reverse;
   --a-intersect: 80deg;  --p-intersect: 230s;  --d-intersect: reverse;
   --bead: max(44px, 11cqi);
 }
@@ -139,7 +140,8 @@
 .is-stopped .orrery .e-star { opacity: 1; transition: opacity .2s ease .3s; }
 .is-stopped .orrery .he :is(.win, .pen) { transform: none; transition: transform var(--id) linear var(--il); }
 
-/* motion: whole layers turn, neighbours against each other. The dial ticks
+/* motion: the clockwork (ring, bands, dial) gears against itself; the planet
+   orbits all turn anticlockwise, slower outward. The dial ticks
    counter-clockwise like a seconds hand: `rotate` steps -6deg a second
    (steps(60) over a minute) while `transform` eases each second's last
    .24 s from 0 to -6deg with a small overshoot, so the sum moves in 60
@@ -148,9 +150,9 @@
   .orrery .e-ring { animation: turn 70s linear infinite; }
   .orrery .e-bands { animation: turn 95s linear infinite reverse; }
   .orrery .e-o66 { animation: turn 120s linear infinite reverse; }
-  .orrery .e-o78 { animation: turn 170s linear infinite; }
+  .orrery .e-o78 { animation: turn 170s linear infinite reverse; }
   .orrery .e-o84 { animation: turn 230s linear infinite reverse; }
-  .orrery .e-o96 { animation: turn 300s linear infinite; }
+  .orrery .e-o96 { animation: turn 300s linear infinite reverse; }
   .orrery .e-tick { animation: e-tick 1s linear infinite, e-minute 60s steps(60, end) infinite; }
   .orrery .e-pulse { animation: e-pulse 4.8s ease-out infinite; }
   .orrery .e-stop:focus-visible ~ .e-bm .e-beam { animation: e-beam 2.4s cubic-bezier(.2, .7, .2, 1) infinite; }

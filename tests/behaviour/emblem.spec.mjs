@@ -1,8 +1,8 @@
 // The home emblem: a sun of colour bands round a dial, the pyramid with its eye
-// at the centre, orbits that turn against each other, and a seven-point star
+// at the centre, orbits the planets all turn anticlockwise, and a seven-point star
 // drawn at the back that the stop reveals.
 // E1 its parts; E2 the dial ticks counter-clockwise in 60 eased steps a minute
-// and neighbouring orbits turn against each other, the beads with theirs;
+// the ring and bands counter-turn, and every orbit with its bead turns anticlockwise;
 // E3 tapping the eye stops it in the symmetric pose, hollows the dial, flips
 // the pyramid, draws the star and says the secret, and a second tap resumes
 // from where it stands; E4 the hero sits on the page's beige, with no
@@ -98,7 +98,7 @@ test("E1 the emblem: dial, 60 marks with a north, the pyramid with its eye, the 
   expect(s.stop, "the eye is a toggle button").toBe("false");
 });
 
-test("E2 the dial ticks counter-clockwise, one eased step a second; neighbouring orbits turn against each other", async ({ page, freeze }) => {
+test("E2 the dial ticks counter-clockwise, one eased step a second; the ring and bands counter-turn; every planet orbit turns anticlockwise", async ({ page, freeze }) => {
   await open(page);
   // second 10 holds at -60 until its move starts
   await freeze(page, 10_400);
@@ -108,13 +108,13 @@ test("E2 the dial ticks counter-clockwise, one eased step a second; neighbouring
   expect(norm(await turnOf(page, ".orrery .e-tick"))).toBeCloseTo(6, 1);
   // after ten seconds each layer has turned 3600 / period degrees, in its direction
   await freeze(page, 10_000);
-  const turned = { ring: [70, 1], bands: [95, -1], o66: [120, -1], o78: [170, 1], o84: [230, -1], o96: [300, 1] };
+  const turned = { ring: [70, 1], bands: [95, -1], o66: [120, -1], o78: [170, -1], o84: [230, -1], o96: [300, -1] };
   for (const [k, [p, d]] of Object.entries(turned)) {
     expect(gap(await turnOf(page, `.orrery .e-${k}`), (d * 3600) / p), `${k} turns ${d > 0 ? "clockwise" : "counter-clockwise"}`).toBeLessThanOrEqual(0.5);
   }
-  // the beads ride their orbits, the same way round
+  // the beads ride their orbits, all four anticlockwise like planets
   const { beads } = await poses(page);
-  const want = { embers: 205 - 3600 / 120, philo: 330 + 3600 / 170, intersect: 80 - 3600 / 230, star: 15 + 3600 / 300 };
+  const want = { embers: 205 - 3600 / 120, philo: 330 - 3600 / 170, intersect: 80 - 3600 / 230, star: 15 - 3600 / 300 };
   for (const [b, a] of Object.entries(want)) expect(gap(beads[b], a), `${b} bead`).toBeLessThanOrEqual(ANGLE_TOL);
 });
 
