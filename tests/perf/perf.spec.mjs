@@ -16,7 +16,8 @@ const SETTLE_MS = 1500; // after load, before a scroll or a trace starts
 const FRAMES_PER_VIEWPORT = 54; // P2: scroll speed (0.9 s at 60 fps), counted in frames so a loaded machine renders the same number of them
 const WINDOWS = 3; // P2: world windows scrolled open
 const IDLE_PAINTS_PER_FRAME = 0.05; // P1: overall paint budget while idle (about one stray paint per 20 frames)
-const ORB_IDLE_MS = 3000; // P6: the traced idle window per orb, in view and not hovered
+const ORB_IDLE_MS = 3000; // P6: the traced idle window, with every orb in view and none hovered
+const ALL_ORBS_HEIGHT = 1700; // P6: a viewport tall enough to hold the three orbs at once (about 1570 px apart at both widths)
 const INTERSECT_IDLE_LAYOUTS = 2; // P3: a one-off layout at settle is fine, one per frame is the regression
 
 const VIEWS = {
@@ -95,33 +96,38 @@ for (const [name, view] of Object.entries(VIEWS)) {
     });
 
     test(`P6 the home's orbs cause no paints when idle in view @perf (${name})`, async ({ context }, testInfo) => {
+      const bodies = ["embers", "philo", "intersect"];
+      const sels = bodies.map((b) => `.orb[data-body="${b}"]`);
       const runs = [];
       for (let i = 0; i < RUNS; i++) {
         const page = await context.newPage();
         try {
           await page.goto(process.env.NTS_BASE + "/", { waitUntil: "load" });
           await page.evaluate(() => document.fonts.ready);
+          // One viewport tall enough for every orb to be in view at once, so they share one idle window.
+          await page.setViewportSize({ width: view.viewport.width, height: ALL_ORBS_HEIGHT });
           await page.mouse.move(1, 1);
-          let parts = 0;
-          const hits = [];
-          for (const body of ["embers", "philo", "intersect"]) {
-            const sel = `.orb[data-body="${body}"]`;
-            await page.evaluate((s) => { document.querySelector(s).scrollIntoView({ block: "center" }); }, sel);
-            await page.waitForTimeout(SETTLE_MS);
-            const r = await trace(page, (p) => p.waitForTimeout(ORB_IDLE_MS), { selectors: [sel] });
-            // the live figures' canvases are meant to paint; nothing else in the orb is
-            const own = r.hits.filter((h) => !/ canvas/.test(h));
-            parts += own.reduce((n, h) => n + parseInt(h, 10), 0);
-            hits.push(...own.map((h) => `${body}: ${h}`));
-          }
-          runs.push({ parts, hits });
+          await page.evaluate(() => { document.querySelector(".orb").scrollIntoView({ block: "start" }); });
+          await page.waitForTimeout(SETTLE_MS);
+          const inView = await page.evaluate((ss) => ss.map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }), sels);
+          expect(inView, "every orb inside the viewport").toEqual(bodies.map(() => true));
+          const r = await trace(page, (p) => p.waitForTimeout(ORB_IDLE_MS), { selectors: sels });
+          // the live figures' canvases are meant to paint; nothing else in the orb is
+          const hitsOf = (k) => r.hitsBy.get(sels[k]).filter((h) => !/ canvas/.test(h));
+          const sum = (hs) => hs.reduce((n, h) => n + parseInt(h, 10), 0);
+          runs.push({
+            byOrb: Object.fromEntries(bodies.map((b, k) => [b, sum(hitsOf(k))])),
+            hits: bodies.flatMap((b, k) => hitsOf(k).map((h) => `${b}: ${h}`)),
+          });
         } finally {
           await page.close();
         }
       }
       await testInfo.attach("p6.json", { body: JSON.stringify(runs, null, 1), contentType: "application/json" });
       if (process.env.PERF_LOG) console.log(name, "P6", JSON.stringify(runs));
-      expect(median(runs.map((r) => r.parts)), `paints of orb parts other than the figures' canvases: ${runs.map((r) => r.hits.join(", ")).join(" / ")}`).toBe(0);
+      for (const b of bodies) {
+        expect(median(runs.map((r) => r.byOrb[b])), `paints of the ${b} orb's parts other than the figure's canvas: ${runs.map((r) => r.hits.filter((h) => h.startsWith(b)).join(", ")).join(" / ")}`).toBe(0);
+      }
     });
 
     test(`P3 INTERSECT does no layout when idle @perf (${name})`, async ({ context }, testInfo) => {

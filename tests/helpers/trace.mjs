@@ -9,6 +9,7 @@ const CATEGORIES = ["devtools.timeline", "disabled-by-default-devtools.timeline"
 //   layouts  Layout events on the renderer main thread
 //   frames   requestAnimationFrame callbacks that ran while `action` did
 //   hits     labels of the nodes counted in a selector, for the failure message
+//   hitsBy   Map of `selectors[i]` -> the same labels, for the nodes inside that selector
 //   repeats  Map of `selectors[i]` -> repaints inside it: for each node, the frames it was painted
 //            in beyond the first (events less than SAME_FRAME_US apart are one frame). A node's first
 //            paint in the trace is when it first comes into view, whenever that happens on a loaded
@@ -53,6 +54,7 @@ export async function trace(page, action, { selectors = [] } = {}) {
     const repeats = new Map(selectors.map((s) => [s, 0]));
     const byNode = new Map([["(no node)", perNode.get(0) || 0], ["(other)", 0], ...selectors.map((s) => [s, 0])]);
     const hits = [];
+    const hitsBy = new Map(selectors.map((s) => [s, []]));
     const ids = [...perNode.keys()].filter(Boolean);
     for (const id of ids) {
       let hit = null;
@@ -77,8 +79,9 @@ export async function trace(page, action, { selectors = [] } = {}) {
       byNode.set(key, byNode.get(key) + perNode.get(id));
       if (repeats.has(key)) repeats.set(key, repeats.get(key) + (repaintsOf.get(id) || 0));
       if (hit) (hit.hit ? hits : (byNode.others ??= [])).push(`${perNode.get(id)}x ${hit.label}`);
+      if (hit?.hit) hitsBy.get(hit.hit).push(`${perNode.get(id)}x ${hit.label}`);
     }
-    return { paints: paintEvents.length, layouts, frames, byNode, repeats, others: byNode.others ?? [], hits, events, main };
+    return { paints: paintEvents.length, layouts, frames, byNode, repeats, others: byNode.others ?? [], hits, hitsBy, events, main };
   } finally {
     await session.detach().catch(() => {});
   }
