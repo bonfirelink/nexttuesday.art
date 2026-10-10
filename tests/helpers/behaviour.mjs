@@ -16,7 +16,7 @@ export async function open(page, pathname = "/") {
 }
 
 export async function scrollTo(page, settle, y) {
-  await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), y);
+  await page.evaluate((y) => { window.scrollTo({ top: y, behavior: "instant" }); }, y);
   await settle(page);
 }
 

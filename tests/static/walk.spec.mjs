@@ -21,7 +21,8 @@ const SLOW = [
 async function walk(page, settle) {
   const overflow = [];
   const measure = async (y) => {
-    await page.evaluate((y) => scrollTo(0, y), y);
+    // Braces: scrollTo returns a Promise in Chromium 153+, and Playwright would wait for the smooth scroll to end.
+    await page.evaluate((y) => { scrollTo(0, y); }, y);
     await settle(page);
     const o = await page.evaluate(() => ({
       y: Math.round(scrollY),

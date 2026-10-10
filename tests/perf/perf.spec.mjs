@@ -106,7 +106,7 @@ for (const [name, view] of Object.entries(VIEWS)) {
           const hits = [];
           for (const body of ["embers", "philo", "intersect"]) {
             const sel = `.orb[data-body="${body}"]`;
-            await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center" }), sel);
+            await page.evaluate((s) => { document.querySelector(s).scrollIntoView({ block: "center" }); }, sel);
             await page.waitForTimeout(SETTLE_MS);
             const r = await trace(page, (p) => p.waitForTimeout(ORB_IDLE_MS), { selectors: [sel] });
             // the live figures' canvases are meant to paint; nothing else in the orb is

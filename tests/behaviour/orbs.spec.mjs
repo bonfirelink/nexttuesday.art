@@ -127,7 +127,7 @@ for (const vp of VIEWPORTS) {
     await page.mouse.move(1, 1);
     for (const { body } of WORLDS) {
       const sel = `.orb[data-body="${body}"]`;
-      await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center" }), sel);
+      await page.evaluate((s) => { document.querySelector(s).scrollIntoView({ block: "center" }); }, sel);
       await page.waitForTimeout(800);
       // the world's window may still be opening as it scrolls in: measure until it settles
       const measure = async () => {
