@@ -20,6 +20,26 @@ const arrive = async (page, world, how) => {
   await expect.poll(() => page.evaluate(() => window.__bleed.events.includes("start"))).toBe(true);
 };
 
+// Waits until the finite time-based animations and transitions have finished
+// (the grain's fade, class-toggle transitions), then two frames for the paint.
+// The disc's own animations are paused or scroll-driven, and the site's loops
+// never end: neither is waited for. A frame first, so a transition started by
+// the last style change exists; it repeats, as a finished one may start another.
+const animationsSettled = (page, timeout = 5000) =>
+  page.evaluate(async (timeout) => {
+    const frame = () => new Promise((r) => requestAnimationFrame(r));
+    const running = () => document.getAnimations().filter((a) =>
+      a.playState === "running" && a.timeline instanceof DocumentTimeline && a.effect.getComputedTiming().endTime !== Infinity);
+    const t0 = performance.now();
+    await frame();
+    for (let list = running(); list.length; list = running()) {
+      if (performance.now() - t0 > timeout) throw new Error("animations still running after " + timeout + " ms: " + list.map((a) => a.animationName || a.transitionProperty).join(","));
+      await Promise.race([Promise.all(list.map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 100))]);
+      await frame();
+    }
+    await frame(); await frame();
+  }, timeout);
+
 function bleedTests(label, viewport, deviceScaleFactor, tag) {
   test.describe(label, () => {
     test.use({ viewport, deviceScaleFactor });
@@ -134,7 +154,7 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
     for (const world of WORLDS) {
       test(`T3 the ${world} bleed shows the settled ground in the disc and below the hero, ${label}`, async ({ page }) => {
         await arrive(page, world, "flag");
-        await page.waitForTimeout(700); // the grain's own fade, if any
+        await animationsSettled(page); // the grain's own fade, if any
         const end = await bleedEnd(page);
         // The section's own text and figures are not the ground: the median skips them.
         const measure = () => page.evaluate(() => {
@@ -159,7 +179,7 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
         await scrollToY(page, Math.round(end) + 5);
         await expect.poll(() => bleedState(page)).toBe("world");
         await scrollToY(page, y);
-        await page.waitForTimeout(700);
+        await animationsSettled(page);
         const after = await groundLuma(page, regions(m));
         expect(during[0], "ground sampled inside the disc over the hero").not.toBeNull();
         expect(after[0]).not.toBeNull();
@@ -184,7 +204,7 @@ for (const scale of SEAM_SCALES) {
     for (const world of WORLDS) {
       test(`T3 the ${world} bleed has no seam at the hero's foot, scale ${scale}`, async ({ page }) => {
         await arrive(page, world, "flag");
-        await page.waitForTimeout(700);
+        await animationsSettled(page);
         const end = await bleedEnd(page);
         const y = Math.round(0.5 * end);
         const rows = async () => {
@@ -202,7 +222,7 @@ for (const scale of SEAM_SCALES) {
         await scrollToY(page, Math.round(end) + 5);
         await expect.poll(() => bleedState(page)).toBe("world");
         await scrollToY(page, y);
-        await page.waitForTimeout(700);
+        await animationsSettled(page);
         const after = await rows();
         expect(after.worst, `world: ground ${after.ref}, rows ${after.r.join(",")}`).toBeLessThanOrEqual(SEAM_TOLERANCE);
       });
