@@ -94,3 +94,14 @@ test("C5 one favicon on every page: the sigil in ink on the beige", async ({ pag
   expect(svg.match(/<rect[^>]*fill='(#[0-9a-f]{6})'/i)[1].toLowerCase(), "its ground").toBe(hex(t["--pal-beige"]));
   expect(svg.match(/stroke='(#[0-9a-f]{6})'/i)[1].toLowerCase(), "its sigil").toBe(hex(t["--pal-ink"]));
 });
+
+test("C6 the Events star on the outer orbit is solid ochre with an ink keyline as thick as the sigils' line, and carries no filter", async ({ page }) => {
+  await open(page);
+  const t = await tokens(page);
+  const sel = '.bead[data-body="star"] .nts-sigil path';
+  expect(await style(page, sel, "fill"), "star fill").toBe(t["--code-events"]);
+  expect(await style(page, sel, "stroke"), "star keyline").toBe(t["--pal-ink"]);
+  expect(await style(page, '.bead[data-body="star"] .nts-sigil', "filter"), "no filter").toBe("none");
+  // the sigils' line scaled to the star's box: 2.4/64 of a glyph at 58% of the bead, as .46/14 at 66%
+  expect(await style(page, sel, "strokeWidth"), "keyline width").toBe("0.46px");
+});
