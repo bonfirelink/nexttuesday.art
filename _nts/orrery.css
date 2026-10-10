@@ -249,7 +249,10 @@ a:is(:hover, :focus-visible) > .disc::after, a.disc:is(:hover, :focus-visible)::
 /* INTERSECT's sigil is the phosphor on the orrery, where its red would sink into the black */
 .bead[data-body="intersect"] .nts-sigil { color: var(--intersect-phosphor); }
 .bead[data-body="star"] .face { display: grid; place-items: center; }
-.bead[data-body="star"] .nts-sigil { width: 66%; color: var(--code-events); filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--pal-ink) 35%, transparent)); }
+/* solid ochre with an ink keyline as thick as the line of the round beads' sigils:
+   2.4/64 of a glyph drawn at 58% of the bead, here on a 14-unit box at 66% (.46) */
+.bead[data-body="star"] .nts-sigil { width: 66%; }
+.bead[data-body="star"] .nts-sigil path { fill: var(--code-events); stroke: var(--pal-ink); stroke-width: .46; stroke-linejoin: round; }
 
 /* the hint that a bead opens: now and then a thin ring grows off it and
    fades, the eye's beam in small (scale and opacity only), with a pointer
