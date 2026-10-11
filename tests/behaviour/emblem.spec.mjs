@@ -54,7 +54,7 @@ const ground = (page) =>
     return {
       plate: before.backgroundColor, plateImage: before.backgroundImage, content: before.content,
       dial: getComputedStyle(document.querySelector(".orrery .e-dial circle")).fill,
-      moat: getComputedStyle(document.querySelector('.orrery .bead[data-body="philo"]'), "::before").backgroundColor,
+      moat: getComputedStyle(document.querySelector('.orrery .bead[data-body="philo"] .bead-face')).boxShadow.match(/rgba?\([^)]*\)/)[0],
       page: getComputedStyle(document.body).backgroundColor,
     };
   });

@@ -270,13 +270,45 @@ motion nothing turns or draws, the fades keep their 1.6 s (they beat the
 global .01ms rule), and the pyramid hands over to an upside-down copy.
 The ground: the emblem sits on the page's beige, no plate, grid or picker;
 the `--e-*` on `.threshold` are the Black sun's inks. Each bead rides in a
-moat of the beige (`.bead::before`) that lifts with its face.
+moat of the page's ground, which is the face's own shadow (`.bead-face`, below).
 The click hint is the bead's `::after`: a thin ring in `--e-halo` that
-grows off the moat and fades, the eye's beam in small, on every pointer
+grows off the bead and fades, the eye's beam in small, on every pointer
 type; one bead at a time (18 s cycle, staggered 4.5 s, set clear of the
 eye's touch beam). It rides the bead, outside the `.face` that the fall
 names `orb`, so the morph never captures it; no ring under reduced
 motion (S5, S6).
+
+## The bead (`.bead-face[data-of]`)
+
+Every round body that wears a world is one element, `.bead-face` with
+`data-of="embers|philo|intersect"` and the sigil `<svg class="nts-sigil">`
+inside; `orrery.css` is its one definition. Face (`--of-base`) and sigil come
+from the world's fixed tokens, never from `--w-*`, which the bleed swaps. The
+face draws its own edge, a ring in the sigil's colour as a radial gradient
+(not a second inset shadow: that leaves a fringe outside the face); the moat
+is a box-shadow spread of `--ground`, set on `main` and `.trace` and, for a
+ring on a seam, to `--ecl-out`. Each place sets only the size; the sigil is 58%
+of the face. Places: the home emblem's beads, the home windows' rings, the hero
+trace, the events' small orrery and the rings of the bands.
+
+- **Tone lift.** On its own world's ground (the hero trace) the face steps
+  10% toward the world's text colour (`--of-text`, a fixed token: `--w-fg`
+  changes with the bleed). Only while the ground is the world's: not in the
+  light (`html[data-bleed-state="before"]`, or the hero copy that carries
+  `.nts-bleed-old` while the night opens), not on the home or /events/.
+- **Rings on a seam.** A ring on a seam is the band it opens: its face is
+  `--ecl-bg`, its sigil and seal the world's (nts/events: `--ecl-fg`,
+  `--code-events`). The EMBERS summon ring is the exception: its band is the
+  sigil's own colour, so it keeps its world's plain face, red sigil on black.
+- **Seal lights.** Hover and focus add no ring at the edge: `::after` is the
+  seal drawn full sigil colour and twice as thick, faded in by opacity, with
+  the lift's shadow. Keyboard focus is a 2px ink outline, 5px clear of the moat.
+- **NTS rings.** `data-of="nts"` and `"events"` (the home's `#words` and
+  `#yet-to-come`, the /events/ ledger) follow the same rule: sigil and seal
+  `--ecl-fg` (events: `--code-events`).
+
+The Events star and the /events/ sun are not beads. O1, O8, O11 and O12 hold
+all of this.
 
 ## The home (`orrery.css`, `orrery.js`) and the apertures (`apertures.css`)
 

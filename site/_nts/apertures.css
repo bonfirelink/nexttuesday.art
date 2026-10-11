@@ -48,17 +48,14 @@ main { --ecl-out: var(--w-bg); }
 .ecl-in { display: flow-root; background: var(--ecl-bg); }
 /* the ring on the top edge: the section's sigil on a small disc of the
    aperture's own ground, a thin ring of its marks, and a halo of the page's
-   ground so it sits cleanly on the seam, like a bead in the orrery */
+   ground so it sits cleanly on the seam. Every ring is a bead (orrery.css),
+   on the seam's ground. */
 .ecl-ring {
   position: absolute; z-index: 4; left: 50%; top: 0; translate: -50% -50%;
   width: var(--ecl-ring); height: var(--ecl-ring); border-radius: 50%;
-  display: grid; place-items: center; color: var(--ecl-fg);
-  background: var(--ecl-bg);
-  border: 1px solid color-mix(in srgb, var(--ecl-fg) 62%, transparent);
-  box-shadow: 0 0 0 3px var(--ecl-out), 0 8px 18px -10px color-mix(in srgb, var(--pal-ink) 50%, transparent);
   pointer-events: none;
 }
-.ecl-ring .nts-sigil { width: 1.75rem; height: 1.75rem; color: inherit; }
+.ecl-ring.bead-face { --ground: var(--ecl-out); }
 
 /* ---------- the opening ----------
    Scrolling opens the disc from the ring while the aperture's top edge
@@ -134,9 +131,6 @@ main { --ecl-out: var(--w-bg); }
 .world.ecl { overflow: visible; --ecl-bg: var(--w-bg); --ecl-fg: var(--w-accent); --ecl-limb: var(--w-accent); padding: 0; }
 /* the top padding keeps the ring on the seam clear of the orb's dashed orbit */
 .world.ecl .ecl-in { padding: clamp(3.75rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); color: var(--w-fg); }
-.world.ecl .ecl-ring { color: var(--w-accent); }
-/* INTERSECT's sigil is the phosphor, as on the orrery bead: its red would sink into the black; the ring's border follows --ecl-fg, so it keeps the accent */
-.world.ecl[data-world="intersect"] .ecl-ring { color: var(--intersect-phosphor); }
 .world.ecl .ecl-in > .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
 @media (min-width: 760px) { .world.ecl .ecl-in { padding-inline: clamp(1rem, 3vw, 3rem); } }
 /* the handover is the breathing space between a section and the next
@@ -163,7 +157,7 @@ main { --ecl-out: var(--w-bg); }
    follow the plate, not the bands' shared defaults. */
 .ledger-ap { --ecl-hold: .15; --ecl-show: .2; --band-bg: var(--pal-ink); --band-fg: var(--pal-bone); --ecl-limb: var(--code-events); padding: 0; margin-top: var(--ecl-gap); margin-bottom: var(--section); }
 .ledger-ap .ecl-in { padding: clamp(2.5rem, 6vw, 4rem) 0; }
-.ledger-ap :is(.ecl-ring, .sect-head .nts-sigil) { color: var(--code-events); }
+.ledger-ap .sect-head .nts-sigil { color: var(--code-events); }
 .ledger-ap ::selection { background: var(--w-selection); color: var(--w-selection-fg); }
 .ledger-ap :focus-visible { outline-color: var(--w-fg); }
 .ledger-ap .ledger li { border-color: var(--w-line); }
@@ -184,14 +178,12 @@ main { --ecl-out: var(--w-bg); }
 .embers-summon.ecl { padding: 0; --ecl-limb: #ffe9d0; }
 .embers-summon.ecl .ecl-in { padding: clamp(3rem, 7vw, 4.5rem) 0; }
 /* NOT NOT PHILO: the volumes are a disc of the deeper grey with the engraved
-   rings; "Next volume" keeps its charcoal, the star says what it is */
+   rings; "Next volume" keeps its charcoal */
 .philo-volumes { --band-bg: var(--w-bg-2); --band-fg: var(--w-fg); --ecl-limb: #e5174a; --ecl-hold: .3; --ecl-show: .15; }
-.philo-volumes .ecl-ring { color: var(--w-accent); }
 .philo-volumes .ecl-in { padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .philo-volumes .ecl-in > .wrap > h2 { margin: 0; }
 .philo-volumes .volumes { margin-top: 1.5rem; }
 .philo-next.ecl { padding: 0; margin-top: var(--ecl-gap); --ecl-limb: #e5174a; }
-.philo-next.ecl .ecl-ring { color: var(--philo-red); }
 .philo-next.ecl .ecl-in { padding: clamp(3rem, 7vw, 4.5rem) 0; }
 .philo-next.ecl .ecl-win::before { opacity: 1; }
 /* INTERSECT: the correspondence sits on a lifted black (bg-2 is too close to
@@ -200,7 +192,6 @@ main { --ecl-out: var(--w-bg); }
 .intersect-corr { --band-bg: #2a2925; --band-fg: var(--w-fg); --ecl-limb: #ff3b63; --ecl-hold: .4; --ecl-show: .15; }
 html[data-bleed-state="before"] .intersect-corr { --band-bg: var(--pal-plywood); }
 .intersect-corr .ecl-win::before { opacity: 1; }
-.intersect-corr .ecl-ring { color: var(--w-accent-text); }
 .intersect-corr .ecl-in { padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .intersect-corr .ecl-win .sect-head { margin-bottom: 1.5rem; }
 .intersect-corr .corr th, .intersect-corr .corr td { border-color: var(--w-line-strong); }
