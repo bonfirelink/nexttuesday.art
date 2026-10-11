@@ -10,20 +10,25 @@
       set. A link from a block already in the destination world's colours sets
       the flag "direct", which skips both. Then
       html[data-bleed-state="before"] holds the page in the NTS colours until
-      nts.js lets the world in. Anything else, a direct landing, a reload,
-      reduced motion, is the world from the first frame ("world"). */
+      nts.js lets the world in. A direct landing or reduced motion is
+      the world from the first frame ("world"); a reload keeps the referrer it
+      had, so it decides again as the first visit did. */
 (function () {
   var d = document.documentElement;
   d.classList.add("js");
   /* The orb morph between the home and the world pages (the events page is
      one too). NTS.world(url): the world a same-site URL is, else null; the
      one list of world paths. NTS.body(world): the home's body for it, its
-     bead if on screen, else its orb; null off the home. */
+     bead if on screen, else its orb; null off the home. BODY and PATHS are
+     generated from site.json's `initiatives` (tools/sync.mjs). */
   var NTS = window.NTS = window.NTS || {};
+  /* nts:worlds */
   var BODY = { "embers": "embers", "not-not-philo": "philo", "intersect": "intersect", "events": "star" };
+  var PATHS = /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/;
+  /* /nts:worlds */
   NTS.world = function (url) {
     var u; try { u = new URL(url, location.href); } catch (err) { return null; }
-    var m = u.origin === location.origin && /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/.exec(u.pathname);
+    var m = u.origin === location.origin && PATHS.exec(u.pathname);
     return m ? m[1] : null;
   };
   /* the [data-world] key the home uses for a world's slug, else null */

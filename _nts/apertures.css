@@ -167,9 +167,11 @@ main { --ecl-out: var(--w-bg); }
 .ledger-ap .ledger .kind { --kind-bg: color-mix(in srgb, var(--pal-bone) 12%, var(--pal-ink)); --kind-fg: var(--pal-bone); }
 .ledger-ap .ledger .kind::before { content: ""; display: inline-block; width: .6em; height: .6em; margin-right: .45em; border-radius: 50%; vertical-align: .02em; background: var(--kind-dot); }
 .ledger-ap li[data-of="nts"] { --kind-dot: var(--code-events); }
+/* nts:dots */
 .ledger-ap li[data-of="embers"] { --kind-dot: var(--code-embers); }
 .ledger-ap li[data-of="philo"] { --kind-dot: var(--code-philo); }
 .ledger-ap li[data-of="intersect"] { --kind-dot: var(--code-intersect); }
+/* /nts:dots */
 
 /* ---------- inside the worlds: the bands ---------- */
 .band.ecl.sect-band { margin-block: var(--section); }
