@@ -261,6 +261,33 @@ test.describe("world to world hop", () => {
   });
 });
 
+// A link inside a block already in the destination world's colours opens that
+// world directly; any other link from the home keeps the beige.
+test.describe("links from a panel in the world's own colours", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  const arrive = async (page, sel, slug) => {
+    await page.goto(process.env.NTS_BASE + "/", { waitUntil: "load" });
+    // el.click(): the dial's beads orbit and the panels' orbs move, so a
+    // coordinate click is unstable; this still fires a click
+    // event and the link's default navigation
+    await page.locator(sel).first().evaluate((el) => el.click());
+    await page.waitForURL("**/" + slug + "/");
+    return page.evaluate(() => document.documentElement.getAttribute("data-bleed-state"));
+  };
+  test("T3 the EMBERS panel's go link opens EMBERS in its colours", async ({ page }) => {
+    expect(await arrive(page, "section#embers a.go", "embers")).toBe("world");
+  });
+  test("T3 the philo panel's orb opens NOT NOT PHILO in its colours", async ({ page }) => {
+    expect(await arrive(page, 'section[data-world="philo"] a.orb', "not-not-philo")).toBe("world");
+  });
+  test("T3 a dial bead from the home still opens beige", async ({ page }) => {
+    expect(await arrive(page, 'a.bead[href="/embers/"]', "embers")).not.toBe("world");
+  });
+  test("T3 a nav link from the home still opens beige", async ({ page }) => {
+    expect(await arrive(page, 'header a[href="/intersect/"]:visible', "intersect")).not.toBe("world");
+  });
+});
+
 // NTS.world (nts-head.js) is the one list of world paths; the pages that run
 // the bleed are exactly its entries but the events page.
 test("T3 the world list is the set of bleed pages", async () => {

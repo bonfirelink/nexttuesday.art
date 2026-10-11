@@ -306,14 +306,19 @@
      that is not a world page, or on a world page whose own bleed has not
      settled (the next world opens beige too). A world page is one that runs
      the bleed (it carries data-bleed-state); the events page is on NTS.world's
-     list but runs none, so it counts as an ordinary page here */
+     list but runs none, so it counts as an ordinary page here. A link inside
+     a block already in the destination world's colours (its closest
+     [data-world] is that world's key) opens the world directly: the flag is
+     "direct", which also stops the referrer fallback in nts-head.js */
   document.addEventListener("click", function (e) {
     if (d.getAttribute("data-bleed-state") === "world") return;
     var a = e.target.closest && e.target.closest("a[href]");
     if (!a || a.target === "_blank") return;
     var w = window.NTS.world(a.getAttribute("href"));
     if (!w || w === "events") return;
-    try { sessionStorage.setItem("nts:from", "home"); } catch (err) { /* private mode */ }
+    var blk = a.closest("[data-world]");
+    var direct = !!blk && blk.getAttribute("data-world") === window.NTS.key(w);
+    try { sessionStorage.setItem("nts:from", direct ? "direct" : "home"); } catch (err) { /* private mode */ }
   }, true);
 
   /* leaving a world: its hero entity is the `orb` of the cross-document view

@@ -2,9 +2,13 @@
    1. mark <html class="js">, which the stylesheet uses to hold things back
       until they draw themselves in (with scripts off everything is drawn);
    2. on a world page loaded with data-bleed="scroll", decide
-      whether the world bleeds in. Only when the visitor arrived from the
-      home page of the same site: a flag the home's links set in
-      sessionStorage, or the same-origin referrer. Then
+      whether the world bleeds in. It does when the visitor comes from a page
+      that is not a world page (the events page counts as ordinary) or from a
+      world page whose own bleed has not settled: nts.js sets the flag "home"
+      in sessionStorage when such a page's link to a world is clicked, and the
+      same-origin referrer is the fallback for such a page when no flag was
+      set. A link from a block already in the destination world's colours sets
+      the flag "direct", which skips both. Then
       html[data-bleed-state="before"] holds the page in the NTS colours until
       nts.js lets the world in. Anything else, a direct landing, a reload,
       reduced motion, is the world from the first frame ("world"). */
@@ -22,6 +26,8 @@
     var m = u.origin === location.origin && /\/(embers|not-not-philo|intersect|events)\/(index\.html)?$/.exec(u.pathname);
     return m ? m[1] : null;
   };
+  /* the [data-world] key the home uses for a world's slug, else null */
+  NTS.key = function (world) { return BODY[world] || null; };
   NTS.body = function (world) {
     var b = BODY[world];
     if (!b) return null;
@@ -61,6 +67,7 @@
     var flag = sessionStorage.getItem("nts:from");
     if (flag) sessionStorage.removeItem("nts:from");
     if (flag === "home") from = true;
+    else if (flag === "direct") from = false;
     else if (document.referrer) {
       /* a same-origin page that is not a world page (the events page runs no bleed) */
       var w = NTS.world(document.referrer);

@@ -406,7 +406,12 @@ behave the same.
   settled (`html[data-bleed-state="world"]`; only pages running the bleed
   carry the attribute). So the next world opens beige from the home, the
   events page or any ordinary page, and from a world page still `before`
-  or `in`, but not from a settled one. `nts-head.js` consumes the flag;
+  or `in`, but not from a settled one. Except that a link inside a block
+  already in the destination's colours (its closest `[data-world]` equals
+  `NTS.key(world)`, as the home's world panels `a.orb` and `a.go`) sets the
+  flag to `"direct"`: the world opens as `world`, and the referrer fallback
+  is skipped. The dial beads, nav, events list and footer stay beige.
+  `nts-head.js` consumes the flag;
   failing that it accepts a same-origin referrer that is not a world page.
   It then sets `html[data-bleed="scroll"][data-bleed-state="before"|"world"]`.
   A new world is added to the regex in `NTS.world` (and `BODY`); a
