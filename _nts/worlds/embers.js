@@ -79,7 +79,7 @@
     /* while the bleed-in's disc opens: the twin canvas the night goes to */
     let twin = null, tctx = null, dayBase = "", nightBase = "";
     let w = 0, h = 0, dpr = 1, yaw = 0.6, pitch = 0.5, pitchDrag = 0, spin = o.spin;
-    let t = 0, stoke = o.stoke0, last = 0, raf = 0, acc = 0, visible = false;
+    let t = 0, tilt = 0, stoke = o.stoke0, last = 0, raf = 0, acc = 0, visible = false;
     let dragging = false, lastX = 0, lastY = 0, lastT = 0, moved = 0;
     let pal = theme(), base = baseColour(host);
     const embers = [], hot = [];
@@ -220,10 +220,10 @@
     function frame(now) {
       raf = 0;
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 0);
-      last = now; t += dt;
+      last = now; t += dt; if (!dragging) tilt += dt;
       if (!dragging) { spin += (o.spin - spin) * Math.min(1, dt * 1.5); pitchDrag *= Math.exp(-dt * 0.8); }
-      yaw = (yaw + spin * dt) % TAU;
-      pitch = 0.5 + Math.sin(t * 0.23) * 0.35;
+      if (!dragging) yaw = (yaw + spin * dt) % TAU;
+      pitch = 0.5 + Math.sin(tilt * 0.23) * 0.35;
       stoke = o.stoke0 + (stoke - o.stoke0) * Math.exp(-dt * 1.4);
       if (o.embers && Math.random() < dt * (1.5 + stoke * 14)) shed(1 + Math.floor(stoke * 2), false);
       stepEmbers(dt);
@@ -241,6 +241,7 @@
       draw(); shed(26 + Math.floor(stoke * 16), true);
       if (still.matches) { draw(); embers.length = 0; stoke = o.stoke0; }
     }
+    canvas.ntsPose = () => [yaw, pitch + pitchDrag];
     if (o.interactive) {
       canvas.addEventListener("pointerdown", (e) => { dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp; canvas.setPointerCapture(e.pointerId); });
       canvas.addEventListener("pointermove", (e) => {
