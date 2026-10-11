@@ -105,3 +105,28 @@ test("C6 the Events star on the outer orbit is solid ochre with an ink keyline a
   // the sigils' line scaled to the star's box: 2.4/64 of a glyph at 58% of the bead, as .46/14 at 66%
   expect(await style(page, sel, "strokeWidth"), "keyline width").toBe("0.46px");
 });
+
+test("C7 the INTERSECT window's ring draws its sigil in the emblem bead's phosphor; EMBERS and PHILO keep their accent, every ring keeps its border", async ({ page }) => {
+  await open(page);
+  const ring = (w) => `.world.ecl[data-world="${w}"] .ecl-ring`;
+  const bead = await style(page, '.bead[data-body="intersect"] .nts-sigil', "color");
+  expect(await style(page, `${ring("intersect")} .nts-sigil`, "color"), "INTERSECT ring sigil").toBe(bead);
+  expect(await style(page, ring("intersect"), "color"), "INTERSECT ring colour").toBe(bead);
+  // the other two windows still draw the ring in their own accent
+  const accent = (w) => page.evaluate((s) => {
+    const el = document.querySelector(s);
+    const probe = document.createElement("i");
+    probe.style.color = "var(--w-accent)";
+    el.appendChild(probe);
+    const c = getComputedStyle(probe).color;
+    probe.remove();
+    return c;
+  }, `.world.ecl[data-world="${w}"]`);
+  for (const w of ["embers", "philo"]) {
+    expect(await style(page, `${ring(w)} .nts-sigil`, "color"), `${w} ring sigil`).toBe(await accent(w));
+  }
+  // the ring's border is driven by --ecl-fg, not by the sigil's colour: it stays the window's accent
+  for (const w of ["embers", "philo", "intersect"]) {
+    expect(await style(page, ring(w), "borderTopColor"), `${w} ring border`).not.toBe(bead);
+  }
+});

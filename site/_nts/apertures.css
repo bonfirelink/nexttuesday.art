@@ -135,6 +135,8 @@ main { --ecl-out: var(--w-bg); }
 /* the top padding keeps the ring on the seam clear of the orb's dashed orbit */
 .world.ecl .ecl-in { padding: clamp(3.75rem, 7vw, 5rem) 0 clamp(3rem, 8vw, 6rem); color: var(--w-fg); }
 .world.ecl .ecl-ring { color: var(--w-accent); }
+/* INTERSECT's sigil is the phosphor, as on the orrery bead: its red would sink into the black; the ring's border follows --ecl-fg, so it keeps the accent */
+.world.ecl[data-world="intersect"] .ecl-ring { color: var(--intersect-phosphor); }
 .world.ecl .ecl-in > .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); }
 @media (min-width: 760px) { .world.ecl .ecl-in { padding-inline: clamp(1rem, 3vw, 3rem); } }
 /* the handover is the breathing space between a section and the next
