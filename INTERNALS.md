@@ -569,8 +569,8 @@ commit that fast-forwards `site`. Push it only on the owner's word to publish.
 ## Checks before a change lands
 
 `npm ci` once per checkout. `npm test` after every change: the static and
-fast tiers, in a minute or two, with the dev shell's Chromium and an
-offline copy of the fonts. `npm run test:publish` before a publish: adds
+fast tiers, in under two minutes, with the dev shell's Chrome headless shell
+and an offline copy of the fonts. `npm run test:publish` before a publish: adds
 the `@slow` sweeps and the `@perf` guards. Tiers are tags in test titles
 (`playwright.config.mjs`); each spec file belongs to one project.
 
