@@ -56,9 +56,10 @@ pre[data-nts-ascii] {
   width: var(--ring); aspect-ratio: 1; overflow: hidden;
   font-family: var(--font-mono); font-weight: 400; line-height: 1; font-size: 4.2px;
   color: var(--w-fg); white-space: pre; user-select: none; -webkit-user-select: none;
-  touch-action: pan-y; cursor: grab;
+  touch-action: pan-y;
 }
-pre[data-nts-ascii]:active { cursor: grabbing; }
+pre[data-nts-ascii].is-grab { cursor: grab; }
+pre[data-nts-ascii].is-grabbing { cursor: grabbing; }
 pre[data-nts-ascii].is-live { text-shadow: 0 0 6px color-mix(in srgb, var(--w-fg) 35%, transparent); }
 html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-state="in"] .nts-bleed-old pre[data-nts-ascii].is-live { text-shadow: none; }
 
