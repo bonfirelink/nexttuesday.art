@@ -91,7 +91,9 @@
     function tick(now) {
       raf = 0;
       if (!visible || hidden || held) return;
-      clock += prev ? Math.min(0.1, (now - prev) / 1000) : 0; prev = now;
+      /* a pressed figure holds its pose and only the drag moves it, as in the other worlds */
+      if (!hand.active) clock += prev ? Math.min(0.1, (now - prev) / 1000) : 0;
+      prev = now;
       if (now - last >= 1000 / FPS) { last = now; draw(pose()); }
       if (!hand.active) hand.dTheta *= 0.985;
       raf = requestAnimationFrame(tick);
