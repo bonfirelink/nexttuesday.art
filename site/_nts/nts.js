@@ -7,8 +7,9 @@
                 page reached from home), the world's night opens over the
                 hero as a disc from its entity, driven by the scroll, and
                 settles once the hero is half gone; see the block below.
-                On a page whose <body data-nts-home>, links to a world page
-                set the sessionStorage flag that nts-head.js reads
+                Links to a world page set the sessionStorage flag that
+                nts-head.js reads, on every page but a world page whose
+                bleed has settled
    Everything checks prefers-reduced-motion. */
 (function () {
   "use strict";
@@ -301,18 +302,19 @@
     dispatchEvent(new CustomEvent("nts:bleed", { detail: { phase: "start", world: world } }));
     update();
   }
-  /* the bleed's flag, set when leaving home for a world page */
-  if (document.body.hasAttribute("data-nts-home")) {
-    var worldRe = /\/(embers|not-not-philo|intersect)\/(index\.html)?$/;
-    document.addEventListener("click", function (e) {
-      var a = e.target.closest && e.target.closest("a[href]");
-      if (!a || a.target === "_blank") return;
-      var u;
-      try { u = new URL(a.getAttribute("href"), location.href); } catch (err) { return; }
-      if (u.origin !== location.origin || !worldRe.test(u.pathname)) return;
-      try { sessionStorage.setItem("nts:from", "home"); } catch (err) { /* private mode */ }
-    }, true);
-  }
+  /* the bleed's flag, set when a link to a world page is clicked on any page
+     that is not a world page, or on a world page whose own bleed has not
+     settled (the next world opens beige too). A world page is one that runs
+     the bleed (it carries data-bleed-state); the events page is on NTS.world's
+     list but runs none, so it counts as an ordinary page here */
+  document.addEventListener("click", function (e) {
+    if (d.getAttribute("data-bleed-state") === "world") return;
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target === "_blank") return;
+    var w = window.NTS.world(a.getAttribute("href"));
+    if (!w || w === "events") return;
+    try { sessionStorage.setItem("nts:from", "home"); } catch (err) { /* private mode */ }
+  }, true);
 
   /* leaving a world: its hero entity is the `orb` of the cross-document view
      transition only when the next page is not a world page (it becomes the

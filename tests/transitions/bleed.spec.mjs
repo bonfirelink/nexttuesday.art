@@ -229,3 +229,45 @@ for (const scale of SEAM_SCALES) {
     }
   });
 }
+
+// Hopping from one world page to another: the next world opens beige only
+// while this one's bleed has not settled.
+test.describe("world to world hop", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  const hop = async (page, settle) => {
+    await page.goto(process.env.NTS_BASE + "/", { waitUntil: "load" });
+    await clickWorldLink(page, "embers");
+    await expect.poll(() => bleedState(page)).toBe("in");
+    if (settle) {
+      await scrollToY(page, Math.round(await bleedEnd(page)) + 5);
+      await expect.poll(() => bleedState(page)).toBe("world");
+    }
+    await page.locator('a[href="/not-not-philo/"]:visible').first().click();
+    await page.waitForURL("**/not-not-philo/");
+    return page.evaluate(() => document.documentElement.getAttribute("data-bleed-state"));
+  };
+  test("T3 a world entered from the events page starts beige", async ({ page }) => {
+    await page.goto(process.env.NTS_BASE + "/events/", { waitUntil: "load" });
+    await page.locator('a[href="/embers/"]:visible').first().click();
+    await page.waitForURL("**/embers/");
+    expect(await page.evaluate(() => document.documentElement.getAttribute("data-bleed-state"))).not.toBe("world");
+  });
+  test("T3 a world hopped to from an unsettled world starts beige", async ({ page }) => {
+    // nts.js moves before to in on load: either means beige
+    expect(await hop(page, false)).not.toBe("world");
+  });
+  test("T3 a world hopped to from a settled world starts in its own colours", async ({ page }) => {
+    expect(await hop(page, true)).toBe("world");
+  });
+});
+
+// NTS.world (nts-head.js) is the one list of world paths; the pages that run
+// the bleed are exactly its entries but the events page.
+test("T3 the world list is the set of bleed pages", async () => {
+  const { readdirSync, readFileSync, existsSync } = await import("node:fs");
+  const dirs = readdirSync("site", { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
+  const bleed = dirs.filter((n) => existsSync(`site/${n}/index.html`) && /data-bleed="scroll"/.test(readFileSync(`site/${n}/index.html`, "utf8"))).sort();
+  const head = readFileSync("site/_nts/nts-head.js", "utf8");
+  const listed = /\(([a-z|-]*\|events)\)/.exec(head)[1].split("|").filter((n) => n !== "events").sort();
+  expect(listed).toEqual(bleed);
+});

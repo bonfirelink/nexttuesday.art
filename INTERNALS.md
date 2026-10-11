@@ -94,7 +94,7 @@ rings and triangle.
   <script src="/_nts/nts.js" defer></script>
   … world scripts, deferred …
 </head>
-<body data-world="embers">          <!-- nts | embers | philo | intersect; home adds data-nts-home -->
+<body data-world="embers">          <!-- nts | embers | philo | intersect -->
 <!-- nts:sprite --><!-- /nts:sprite -->
 <!-- nts:header --><!-- /nts:header -->
 <main>…</main>
@@ -399,12 +399,18 @@ or asking for reduced motion gives the world from the first frame.
 EMBERS' bleed-in is its night-fall: paper to night. The three worlds
 behave the same.
 
-- Detection, in `nts-head.js`, before paint: `nts.js` on a page whose
-  `<body data-nts-home>` sets `sessionStorage["nts:from"] = "home"` when
-  a link to `/…/embers/`, `/…/not-not-philo/` or `/…/intersect/` is
-  clicked, and `nts-head.js` consumes it; failing that it accepts a
-  same-origin referrer equal to the page's parent folder. It then sets
-  `html[data-bleed="scroll"][data-bleed-state="before"|"world"]`.
+- Detection, in `nts-head.js`, before paint: `nts.js` sets
+  `sessionStorage["nts:from"] = "home"` when a link to a world page is
+  clicked (`NTS.world`, the one list of world paths; the events page is on
+  it but runs no bleed) on any page except a world page whose bleed has
+  settled (`html[data-bleed-state="world"]`; only pages running the bleed
+  carry the attribute). So the next world opens beige from the home, the
+  events page or any ordinary page, and from a world page still `before`
+  or `in`, but not from a settled one. `nts-head.js` consumes the flag;
+  failing that it accepts a same-origin referrer that is not a world page.
+  It then sets `html[data-bleed="scroll"][data-bleed-state="before"|"world"]`.
+  A new world is added to the regex in `NTS.world` (and `BODY`); a
+  test compares that list with the pages that run the bleed.
 - The before state is CSS: `html[data-bleed-state="before"] [data-world]`
   reads the NTS `--w-*` tokens (section 11 of `nts.css`), and each kit
   undoes what else its world brings (`--embers-glow`, `--hearth-base`, the

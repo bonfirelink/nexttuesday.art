@@ -60,11 +60,11 @@
   try {
     var flag = sessionStorage.getItem("nts:from");
     if (flag) sessionStorage.removeItem("nts:from");
-    var root = location.pathname.replace(/[^/]*\/[^/]*$/, "");
     if (flag === "home") from = true;
     else if (document.referrer) {
-      var r = new URL(document.referrer);
-      if (r.origin === location.origin && (r.pathname === root || r.pathname === root + "index.html")) from = true;
+      /* a same-origin page that is not a world page (the events page runs no bleed) */
+      var w = NTS.world(document.referrer);
+      if (new URL(document.referrer).origin === location.origin && (!w || w === "events")) from = true;
     }
   } catch (e) { from = false; }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) from = false;
