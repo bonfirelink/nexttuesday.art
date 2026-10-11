@@ -55,7 +55,7 @@ if [ "$url" != "$want" ]; then
 fi
 
 # The machine's dev-shell rule: every preview says what it is for.
-(cd "$path" && devshell note --status working "$name: in progress" --step "Open $url")
+(cd "$path" && devshell note --status building "$name: in progress" --step "Open $url")
 
 echo "worktree: $path"
 echo "branch:   $name (from $base)"

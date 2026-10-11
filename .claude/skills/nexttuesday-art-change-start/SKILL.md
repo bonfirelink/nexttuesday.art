@@ -9,7 +9,7 @@ One change, one worktree, one preview, one commit. `<name>` is a short lowercase
 
 ## Steps
 
-1. **Create.** `tools/change-start.sh <name>` from any checkout. It makes branch and worktree `<name>` off the working branch, locks the worktree, runs `devshell up`, checks that `devshell url` prints `http://<name>.nexttuesday-art.localhost:18000/` and writes the preview note (`devshell note --status working "<name>: in progress" --step "Open <url>"`). It stops with an error on a name that exists as a branch or tag; on a failure after the worktree exists (`devshell up`, URL mismatch) it prints the commands that undo the worktree. Done when it prints the worktree path and the preview URL.
+1. **Create.** `tools/change-start.sh <name>` from any checkout. It makes branch and worktree `<name>` off the working branch, locks the worktree, runs `devshell up`, checks that `devshell url` prints `http://<name>.nexttuesday-art.localhost:18000/` and writes the preview note (`devshell note --status building "<name>: in progress" --step "Open <url>"`). It stops with an error on a name that exists as a branch or tag; on a failure after the worktree exists (`devshell up`, URL mismatch) it prints the commands that undo the worktree. Done when it prints the worktree path and the preview URL.
 2. **Work only in that worktree.** Use its absolute path for edits and `git -C`; reach other worktrees by `git -C` and absolute paths only. Run `git rev-parse --show-toplevel` before every commit: it must print your worktree.
 3. **Read INTERNALS.md** for the files that own the thing you change.
 4. **Red.** Write or adjust the test that describes the change and run it; it fails on the current code for the stated reason. A bug report gets a test that reproduces it before any fix.
