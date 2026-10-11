@@ -66,6 +66,9 @@
   --intersect-phosphor: #e9e2cf;
   --intersect-fire: #ff3b63;
   --intersect-fire-text: #c8103a;
+  /* the title's ">": the fire nudged (dE 1) so it holds 3:1 on the NTS paper
+     and on the black (3.05, 5.4); one value in both states of the hero */
+  --intersect-fire-key: #fa3b63;
 
   /* the world the page is in: NTS by default (its colours are the set
      after this block). World kits set these on [data-world] and on the root
