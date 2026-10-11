@@ -17,7 +17,7 @@ from the working branch (`main`). How the code fits:
 - One change per worktree, one merge into the working branch at a time.
 - Other worktrees belong to other agents: use `git -C <path>`, never `cd`.
 - Merge only after the change is approved.
-- Push `site` only when a publish is explicitly requested. `main` stays untouched until the final squash.
+- Push `site` only when a publish is explicitly requested. `main` is the working branch; it is pushed to origin when a change lands.
 - A branch and a tag may share a name (`round-*`): spell refs as `refs/heads/<n>` or `refs/tags/<n>` in `git log`, `rev-parse`, `checkout` and `push`; `git branch -d/-D` only ever sees branches.
 
 ## Tests
