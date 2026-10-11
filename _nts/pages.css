@@ -94,7 +94,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .intersect-hero { text-align: left; }
 /* the title is IM Fell, the one place it lives; the prompt before it stays mono */
 .intersect-hero h1 { text-transform: uppercase; letter-spacing: .02em; font-size: clamp(2.4rem, 10vw, 5rem); line-height: .95; }
-.intersect-hero h1 .x { font-family: var(--font-mono); font-weight: 500; color: var(--w-accent-text); }
+.intersect-hero h1 .x { font-family: var(--font-mono); font-weight: 500; color: var(--intersect-fire-key); }
 .intersect-hero .incant { font-size: clamp(1.4rem, 4vw, 2rem); }
 .intersect-body .prose p { font-size: 1.15rem; }
 .intersect-whisper { font-family: var(--font-intersect); font-style: italic; color: var(--w-muted); font-size: 1.25rem; margin: 1.5rem 0 0; }
