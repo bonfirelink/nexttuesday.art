@@ -10,12 +10,12 @@
 // reduced motion they do not pulse. The eye's own beam is E6 (emblem.spec).
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
+import { BODIES as BEADS } from "../helpers/registry.mjs";
 
 const MARGIN = 16; // px between the outer orbit and the screen's side, at least
 const ORBIT_R = (96.4 + 0.55 / 2) / 202; // the outer orbit's outer edge, in emblem widths
 const STAR_AT_3 = 62500; // ms: the events star turns 15deg -> 90deg (300 s a turn)
 const PHONES = [360, 375, 390, 430];
-const BEADS = ["embers", "philo", "intersect", "star"];
 
 // The outer orbit's box, from the emblem's box (the orbit layer turns, so its own box is a turned square).
 const orbitBox = (page) =>

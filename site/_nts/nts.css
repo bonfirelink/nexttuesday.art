@@ -229,9 +229,11 @@ h1.caps { letter-spacing: -.005em; }
 .nts-sigil use { stroke-linecap: round; }
 .nts-sigil.lg { width: 3.5rem; height: 3.5rem; }
 .nts-sigil.xl { width: clamp(4.5rem, 14vw, 7rem); height: clamp(4.5rem, 14vw, 7rem); }
+/* nts:sigils */
 .sigil-embers { color: var(--embers-fire); }
 .sigil-philo { color: var(--philo-red); }
 .sigil-intersect { color: var(--intersect-fire-text); }
+/* /nts:sigils */
 .sigil-nts { color: var(--w-accent); }
 
 /* ---------- 5. the skeleton: header ---------- */
@@ -373,9 +375,11 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
 .ledger .where { font-size: .9rem; color: var(--w-muted); margin: 0; }
 .ledger .line { margin: .3rem 0 0; font-size: .98rem; max-width: 44rem; }
 .ledger .kind { display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding: .15em .5em .1em; border-radius: 3px; margin-left: .5rem; vertical-align: .15em; color: var(--kind-fg, var(--w-fg)); background: var(--kind-bg, var(--w-line)); }
+/* nts:kinds */
 .ledger li[data-of="embers"] { --kind-bg: var(--embers-fire); --kind-fg: #fff; }
 .ledger li[data-of="philo"] { --kind-bg: var(--philo-red); --kind-fg: #fff; }
 .ledger li[data-of="intersect"] { --kind-bg: var(--intersect-black); --kind-fg: var(--intersect-phosphor); }
+/* /nts:kinds */
 .ledger li[data-of="nts"] { --kind-bg: var(--pal-ink); --kind-fg: var(--pal-bone); }
 .ledger li.upcoming .when { color: var(--w-accent-text); }
 @media (min-width: 720px) {

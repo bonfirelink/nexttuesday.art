@@ -35,7 +35,9 @@ if (!variants.length) {
   console.error("usage: node tools/bench.mjs label=<base url> [label=<base url> ...] [paths=/,/embers/] [views=phone,desktop] [throttle=4] [runs=3] [speed=1.2] [--json] [--trace[=<absolute dir>]]");
   process.exit(2);
 }
-const paths = (opt.paths || "/,/embers/,/not-not-philo/,/intersect/").split(",");
+// default: the home and the world pages, from the registry (site.json)
+const worldPaths = JSON.parse(fs.readFileSync(new URL("../site/_nts/content/site.json", import.meta.url), "utf8")).initiatives.filter((i) => i.world !== "nts").map((i) => `/${i.slug}/`);
+const paths = opt.paths ? opt.paths.split(",") : ["/", ...worldPaths];
 const views = (opt.views || "phone,desktop").split(",");
 const throttle = Number(opt.throttle ?? 4);
 const runs = Number(opt.runs ?? 3);

@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import { test, expect } from "../helpers/fixtures.mjs";
 import { trace, median } from "../helpers/trace.mjs";
+import { WORLD_ENTRIES } from "../helpers/registry.mjs";
 
 const baselines = JSON.parse(fs.readFileSync(new URL("../fixtures/perf-baselines.json", import.meta.url), "utf8"));
 
@@ -96,7 +97,7 @@ for (const [name, view] of Object.entries(VIEWS)) {
     });
 
     test(`P6 the home's orbs cause no paints when idle in view @perf (${name})`, async ({ context }, testInfo) => {
-      const bodies = ["embers", "philo", "intersect"];
+      const bodies = WORLD_ENTRIES.map((i) => i.body);
       const sels = bodies.map((b) => `.orb[data-body="${b}"]`);
       const runs = [];
       for (let i = 0; i < RUNS; i++) {

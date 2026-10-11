@@ -13,16 +13,20 @@
    Nothing here redefines a --pal-*, --code-* or --w-* token.
    Angles, periods and directions: --a is where a body starts, --p how long
    one orbit takes, --d normal (clockwise) or reverse (anticlockwise, which
-   every orbit uses); each body turns with its orbit in the emblem.
+   every orbit uses); each body turns with its orbit in the emblem. They,
+   the riders and the world faces are generated from site.json's
+   `initiatives` (tools/sync.mjs).
    Every orbit is a zero-size pivot, with the body riding it at the radius,
    turning round it and turned back upright: a rotated box of any size would
    push its corners into the page's scrollable overflow. */
 
 :root {
-  --a-star: 15deg;       --p-star: 300s;       --d-star: reverse;
-  --a-embers: 205deg;    --p-embers: 120s;     --d-embers: reverse;
-  --a-philo: 330deg;     --p-philo: 170s;      --d-philo: reverse;
-  --a-intersect: 80deg;  --p-intersect: 230s;  --d-intersect: reverse;
+  /* nts:orbits */
+  --a-embers: 205deg; --p-embers: 120s; --d-embers: reverse;
+  --a-philo: 330deg; --p-philo: 170s; --d-philo: reverse;
+  --a-intersect: 80deg; --p-intersect: 230s; --d-intersect: reverse;
+  --a-star: 15deg; --p-star: 300s; --d-star: reverse;
+  /* /nts:orbits */
   --bead: max(44px, 11cqi);
 }
 
@@ -211,9 +215,11 @@
    only); no ring is drawn at the face's edge. The rings that open NTS's own
    bands (nts, events) are the bead of the band they open: its ground the
    face, its marks the sigil and seal. */
+/* nts:faces */
 .bead-face[data-of="embers"] { --of-base: var(--embers-night); --of-sigil: var(--embers-fire); --of-text: var(--embers-cream); }
 .bead-face[data-of="philo"] { --of-base: var(--philo-ground); --of-sigil: var(--philo-red); --of-text: var(--philo-ink); }
 .bead-face[data-of="intersect"] { --of-base: var(--intersect-black); --of-sigil: var(--intersect-phosphor); --of-text: var(--intersect-phosphor); }
+/* /nts:faces */
 .bead-face[data-of="nts"] { --of-base: var(--ecl-bg); --of-sigil: var(--ecl-fg); --of-text: var(--ecl-fg); }
 .bead-face[data-of="events"] { --of-base: var(--ecl-bg); --of-sigil: var(--code-events); --of-text: var(--ecl-fg); }
 /* a ring on a seam is the band it opens: its face is the band's ground. The
@@ -249,11 +255,13 @@ main, .trace { --ground: var(--w-bg); }
 a:is(:hover, :focus-visible) > .bead-face::after, a.bead-face:is(:hover, :focus-visible)::after { opacity: 1; }
 a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5px; }
 .trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; }
-/* each body rides its orbit in the emblem: r 66, 78.4, 84 and 96.4 of 202 */
-.orrery .o-star { --r: 47.72cqi; --a: var(--a-star); --p: var(--p-star); --d: var(--d-star); }
+/* each body rides its orbit in the emblem: the registry's r, of the emblem's 202 */
+/* nts:riders */
 .orrery .o-embers { --r: 32.67cqi; --a: var(--a-embers); --p: var(--p-embers); --d: var(--d-embers); }
 .orrery .o-philo { --r: 38.81cqi; --a: var(--a-philo); --p: var(--p-philo); --d: var(--d-philo); }
 .orrery .o-intersect { --r: 41.58cqi; --a: var(--a-intersect); --p: var(--p-intersect); --d: var(--d-intersect); }
+.orrery .o-star { --r: 47.72cqi; --a: var(--a-star); --p: var(--p-star); --d: var(--d-star); }
+/* /nts:riders */
 .bead {
   width: var(--bead); height: var(--bead);
   margin: calc(var(--bead) / -2) 0 0 calc(var(--bead) / -2);

@@ -8,6 +8,7 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
 import { tokens, rgb, contrast, style, focusRing, composite } from "../helpers/palette.mjs";
+import { WORLD_ENTRIES } from "../helpers/registry.mjs";
 
 test("C1 header sigil, links, hints, focus and selection take the palette's ink and voice", async ({ page }) => {
   await open(page);
@@ -109,8 +110,8 @@ test("C6 the Events star on the outer orbit is solid ochre with an ink keyline a
 test("C7 each window's ring is its world's bead: the sigil in the world's fixed colour, no border", async ({ page }) => {
   await open(page);
   const ring = (w) => `.world.ecl[data-world="${w}"] .ecl-ring`;
-  for (const w of ["embers", "philo", "intersect"]) {
-    const bead = await style(page, `.bead[data-body="${w}"] .nts-sigil`, "color");
+  for (const { world: w, body } of WORLD_ENTRIES) {
+    const bead = await style(page, `.bead[data-body="${body}"] .nts-sigil`, "color");
     expect(await style(page, `${ring(w)} .nts-sigil`, "color"), `${w} ring sigil`).toBe(bead);
     expect(await style(page, ring(w), "color"), `${w} ring colour`).toBe(bead);
     expect(await style(page, ring(w), "borderTopWidth"), `${w} ring border`).toBe("0px");

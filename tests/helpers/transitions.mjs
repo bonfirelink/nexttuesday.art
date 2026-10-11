@@ -1,5 +1,8 @@
 // Helpers for the view-transition and bleed-in tests.
-export const WORLDS = ["embers", "not-not-philo", "intersect"];
+import { WORLD_SLUGS } from "./registry.mjs";
+
+// the world pages, by slug, from the registry
+export const WORLDS = WORLD_SLUGS;
 
 // Init script: for each document, records what its `pagereveal` view transition
 // painted once `ready` resolves. window.__vt is a list of

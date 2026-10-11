@@ -7,18 +7,40 @@
   "embers_instagram_url": "https://www.instagram.com/embers.gva/",
   "signoff": "Know thyself",
   "signoff_emoji": "🪬",
-  "nav": [
-    { "slug": "embers", "label": "EMBERS", "world": "embers" },
-    { "slug": "not-not-philo", "label": "NOT NOT PHILO", "world": "philo" },
-    { "slug": "intersect", "label": "INTERSECT", "world": "intersect" },
-    { "slug": "events", "label": "Events", "world": "nts" }
+  "nts": { "name": "Next Tuesday Society", "sigil": "nts" },
+  "initiatives": [
+    {
+      "slug": "embers", "world": "embers", "name": "EMBERS", "body": "embers", "bleed": true,
+      "orbit": { "r": 66, "a": "205deg", "p": "120s", "d": "reverse" },
+      "colours": {
+        "sigil": "--embers-fire",
+        "face": { "base": "--embers-night", "sigil": "--embers-fire", "text": "--embers-cream" },
+        "kind": { "bg": "--embers-fire", "fg": "#fff" }
+      }
+    },
+    {
+      "slug": "not-not-philo", "world": "philo", "name": "NOT NOT PHILO", "body": "philo", "bleed": true,
+      "orbit": { "r": 78.4, "a": "330deg", "p": "170s", "d": "reverse" },
+      "colours": {
+        "sigil": "--philo-red",
+        "face": { "base": "--philo-ground", "sigil": "--philo-red", "text": "--philo-ink" },
+        "kind": { "bg": "--philo-red", "fg": "#fff" }
+      }
+    },
+    {
+      "slug": "intersect", "world": "intersect", "name": "INTERSECT", "body": "intersect", "bleed": true,
+      "orbit": { "r": 84, "a": "80deg", "p": "230s", "d": "reverse" },
+      "colours": {
+        "sigil": "--intersect-fire-text",
+        "face": { "base": "--intersect-black", "sigil": "--intersect-phosphor", "text": "--intersect-phosphor" },
+        "kind": { "bg": "--intersect-black", "fg": "--intersect-phosphor" }
+      }
+    },
+    {
+      "slug": "events", "world": "nts", "name": "Events", "sigil": "star", "body": "star",
+      "orbit": { "r": 96.4, "a": "15deg", "p": "300s", "d": "reverse" }
+    }
   ],
-  "worlds": {
-    "nts": { "name": "Next Tuesday Society", "sigil": "nts", "home": "" },
-    "embers": { "name": "EMBERS", "sigil": "embers", "home": "embers/", "line": "Our nightlife series. Raves around Geneva since 2021." },
-    "philo": { "name": "NOT NOT PHILO", "sigil": "philo", "home": "not-not-philo/", "line": "Discussions on everything, nothing and anything in between." },
-    "intersect": { "name": "INTERSECT", "sigil": "intersect", "home": "intersect/", "line": "An assembly at the Chaos Communication Congress." }
-  },
   "footer": {
     "about": "An association in Geneva. We gather every Tuesday, and from there come raves, philo salons and an endless field of possibilities.",
     "write": "Venues, institutions, collaborators: if there is something you would like to make with us, write to us.",

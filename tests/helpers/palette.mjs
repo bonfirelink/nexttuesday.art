@@ -1,8 +1,9 @@
 // Reading the palette in a page: the tokens of nts.css section 1 resolved
 // to computed colours, computed styles, focus rings and WCAG contrast.
+import { WORLD_KEYS } from "./registry.mjs";
 
 export const TOKENS = ["--pal-beige", "--pal-plywood", "--pal-ink", "--pal-bone", "--pal-bone-muted", "--pal-muted", "--pal-voice",
-  "--code-embers", "--code-philo", "--code-intersect", "--code-events"];
+  ...WORLD_KEYS.map((w) => `--code-${w}`), "--code-events"];
 
 // Each token resolved to the computed rgb() string a property would carry.
 export const tokens = (page) =>

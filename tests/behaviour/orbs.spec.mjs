@@ -10,6 +10,7 @@
 // costs no more to composite than before the lid.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
+import { BODIES } from "../helpers/registry.mjs";
 
 // The resting window's diameter in CSS px per viewport width: the whole disc,
 // as it was before the orbs had a lid. Measured inside the limb that rims it.
@@ -269,7 +270,6 @@ test("O6 at rest the figure is neither transformed nor clipped beyond the disc's
 // drawn by the box that lifts, so the face never sits off-centre in it.
 // O8 a bead's edge is flat: a ring of one colour and one thickness all
 // round, resting or lifted, drawn by the face's gradient.
-const BODIES = ["embers", "philo", "intersect", "star"];
 
 async function focusBody(page, body) {
   const sel = `.bead[data-body="${body}"]`;
