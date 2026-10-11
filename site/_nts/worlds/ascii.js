@@ -157,7 +157,8 @@
     return { fill: cs.color, font: cs.fontStyle + " " + cs.fontWeight + " ", family: cs.fontFamily, glow: m ? { c: m[1], x: +m[2], y: +m[3], b: +(m[4] || 0) } : null };
   }
   function mount(pre, name, cols, lite) {
-    if (!FIGURES[name]) return;
+    var G = window.NTS.grab;
+    if (!FIGURES[name] || !G) return;
     var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
     if (!ctx) return;
     canvas.setAttribute("aria-hidden", "true");
@@ -233,8 +234,26 @@
       if (e.detail.phase === "start") { twinUp(); if (live && twin) draw(); }
       else if (e.detail.phase === "end") { twin = tctx = night = null; if (live) { day = look(pre); glow(ctx, canvas, day); draw(); } }
     });
+    /* the lines last drawn, and the convex hull of their glyphs (made when a
+       press or the pointer asks, from the ends of each row) */
+    var shown = null, outline = null;
+    function onFigure(px, py) {
+      if (!shown || !size) return false;
+      if (!outline) {
+        var cw = aspect * size, pts = [];
+        for (var r = 0; r < shown.length; r++) {
+          var a = shown[r].search(/\S/);
+          if (a < 0) continue;
+          pts.push([(a + 0.5) * cw, (r + 0.5) * size], [(shown[r].length - 0.5) * cw, (r + 0.5) * size]);
+        }
+        outline = G.hull(pts);
+      }
+      var b = pre.getBoundingClientRect(), k = b.width ? pre.clientWidth / b.width : 1;
+      return outline.length > 2 && G.near(outline, (px - b.left) * k, (py - b.top) * k, G.SLACK * k);
+    }
     function draw() {
       var ls = lines(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9), q = twin ? window.NTS.bleed.progress() : 0;
+      shown = ls; outline = null;
       if (q < 1) paint(ctx, canvas, day, ls);
       if (twin && q > 0) paint(tctx, twin, night, ls);
     }
@@ -250,22 +269,25 @@
     function start() { if (still.matches || raf || !live || !visible || held || document.hidden) return; last = 0; raf = requestAnimationFrame(frame); }
     function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
     if (!lite) {
-      pre.addEventListener("pointerdown", function (e) { dragging = true; lastX = e.clientX; lastY = e.clientY; pre.setPointerCapture(e.pointerId); });
+      var grab = G.watch(pre, onFigure);
+      pre.addEventListener("pointerdown", function (e) { if (!grab.down(e)) return; dragging = true; lastX = e.clientX; lastY = e.clientY; pre.setPointerCapture(e.pointerId); });
       pre.addEventListener("pointermove", function (e) {
         if (!dragging) return;
         var dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
         pose.phi += dx * 0.01; pose.spin += dx * 0.004; pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + dy * 0.006));
-        pose.ay += dx * 0.01; pose.ax += dy * 0.01;
+        /* the solid faces -z: +ay swings its front left and +ax lifts it, so the front follows the pointer with both negated */
+        pose.ay -= dx * 0.01; pose.ax -= dy * 0.01;
         if (still.matches && live) draw();
       });
-      var release = function () { dragging = false; speed = 1; };
+      var release = function () { dragging = false; speed = 1; grab.up(); };
       pre.addEventListener("pointerup", release); pre.addEventListener("pointercancel", release); pre.addEventListener("lostpointercapture", release);
       pre.stoke = function () { speed = 4; };
+      pre.ntsPose = function () { return [pose.ax, pose.ay]; };
       pre.addEventListener("keydown", function (e) {
         var k = e.key, d = k === "ArrowLeft" ? -1 : k === "ArrowRight" ? 1 : 0, v = k === "ArrowUp" ? -1 : k === "ArrowDown" ? 1 : 0;
         if (!d && !v) return;
         e.preventDefault();
-        pose.phi += d * 0.25; pose.spin += d * 0.1; pose.ay += d * 0.25; pose.ax += v * 0.25;
+        pose.phi += d * 0.25; pose.spin += d * 0.1; pose.ay -= d * 0.25; pose.ax -= v * 0.25;
         pose.alpha = Math.max(0.3, Math.min(1.0, pose.alpha + v * 0.08));
         if (still.matches && live) draw();
       });

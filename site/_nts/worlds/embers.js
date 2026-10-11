@@ -10,7 +10,7 @@
    are this page's own.
 
    Mounts on every <canvas class="nts-hearth"> (the page entity: drag to
-   turn, tap to stoke) and on every <div data-nts-fragment="embers"> (a small,
+   turn, tap to stoke; a press counts only on the solid, NTS.grab) and on every <div data-nts-fragment="embers"> (a small,
    cheap, non-interactive one for the home page). Decorative only. Under
    prefers-reduced-motion it draws one still frame. DPR capped at 2 (and at
    a backing-store budget, data-max-px), paused off-screen and in hidden
@@ -59,6 +59,7 @@
     embers: ["#f5b31b", "#f2591b", "#e51d47", "#c0103a", "#a3163c", "#6e1030", "#4a1a3a"],
     halo: [[242, 89, 27], [229, 29, 71]], glow: "229, 29, 71", composite: "multiply",
   };
+  const G = window.NTS && window.NTS.grab;
   const theme = () => (document.documentElement.getAttribute("data-bleed-state") === "before" ? DAY : NIGHT);
   const baseColour = (el) => getComputedStyle(el).getPropertyValue("--hearth-base").trim() || "rgba(229, 29, 71, 0.3)";
 
@@ -101,10 +102,19 @@
       return [x, v[1] * cx - z * sx, v[1] * sx + z * cx];
     }
     const COARSE = 12;
+    function geom() { return { gcx: ax + o.cx * aw, gcy: ay + o.cy * ah, size: Math.min(aw, ah) * o.size / Math.sqrt(3) }; }
+    /* on the solid: its four vertices (the face normals, turned, scaled to
+       the circumradius) are the convex outline, with the shared slack */
+    function onFigure(px, py) {
+      const r = canvas.getBoundingClientRect(), { gcx, gcy, size } = geom(), p = pitch + pitchDrag;
+      const R = size * Math.sqrt(3), c = Math.cos(yaw), s = Math.sin(yaw), cp = Math.cos(p), sp = Math.sin(p);
+      const poly = FACES.map((f) => { const v = rotate(f, c, s, cp, sp); return [gcx - v[0] * R, gcy - v[1] * R]; });
+      return G.near(poly, px - r.left, py - r.top);
+    }
     function draw() {
       if (!w || !h) return;
       ctx.clearRect(0, 0, w, h);
-      const gcx = ax + o.cx * aw, gcy = ay + o.cy * ah, size = Math.min(aw, ah) * o.size / Math.sqrt(3);
+      const { gcx, gcy, size } = geom();
       const dist = INRADIUS * size, R = size * Math.sqrt(3) + o.step;
       const cy = Math.cos(yaw), sy = Math.sin(yaw), p = pitch + pitchDrag, cx = Math.cos(p), sx = Math.sin(p);
       const n = FACES.map((f) => rotate(f, cy, sy, cx, sx));
@@ -243,23 +253,25 @@
     }
     canvas.ntsPose = () => [yaw, pitch + pitchDrag];
     if (o.interactive) {
-      canvas.addEventListener("pointerdown", (e) => { dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp; canvas.setPointerCapture(e.pointerId); });
+      const hand = G.watch(canvas, onFigure);
+      canvas.addEventListener("pointerdown", (e) => { if (!hand.down(e)) return; dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp; canvas.setPointerCapture(e.pointerId); });
       canvas.addEventListener("pointermove", (e) => {
         if (!dragging) return;
         const dx = e.clientX - lastX, dy = e.clientY - lastY, dtm = Math.max(8, e.timeStamp - lastT);
         moved += Math.abs(dx) + Math.abs(dy);
-        yaw += dx * 0.012; pitchDrag = Math.max(-0.9, Math.min(0.9, pitchDrag + dy * 0.006));
-        spin = Math.max(-6, Math.min(6, (dx * 0.012) / (dtm / 1000)));
+        /* the bright faces read as the front (the nearest are drawn faintest), so they follow the pointer: the geometric back, hence the signs */
+        yaw -= dx * 0.012; pitchDrag = Math.max(-0.9, Math.min(0.9, pitchDrag + dy * 0.006));
+        spin = Math.max(-6, Math.min(6, (-dx * 0.012) / (dtm / 1000)));
         lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp;
         if (still.matches) draw();
       });
-      const release = () => { if (!dragging) return; dragging = false; if (moved < 8) stokeIt(); };
+      const release = () => { hand.up(); if (!dragging) return; dragging = false; if (moved < 8) stokeIt(); };
       canvas.addEventListener("pointerup", release);
       canvas.addEventListener("pointercancel", release);
       canvas.addEventListener("keydown", (e) => {
         if (e.key === " " || e.key === "Enter") { e.preventDefault(); stokeIt(); }
-        if (e.key === "ArrowLeft") { yaw -= 0.2; if (still.matches) draw(); }
-        if (e.key === "ArrowRight") { yaw += 0.2; if (still.matches) draw(); }
+        if (e.key === "ArrowLeft") { yaw += 0.2; if (still.matches) draw(); }
+        if (e.key === "ArrowRight") { yaw -= 0.2; if (still.matches) draw(); }
       });
     }
     /* in an aperture (the home's windows), NTS.live says when this one may

@@ -337,4 +337,60 @@
       if (e.viewTransition && e.activation && e.activation.entry) orb(e.activation.entry.url, e.viewTransition);
     });
   })();
+  /* grab: what the worlds' figures share to take a press only on the figure.
+       SLACK                px of forgiveness around an outline (fingers)
+       hull(points)         the convex hull of [x, y] points
+       near(poly, x, y, s)  inside the polygon, or within s px (default SLACK)
+                            of its edge
+       watch(el, test)      test(clientX, clientY) says whether a point is on
+                            the figure. Returns { down(e), up() }: down says
+                            whether a press may start a drag (and shows the
+                            grabbing cursor), up ends it. Over the figure, a
+                            mouse or pen puts .is-grab on el for the grab
+                            cursor; .is-grabbing while pressed. The test runs
+                            on pointer events only, on geometry the figure
+                            already holds. */
+  (function () {
+    var SLACK = 14;
+    function near(poly, x, y, s) {
+      var r = s === undefined ? SLACK : s, r2 = r * r, inside = false, n = poly.length, i, j, a, b;
+      for (i = 0, j = n - 1; i < n; j = i++) {
+        a = poly[i]; b = poly[j];
+        if ((a[1] > y) !== (b[1] > y) && x < ((b[0] - a[0]) * (y - a[1])) / (b[1] - a[1]) + a[0]) inside = !inside;
+        var dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy;
+        var t = l ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l)) : 0;
+        var ex = a[0] + t * dx - x, ey = a[1] + t * dy - y;
+        if (ex * ex + ey * ey <= r2) return true;
+      }
+      return inside;
+    }
+    function hull(pts) {
+      var p = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }), out = [], k, i, lo;
+      if (p.length < 3) return p;
+      function turn(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
+      for (i = 0; i < p.length; i++) { while (out.length > 1 && turn(out[out.length - 2], out[out.length - 1], p[i]) <= 0) out.pop(); out.push(p[i]); }
+      lo = out.length + 1;
+      for (i = p.length - 2; i >= 0; i--) { while (out.length >= lo && turn(out[out.length - 2], out[out.length - 1], p[i]) <= 0) out.pop(); out.push(p[i]); }
+      out.pop();
+      return out;
+    }
+    function watch(el, test) {
+      var over = false, down = false;
+      function show(on) { if (on !== over) { over = on; el.classList.toggle("is-grab", on); } }
+      el.addEventListener("pointermove", function (e) {
+        if (down || e.pointerType === "touch") return;
+        show(test(e.clientX, e.clientY));
+      });
+      el.addEventListener("pointerleave", function () { if (!down) show(false); });
+      return {
+        down: function (e) {
+          if (!test(e.clientX, e.clientY)) return false;
+          down = true; el.classList.add("is-grabbing"); show(true);
+          return true;
+        },
+        up: function () { down = false; el.classList.remove("is-grabbing"); },
+      };
+    }
+    (window.NTS = window.NTS || {}).grab = { SLACK: SLACK, near: near, hull: hull, watch: watch };
+  })();
 })();

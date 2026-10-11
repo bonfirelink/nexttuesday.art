@@ -12,7 +12,8 @@ test("H2 embers figure: rotation still while pressed, moving again after release
   await page.waitForSelector("canvas.nts-hearth");
   const host = page.locator("canvas.nts-hearth");
   await host.scrollIntoViewIfNeeded();
-  const box = await host.boundingBox();
+  // the canvas is the whole hero; the figure sits at the centre of the stage in it
+  const box = await page.locator(".embers-hero .hearth-stage").boundingBox();
   const x = box.x + box.width / 2, y = box.y + box.height / 2;
 
   await page.mouse.move(x, y);

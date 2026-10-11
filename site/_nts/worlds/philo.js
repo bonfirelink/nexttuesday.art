@@ -1,7 +1,7 @@
 /* NOT NOT PHILO's entity on canvas. Needs penrose.js loaded first.
    Mounts on every <div class="nts-penrose"> (the page entity: rests closed,
    tilts slowly open on an axis that drifts, closes again; a drag tilts it
-   by hand) and on every <div data-nts-fragment="philo"> (small, slower,
+   by hand, pressed on the figure) and on every <div data-nts-fragment="philo"> (small, slower,
    not interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
    host's computed --penrose-ink, --penrose-cut and --penrose-ground. While
@@ -11,8 +11,8 @@
    fragment; one closed frame under prefers-reduced-motion. */
 (() => {
   "use strict";
-  const P = window.NTS && window.NTS.penrose;
-  if (!P) return;
+  const P = window.NTS && window.NTS.penrose, G = window.NTS && window.NTS.grab;
+  if (!P || !G) return;
   const { frame, CLOSED } = P;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -63,11 +63,14 @@
       if (q < 1) paint(ctx, col, pose);
       if (q > 0) paint(tctx, night, pose);
     }
+    /* the pieces last drawn, in model units: what a press is tested against */
+    let shown = [];
     function paint(ctx, col, pose) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       ctx.lineCap = "butt";
-      for (const f of frame(pose)) {
+      shown = frame(pose);
+      for (const f of shown) {
         ctx.beginPath();
         f.poly.forEach(([x, y], i) => ctx[i ? "lineTo" : "moveTo"](cx + x * scale, cy - y * scale));
         ctx.closePath();
@@ -122,15 +125,25 @@
     });
     let timer = 0;
     addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { measure(); redraw(); }, 120); });
+    /* on the figure: inside one of its drawn pieces or within the slack of
+       its edge, tested in model units (no per-frame work) */
+    function onFigure(px, py) {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width || !scale) return false;
+      const k = w / r.width, x = ((px - r.left) * k - cx) / scale, y = (cy - (py - r.top) * k) / scale;
+      for (const f of shown) if (G.near(f.poly, x, y, (G.SLACK * k) / scale)) return true;
+      return false;
+    }
     if (!lite) {
-      host.addEventListener("pointerdown", (e) => { hand.active = true; hand.x = e.clientX; hand.y = e.clientY; host.setPointerCapture(e.pointerId); });
+      const grab = G.watch(host, onFigure);
+      host.addEventListener("pointerdown", (e) => { if (!grab.down(e)) return; hand.active = true; hand.x = e.clientX; hand.y = e.clientY; host.setPointerCapture(e.pointerId); });
       host.addEventListener("pointermove", (e) => {
         if (!hand.active) return;
         hand.dTheta += (e.clientX - hand.x) / 140; hand.dPsi += (e.clientY - hand.y) / 400;
         hand.x = e.clientX; hand.y = e.clientY;
         if (reduce.matches) draw({ ...CLOSED, theta: hand.dTheta, psi: hand.dPsi });
       });
-      const release = () => { hand.active = false; };
+      const release = () => { hand.active = false; grab.up(); };
       host.addEventListener("pointerup", release);
       host.addEventListener("pointercancel", release);
       host.addEventListener("keydown", (e) => {

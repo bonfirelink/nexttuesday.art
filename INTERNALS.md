@@ -539,6 +539,17 @@ the accessible element and the target of drag and keys; the baseline
 comes from a probe line in the same face at line-height 1, so the glyphs
 sit where the pre's own lines put them (within a device pixel).
 
+A press grabs a figure only on the figure, in all three worlds
+(`NTS.grab` in `nts.js`): the world gives a test of a point against the
+outline it last drew (EMBERS: the hull of the solid's four turned vertices;
+philo: its drawn pieces, tested in model units; INTERSECT: the hull of the
+last frame's glyphs, from the ends of each row), with `NTS.grab.SLACK`
+(14px) around it. `watch` returns `down`/`up` for the drag handlers and puts
+`.is-grab` (hover over the figure, mouse and pen) and `.is-grabbing` on the
+host, which the stylesheets turn into the cursors. A press elsewhere starts
+nothing and captures nothing, so scrolling and clicks go through. The test
+runs on pointer events only; the keyboard is unchanged.
+
 ## Fragments (for the home page)
 
 One element per world, anywhere, any size (they are square):
