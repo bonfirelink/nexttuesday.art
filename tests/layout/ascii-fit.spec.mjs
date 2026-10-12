@@ -61,11 +61,14 @@ test.describe("L3b ASCII solid fits the ring", () => {
     expect(mean, "fragment's mean span over its box").toBeGreaterThanOrEqual(FRAG_MIN);
     expect(mean, "fragment's mean span over its box").toBeLessThanOrEqual(FRAG_MAX);
     // the hero: no pose reaches past the room it is given
-    const room = 1.34, C = Math.floor(64 * room), hz = ascii.fit(fig, ascii.SPAN.hero, (C - 3) / 64);
+    // the page's canvas over its pre (intersect.css: 128.6% across, 133.2% down), as cells
+    // of a 0.6em face at 64 columns, and the room fit() gets from them (ascii.js)
+    const ratio = 0.6, C = Math.floor(1.286 * 64), R = Math.floor(1.332 * 64 * ratio);
+    const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / ratio) / 64);
     expect(hz * 0.95, "the room does not cut the hero's size (zoom, unclamped vs clamped)").toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero) * 0.95, 3);
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
-      const ls = ascii.lines(fig, C, C, 1, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 64);
-      expect(ls[0].trim() + ls[C - 1].trim(), `pose ${i},${j}: top and bottom rows of the grid`).toBe("");
+      const ls = ascii.lines(fig, C, R, ratio, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 64);
+      expect(ls[0].trim() + ls[R - 1].trim(), `pose ${i},${j}: top and bottom rows of the grid`).toBe("");
       expect(Math.max(...ls.map((l) => l.length)), `pose ${i},${j}: rightmost glyph`).toBeLessThan(C);
       expect(Math.min(...ls.filter((l) => l.trim()).map((l) => l.search(/\S/))), `pose ${i},${j}: leftmost glyph`).toBeGreaterThan(0);
     }

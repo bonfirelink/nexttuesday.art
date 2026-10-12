@@ -178,3 +178,22 @@ test.describe("L3 the baked still is the first live frame", () => {
     });
   }
 });
+
+// The baked still's glyphs are sized by CSS so that data-cols cells of the mono's 0.6em
+// advance span the pre: 38.4 = 64 x 0.6 on the page, 22.2 = 37 x 0.6 in a fragment
+// (intersect.css); they follow data-cols. Half a pixel across the whole pre.
+const FONT_FIT_TOL = 0.5;
+test.describe("L3 the still's glyphs span the pre", () => {
+  for (const [width, height] of [[390, 844], [1280, 500]]) {
+    test.describe(`${width}x${height}`, () => {
+      test.use({ viewport: { width, height } });
+      for (const [p, k] of [[PAGES[0], 38.4], [PAGES[1], 22.2]]) {
+        test(`${p.name}: font size x ${k} is the pre's width`, async ({ page }) => {
+          await page.goto(process.env.NTS_BASE + p.path);
+          const r = await page.evaluate((sel) => { const cs = getComputedStyle(document.querySelector(sel)); return { fs: parseFloat(cs.fontSize), w: parseFloat(cs.width) }; }, p.pre);
+          expect(Math.abs(r.fs * k - r.w), `font size ${r.fs} x ${k} vs pre width ${r.w}`).toBeLessThanOrEqual(FONT_FIT_TOL);
+        });
+      }
+    });
+  }
+});

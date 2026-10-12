@@ -61,7 +61,8 @@ const EMBLEM = { core: read(join(nts, 'parts', 'emblem-core.html')).trim(), orbi
 const STILLS = {
   embers: read(join(nts, 'parts', 'still-embers.svg')).trim(),
   philo: read(join(nts, 'parts', 'still-philo.svg')).trim(),
-  intersect: `<pre aria-hidden="true">${esc(read(join(nts, 'parts', 'still-intersect-sm.txt')))}</pre>`,
+  // the parser drops a newline right after <pre>: this one, not the still's blank first row
+  intersect: `<pre aria-hidden="true">\n${esc(read(join(nts, 'parts', 'still-intersect-sm.txt')))}</pre>`,
   'intersect-lg': esc(read(join(nts, 'parts', 'still-intersect.txt'))),
 };
 
