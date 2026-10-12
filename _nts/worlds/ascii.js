@@ -147,6 +147,10 @@
      fragment keeps the size it had, its window cutting its widest poses as
      the other worlds' fragments are cut by theirs. */
   var SPAN = { hero: 0.97, fragment: 1.015 };
+  /* the pose a figure starts in, which the baked stills show too (see
+     tools/gen-stills.mjs): at the page's fit the solid keeps a glyph clear
+     of its still's grid, which has no room around the box to overshoot */
+  var POSE = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.1, ay: 0.3 };
   function fitZoom(fig, span, room) {
     var e = extent(fig);
     return Math.min(span / e.span, (room || Infinity) / e.reach);
@@ -184,7 +188,7 @@
   function render(fig, cols, rows, aspect, pose, zoom, unit) { return lines(fig, cols, rows, aspect, pose, zoom, unit).join("\n"); }
   var built = {};
   function figure(name) { if (!built[name]) built[name] = FIGURES[name](); return built[name]; }
-  var api = { render: render, lines: lines, figure: figure, fit: fitZoom, SPAN: SPAN, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
+  var api = { render: render, lines: lines, figure: figure, fit: fitZoom, SPAN: SPAN, POSE: POSE, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   if (typeof document === "undefined") return;
   window.NTS = window.NTS || {}; window.NTS.ascii = api;
@@ -220,7 +224,7 @@
        grid covers the canvas, centred on the pre; ox/oy place it on the
        canvas, gx/gy on the pre; zoom fits the figure to the pre's box */
     var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1;
-    var pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
+    var pose = { phi: POSE.phi, alpha: POSE.alpha, spin: POSE.spin, ax: POSE.ax, ay: POSE.ay };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, held = false, raf = 0, last = 0, acc = 0, tAcc = 0;
     /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
        CSS (a square), so nothing here changes the layout. The cell ratio
@@ -242,13 +246,13 @@
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
       size = Math.min(24, Math.max(3, w / cols / ratio)); aspect = ratio; fitted = w;
-      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h, cw = ratio * size;
-      grid = Math.max(cols, Math.floor(cW / cw)); rows = Math.max(1, Math.floor(cH / size));
-      ox = (cW - grid * cw) / 2; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
+      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h, cell = ratio * size;
+      grid = Math.max(cols, Math.floor(cW / cell)); rows = Math.max(1, Math.floor(cH / size));
+      ox = (cW - grid * cell) / 2; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
       /* the room around the pre, in its half-widths, keeps a glyph clear of
          the canvas's edge on every side (a glyph's cell is the one its
          position falls in, so a reach of half the grid less a cell and a half) */
-      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? 0 : Math.min(grid - 3, (rows - 3) / ratio) / cols);
+      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? undefined : Math.min(grid - 3, (rows - 3) / ratio) / cols);
       dpr = Math.min(3, devicePixelRatio || 1);
       canvas.width = Math.round(cW * dpr); canvas.height = Math.round(cH * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
@@ -258,7 +262,7 @@
          text is scaled across to the cell width instead */
       ctx.font = day.font + size + "px " + day.family;
       var adv = ctx.measureText("M".repeat(50)).width / 50;
-      sx = adv > 0 ? cw / adv : 1;
+      sx = adv > 0 ? cell / adv : 1;
       /* the baseline as the pre's lines put it: a line of the face at this
          size, line-height 1, in a probe outside any transformed ancestor */
       var line = document.createElement("div"), mark = document.createElement("span");
