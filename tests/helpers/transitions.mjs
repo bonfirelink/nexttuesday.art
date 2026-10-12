@@ -39,7 +39,7 @@ export function recordTransitions() {
 // nts.js, whose listener is added later) and every `nts:bleed` event.
 export function recordBleed() {
   // Figure canvases restyle themselves in the world's colours when the bleed
-  // ends (INTERSECT's glow), so only the markup around them is compared.
+  // ends, so only the markup around them is compared.
   window.__heroStyles = () => {
     const hero = document.querySelector("main .hero");
     return hero ? [hero, ...hero.querySelectorAll("*:not(canvas)")].map((e) => e.getAttribute("style")) : [];

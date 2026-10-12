@@ -200,18 +200,15 @@
   window.NTS = window.NTS || {}; window.NTS.ascii = api;
 
   /* Draws the live solid on a canvas over the <pre>'s box, one fillText
-     per line, in the pre's own face, size, colour and glow (its computed
-     color and text-shadow, read when the colours can change, never per
-     frame): writing the text into the pre instead made the page lay out
-     every frame. The pre stays the box, the target of drag and keys, and
-     the accessible element (role, label); its baked still text moves into a
-     span that is hidden once the canvas draws. The glow (the pre's
-     text-shadow) is a drop-shadow filter on the canvas element: blurring
-     each line's shadow in the canvas looked the same but cost the main
-     thread more than the text did (software canvas, 4x throttle). */
+     per line, in the pre's own face, size and colour (its computed color,
+     read when the colours can change, never per frame): writing the text
+     into the pre instead made the page lay out every frame. The pre stays
+     the box, the target of drag and keys, and the accessible element (role,
+     label); its baked still text moves into a span that is hidden once the
+     canvas draws. */
   function look(el) {
-    var cs = getComputedStyle(el), m = /^(.*?)\s+(-?[\d.]+)px\s+(-?[\d.]+)px(?:\s+([\d.]+)px)?/.exec(cs.textShadow || "");
-    return { fill: cs.color, font: cs.fontStyle + " " + cs.fontWeight + " ", family: cs.fontFamily, glow: m ? { c: m[1], x: +m[2], y: +m[3], b: +(m[4] || 0) } : null };
+    var cs = getComputedStyle(el);
+    return { fill: cs.color, font: cs.fontStyle + " " + cs.fontWeight + " ", family: cs.fontFamily };
   }
   function mount(pre, name, cols, lite) {
     var G = window.NTS.grab;
@@ -287,7 +284,6 @@
       base = mark.getBoundingClientRect().top - line.getBoundingClientRect().top; document.body.removeChild(line);
       if (!(base > 0)) base = size * 0.8;
     }
-    function glow(c, el, st) { el.style.filter = st.glow ? "drop-shadow(" + st.glow.x + "px " + st.glow.y + "px " + st.glow.b + "px " + st.glow.c + ")" : ""; }
     function paint(c, el, st, ls) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
       c.setTransform(dpr * sx, 0, 0, dpr, 0, 0);
@@ -301,7 +297,7 @@
     function faceReady() { try { return !fonts || !fonts.check || fonts.check(face, "M"); } catch (e) { return true; } }
     function refit() {
       if (pending || !live || !(faceReady() || gaveUp)) return;
-      pending = requestAnimationFrame(function () { pending = 0; fit(); glow(ctx, canvas, day); if (rows) draw(); });
+      pending = requestAnimationFrame(function () { pending = 0; fit(); if (rows) draw(); });
     }
     /* while a world bleed-in's disc opens, the glyphs also go to the
        canvas's twin in the disc's copy (NTS.bleed.twin), in the colours the
@@ -312,11 +308,11 @@
       if (!tp || !tc) return;
       tp.classList.add("is-live");
       twin = tc; tctx = twin.getContext("2d"); night = look(tp);
-      twin.width = canvas.width; twin.height = canvas.height; glow(tctx, twin, night);
+      twin.width = canvas.width; twin.height = canvas.height;
     }
     addEventListener("nts:bleed", function (e) {
       if (e.detail.phase === "start") { twinUp(); if (live && twin) draw(); }
-      else if (e.detail.phase === "end") { twin = tctx = night = null; if (live) { day = look(pre); glow(ctx, canvas, day); draw(); } }
+      else if (e.detail.phase === "end") { twin = tctx = night = null; if (live) { day = look(pre); draw(); } }
     });
     /* the lines last drawn, and the convex hull of their glyphs (made when a
        press or the pointer asks, from the ends of each row) */
@@ -387,9 +383,8 @@
     else addEventListener("resize", refit);
     function go() {
       live = true; pre.classList.add("is-live");
-      fit(); glow(ctx, canvas, day);
+      fit();
       if (!twin) twinUp();
-      if (twin) glow(tctx, twin, night);
       draw(); start();
     }
     if (!fonts || !fonts.load) { go(); return; }

@@ -197,3 +197,21 @@ test.describe("L3 the still's glyphs span the pre", () => {
     });
   }
 });
+
+// INTERSECT's glyphs have no glow: no text-shadow on the pre and no filter on its canvas,
+// on the page (in its world) and in the home's fragment, so the two look the same.
+test.describe("L3 the solid has no glow", () => {
+  test.use({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
+  for (const p of PAGES) {
+    test(`${p.name}: no text-shadow, no canvas filter`, async ({ page }) => {
+      await openPage(page, p.path, { live: [p.pre] });
+      await page.waitForFunction(() => document.documentElement.getAttribute("data-bleed-state") !== "before");
+      const r = await page.evaluate((sel) => {
+        const pre = document.querySelector(sel), c = pre.querySelector(":scope > canvas");
+        return { shadow: getComputedStyle(pre).textShadow, filter: getComputedStyle(c).filter };
+      }, p.pre);
+      expect(r.shadow, "the pre's text-shadow").toBe("none");
+      expect(r.filter, "the canvas's filter").toBe("none");
+    });
+  }
+});

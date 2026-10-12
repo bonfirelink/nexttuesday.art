@@ -554,9 +554,8 @@ table), `.intersect-grain` (a grain div, first in body).
 The entity is `<pre data-nts-ascii="tetra" data-cols="52" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
 figures: `tetra`, `heptagram`, `seed`. Live, `ascii.js` moves the baked
 still into a hidden `span.ascii-still` and draws the glyphs on a canvas
-over the pre's box, one `fillText` per line, in the pre's computed face,
-colour and `text-shadow` (as a `drop-shadow` filter on the canvas; a
-canvas shadow per line looked the same but cost more main thread);
+over the pre's box, one `fillText` per line, in the pre's computed face
+and colour, without a glow (on the page and in the fragments alike);
 writing the text into the pre made the page lay out on
 every frame. Those values are read at mount, on a resize and at the
 bleed-in's start and end, never per frame, so a style that changes the
