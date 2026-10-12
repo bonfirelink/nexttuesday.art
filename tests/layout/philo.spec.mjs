@@ -63,6 +63,6 @@ test("PHILO title is the one key line, with nothing above it", async ({ page }) 
     const el = document.querySelector("#title");
     return { text: el.textContent.trim(), kids: el.children.length };
   });
-  expect(h1.text).toBe("NOT NOT PHILO");
+  expect(h1.text).toBe("NOT2 PHILO"); // the logotype: an exponent 2 stands for the second NOT
   expect(h1.kids, "only the key span").toBe(1);
 });
