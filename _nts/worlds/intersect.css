@@ -66,11 +66,9 @@ pre[data-nts-ascii] {
 }
 pre[data-nts-ascii].is-grab { cursor: grab; }
 pre[data-nts-ascii].is-grabbing { cursor: grabbing; }
-pre[data-nts-ascii].is-live { text-shadow: 0 0 6px color-mix(in srgb, var(--w-fg) 35%, transparent); }
-html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-state="in"] .nts-bleed-old pre[data-nts-ascii].is-live { text-shadow: none; }
 
 /* live, ascii.js draws the glyphs on a canvas over the pre's box, in the
-   pre's computed color and text-shadow (the rules above and below); the
+   pre's computed color, without a glow (the rules above and below); the
    baked still text stays in the pre for scripts off, hidden once live */
 :is(pre[data-nts-ascii], [data-nts-fragment="intersect"] pre) { position: relative; }
 :is(pre[data-nts-ascii], [data-nts-fragment="intersect"] pre) > canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -100,4 +98,3 @@ body[data-world="intersect"] > main { overflow-x: clip; }
 [data-nts-fragment="intersect"] .still { width: 100%; height: 100%; display: grid; place-items: center; }
 [data-nts-fragment="intersect"] pre { margin: 0; width: 100%; aspect-ratio: 1; font-family: var(--font-mono); font-weight: 700; line-height: 1; white-space: pre; overflow: hidden; font-size: calc(100cqi / 31.2); }
 /* as the page's: 52 cells (ascii.js's fragment default) of 0.6em span the box */
-[data-nts-fragment="intersect"] pre.is-live { text-shadow: 0 0 5px rgba(233, 226, 207, .35); }
