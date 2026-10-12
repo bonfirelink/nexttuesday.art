@@ -226,9 +226,9 @@
     /* the canvas may be larger than the pre (CSS sets its overhang): the
        grid covers the canvas, centred on the pre; ox/oy place it on the
        canvas, gx/gy on the pre; zoom fits the figure to the pre's box */
-    var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1, cellW = 0;
-    /* the baseline of grid row r, on a whole device pixel */
-    function lineY(r) { return Math.round((oy + r * size + base) * dpr) / dpr; }
+    var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1, cellW = 0, idealW = 0, unit = cols, kx = 1, ky = 1;
+    /* the baseline of grid row r, on a whole pixel of the bitmap */
+    function lineY(r) { return Math.round((oy + r * size + base) * ky) / ky; }
     var pose = { phi: POSE.phi, alpha: POSE.alpha, spin: POSE.spin, ax: POSE.ax, ay: POSE.ay };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, held = false, raf = 0, last = 0, acc = 0, tAcc = 0;
     /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
@@ -243,31 +243,44 @@
        above the face's ascent. */
     var fitted = 0, gaveUp = false;
     function fit() {
-      var w = pre.clientWidth; if (!w) return;
+      var w = parseFloat(getComputedStyle(pre).width) || pre.clientWidth; if (!w) return;
       var probe = document.createElement("span");
       probe.textContent = "M".repeat(100);
       probe.style.cssText = "position:absolute;visibility:hidden;font-size:100px;line-height:1;letter-spacing:0";
       pre.appendChild(probe);
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
-      size = Math.min(24, Math.max(3, w / cols / ratio)); fitted = w;
+      size = Math.min(24, Math.max(3, w / cols / ratio)); fitted = pre.clientWidth;
       dpr = Math.min(3, devicePixelRatio || 1);
-      /* The cell is a whole number of device pixels and each line starts on
-         one (lineY, ox): at a fractional cell each glyph fell at its own
-         sub-pixel phase and the same glyph drew up to a fifth heavier in
-         one place than another. The figure is then up to half a device
-         pixel per cell wider than the box's cells (about 1%). */
-      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h;
-      var cell = Math.max(1, Math.round(ratio * size * dpr)) / dpr;
-      cellW = cell; aspect = cell / size;
-      grid = Math.max(cols, Math.floor(cW / cell)); rows = Math.max(1, Math.floor(cH / size));
-      ox = Math.round((cW - grid * cell) / 2 * dpr) / dpr; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
+      /* The bitmap is the canvas's layout box (computed, fractional, without
+         a transformed ancestor's scale) at the density, and kx/ky are its
+         pixels per CSS pixel. The cell is a whole number of those pixels and
+         each line starts on one (lineY, ox): at a fractional cell each glyph
+         fell at its own sub-pixel phase and the same glyph drew up to a
+         fifth heavier in one place than another. The figure keeps its size:
+         lines() is given the box's width in snapped cells (unit). */
+      /* The canvas's CSS size is then set to the bitmap's over the density,
+         a fraction of a pixel off the box CSS gives it, so the screen shows
+         the bitmap 1:1 (a box a fraction wider resampled it, and the glyph
+         phase drifted along a line). */
+      var h = parseFloat(getComputedStyle(pre).height) || w, ccs;
+      canvas.style.width = canvas.style.height = ""; ccs = getComputedStyle(canvas);
+      var cW = parseFloat(ccs.width) || w, cH = parseFloat(ccs.height) || h;
+      canvas.width = Math.max(1, Math.round(cW * dpr)); canvas.height = Math.max(1, Math.round(cH * dpr));
+      cW = canvas.width / dpr; cH = canvas.height / dpr;
+      canvas.style.width = cW + "px"; canvas.style.height = cH + "px";
+      if (twin) { twin.width = canvas.width; twin.height = canvas.height; twin.style.width = canvas.style.width; twin.style.height = canvas.style.height; }
+      kx = ky = dpr;
+      var cell = Math.max(1, Math.round(ratio * size * kx)) / kx;
+      idealW = ratio * size; cellW = cell; aspect = cell / size; unit = cols * idealW / cell;
+      /* the page's grid stops a glyph short of its canvas's edge; a
+         fragment's covers its box, its window cutting the edge glyphs */
+      grid = lite ? Math.ceil(cW / cell) : Math.floor(cW / cell); rows = Math.max(1, lite ? Math.ceil(cH / size) : Math.floor(cH / size));
+      ox = Math.round((cW - grid * cell) / 2 * kx) / kx; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
       /* the room around the pre, in its half-widths, keeps a glyph clear of
          the canvas's edge on every side (a glyph's cell is the one its
          position falls in, so a reach of half the grid less a cell and a half) */
-      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? undefined : Math.min(grid - 3, (rows - 3) / aspect) / cols);
-      canvas.width = Math.round(cW * dpr); canvas.height = Math.round(cH * dpr);
-      if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
+      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? undefined : Math.min(grid - 3, (rows - 3) / aspect) / unit);
       day = look(pre);
       /* the canvas sets a small face on whole-pixel advances (4px for a
          3.68px cell), which drifts a line of glyphs off its cells: the
@@ -286,7 +299,7 @@
     }
     function paint(c, el, st, ls) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
-      c.setTransform(dpr * sx, 0, 0, dpr, 0, 0);
+      c.setTransform(kx * sx, 0, 0, ky, 0, 0);
       c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
       for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], ox / sx, lineY(r));
     }
@@ -308,7 +321,7 @@
       if (!tp || !tc) return;
       tp.classList.add("is-live");
       twin = tc; tctx = twin.getContext("2d"); night = look(tp);
-      twin.width = canvas.width; twin.height = canvas.height;
+      twin.width = canvas.width; twin.height = canvas.height; twin.style.width = canvas.style.width; twin.style.height = canvas.style.height;
     }
     addEventListener("nts:bleed", function (e) {
       if (e.detail.phase === "start") { twinUp(); if (live && twin) draw(); }
@@ -332,7 +345,7 @@
       return outline.length > 2 && G.near(outline, (px - b.left) * k, (py - b.top) * k, G.SLACK * k);
     }
     function draw() {
-      var ls = lines(fig, grid, rows, aspect, pose, zoom, cols), q = twin ? window.NTS.bleed.progress() : 0;
+      var ls = lines(fig, grid, rows, aspect, pose, zoom, unit), q = twin ? window.NTS.bleed.progress() : 0;
       shown = ls; outline = null;
       if (q < 1) paint(ctx, canvas, day, ls);
       if (twin && q > 0) paint(tctx, twin, night, ls);
@@ -348,6 +361,8 @@
     }
     function start() { if (still.matches || raf || !live || !visible || held || document.hidden) return; last = 0; raf = requestAnimationFrame(frame); }
     function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+    /* the paint's metrics, for checks: cells, line origin, scale, face */
+    pre.ntsCells = function () { return { cell: cellW, ideal: idealW, unit: unit, cols: cols, grid: grid, zoom: zoom, ox: ox, size: size, base: base, sx: sx, kx: kx, ky: ky, dpr: dpr, font: day.font + size + "px " + day.family, line: lineY }; };
     if (!lite) {
       var grab = G.watch(pre, onFigure);
       pre.addEventListener("pointerdown", function (e) { if (!grab.down(e)) return; dragging = true; lastX = e.clientX; lastY = e.clientY; pre.setPointerCapture(e.pointerId); });
@@ -363,8 +378,6 @@
       pre.addEventListener("pointerup", release); pre.addEventListener("pointercancel", release); pre.addEventListener("lostpointercapture", release);
       pre.stoke = function () { speed = 4; };
       pre.ntsPose = function () { return [pose.ax, pose.ay]; };
-      /* the paint's metrics, for checks: cell, line origin, density, face */
-      pre.ntsCells = function () { return { cell: cellW, ox: ox, size: size, base: base, sx: sx, dpr: dpr, font: day.font + size + "px " + day.family, line: lineY }; };
       pre.addEventListener("keydown", function (e) {
         var k = e.key, d = k === "ArrowLeft" ? -1 : k === "ArrowRight" ? 1 : 0, v = k === "ArrowUp" ? -1 : k === "ArrowDown" ? 1 : 0;
         if (!d && !v) return;
