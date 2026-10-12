@@ -177,7 +177,7 @@ Type, five families, each with one job:
   at 112) and NOT NOT PHILO's poster bold (`.philo-key`, `.philo-bar`, the
   volume titles, the band heading).
 - `--font-mono`: Red Hat Mono: dates, EMBERS' bar and hint, INTERSECT's
-  labels, tables and the ASCII solid.
+  labels, tables and the ASCII solid (in its bold, 700, on the page and in the fragments; the solid waits for and checks the pre's own weight before it measures).
 
 Sizes of the main levels: `h1` clamp(2.6rem, 10vw, 5.5rem) (the home title
 clamp(2.6rem, 11.5vw, 5.5rem)), `h2` clamp(1.9rem, 5.5vw, 3rem), `h3`

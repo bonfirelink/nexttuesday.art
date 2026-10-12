@@ -276,10 +276,11 @@
       c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
       for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], ox / sx, oy + r * size + base);
     }
-    var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
+    /* the face the glyphs are drawn in: the pre's own family and weight */
+    var pending = 0, live = false, cs0 = getComputedStyle(pre), face = cs0.fontWeight + " 100px " + cs0.fontFamily, fonts = document.fonts;
     /* Before the face is in (or given up on) nothing is measured; while it
        is still loading later, a refit would measure the fallback. */
-    function faceReady() { try { return !fonts || !fonts.check || fonts.check("400 100px " + family, "M"); } catch (e) { return true; } }
+    function faceReady() { try { return !fonts || !fonts.check || fonts.check(face, "M"); } catch (e) { return true; } }
     function refit() {
       if (pending || !live || !(faceReady() || gaveUp)) return;
       pending = requestAnimationFrame(function () { pending = 0; fit(); glow(ctx, canvas, day); if (rows) draw(); });
@@ -374,7 +375,7 @@
     if (!fonts || !fonts.load) { go(); return; }
     /* The first measure waits for the face (at most 3 s, for a blocked
        network); until then the baked still stays on screen. */
-    Promise.race([fonts.load("400 100px " + family, "M"), new Promise(function (r) { setTimeout(r, 3000); })]).catch(function () {}).then(function () {
+    Promise.race([fonts.load(face, "M"), new Promise(function (r) { setTimeout(r, 3000); })]).catch(function () {}).then(function () {
       gaveUp = !faceReady();
       go();
       fonts.addEventListener("loadingdone", refit);
