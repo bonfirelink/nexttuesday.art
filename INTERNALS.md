@@ -428,8 +428,12 @@ behave the same.
   penrose colours, `--grain`). The same rules apply to `.nts-bleed-old`
   while the state is `in` (not the grain, below). The root itself
   (`html`) reads the NTS set while the state is `before` or `in`: its ground
-  is what the arrival's view transition crossfades over, and a world's dark
-  there shows through the crossfade on the whole page but the header. The
+  is what the arrival's view transition lies on, and a world's dark
+  there would show through any see-through moment on the whole page but the
+  header. The root pair has none: the old snapshot stays opaque (no
+  animation) and the new one fades in over it (`vt-in`, 420ms), because
+  Safari paints a dark backdrop behind a fading pair (`T7` in
+  `tests/transitions/solid-root.spec.mjs`). The
   kits set the root's world tokens at `:root`'s weight
   (`:root:where(:has(> body[data-world=…]))`), so the arrival selectors win;
   a settled world page has its own ground on the root. Only three states exist: `before`, `in` (from
