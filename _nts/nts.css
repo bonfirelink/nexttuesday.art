@@ -430,8 +430,14 @@ body > .nts-night { position: absolute; left: 0; top: 0; z-index: 2; overflow: c
 .nts-night-disc { position: absolute; border-radius: 50%; overflow: hidden; transform: scale(0); will-change: transform; }
 .nts-night-in { position: absolute; background: var(--w-bg); color: var(--w-fg); will-change: transform; }
 .nts-night * { view-transition-name: none !important; }
-/* the parts outside the hero crossfade as the disc passes their centre */
-html[data-bleed-state="in"] :is(body > :not(main, footer, .nts-night), body > :not(main, footer, .nts-night) *) { transition: color var(--dur-bleed-fade) ease, background-color var(--dur-bleed-fade) ease, border-color var(--dur-bleed-fade) ease, box-shadow var(--dur-bleed-fade) ease, text-shadow var(--dur-bleed-fade) ease, fill var(--dur-bleed-fade) ease, stroke var(--dur-bleed-fade) ease; }
+/* the parts outside the hero crossfade once the disc covers them. Only the
+   part itself fades: what is inside it inherits the fading colour frame for
+   frame. A transition on each level would restart whenever its parent's
+   value moved, so the ink would trail its ground by one fade per level
+   (labels dark on the new dark ground). Marks with a colour of their own
+   (the accent) change at once */
+html[data-bleed-state="in"] body > :not(main, footer, .nts-night) { transition: color var(--dur-bleed-fade) ease, background-color var(--dur-bleed-fade) ease, border-color var(--dur-bleed-fade) ease, box-shadow var(--dur-bleed-fade) ease, text-shadow var(--dur-bleed-fade) ease, fill var(--dur-bleed-fade) ease, stroke var(--dur-bleed-fade) ease; }
+html[data-bleed-state="in"] body > :not(main, footer, .nts-night) * { transition: none; }
 
 /* ---------- 12. shared keyframes ---------- */
 @keyframes turn { to { transform: rotate(360deg); } }
