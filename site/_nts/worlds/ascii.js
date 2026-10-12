@@ -102,7 +102,11 @@
     var cxr = Math.cos(pose.ax), sxr = Math.sin(pose.ax), cyr = Math.cos(pose.ay), syr = Math.sin(pose.ay);
     return mul([1, 0, 0, 0, cxr, -sxr, 0, sxr, cxr], [cyr, 0, syr, 0, 1, 0, -syr, 0, cyr]);
   }
-  var K2 = 6, CULL = 0.35;
+  /* A solid's faces (its points before faceEnd) write depth but no glyph:
+     they hide the edges behind them and leave the edges in front to carry
+     the figure. They sit FACE_BACK further back, so an edge in front wins
+     against its own faces, which meet it at its depth. */
+  var K2 = 6, CULL = 0.35, FACE_BACK = 0.05;
   /* How large a figure draws at zoom 1 across the poses it can take: its
      silhouette's span (the larger side of its bounding box) averaged over
      them, in widths of the box the zoom refers to, and its furthest reach
@@ -110,7 +114,8 @@
      both grow without bound (the clock and a drag add to them), so the span
      samples the whole torus of pairs; a flat figure spins and precesses
      freely and tilts within the drag's clamp. Points are thinned for the
-     span (the surfaces are dense) and culled as lines() culls them. The
+     span (the surfaces are dense), culled as lines() culls them, and only
+     those that draw count (a solid's edges, not its faces). The
      reach is a bound, not a sample: a point at distance r from the centre
      projects at most r*K2/sqrt(K2^2 - r^2) from it, whatever the rotation.
      Once per figure. */
@@ -121,7 +126,7 @@
       var a = (i / S) * TAU, b = (j / S) * TAU;
       var m = turn(fig, fig.flat ? { phi: a, spin: b, alpha: 0.3 + 0.7 * j / (S - 1) } : { ax: a, ay: b });
       var x0 = 9, x1 = -9, y0 = 9, y1 = -9;
-      for (var k = 0; k < n; k += 5) {
+      for (var k = fig.faceEnd || 0; k < n; k += 5) {
         var q = k * 6, x = pts[q], y = pts[q + 1], z = pts[q + 2];
         if (m[6] * pts[q + 3] + m[7] * pts[q + 4] + m[8] * pts[q + 5] > CULL) continue;
         var o = K2 / (m[6] * x + m[7] * y + m[8] * z + K2), X = (m[0] * x + m[1] * y + m[2] * z) * o, Y = (m[3] * x + m[4] * y + m[5] * z) * o;
@@ -141,7 +146,7 @@
      it at its widest poses onto the canvas drawn around the ring; the
      fragment keeps the size it had, its window cutting its widest poses as
      the other worlds' fragments are cut by theirs. */
-  var SPAN = { hero: 0.95, fragment: 1.015 };
+  var SPAN = { hero: 0.97, fragment: 1.015 };
   function fitZoom(fig, span, room) {
     var e = extent(fig);
     return Math.min(span / e.span, (room || Infinity) / e.reach);
@@ -161,20 +166,14 @@
       var X = m[0] * x + m[1] * y + m[2] * z, Y = m[3] * x + m[4] * y + m[5] * z, Z = m[6] * x + m[7] * y + m[8] * z;
       var NX = m[0] * nx + m[1] * ny + m[2] * nz, NY = m[3] * nx + m[4] * ny + m[5] * nz, NZ = m[6] * nx + m[7] * ny + m[8] * nz;
       if (NZ > CULL) continue;
-      var ooz = 1 / (Z + K2);
+      var ooz = 1 / (Z + K2 + (k < faceEnd ? FACE_BACK : 0));
       var xp = (cx + K1 * X * ooz) | 0, yp = (cy - K1 * Y * ooz * aspect) | 0;
       if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
       var idx = yp * cols + xp;
       if (ooz > zb[idx]) {
         zb[idx] = ooz;
         var lum = NX * L[0] + NY * L[1] + NZ * L[2] + 1.0 * (ooz * K2 - 1);
-        if (k < faceEnd) {
-          var h = Math.sin(xp * 12.9898 + yp * 78.233) * 43758.5453; h -= Math.floor(h);
-          var density = Math.max(0.04, Math.min(0.6, (lum + 0.15) * 0.45));
-          chars[idx] = h < density ? (lum > 0.85 ? ":" : ".") : " ";
-        } else {
-          chars[idx] = RAMP[lum > 0 ? 1 + Math.min(10, (lum * 11) | 0) : 1];
-        }
+        chars[idx] = k < faceEnd ? " " : RAMP[lum > 0 ? 1 + Math.min(10, (lum * 11) | 0) : 1];
       }
     }
     var out = [];
@@ -248,8 +247,8 @@
       ox = (cW - grid * cw) / 2; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
       /* the room around the pre, in its half-widths, keeps a glyph clear of
          the canvas's edge on every side (a glyph's cell is the one its
-         position falls in, so a reach of half the grid less two cells) */
-      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? 0 : Math.min(grid - 4, (rows - 4) / ratio) / cols);
+         position falls in, so a reach of half the grid less a cell and a half) */
+      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? 0 : Math.min(grid - 3, (rows - 3) / ratio) / cols);
       dpr = Math.min(3, devicePixelRatio || 1);
       canvas.width = Math.round(cW * dpr); canvas.height = Math.round(cH * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
@@ -382,12 +381,12 @@
     });
   }
   function init() {
-    document.querySelectorAll("pre[data-nts-ascii]").forEach(function (pre) { mount(pre, pre.getAttribute("data-nts-ascii"), +pre.getAttribute("data-cols") || 84, false); });
+    document.querySelectorAll("pre[data-nts-ascii]").forEach(function (pre) { mount(pre, pre.getAttribute("data-nts-ascii"), +pre.getAttribute("data-cols") || 64, false); });
     document.querySelectorAll("[data-nts-fragment='intersect']").forEach(function (host) {
       var pre = host.querySelector("pre");
       if (!pre) { pre = document.createElement("pre"); pre.setAttribute("aria-hidden", "true"); host.appendChild(pre); }
       host.classList.add("is-live");
-      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 48, true);
+      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 37, true);
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

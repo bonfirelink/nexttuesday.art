@@ -49,8 +49,8 @@ test.describe("L3b ASCII solid fits the ring", () => {
   test("the fit holds over every pose a turn or a drag reaches (node)", () => {
     const fig = ascii.figure("tetra");
     expect(typeof ascii.fit, "ascii.fit").toBe("function");
-    // the fragment: its 48-column box, no overhang; mean glyph span over the pose torus
-    const cols = 48, rows = Math.round(cols * 0.6), zoom = ascii.fit(fig, ascii.SPAN.fragment), spans = [];
+    // the fragment: its 37-column box, no overhang; mean glyph span over the pose torus
+    const cols = 37, rows = Math.round(cols * 0.6), zoom = ascii.fit(fig, ascii.SPAN.fragment), spans = [];
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
       const ls = ascii.lines(fig, cols, rows, 0.6, { ax: (i / 16) * 2 * Math.PI, ay: (j / 16) * 2 * Math.PI }, zoom);
       let x0 = cols, x1 = 0, y0 = rows, y1 = 0;
@@ -61,10 +61,10 @@ test.describe("L3b ASCII solid fits the ring", () => {
     expect(mean, "fragment's mean span over its box").toBeGreaterThanOrEqual(FRAG_MIN);
     expect(mean, "fragment's mean span over its box").toBeLessThanOrEqual(FRAG_MAX);
     // the hero: no pose reaches past the room it is given
-    const room = 1.28, C = Math.floor(84 * room), hz = ascii.fit(fig, ascii.SPAN.hero, (C - 4) / 84);
+    const room = 1.34, C = Math.floor(64 * room), hz = ascii.fit(fig, ascii.SPAN.hero, (C - 3) / 64);
     expect(hz * 0.95, "the room does not cut the hero's size (zoom, unclamped vs clamped)").toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero) * 0.95, 3);
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
-      const ls = ascii.lines(fig, C, C, 1, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 84);
+      const ls = ascii.lines(fig, C, C, 1, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 64);
       expect(ls[0].trim() + ls[C - 1].trim(), `pose ${i},${j}: top and bottom rows of the grid`).toBe("");
       expect(Math.max(...ls.map((l) => l.length)), `pose ${i},${j}: rightmost glyph`).toBeLessThan(C);
       expect(Math.min(...ls.filter((l) => l.trim()).map((l) => l.search(/\S/))), `pose ${i},${j}: leftmost glyph`).toBeGreaterThan(0);
