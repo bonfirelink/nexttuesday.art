@@ -437,12 +437,14 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 /* ---------- falling in: cross-document view transitions ---------- */
 @view-transition { navigation: auto; }
 .nts-header { view-transition-name: nts-header; }
-::view-transition-old(root) { animation: vt-out 320ms ease both; }
+/* The old root snapshot stays fully opaque and the new one fades in on it: a
+   fading pair is see-through in the middle, and Safari paints a dark backdrop
+   behind it that washes the whole screen grey. */
+::view-transition-old(root) { animation: none; }
 ::view-transition-new(root) { animation: vt-in 420ms ease both; }
 ::view-transition-group(orb) { animation-duration: 640ms; animation-timing-function: var(--ease-out); }
 ::view-transition-old(orb), ::view-transition-new(orb) { animation-duration: 640ms; animation-timing-function: var(--ease-out); height: 100%; object-fit: contain; }
 ::view-transition-group(nts-header) { animation: none; }
-@keyframes vt-out { to { opacity: 0; } }
 @keyframes vt-in { from { opacity: 0; } }
 
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
