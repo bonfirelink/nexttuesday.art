@@ -77,9 +77,11 @@ html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-sta
 :is(pre[data-nts-ascii], [data-nts-fragment="intersect"] pre).is-live > .ascii-still { visibility: hidden; }
 /* the page's solid overshoots its ring at its widest poses, as the other
    worlds' figures do: its canvas reaches past the pre, which ascii.js
-   reads (17% fits any pose at the fitted size, with a glyph to spare) */
+   reads. It is what the fit uses and no more (its area is drawn every
+   frame): the solid's furthest reach plus a cell and a half on each side,
+   82 columns across and 51 rows down at 64 columns of a 0.6em face */
 pre[data-nts-ascii].is-live { overflow: visible; }
-pre[data-nts-ascii] > canvas { inset: -17%; width: 134%; max-width: none; height: 134%; }
+pre[data-nts-ascii] > canvas { inset: -16.6% -14.3%; width: 128.6%; max-width: none; height: 133.2%; }
 /* the canvas's empty margin may pass the screen's edge on a phone (the
    glyphs stay inside it): the page clips what would scroll sideways, at
    the screen's edge rather than the hero's, which is inside the gutters */
