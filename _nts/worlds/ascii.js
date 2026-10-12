@@ -159,12 +159,18 @@
      cell grid; aspect: cell width over height; pose: see turn(); zoom: the
      figure's scale in widths of `unit` columns (default cols), centred on
      the grid, so a grid wider than the box draws around it. */
+  var buf = null;
   function lines(fig, cols, rows, aspect, pose, zoom, unit) {
     var pts = fig.pts, n = pts.length / 6, faceEnd = fig.faceEnd || 0;
     var K1 = (zoom || 0.9) * ((unit || cols) / 2) * K2, cx = cols / 2, cy = rows / 2;
     var L = norm([0.25, 0.55, -0.8]);
-    var zb = new Float32Array(cols * rows), chars = new Array(cols * rows), k, m = turn(fig, pose);
-    for (k = 0; k < cols * rows; k++) chars[k] = " ";
+    var size = cols * rows, k, m = turn(fig, pose);
+    /* the depth and glyph buffers are kept between frames of one grid size
+       (every frame allocated them anew, for the collector to take back) */
+    if (!buf || buf.size !== size) buf = { size: size, zb: new Float32Array(size), chars: new Array(size) };
+    var zb = buf.zb, chars = buf.chars;
+    zb.fill(0);
+    for (k = 0; k < size; k++) chars[k] = " ";
     for (k = 0; k < n; k++) {
       var i = k * 6, x = pts[i], y = pts[i + 1], z = pts[i + 2], nx = pts[i + 3], ny = pts[i + 4], nz = pts[i + 5];
       var X = m[0] * x + m[1] * y + m[2] * z, Y = m[3] * x + m[4] * y + m[5] * z, Z = m[6] * x + m[7] * y + m[8] * z;
