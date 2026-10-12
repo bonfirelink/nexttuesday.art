@@ -131,10 +131,14 @@
 /* The NTS colours, in the colour code: the default world (the home,
    /events/) and the NTS state a world page opens in when reached from the
    home (section 11) read this one set, so the hand-over from the home to a
-   world is seamless. World kits set theirs on [data-world]; the arrival
-   selectors outrank them. Accent and accent text are ink: the voice and the
-   ochre mark hints by name. */
-:root, html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old {
+   world is seamless. World kits set theirs on [data-world] (and on the
+   root at no more than :root's weight); the arrival selectors outrank them.
+   The root keeps the NTS set until the world settles ("before" and "in"):
+   its ground is what the arrival's view transition crossfades over, so a
+   world's ground there would darken the whole page for the crossfade.
+   Accent and accent text are ink: the voice and the ochre mark hints by
+   name. */
+:root, html[data-bleed-state="before"], html[data-bleed-state="in"], html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old {
   --w-bg: var(--pal-beige);
   --w-bg-2: var(--pal-plywood);
   --w-fg: var(--pal-ink);
@@ -412,7 +416,7 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
    the world's except what carries .nts-bleed-old (the hero, and the header
    until the disc reaches it), which reads the same NTS tokens, and a copy
    of the hero in the world's colours (.nts-night) opens over it as a disc. */
-html[data-bleed-state="before"], html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old { color-scheme: light; }
+html:is([data-bleed-state="before"], [data-bleed-state="in"]), html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old { color-scheme: light; }
 /* text inherits the body's colour as a value, not its token */
 html[data-bleed-state="in"] .nts-bleed-old { color: var(--w-fg); }
 /* the hero's own ground until the world settles, full-bleed from the top

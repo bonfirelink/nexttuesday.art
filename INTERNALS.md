@@ -426,7 +426,13 @@ behave the same.
   reads the NTS `--w-*` tokens (section 11 of `nts.css`), and each kit
   undoes what else its world brings (`--embers-glow`, `--hearth-base`, the
   penrose colours, `--grain`). The same rules apply to `.nts-bleed-old`
-  while the state is `in` (not the grain, below). Only three states exist: `before`, `in` (from
+  while the state is `in` (not the grain, below). The root itself
+  (`html`) reads the NTS set while the state is `before` or `in`: its ground
+  is what the arrival's view transition crossfades over, and a world's dark
+  there shows through the crossfade on the whole page but the header. The
+  kits set the root's world tokens at `:root`'s weight
+  (`:root:where(:has(> body[data-world=…]))`), so the arrival selectors win;
+  a settled world page has its own ground on the root. Only three states exist: `before`, `in` (from
   `DOMContentLoaded` until the disc is complete) and `world`.
 - The crossing, in `nts.js`, only ever crosses the hero, and the
   compositor does it: during the scroll the main thread reads no layout
