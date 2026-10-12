@@ -60,7 +60,7 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
   text-shadow: calc(-1 * var(--philo-off)) calc(-1 * var(--philo-off)) 0 var(--philo-shadow);
 }
 /* the logotype's exponent: the key's two inks swapped, raised above the caps */
-.philo-exp { position: relative; top: -.6em; font-size: .64em; line-height: 0; margin-left: .02em; letter-spacing: 0; color: var(--philo-ink); text-shadow: -3px -3px 0 var(--philo-red-key); }
+.philo-exp { position: relative; top: -.5em; font-size: .78em; line-height: 0; margin-left: .06em; letter-spacing: 0; color: var(--philo-ink); text-shadow: calc(-1 * var(--philo-off)) calc(-1 * var(--philo-off)) 0 var(--philo-red-key); }
 .philo-strip { display: inline; font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.4rem); line-height: 1.65; background: rgba(255, 255, 255, .7); color: var(--philo-ink); padding: .12em .45em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 
 /* the entity */

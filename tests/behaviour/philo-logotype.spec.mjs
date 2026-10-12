@@ -14,8 +14,10 @@ for (const width of [360, 390, 1440]) {
     await expect(two).toHaveAttribute("aria-hidden", "true");
     const st = await two.evaluate((e) => { const c = getComputedStyle(e); return { color: c.color, shadow: c.textShadow, h1: getComputedStyle(e.closest("h1")).color }; });
     expect(st.color).toBe("rgb(43, 45, 62)");
-    expect(st.shadow).toContain("-3px -3px");
-    expect(st.shadow).not.toMatch(/^rgb\(43, 45, 62\)/); // the plate is the key red, not charcoal
+    expect(st.shadow).toMatch(/^rgb\(232, 30, 76\) -4px -4px/); // the plate is the key red, offset like the key's own plate
+    // oversized: the 2 is at least .7 of the key's size, so it rises clearly above the caps
+    const size = await two.evaluate((e) => parseFloat(getComputedStyle(e).fontSize) / parseFloat(getComputedStyle(e.parentElement).fontSize));
+    expect(size).toBeGreaterThanOrEqual(0.7);
     expect(await page.locator(".hero-text .philo-bar").count()).toBe(0);
     expect(await page.locator("[data-nts-copy='philo.eyebrow']").count()).toBe(0);
     expect(await page.locator("meta[property='og:title']").getAttribute("content")).toBe("NOT NOT PHILO");
