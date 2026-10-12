@@ -568,11 +568,12 @@ The size comes from `fit()`: the solid's mean silhouette span over every
 pose a turn or a drag reaches (`SPAN.hero`, 0.97 of the ring, geometric;
 the glyphs add about 5%) or its fragment's (`SPAN.fragment`), capped so
 its furthest reach, a bound over all rotations, keeps a glyph clear of the
-canvas. The page's canvas reaches 15.8% past the pre across and 17.6% down
+canvas. The page's canvas reaches 16.2% past the pre across and 17.6% down
 (`intersect.css`), so the widest poses overshoot the ring as the other
 worlds' figures do; `main` clips sideways overflow on that page. The
 canvas sets a small face on whole-pixel advances, so the text is scaled
-across to the cell width. `tools/gen-stills.mjs` bakes each still as the
+across to the cell width; the cell and each line's origin are snapped to
+device pixels, so a glyph has the same ink wherever it falls. `tools/gen-stills.mjs` bakes each still as the
 first live frame (`POSE` at the live zoom), and the pre's font size makes
 the still's grid span the box as the live glyphs do. The overshooting tip
 of a wide pose can't be grabbed: the canvas is `pointer-events: none` and

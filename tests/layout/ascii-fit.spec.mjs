@@ -61,9 +61,10 @@ test.describe("L3b ASCII solid fits the ring", () => {
     expect(mean, "fragment's mean span over its box").toBeGreaterThanOrEqual(FRAG_MIN);
     expect(mean, "fragment's mean span over its box").toBeLessThanOrEqual(FRAG_MAX);
     // the hero: no pose reaches past the room it is given
-    // the page's canvas over its pre (intersect.css: 131.6% across, 135.2% down), as cells
-    // of a 0.6em face at 52 columns, and the room fit() gets from them (ascii.js)
-    const ratio = 0.6, C = Math.floor(1.316 * 52), R = Math.floor(1.352 * 52 * ratio);
+    // the page's canvas over its pre (intersect.css: 132.4% across, 135.2% down), as cells
+    // of a 0.6em face at 52 columns, each up to 1% wider once snapped to device pixels, and
+    // the room fit() gets from them (ascii.js)
+    const ratio = 0.6, C = Math.floor((1.324 * 52) / 1.01), R = Math.floor(1.352 * 52 * ratio);
     const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / ratio) / 52);
     expect(hz * 0.95, "the room does not cut the hero's size (zoom, unclamped vs clamped)").toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero) * 0.95, 3);
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {

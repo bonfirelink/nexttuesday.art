@@ -79,9 +79,10 @@ html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-sta
    worlds' figures do: its canvas reaches past the pre, which ascii.js
    reads. It is what the fit uses and no more (its area is drawn every
    frame): the solid's furthest reach plus a cell and a half on each side,
-   68 columns across and 42 rows down at 52 columns of a 0.6em face */
+   68 columns across and 42 rows down at 52 columns of a 0.6em face, with
+   the cell up to 1% wider once snapped to device pixels (ascii.js) */
 pre[data-nts-ascii].is-live { overflow: visible; }
-pre[data-nts-ascii] > canvas { inset: -17.6% -15.8%; width: 131.6%; max-width: none; height: 135.2%; }
+pre[data-nts-ascii] > canvas { inset: -17.6% -16.2%; width: 132.4%; max-width: none; height: 135.2%; }
 /* the canvas's empty margin may pass the screen's edge on a phone (the
    glyphs stay inside it): the page clips what would scroll sideways, at
    the screen's edge rather than the hero's, which is inside the gutters */

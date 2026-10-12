@@ -229,7 +229,9 @@
     /* the canvas may be larger than the pre (CSS sets its overhang): the
        grid covers the canvas, centred on the pre; ox/oy place it on the
        canvas, gx/gy on the pre; zoom fits the figure to the pre's box */
-    var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1;
+    var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1, cellW = 0;
+    /* the baseline of grid row r, on a whole device pixel */
+    function lineY(r) { return Math.round((oy + r * size + base) * dpr) / dpr; }
     var pose = { phi: POSE.phi, alpha: POSE.alpha, spin: POSE.spin, ax: POSE.ax, ay: POSE.ay };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, held = false, raf = 0, last = 0, acc = 0, tAcc = 0;
     /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
@@ -251,15 +253,22 @@
       pre.appendChild(probe);
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
-      size = Math.min(24, Math.max(3, w / cols / ratio)); aspect = ratio; fitted = w;
-      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h, cell = ratio * size;
+      size = Math.min(24, Math.max(3, w / cols / ratio)); fitted = w;
+      dpr = Math.min(3, devicePixelRatio || 1);
+      /* The cell is a whole number of device pixels and each line starts on
+         one (lineY, ox): at a fractional cell each glyph fell at its own
+         sub-pixel phase and the same glyph drew up to a fifth heavier in
+         one place than another. The figure is then up to half a device
+         pixel per cell wider than the box's cells (about 1%). */
+      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h;
+      var cell = Math.max(1, Math.round(ratio * size * dpr)) / dpr;
+      cellW = cell; aspect = cell / size;
       grid = Math.max(cols, Math.floor(cW / cell)); rows = Math.max(1, Math.floor(cH / size));
-      ox = (cW - grid * cell) / 2; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
+      ox = Math.round((cW - grid * cell) / 2 * dpr) / dpr; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
       /* the room around the pre, in its half-widths, keeps a glyph clear of
          the canvas's edge on every side (a glyph's cell is the one its
          position falls in, so a reach of half the grid less a cell and a half) */
-      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? undefined : Math.min(grid - 3, (rows - 3) / ratio) / cols);
-      dpr = Math.min(3, devicePixelRatio || 1);
+      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? undefined : Math.min(grid - 3, (rows - 3) / aspect) / cols);
       canvas.width = Math.round(cW * dpr); canvas.height = Math.round(cH * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       day = look(pre);
@@ -283,7 +292,7 @@
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
       c.setTransform(dpr * sx, 0, 0, dpr, 0, 0);
       c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
-      for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], ox / sx, oy + r * size + base);
+      for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], ox / sx, lineY(r));
     }
     /* the face the glyphs are drawn in: the pre's own family and weight */
     var pending = 0, live = false, cs0 = getComputedStyle(pre), face = cs0.fontWeight + " 100px " + cs0.fontFamily, fonts = document.fonts;
@@ -315,7 +324,7 @@
     function onFigure(px, py) {
       if (!shown || !size) return false;
       if (!outline) {
-        var cw = aspect * size, pts = [];
+        var cw = cellW, pts = [];
         for (var r = 0; r < shown.length; r++) {
           var a = shown[r].search(/\S/);
           if (a < 0) continue;
@@ -358,6 +367,8 @@
       pre.addEventListener("pointerup", release); pre.addEventListener("pointercancel", release); pre.addEventListener("lostpointercapture", release);
       pre.stoke = function () { speed = 4; };
       pre.ntsPose = function () { return [pose.ax, pose.ay]; };
+      /* the paint's metrics, for checks: cell, line origin, density, face */
+      pre.ntsCells = function () { return { cell: cellW, ox: ox, size: size, base: base, sx: sx, dpr: dpr, font: day.font + size + "px " + day.family, line: lineY }; };
       pre.addEventListener("keydown", function (e) {
         var k = e.key, d = k === "ArrowLeft" ? -1 : k === "ArrowRight" ? 1 : 0, v = k === "ArrowUp" ? -1 : k === "ArrowDown" ? 1 : 0;
         if (!d && !v) return;
