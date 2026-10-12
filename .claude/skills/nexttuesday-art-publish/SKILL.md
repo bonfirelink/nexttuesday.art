@@ -13,15 +13,17 @@ Run this only when a publish is explicitly requested in the current conversation
 
 ## Steps
 
-1. **Review.** Spawn a `checker` on everything the working branch has that `origin/site` lacks: `git fetch origin site`, then run `tools/publish.sh --dry-run` and take the split SHA it prints; the diff is `git diff origin/site <split sha>`. The reviewer makes no branch named `site-publish`, which the script deletes. The brief:
+The suite (`npm run test:publish`) has run green on the exact commit being published before step 1; the script runs no suite itself, only the sync check and the git safety checks.
+
+1. **Review.** The main session spawns a `checker` itself (a subagent it delegated to cannot be relied on to spawn one) on everything the working branch has that `origin/site` lacks: `git fetch origin site`, then run `tools/publish.sh --dry-run` and take the split SHA it prints; the diff is `git diff origin/site <split sha>`. The reviewer makes no branch named `site-publish`, which the script deletes. The brief:
    - gives a turn budget (reviews have hit 25-turn limits: say "40 turns, report findings found so far at 30");
-   - has the checker run `npm run test:publish` itself on the exact commit, not trust a builder's report;
+   - says the suite already ran green on this commit; the checker reads the diff, it does not rerun the suite;
    - asks for one verdict: PUBLISH, WITH NOTES, or STOP.
 
    Done when the verdict is in hand. STOP ends the run: report the findings. WITH NOTES goes to the requester before pushing.
-2. **Dry run.** `tools/publish.sh --dry-run` runs every check and the split and moves nothing. A dry run then a real run runs the suite twice; that is accepted. Done when it ends with "dry run: site not moved" or "nothing to publish" (then stop and say so). A refusal (dirty working branch, `site` checked out in a worktree, a diverged `site`, a red suite) is a blocker: report it, fix nothing on `site`.
-3. **Publish.** Always pass a `--marker` or `--gone`: without one the script warns that the 200 checks may be hitting the old site. Pick one (text only the new version has) or `--gone` (text only the old one has) from the diff, then run `tools/publish.sh --marker '<text>'`. It pushes `site` fast-forward only, polls the live site (30 s, 10 tries), checks 200 on the five pages and waits for the Pages build to reach `built` (it fails on `errored`). Done when the script exits 0. If the marker never appears, rerun `tools/publish.sh --live-only --marker '<text>'` before calling it failed; the Pages build can lag.
-4. **Report and log.** Record the published SHA (the script prints it) where the project keeps its log, and tell the reviewer, in the same message:
+2. **Publish.** `tools/publish.sh`. It pushes `site` fast-forward only, then polls (30 s, 10 tries) until the latest Pages build is `built` for the commit `origin/site` points at and the five pages answer 200. Done when the script exits 0, or says "nothing to publish" (then stop and say so). A refusal (dirty working branch, `site` checked out in a worktree, a diverged `site`, a failed sync check) is a blocker: report it, fix nothing on `site`. If the live check runs out of tries, rerun `tools/publish.sh --live-only` before calling it failed; the Pages build can lag.
+3. **Log.** Update the "Last publish" line in the memex note `nexttuesday-art.md` (the SHA the script prints, `main`'s SHA, a few words on what changed) and add the publish to the refinements log (`nexttuesday-art/refinements.md`).
+4. **Report.** Tell the requester, in one message:
    - the SHA and what changed, in one or two lines;
    - what this machine could not check: WebKit and iPhone Safari, Firefox, the real touch and scroll feel, and anything else the diff touches that headless Chromium cannot judge, each as something to look at on the phone.
 
@@ -30,4 +32,4 @@ Run this only when a publish is explicitly requested in the current conversation
 - `tools/publish.sh` is the only way `site` moves. Never push with `--force`; when the script reports that `site` diverged, stop and report.
 - The machine cannot resolve `nexttuesday.art`; the script pins the address. Run any other live curl with `--resolve nexttuesday.art:443:185.199.108.153`.
 - `site` is checked out nowhere. The script refuses otherwise.
-- Without a `test:publish` script the script warns and runs only the sync check; say so in the report, since the suite did not run.
+- Publishing on a commit the suite has not passed is a stop: say so in the report rather than publish.

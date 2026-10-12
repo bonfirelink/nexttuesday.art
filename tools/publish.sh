@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 # Publish the working branch: subtree-split site/ and fast-forward the `site`
-# branch that GitHub Pages serves, then verify the live site.
+# branch that GitHub Pages serves, then verify the live site. It runs no test
+# suite: run `npm run test:publish` on the commit first. The sync check and
+# the git safety checks do run.
 #
-#   tools/publish.sh [--dry-run] [--marker TEXT] [--gone TEXT]
-#   tools/publish.sh --live-only [--marker TEXT] [--gone TEXT]
+#   tools/publish.sh [--dry-run]
+#   tools/publish.sh --live-only
 #
 #   --dry-run    everything up to (not including) moving `site` and pushing
-#   --live-only  skip the publish, only run the live checks (read-only)
-#   --marker     text that must appear on https://nexttuesday.art/ once live
-#   --gone       text that must disappear from it
+#   --live-only  skip the publish, run the live check once (read-only): the
+#                latest Pages build is `built` for the commit origin/site
+#                points at, and every page answers 200. Exits non-zero while
+#                that is not yet so, for a caller to retry.
+#
+# After its push a full run polls the same check until it passes or its
+# tries run out.
 #
 # NTS_BRANCH names the working branch (default main). The script never
 # forces a push: a non-fast-forward split stops it.
@@ -23,20 +29,17 @@ PAGES=(/ $REG)
 TRIES=10
 WAIT=30
 
-dry=0 live_only=0 marker="" gone=""
+dry=0 live_only=0
 while [ $# -gt 0 ]; do
   case $1 in
     --dry-run) dry=1 ;;
     --live-only) live_only=1 ;;
-    --marker) marker=${2:?--marker needs text}; shift ;;
-    --gone) gone=${2:?--gone needs text}; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
   shift
 done
 
 die() { echo "publish: $*" >&2; exit 1; }
-fetch_home() { curl -sS --max-time 20 --resolve "$RESOLVE" https://nexttuesday.art/; }
 
 # owner/name of the GitHub repo: from gh, else from the origin URL.
 repo_slug() {
@@ -44,47 +47,45 @@ repo_slug() {
   git remote get-url origin | sed -E 's#^(git@[^:]+:|https?://[^/]+/)##; s#\.git$##'
 }
 
-live_checks() {
-  local try body ok=0
-  if [ -n "$marker$gone" ]; then
-    for ((try = 1; try <= TRIES; try++)); do
-      body=$(fetch_home || true)
-      ok=1
-      if [ -n "$marker" ] && ! grep -qF -- "$marker" <<<"$body"; then ok=0; fi
-      if [ -n "$gone" ] && grep -qF -- "$gone" <<<"$body"; then ok=0; fi
-      [ "$ok" = 1 ] && break
-      echo "live: change not there yet (try $try/$TRIES)"
-      [ "$try" -lt "$TRIES" ] && sleep "$WAIT"
-    done
-    [ "$ok" = 1 ] || die "live site never showed the change after $TRIES tries"
-    echo "live: change is up"
-  fi
-  local p code bad=0
-  if [ -z "$marker$gone" ]; then
-    echo "WARNING: no --marker or --gone: the 200 checks may be hitting the old site" >&2
-  fi
+# One pass: the Pages build is done for the commit `site` points at, and every
+# page answers 200. Returns 1, saying what it saw, if not yet; 2 if the build
+# errored (waiting will not help).
+live_check_once() {
+  local slug build status commit want p code bad=0
+  git fetch -q origin site || { echo "live: cannot fetch origin/site"; return 1; }
+  want=$(git rev-parse refs/remotes/origin/site)
+  slug=$(repo_slug) || { echo "live: cannot work out the GitHub repo"; return 1; }
+  build=$(gh api "repos/$slug/pages/builds/latest" --jq '.status + " " + .commit') || { echo "live: gh api failed for the pages build"; return 1; }
+  status=${build%% *} commit=${build#* }
+  echo "pages build: ${status:-<empty>} @ ${commit:0:7} (want built @ ${want:0:7})"
+  [ "$status" = errored ] && { echo "live: the Pages build errored"; return 2; }
+  [ "$status" = built ] && [ "$commit" = "$want" ] || return 1
   for p in "${PAGES[@]}"; do
     code=$(curl -sS -o /dev/null --max-time 20 -w '%{http_code}' --resolve "$RESOLVE" "https://nexttuesday.art$p" || echo 000)
     echo "live: $code $p"
     [ "$code" = 200 ] || bad=1
   done
-  [ "$bad" = 0 ] || die "a page did not answer 200"
-  # The Pages build outlives the push: wait for it rather than report a stale status.
-  local slug status=""
-  slug=$(repo_slug) || die "cannot work out the GitHub repo (gh repo view and origin URL both failed)"
-  for ((try = 1; try <= TRIES; try++)); do
-    status=$(gh api "repos/$slug/pages/builds/latest" --jq .status) || die "gh api failed for pages build status"
-    echo "pages build: ${status:-<empty>} (try $try/$TRIES)"
-    case $status in
-      built) return 0 ;;
-      errored|"") die "pages build status is '${status:-empty}'" ;;
-    esac
-    [ "$try" -lt "$TRIES" ] && sleep "$WAIT"
-  done
-  die "pages build still '$status' after $TRIES tries"
+  [ "$bad" = 0 ] || { echo "live: a page did not answer 200"; return 1; }
 }
 
-if [ "$live_only" = 1 ]; then live_checks; exit 0; fi
+live_checks() {
+  local try rc
+  for ((try = 1; try <= TRIES; try++)); do
+    echo "live check (try $try/$TRIES)"
+    rc=0; live_check_once || rc=$?
+    [ "$rc" = 0 ] && { echo "live: up"; return 0; }
+    [ "$rc" = 2 ] && die "the Pages build errored"
+    [ "$try" -lt "$TRIES" ] && sleep "$WAIT"
+  done
+  die "live site not up after $TRIES tries"
+}
+
+if [ "$live_only" = 1 ]; then
+  rc=0; live_check_once || rc=$?
+  [ "$rc" = 0 ] || die "$([ "$rc" = 2 ] && echo "the Pages build errored" || echo "live site not up yet")"
+  echo "live: up"
+  exit 0
+fi
 
 git rev-parse --git-dir >/dev/null 2>&1 || die "not in a git repo"
 cd "$(git rev-parse --show-toplevel)"
@@ -108,14 +109,8 @@ git show-ref --verify --quiet refs/remotes/origin/site || die "no origin/site af
 sha=$(git rev-parse "refs/heads/$BASE")
 echo "publishing $BASE @ $sha"
 
-# Publish suite on the exact commit that gets split.
-if [ -f "$base_wt/package.json" ] && grep -q '"test:publish"' "$base_wt/package.json"; then
-  # NTS_BASE is the suite's URL under test; unset so it never leaks in.
-  (cd "$base_wt" && env -u NTS_BASE npm run test:publish)
-else
-  echo "WARNING: no test:publish script; only the sync check ran, the suite did not" >&2
-  (cd "$base_wt" && node tools/sync.mjs --check)
-fi
+# The suite is not run here; the cheap sync check still is.
+(cd "$base_wt" && node tools/sync.mjs --check)
 [ "$(git rev-parse "refs/heads/$BASE")" = "$sha" ] || die "$BASE moved while the checks ran"
 
 # A stale site-publish from an earlier run would make the split ambiguous.
