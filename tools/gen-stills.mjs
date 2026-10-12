@@ -59,21 +59,17 @@ function philoStill() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" fill="none" stroke-linecap="butt" aria-hidden="true">${body}</svg>`;
 }
 
-const pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
 const tetra = ascii.figure('tetra');
-/* A still is the live frame's pose at the live fit, but it has no room
-   around its box to overshoot into: the zoom steps down until the pose
-   keeps a cell clear of the grid's edge on every side. */
-function still(cols, span) {
-  const rows = Math.round(cols * 0.6);
-  for (let zoom = ascii.fit(tetra, span); ; zoom *= 0.99) {
-    const ls = ascii.lines(tetra, cols, rows, 0.6, pose, zoom), lit = ls.filter((l) => l.trim());
-    if (!ls[0] && !ls[rows - 1] && Math.max(...ls.map((l) => l.length)) < cols && Math.min(...lit.map((l) => l.search(/\S/))) > 0) return ls.join('\n');
-  }
-}
+/* A still is the live solid's first frame: its pose and its zoom, in the
+   cell grid of its box (the page's CSS sizes the still's glyphs so the grid
+   spans the box, as the live glyphs do). */
+const still = (cols, span) => ascii.render(tetra, cols, Math.round(cols * 0.6), 0.6, ascii.POSE, ascii.fit(tetra, span));
 const out = {
   'still-philo.svg': philoStill(),
-  'still-intersect.txt': still(64, ascii.SPAN.hero),
+  /* sync writes the page's still after a newline of its own, which the pre
+     shows as the first row: the baked first row (always blank, the pose
+     keeps a glyph clear of the edge) goes */
+  'still-intersect.txt': still(64, ascii.SPAN.hero).replace(/^[^\n]*\n/, ''),
   'still-intersect-sm.txt': still(37, ascii.SPAN.fragment),
 };
 for (const [name, text] of Object.entries(out)) {

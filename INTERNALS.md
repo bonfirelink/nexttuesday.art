@@ -572,11 +572,14 @@ canvas. The page's canvas reaches 17% past the pre on every side
 (`intersect.css`), so the widest poses overshoot the ring as the other
 worlds' figures do; `main` clips sideways overflow on that page. The
 canvas sets a small face on whole-pixel advances, so the text is scaled
-across to the cell width. `tools/gen-stills.mjs` bakes each still at the
-same fit, stepped down until its pose clears its own grid. The solid is
-drawn by its edges: its faces write depth but no glyph (0.05 further
-back, so a front edge wins against its own faces), which hides the edges
-behind. 64 columns on the page, 37 in a fragment.
+across to the cell width. `tools/gen-stills.mjs` bakes each still as the
+first live frame (`POSE` at the live zoom), and the pre's font size makes
+the still's grid span the box as the live glyphs do. The overshooting tip
+of a wide pose can't be grabbed: the canvas is `pointer-events: none` and
+a press counts only on the pre. The solid is drawn by its edges: its faces
+write depth but no glyph (0.05 further back, so a front edge wins against
+its own faces), which hides the edges behind. 64 columns on the page, 37
+in a fragment.
 
 A press grabs a figure only on the figure, in all three worlds
 (`NTS.grab` in `nts.js`): the world gives a test of a point against the

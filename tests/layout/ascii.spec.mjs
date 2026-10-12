@@ -16,6 +16,8 @@ const INK_SPREAD = 1;
 const FONT_DELAY = 1500;
 const FAST_TIMEOUT_MS = 120_000; // a describe's tests each load cold pages 3 to 4 times
 const SLOW_TIMEOUT_MS = 300_000; // 10 cold loads per test
+// The page's canvas reaches past its pre by this share of the pre's width on each side.
+const OVERHANG = 0.17;
 // A cover of the pre by the canvas (the fragment's matches its box; the page's reaches past
 // it on every side, by the same amount), as for any box edge.
 const COVER_TOL = 1;
@@ -112,14 +114,17 @@ test.describe("L3 the solid is drawn on a canvas", () => {
           canvas: !!c, still: !!still, stillVisibility: still && getComputedStyle(still).visibility,
           stillText: still ? still.textContent.trim().length : 0,
           dx: cr && [cr.left - pr.left, cr.top - pr.top, cr.right - pr.right, cr.bottom - pr.bottom],
-          role: pre.getAttribute("role"), label: pre.getAttribute("aria-label"),
+          role: pre.getAttribute("role"), label: pre.getAttribute("aria-label"), w: pr.width,
         };
       }, p.pre);
       expect(r.canvas, "a canvas inside the pre").toBe(true);
       if (p.overhang) {
         // the page's solid draws past its ring: the canvas covers the pre, centred on it
         const [l, t, rr, b] = r.dx;
-        for (const d of [-l, -t, rr, b]) expect(d, "canvas edge outside the pre's box").toBeGreaterThanOrEqual(-COVER_TOL);
+        for (const d of [-l, -t, rr, b]) {
+          expect(d, "canvas edge outside the pre's box").toBeGreaterThanOrEqual(-COVER_TOL);
+          expect(d, "canvas edge's reach past the pre's box").toBeLessThanOrEqual(OVERHANG * r.w + 2 * COVER_TOL); // the inset rounds to the pixel grid
+        }
         expect(Math.abs(l + rr), "canvas centre x vs the pre's").toBeLessThanOrEqual(COVER_TOL);
         expect(Math.abs(t + b), "canvas centre y vs the pre's").toBeLessThanOrEqual(COVER_TOL);
       } else for (const d of r.dx) expect(Math.abs(d), "canvas edge vs the pre's box").toBeLessThanOrEqual(COVER_TOL);
@@ -131,6 +136,45 @@ test.describe("L3 the solid is drawn on a canvas", () => {
         expect(r.role).toBe("img");
         expect(r.label).toMatch(/tetrahedron/i);
       }
+    });
+  }
+});
+
+// The baked still (scripts off, and until the face loads) is the first live frame: same
+// glyph size, same zoom and pose, so its glyphs' box matches the live ink's box to within
+// two glyph cells: a glyph's ink sits inside its cell, and headless Chromium sets small
+// DOM text on whole-pixel advances (5 px for a 4.83 px cell at 390), which stretches a
+// still line of 60 glyphs by up to 10 px; the live canvas is scaled to the cell.
+const STILL_TOL_CELLS = 2;
+
+test.describe("L3 the baked still is the first live frame", () => {
+  test.use({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
+  for (const p of PAGES) {
+    test(`${p.name}: the still's glyph box matches the live frame's ink`, async ({ page, settle }) => {
+      await openPage(page, p.path, { live: [p.pre] });
+      await page.evaluate(() => document.fonts.ready);
+      await settle(page);
+      const s = await page.evaluate((sel) => {
+        const pre = document.querySelector(sel), still = pre.querySelector(":scope > span.ascii-still");
+        // the baked text (sync's markers around it are comments)
+        const node = [...still.childNodes].filter((n) => n.nodeType === 3).sort((x, y) => y.textContent.length - x.textContent.length)[0];
+        const text = node.textContent, range = document.createRange();
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, at = 0;
+        for (const line of text.split("\n")) {
+          const a = line.search(/\S/);
+          if (a >= 0) {
+            range.setStart(node, at + a); range.setEnd(node, at + line.trimEnd().length);
+            const r = range.getBoundingClientRect();
+            x0 = Math.min(x0, r.left); x1 = Math.max(x1, r.right); y0 = Math.min(y0, r.top); y1 = Math.max(y1, r.bottom);
+          }
+          at += line.length + 1;
+        }
+        return { x0, y0, x1, y1, cell: parseFloat(getComputedStyle(pre).fontSize) };
+      }, p.pre);
+      const k = await canvasInk(page, `${p.pre} > canvas`);
+      const ink = { x0: k.bx - k.bw / 2, x1: k.bx + k.bw / 2, y0: k.by - k.bh / 2, y1: k.by + k.bh / 2 };
+      for (const e of ["x0", "x1", "y0", "y1"])
+        expect(Math.abs(s[e] - ink[e]), `still vs live ink, ${e} (px; cell ${s.cell.toFixed(1)})`).toBeLessThanOrEqual(STILL_TOL_CELLS * s.cell);
     });
   }
 });
