@@ -48,7 +48,6 @@ html[data-bleed-state="before"] [data-world="philo"], html[data-bleed-state="in"
 }
 .philo-bar::before { content: ""; position: absolute; inset: 0; background: var(--philo-shadow); transform: translate(calc(-1 * var(--philo-off)), calc(-1 * var(--philo-off))); z-index: -1; transition: transform var(--dur-lift) var(--ease-lift); }
 a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: translate(calc(-1 * var(--philo-off) - 2px), calc(-1 * var(--philo-off) - 2px)); }
-.philo-bar.sm { font-size: .78rem; --philo-off: 3px; padding: .28em .5em .32em; }
 .philo-bar.caps { text-transform: uppercase; letter-spacing: .06em; }
 .philo-bar.wrap-ok { white-space: normal; }
 
@@ -60,6 +59,8 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
   color: var(--philo-red-key);
   text-shadow: calc(-1 * var(--philo-off)) calc(-1 * var(--philo-off)) 0 var(--philo-shadow);
 }
+/* the logotype's exponent: the key's two inks swapped, raised above the caps */
+.philo-exp { position: relative; top: -.6em; font-size: .64em; line-height: 0; margin-left: .02em; letter-spacing: 0; color: var(--philo-ink); text-shadow: -3px -3px 0 var(--philo-red-key); }
 .philo-strip { display: inline; font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.4rem); line-height: 1.65; background: rgba(255, 255, 255, .7); color: var(--philo-ink); padding: .12em .45em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 
 /* the entity */
