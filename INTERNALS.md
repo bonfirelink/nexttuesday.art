@@ -74,7 +74,7 @@ favicon (the NTS sigil in ink on the beige, the same `<link rel="icon">`
 on the home, the worlds and events; 404 has its own); no horizontal scroll at 320/360/390; 16px minimum gutter; AA
 contrast, settled and in every transition (the bleed-in's crossing keeps
 each glyph in the colours of the ground under it); functional text 11px
-or more; canvases cap DPR at 2, pause off-screen and in hidden tabs, and
+or more; canvases cap DPR (at 2; INTERSECT's ASCII at 3, for its glyphs), pause off-screen and in hidden tabs, and
 draw one still under prefers-reduced-motion. What the design keeps: the
 orrery (sun, beads on their orbits, the events star), the windows into
 each world as you scroll, falling into a satellite, the

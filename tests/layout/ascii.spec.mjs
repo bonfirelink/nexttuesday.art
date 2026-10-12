@@ -3,6 +3,7 @@ import { test, expect } from "../helpers/fixtures.mjs";
 import { openPage } from "../helpers/geometry.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
 import { coldPage } from "../helpers/cold.mjs";
+import { OVERHANG } from "../helpers/ascii-overhang.mjs";
 
 // Discrete facts: the glyph size, and so the pre's font size, is one value across loads.
 const FONT_SPREAD = 0;
@@ -16,8 +17,6 @@ const INK_SPREAD = 1;
 const FONT_DELAY = 1500;
 const FAST_TIMEOUT_MS = 120_000; // a describe's tests each load cold pages 3 to 4 times
 const SLOW_TIMEOUT_MS = 300_000; // 10 cold loads per test
-// The page's canvas reaches past its pre by this share of the pre's width on each side.
-const OVERHANG = 0.176;
 // A cover of the pre by the canvas (the fragment's matches its box; the page's reaches past
 // it on every side, by the same amount), as for any box edge.
 const COVER_TOL = 1;
@@ -121,9 +120,11 @@ test.describe("L3 the solid is drawn on a canvas", () => {
       if (p.overhang) {
         // the page's solid draws past its ring: the canvas covers the pre, centred on it
         const [l, t, rr, b] = r.dx;
-        for (const d of [-l, -t, rr, b]) {
+        // its reach past the pre: OVERHANG.x across, OVERHANG.y down (intersect.css; the
+        // insets are shares of the pre's width), each to the pixel grid's rounding
+        for (const [d, k] of [[-l, "x"], [rr, "x"], [-t, "y"], [b, "y"]]) {
           expect(d, "canvas edge outside the pre's box").toBeGreaterThanOrEqual(-COVER_TOL);
-          expect(d, "canvas edge's reach past the pre's box").toBeLessThanOrEqual(OVERHANG * r.w + 2 * COVER_TOL); // the inset rounds to the pixel grid
+          expect(d, `canvas edge's reach past the pre's box (${k})`).toBeLessThanOrEqual(OVERHANG[k] * r.w + 2 * COVER_TOL);
         }
         expect(Math.abs(l + rr), "canvas centre x vs the pre's").toBeLessThanOrEqual(COVER_TOL);
         expect(Math.abs(t + b), "canvas centre y vs the pre's").toBeLessThanOrEqual(COVER_TOL);

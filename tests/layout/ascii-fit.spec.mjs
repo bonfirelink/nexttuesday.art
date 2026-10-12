@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { test, expect } from "../helpers/fixtures.mjs";
 import { openPage } from "../helpers/geometry.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
+import { OVERHANG } from "../helpers/ascii-overhang.mjs";
 
 // The other worlds' figures span 0.92 to 1.28 of the ring as they turn (mean about 1.08);
 // the solid's span, averaged over its turn, sits at about the ring's diameter.
@@ -61,17 +62,21 @@ test.describe("L3b ASCII solid fits the ring", () => {
     expect(mean, "fragment's mean span over its box").toBeGreaterThanOrEqual(FRAG_MIN);
     expect(mean, "fragment's mean span over its box").toBeLessThanOrEqual(FRAG_MAX);
     // the hero: no pose reaches past the room it is given
-    // the page's canvas over its pre (intersect.css: 132.4% across, 135.2% down), as cells
-    // of a 0.6em face at 52 columns, each up to 1% wider once snapped to device pixels, and
-    // the room fit() gets from them (ascii.js)
-    const ratio = 0.6, C = Math.floor((1.324 * 52) / 1.01), R = Math.floor(1.352 * 52 * ratio);
-    const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / ratio) / 52);
-    expect(hz * 0.95, "the room does not cut the hero's size (zoom, unclamped vs clamped)").toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero) * 0.95, 3);
-    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
-      const ls = ascii.lines(fig, C, R, ratio, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 52);
-      expect(ls[0].trim() + ls[R - 1].trim(), `pose ${i},${j}: top and bottom rows of the grid`).toBe("");
-      expect(Math.max(...ls.map((l) => l.length)), `pose ${i},${j}: rightmost glyph`).toBeLessThan(C);
-      expect(Math.min(...ls.filter((l) => l.trim()).map((l) => l.search(/\S/))), `pose ${i},${j}: leftmost glyph`).toBeGreaterThan(0);
+    // the page's canvas over its pre (read from intersect.css) in cells of a 0.6em face at 52
+    // columns. Snapped to device pixels a cell is up to half a pixel off: at the smallest
+    // ring (320 px wide, 4.7 px cells, DPR 1) about 10.5% either way. The figure keeps its
+    // size (lines() gets the box's width in snapped cells, unit), so the room is in units.
+    const ratio = 0.6;
+    for (const e of [-0.105, 0, 0.105]) {
+      const C = Math.floor((OVERHANG.width * 52) / (1 + e)), R = Math.floor(OVERHANG.height * 52 * ratio), aspect = ratio * (1 + e), unit = 52 / (1 + e);
+      const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / aspect) / unit);
+      expect(hz, `cell ${e}: the room does not cut the hero's size`).toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero), 6);
+      for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
+        const ls = ascii.lines(fig, C, R, aspect, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, unit);
+        expect(ls[0].trim() + ls[R - 1].trim(), `cell ${e}, pose ${i},${j}: top and bottom rows of the grid`).toBe("");
+        expect(Math.max(...ls.map((l) => l.length)), `cell ${e}, pose ${i},${j}: rightmost glyph`).toBeLessThan(C);
+        expect(Math.min(...ls.filter((l) => l.trim()).map((l) => l.search(/\S/))), `cell ${e}, pose ${i},${j}: leftmost glyph`).toBeGreaterThan(0);
+      }
     }
   });
 });

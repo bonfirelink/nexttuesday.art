@@ -38,8 +38,8 @@ export function recordTransitions() {
 // Init script: remembers what the bleed looked like at DOMContentLoaded (before
 // nts.js, whose listener is added later) and every `nts:bleed` event.
 export function recordBleed() {
-  // Figure canvases restyle themselves in the world's colours when the bleed
-  // ends, so only the markup around them is compared.
+  // Figure canvases set their own style (their size, to the pixel grid), so
+  // only the markup around them is compared.
   window.__heroStyles = () => {
     const hero = document.querySelector("main .hero");
     return hero ? [hero, ...hero.querySelectorAll("*:not(canvas)")].map((e) => e.getAttribute("style")) : [];

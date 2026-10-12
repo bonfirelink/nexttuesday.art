@@ -68,7 +68,7 @@ pre[data-nts-ascii].is-grab { cursor: grab; }
 pre[data-nts-ascii].is-grabbing { cursor: grabbing; }
 
 /* live, ascii.js draws the glyphs on a canvas over the pre's box, in the
-   pre's computed color, without a glow (the rules above and below); the
+   pre's computed colour, without a glow; the
    baked still text stays in the pre for scripts off, hidden once live */
 :is(pre[data-nts-ascii], [data-nts-fragment="intersect"] pre) { position: relative; }
 :is(pre[data-nts-ascii], [data-nts-fragment="intersect"] pre) > canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -77,8 +77,8 @@ pre[data-nts-ascii].is-grabbing { cursor: grabbing; }
    worlds' figures do: its canvas reaches past the pre, which ascii.js
    reads. It is what the fit uses and no more (its area is drawn every
    frame): the solid's furthest reach plus a cell and a half on each side,
-   68 columns across and 42 rows down at 52 columns of a 0.6em face, with
-   the cell up to 1% wider once snapped to device pixels (ascii.js) */
+   68 columns across and 42 rows down at 52 columns of a 0.6em face (a
+   cell snapped to device pixels changes the count, not the figure's size) */
 pre[data-nts-ascii].is-live { overflow: visible; }
 pre[data-nts-ascii] > canvas { inset: -17.6% -16.2%; width: 132.4%; max-width: none; height: 135.2%; }
 /* the canvas's empty margin may pass the screen's edge on a phone (the
