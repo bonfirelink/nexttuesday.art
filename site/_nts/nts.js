@@ -164,9 +164,9 @@
      stays in the NTS colours under it (.nts-bleed-old); everything below
      the hero is in the world from the start, so nothing there is crossed.
      The few parts outside the hero (the header, a fixed layer that is not
-     the ground's own texture) keep .nts-bleed-old until the disc's edge
-     passes their centre,
-     and crossfade (--dur-bleed-fade). When the disc is complete the world
+     the ground's own texture) keep .nts-bleed-old until the disc covers
+     them whole, and crossfade (--dur-bleed-fade), the part alone: what is
+     inside it inherits the fade. When the disc is complete the world
      settles for good: the state is "world", the copy goes.
      Live figures in the hero draw their night into their twin in the copy:
        NTS.bleed.twin(el)   the copy of a hero element, while the copy exists
@@ -218,8 +218,8 @@
 
     /* 2. the geometry, in document px, read once (and again on a resize):
        the disc's centre and full radius, the scroll at which it is complete,
-       and for each part outside the hero the scroll at which the edge passes
-       its centre */
+       and for each part outside the hero the scroll at which the disc
+       covers it */
     var g = { end: 1 }, at = [], anims = [];
     var measure = function () {
       var sy = scrollY, hr = hero.getBoundingClientRect(), er = entity.getBoundingClientRect();
@@ -240,10 +240,18 @@
       at = toggles.map(function (el) {
         var r = el.getBoundingClientRect();
         if (!r.width && !r.height) return 0;
-        var fixed = /fixed|sticky/.test(getComputedStyle(el).position), x = r.left + r.width / 2, y = r.top + r.height / 2 + (fixed ? 0 : sy);
+        /* the farthest corner: a part crosses once the disc covers all of
+           it, so a band as wide as the page never wears the world's
+           colours over the NTS ground still around the disc. A fixed or
+           sticky part moves down the document with the scroll */
+        var fixed = /fixed|sticky/.test(getComputedStyle(el).position), dy = fixed ? 0 : sy;
+        var far = function (s) {
+          var t = r.top + dy + (fixed ? s : 0), b = r.bottom + dy + (fixed ? s : 0);
+          return Math.hypot(Math.max(cx - r.left, r.right - cx), Math.max(Math.abs(t - cy), Math.abs(b - cy)));
+        };
         for (var k = 0; k <= 100; k++) {
           var s = end * k / 100;
-          if (ease(k / 100) * R >= Math.hypot(x - cx, (fixed ? y + s : y) - cy)) return s;
+          if (ease(k / 100) * R >= far(s)) return s;
         }
         return end;
       });

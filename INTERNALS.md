@@ -460,8 +460,18 @@ behave the same.
   the hero keeps its NTS ground (`main .hero` gets a full-bleed beige
   ground, `box-shadow` clipped at its foot, while the state is `before`
   or `in`). The parts outside the hero drop `.nts-bleed-old` when the
-  disc's edge passes their centre (a scroll position worked out with the
-  geometry) and crossfade (`--dur-bleed-fade`, 200ms). A texture that is
+  disc covers them whole, their farthest corner (a scroll position worked
+  out with the geometry; a sticky header moves down with the scroll), and
+  crossfade (`--dur-bleed-fade`, 200ms). Crossed at its centre, the
+  full-width header went dark over the NTS ground still around the disc,
+  its backdrop blur smearing the disc's edge across it. Only the part itself
+  fades; everything inside it has no transition and inherits the fading
+  colour, so ground and ink move in one step (a transition on each level
+  restarts whenever its parent's value moves, and the labels trailed their
+  ground by a fade per level: dark ink on the dark bar for about a second
+  on iPhone). Marks with a colour of their own (the accent sigil, the
+  current page's bar) change at once. `T8` in
+  `tests/transitions/header-bleed.spec.mjs`. A texture that is
   part of the world's ground is not one of those parts: INTERSECT's grain
   (`.intersect-grain`, a body-level layer under the content) is on from the
   start of `in` (it is off only in `before`). While the state is `in` it
