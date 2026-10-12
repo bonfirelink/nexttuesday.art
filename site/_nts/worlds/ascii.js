@@ -92,27 +92,75 @@
     for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) o[r * 3 + c] = a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c];
     return o;
   }
-  /* One frame as lines of text (trailing spaces trimmed). cols/rows: the
-     cell grid; aspect: cell width over height; pose: {phi, alpha, spin} for
-     flat figures, {ax, ay} for solids. */
-  function lines(fig, cols, rows, aspect, pose, zoom) {
-    var pts = fig.pts, n = pts.length / 6, faceEnd = fig.faceEnd || 0;
-    var K2 = 6, K1 = (zoom || 0.9) * (cols / 2) * K2, cx = cols / 2, cy = rows / 2;
-    var L = norm([0.25, 0.55, -0.8]);
-    var zb = new Float32Array(cols * rows), chars = new Array(cols * rows), k, m;
-    for (k = 0; k < cols * rows; k++) chars[k] = " ";
+  /* the figure's rotation at a pose: {phi, alpha, spin} for flat figures,
+     {ax, ay} for solids */
+  function turn(fig, pose) {
     if (fig.flat) {
       var cs = Math.cos(pose.spin), ss = Math.sin(pose.spin), ca = Math.cos(pose.alpha), sa = Math.sin(pose.alpha), cp = Math.cos(pose.phi), sp = Math.sin(pose.phi);
-      m = mul([cp, -sp, 0, sp, cp, 0, 0, 0, 1], mul([1, 0, 0, 0, ca, -sa, 0, sa, ca], [cs, -ss, 0, ss, cs, 0, 0, 0, 1]));
-    } else {
-      var cxr = Math.cos(pose.ax), sxr = Math.sin(pose.ax), cyr = Math.cos(pose.ay), syr = Math.sin(pose.ay);
-      m = mul([1, 0, 0, 0, cxr, -sxr, 0, sxr, cxr], [cyr, 0, syr, 0, 1, 0, -syr, 0, cyr]);
+      return mul([cp, -sp, 0, sp, cp, 0, 0, 0, 1], mul([1, 0, 0, 0, ca, -sa, 0, sa, ca], [cs, -ss, 0, ss, cs, 0, 0, 0, 1]));
     }
+    var cxr = Math.cos(pose.ax), sxr = Math.sin(pose.ax), cyr = Math.cos(pose.ay), syr = Math.sin(pose.ay);
+    return mul([1, 0, 0, 0, cxr, -sxr, 0, sxr, cxr], [cyr, 0, syr, 0, 1, 0, -syr, 0, cyr]);
+  }
+  var K2 = 6, CULL = 0.35;
+  /* How large a figure draws at zoom 1 across the poses it can take: its
+     silhouette's span (the larger side of its bounding box) averaged over
+     them, in widths of the box the zoom refers to, and its furthest reach
+     from the centre at any rotation, in half-widths. A solid's ax and ay
+     both grow without bound (the clock and a drag add to them), so the span
+     samples the whole torus of pairs; a flat figure spins and precesses
+     freely and tilts within the drag's clamp. Points are thinned for the
+     span (the surfaces are dense) and culled as lines() culls them. The
+     reach is a bound, not a sample: a point at distance r from the centre
+     projects at most r*K2/sqrt(K2^2 - r^2) from it, whatever the rotation.
+     Once per figure. */
+  function extent(fig) {
+    if (fig.extent) return fig.extent;
+    var pts = fig.pts, n = pts.length / 6, S = 16, sum = 0, far = 0;
+    for (var i = 0; i < S; i++) for (var j = 0; j < S; j++) {
+      var a = (i / S) * TAU, b = (j / S) * TAU;
+      var m = turn(fig, fig.flat ? { phi: a, spin: b, alpha: 0.3 + 0.7 * j / (S - 1) } : { ax: a, ay: b });
+      var x0 = 9, x1 = -9, y0 = 9, y1 = -9;
+      for (var k = 0; k < n; k += 5) {
+        var q = k * 6, x = pts[q], y = pts[q + 1], z = pts[q + 2];
+        if (m[6] * pts[q + 3] + m[7] * pts[q + 4] + m[8] * pts[q + 5] > CULL) continue;
+        var o = K2 / (m[6] * x + m[7] * y + m[8] * z + K2), X = (m[0] * x + m[1] * y + m[2] * z) * o, Y = (m[3] * x + m[4] * y + m[5] * z) * o;
+        if (X < x0) x0 = X; if (X > x1) x1 = X; if (Y < y0) y0 = Y; if (Y > y1) y1 = Y;
+      }
+      sum += Math.max(x1 - x0, y1 - y0) / 2;
+    }
+    for (k = 0; k < n; k++) { var r = Math.hypot(pts[k * 6], pts[k * 6 + 1], pts[k * 6 + 2]); far = Math.max(far, r * K2 / Math.sqrt(K2 * K2 - r * r)); }
+    return (fig.extent = { span: sum / (S * S), reach: far });
+  }
+  /* The zoom at which the figure's mean span is `span` box widths, at most
+     the one at which its furthest reach stays within `room` half-widths
+     (the space drawn around the box: a glyph past it would be cut off).
+     The spans are geometric; the glyphs' own width adds about 5%. The hero
+     then spans its ring about as the other worlds' figures do (their mean
+     over a turn is a little over the ring, as is the solid's), overshooting
+     it at its widest poses onto the canvas drawn around the ring; the
+     fragment keeps the size it had, its window cutting its widest poses as
+     the other worlds' fragments are cut by theirs. */
+  var SPAN = { hero: 0.95, fragment: 1.015 };
+  function fitZoom(fig, span, room) {
+    var e = extent(fig);
+    return Math.min(span / e.span, (room || Infinity) / e.reach);
+  }
+  /* One frame as lines of text (trailing spaces trimmed). cols/rows: the
+     cell grid; aspect: cell width over height; pose: see turn(); zoom: the
+     figure's scale in widths of `unit` columns (default cols), centred on
+     the grid, so a grid wider than the box draws around it. */
+  function lines(fig, cols, rows, aspect, pose, zoom, unit) {
+    var pts = fig.pts, n = pts.length / 6, faceEnd = fig.faceEnd || 0;
+    var K1 = (zoom || 0.9) * ((unit || cols) / 2) * K2, cx = cols / 2, cy = rows / 2;
+    var L = norm([0.25, 0.55, -0.8]);
+    var zb = new Float32Array(cols * rows), chars = new Array(cols * rows), k, m = turn(fig, pose);
+    for (k = 0; k < cols * rows; k++) chars[k] = " ";
     for (k = 0; k < n; k++) {
       var i = k * 6, x = pts[i], y = pts[i + 1], z = pts[i + 2], nx = pts[i + 3], ny = pts[i + 4], nz = pts[i + 5];
       var X = m[0] * x + m[1] * y + m[2] * z, Y = m[3] * x + m[4] * y + m[5] * z, Z = m[6] * x + m[7] * y + m[8] * z;
       var NX = m[0] * nx + m[1] * ny + m[2] * nz, NY = m[3] * nx + m[4] * ny + m[5] * nz, NZ = m[6] * nx + m[7] * ny + m[8] * nz;
-      if (NZ > 0.35) continue;
+      if (NZ > CULL) continue;
       var ooz = 1 / (Z + K2);
       var xp = (cx + K1 * X * ooz) | 0, yp = (cy - K1 * Y * ooz * aspect) | 0;
       if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
@@ -134,10 +182,10 @@
     return out;
   }
   /* the same frame as one string, as a <pre> holds it */
-  function render(fig, cols, rows, aspect, pose, zoom) { return lines(fig, cols, rows, aspect, pose, zoom).join("\n"); }
+  function render(fig, cols, rows, aspect, pose, zoom, unit) { return lines(fig, cols, rows, aspect, pose, zoom, unit).join("\n"); }
   var built = {};
   function figure(name) { if (!built[name]) built[name] = FIGURES[name](); return built[name]; }
-  var api = { render: render, lines: lines, figure: figure, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
+  var api = { render: render, lines: lines, figure: figure, fit: fitZoom, SPAN: SPAN, RAMP: RAMP, FIGURES: Object.keys(FIGURES) };
   if (typeof module !== "undefined" && module.exports) { module.exports = api; return; }
   if (typeof document === "undefined") return;
   window.NTS = window.NTS || {}; window.NTS.ascii = api;
@@ -168,7 +216,11 @@
     pre.appendChild(baked); pre.appendChild(canvas);
     var fig = figure(name);
     var still = matchMedia("(prefers-reduced-motion: reduce)");
-    var rows = 0, aspect = 0.6, FPS = lite ? 15 : 30, size = 0, base = 0, dpr = 1, day = null, night = null;
+    var rows = 0, grid = cols, aspect = 0.6, FPS = lite ? 15 : 30, size = 0, base = 0, dpr = 1, day = null, night = null;
+    /* the canvas may be larger than the pre (CSS sets its overhang): the
+       grid covers the canvas, centred on the pre; ox/oy place it on the
+       canvas, gx/gy on the pre; zoom fits the figure to the pre's box */
+    var ox = 0, oy = 0, gx = 0, gy = 0, zoom = 1, sx = 1;
     var pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
     var speed = 1, dragging = false, lastX = 0, lastY = 0, visible = true, held = false, raf = 0, last = 0, acc = 0, tAcc = 0;
     /* Sizes the glyphs so `cols` cells span the box. The box is reserved by
@@ -190,11 +242,24 @@
       pre.appendChild(probe);
       var cw = probe.offsetWidth / 10000; pre.removeChild(probe);
       var ratio = Math.min(0.7, Math.max(0.5, cw || 0.6));
-      size = Math.min(24, Math.max(3, w / cols / ratio)); aspect = ratio; rows = Math.max(1, Math.floor(w / size)); fitted = w;
+      size = Math.min(24, Math.max(3, w / cols / ratio)); aspect = ratio; fitted = w;
+      var h = pre.clientHeight || w, cW = canvas.clientWidth || w, cH = canvas.clientHeight || h, cw = ratio * size;
+      grid = Math.max(cols, Math.floor(cW / cw)); rows = Math.max(1, Math.floor(cH / size));
+      ox = (cW - grid * cw) / 2; oy = (cH - rows * size) / 2; gx = ox - (cW - w) / 2; gy = oy - (cH - h) / 2;
+      /* the room around the pre, in its half-widths, keeps a glyph clear of
+         the canvas's edge on every side (a glyph's cell is the one its
+         position falls in, so a reach of half the grid less two cells) */
+      zoom = fitZoom(fig, lite ? SPAN.fragment : SPAN.hero, lite ? 0 : Math.min(grid - 4, (rows - 4) / ratio) / cols);
       dpr = Math.min(3, devicePixelRatio || 1);
-      canvas.width = Math.round(w * dpr); canvas.height = Math.round((pre.clientHeight || w) * dpr);
+      canvas.width = Math.round(cW * dpr); canvas.height = Math.round(cH * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
       day = look(pre);
+      /* the canvas sets a small face on whole-pixel advances (4px for a
+         3.68px cell), which drifts a line of glyphs off its cells: the
+         text is scaled across to the cell width instead */
+      ctx.font = day.font + size + "px " + day.family;
+      var adv = ctx.measureText("M".repeat(50)).width / 50;
+      sx = adv > 0 ? cw / adv : 1;
       /* the baseline as the pre's lines put it: a line of the face at this
          size, line-height 1, in a probe outside any transformed ancestor */
       var line = document.createElement("div"), mark = document.createElement("span");
@@ -207,9 +272,9 @@
     function glow(c, el, st) { el.style.filter = st.glow ? "drop-shadow(" + st.glow.x + "px " + st.glow.y + "px " + st.glow.b + "px " + st.glow.c + ")" : ""; }
     function paint(c, el, st, ls) {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, el.width, el.height);
-      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.setTransform(dpr * sx, 0, 0, dpr, 0, 0);
       c.font = st.font + size + "px " + st.family; c.fillStyle = st.fill; c.textBaseline = "alphabetic";
-      for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], 0, r * size + base);
+      for (var r = 0; r < ls.length; r++) if (ls[r]) c.fillText(ls[r], ox / sx, oy + r * size + base);
     }
     var pending = 0, live = false, family = getComputedStyle(pre).fontFamily, fonts = document.fonts;
     /* Before the face is in (or given up on) nothing is measured; while it
@@ -244,7 +309,7 @@
         for (var r = 0; r < shown.length; r++) {
           var a = shown[r].search(/\S/);
           if (a < 0) continue;
-          pts.push([(a + 0.5) * cw, (r + 0.5) * size], [(shown[r].length - 0.5) * cw, (r + 0.5) * size]);
+          pts.push([gx + (a + 0.5) * cw, gy + (r + 0.5) * size], [gx + (shown[r].length - 0.5) * cw, gy + (r + 0.5) * size]);
         }
         outline = G.hull(pts);
       }
@@ -252,7 +317,7 @@
       return outline.length > 2 && G.near(outline, (px - b.left) * k, (py - b.top) * k, G.SLACK * k);
     }
     function draw() {
-      var ls = lines(fig, cols, rows, aspect, pose, lite ? 1.25 : 0.9), q = twin ? window.NTS.bleed.progress() : 0;
+      var ls = lines(fig, grid, rows, aspect, pose, zoom, cols), q = twin ? window.NTS.bleed.progress() : 0;
       shown = ls; outline = null;
       if (q < 1) paint(ctx, canvas, day, ls);
       if (twin && q > 0) paint(tctx, twin, night, ls);

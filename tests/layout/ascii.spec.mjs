@@ -16,11 +16,12 @@ const INK_SPREAD = 1;
 const FONT_DELAY = 1500;
 const FAST_TIMEOUT_MS = 120_000; // a describe's tests each load cold pages 3 to 4 times
 const SLOW_TIMEOUT_MS = 300_000; // 10 cold loads per test
-// A cover of the pre by the canvas, as for any box edge.
+// A cover of the pre by the canvas (the fragment's matches its box; the page's reaches past
+// it on every side, by the same amount), as for any box edge.
 const COVER_TOL = 1;
 
 const PAGES = [
-  { name: "/intersect/", path: "/intersect/", pre: "pre[data-nts-ascii]" },
+  { name: "/intersect/", path: "/intersect/", pre: "pre[data-nts-ascii]", overhang: true },
   { name: "the home fragment", path: "/", pre: "[data-nts-fragment=intersect] pre" },
 ];
 
@@ -115,7 +116,13 @@ test.describe("L3 the solid is drawn on a canvas", () => {
         };
       }, p.pre);
       expect(r.canvas, "a canvas inside the pre").toBe(true);
-      for (const d of r.dx) expect(Math.abs(d), "canvas edge vs the pre's box").toBeLessThanOrEqual(COVER_TOL);
+      if (p.overhang) {
+        // the page's solid draws past its ring: the canvas covers the pre, centred on it
+        const [l, t, rr, b] = r.dx;
+        for (const d of [-l, -t, rr, b]) expect(d, "canvas edge outside the pre's box").toBeGreaterThanOrEqual(-COVER_TOL);
+        expect(Math.abs(l + rr), "canvas centre x vs the pre's").toBeLessThanOrEqual(COVER_TOL);
+        expect(Math.abs(t + b), "canvas centre y vs the pre's").toBeLessThanOrEqual(COVER_TOL);
+      } else for (const d of r.dx) expect(Math.abs(d), "canvas edge vs the pre's box").toBeLessThanOrEqual(COVER_TOL);
       expect(r.still, "span.ascii-still").toBe(true);
       expect(r.stillText, "the baked text is kept").toBeGreaterThan(0);
       expect(r.stillVisibility, "the baked text is hidden once live").toBe("hidden");

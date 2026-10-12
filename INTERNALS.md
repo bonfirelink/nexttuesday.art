@@ -564,6 +564,16 @@ pre's colour at any other moment needs a redraw. The pre stays the box,
 the accessible element and the target of drag and keys; the baseline
 comes from a probe line in the same face at line-height 1, so the glyphs
 sit where the pre's own lines put them (within a device pixel).
+The size comes from `fit()`: the solid's mean silhouette span over every
+pose a turn or a drag reaches (`SPAN.hero`, 0.95 of the ring, geometric;
+the glyphs add about 5%) or its fragment's (`SPAN.fragment`), capped so
+its furthest reach, a bound over all rotations, keeps a glyph clear of the
+canvas. The page's canvas reaches 14% past the pre on every side
+(`intersect.css`), so the widest poses overshoot the ring as the other
+worlds' figures do; `main` clips sideways overflow on that page. The
+canvas sets a small face on whole-pixel advances, so the text is scaled
+across to the cell width. `tools/gen-stills.mjs` bakes each still at the
+same fit, stepped down until its pose clears its own grid.
 
 A press grabs a figure only on the figure, in all three worlds
 (`NTS.grab` in `nts.js`): the world gives a test of a point against the

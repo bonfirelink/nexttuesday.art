@@ -61,10 +61,20 @@ function philoStill() {
 
 const pose = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.5, ay: 0.4 };
 const tetra = ascii.figure('tetra');
+/* A still is the live frame's pose at the live fit, but it has no room
+   around its box to overshoot into: the zoom steps down until the pose
+   keeps a cell clear of the grid's edge on every side. */
+function still(cols, span) {
+  const rows = Math.round(cols * 0.6);
+  for (let zoom = ascii.fit(tetra, span); ; zoom *= 0.99) {
+    const ls = ascii.lines(tetra, cols, rows, 0.6, pose, zoom), lit = ls.filter((l) => l.trim());
+    if (!ls[0] && !ls[rows - 1] && Math.max(...ls.map((l) => l.length)) < cols && Math.min(...lit.map((l) => l.search(/\S/))) > 0) return ls.join('\n');
+  }
+}
 const out = {
   'still-philo.svg': philoStill(),
-  'still-intersect.txt': ascii.render(tetra, 84, Math.round(84 * 0.6), 0.6, pose),
-  'still-intersect-sm.txt': ascii.render(tetra, 48, Math.round(48 * 0.6), 0.6, pose, 1.25),
+  'still-intersect.txt': still(84, ascii.SPAN.hero),
+  'still-intersect-sm.txt': still(48, ascii.SPAN.fragment),
 };
 for (const [name, text] of Object.entries(out)) {
   writeFileSync(join(parts, name), text);
