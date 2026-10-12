@@ -716,15 +716,28 @@ To retire a page, leave the same kind of stub at its path.
 
 `site/` is published as the `site` branch, which GitHub Pages serves:
 `git subtree split --prefix=site` from the branch being published gives a
-commit that fast-forwards `site`. Push it only on the owner's word to publish.
+commit that fast-forwards `site`. `tools/publish.sh` does the split, the
+fast-forward push and the live check; it runs no test suite of its own, so the
+suite (`npm run test:publish`) is run on the commit beforehand. The live check
+(`--live-only`, also run after the push) passes once GitHub's latest Pages
+build is `built` for the commit `origin/site` points at and every page answers
+200. Push `site` only when a publish is requested.
 
 ## Checks before a change lands
 
-`npm ci` once per checkout. `npm test` after every change: the static and
-fast tiers, in under two minutes, with the dev shell's Chrome headless shell
-and an offline copy of the fonts. `npm run test:publish` before a publish: adds
-the `@slow` sweeps and the `@perf` guards. Tiers are tags in test titles
-(`playwright.config.mjs`); each spec file belongs to one project.
+`npm ci` once per checkout. Tiers are tags in test titles
+(`playwright.config.mjs`); each spec file belongs to one project, and each
+runs against the dev shell's Chrome headless shell and an offline copy of the
+fonts.
+
+- `npm test`: the static and fast tiers, everything but `@slow`, `@perf` and
+  `@visual`. About 2 minutes.
+- `npm run test:publish`: all of it, adding the `@slow` sweeps, the `@visual`
+  snapshots and the `@perf` guards (frame pacing and paint counts against `tests/perf/perf-baselines.json`).
+  About 7 minutes.
+- `npm run test:perf`: the `@perf` guards alone, without their setup project.
+- `npm run test:visual`: the `@visual` screenshot comparisons alone;
+  `npm run test:update-visual` rewrites their snapshots.
 
 The npm scripts go through `tools/run-suite.mjs`. Playwright uses 4 workers
 (`--workers` overrides). The timing tests fail on a loaded machine: run one
