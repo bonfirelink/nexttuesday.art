@@ -5,7 +5,7 @@
    from home) the page reads the NTS tokens from nts.css and the grain is
    off. The nav keeps the site's text face: only its colour is this world's.
    Contrast: phosphor on black 15.4:1, dim 6.6:1, fire-hi 5.6:1. */
-[data-world="intersect"], :root:has(> body[data-world="intersect"]) {
+[data-world="intersect"], :root:where(:has(> body[data-world="intersect"])) {
   --w-bg: #0a0a0a;
   --w-bg-2: #141412;
   --w-fg: #e9e2cf;
