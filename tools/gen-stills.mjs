@@ -2,8 +2,8 @@
      node tools/gen-stills.mjs
    Writes, in site/_nts/parts/:
      still-philo.svg          the impossible triangle at its closed pose
-     still-intersect.txt      the ASCII tetrahedron, 64 columns
-     still-intersect-sm.txt   the same at 37 columns, for fragments
+     still-intersect.txt      the ASCII tetrahedron, 52 columns
+     still-intersect-sm.txt   the same at 52 columns, for fragments (the same frame, smaller)
    The SVG uses the --penrose-* custom properties with fallbacks, so the
    same still follows day and night once inlined. tools/sync.mjs inlines
    these into the pages. */
@@ -69,8 +69,8 @@ const out = {
   /* sync writes the page's still after a newline of its own, which the pre
      shows as the first row: the baked first row (always blank, the pose
      keeps a glyph clear of the edge) goes */
-  'still-intersect.txt': still(64, ascii.SPAN.hero).replace(/^[^\n]*\n/, ''),
-  'still-intersect-sm.txt': still(37, ascii.SPAN.fragment),
+  'still-intersect.txt': still(52, ascii.SPAN.hero).replace(/^[^\n]*\n/, ''),
+  'still-intersect-sm.txt': still(52, ascii.SPAN.fragment),
 };
 for (const [name, text] of Object.entries(out)) {
   writeFileSync(join(parts, name), text);

@@ -17,7 +17,7 @@ const FONT_DELAY = 1500;
 const FAST_TIMEOUT_MS = 120_000; // a describe's tests each load cold pages 3 to 4 times
 const SLOW_TIMEOUT_MS = 300_000; // 10 cold loads per test
 // The page's canvas reaches past its pre by this share of the pre's width on each side.
-const OVERHANG = 0.17;
+const OVERHANG = 0.176;
 // A cover of the pre by the canvas (the fragment's matches its box; the page's reaches past
 // it on every side, by the same amount), as for any box edge.
 const COVER_TOL = 1;
@@ -180,14 +180,14 @@ test.describe("L3 the baked still is the first live frame", () => {
 });
 
 // The baked still's glyphs are sized by CSS so that data-cols cells of the mono's 0.6em
-// advance span the pre: 38.4 = 64 x 0.6 on the page, 22.2 = 37 x 0.6 in a fragment
-// (intersect.css); they follow data-cols. Half a pixel across the whole pre.
+// advance span the pre: 31.2 = 52 x 0.6, on the page and in a fragment (intersect.css);
+// it follows data-cols. Half a pixel across the whole pre.
 const FONT_FIT_TOL = 0.5;
 test.describe("L3 the still's glyphs span the pre", () => {
   for (const [width, height] of [[390, 844], [1280, 500]]) {
     test.describe(`${width}x${height}`, () => {
       test.use({ viewport: { width, height } });
-      for (const [p, k] of [[PAGES[0], 38.4], [PAGES[1], 22.2]]) {
+      for (const [p, k] of [[PAGES[0], 31.2], [PAGES[1], 31.2]]) {
         test(`${p.name}: font size x ${k} is the pre's width`, async ({ page }) => {
           await page.goto(process.env.NTS_BASE + p.path);
           const r = await page.evaluate((sel) => { const cs = getComputedStyle(document.querySelector(sel)); return { fs: parseFloat(cs.fontSize), w: parseFloat(cs.width) }; }, p.pre);

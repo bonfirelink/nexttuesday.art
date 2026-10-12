@@ -150,7 +150,7 @@
   /* the pose a figure starts in, which the baked stills show too (see
      tools/gen-stills.mjs): at the page's fit the solid keeps a glyph clear
      of its still's grid, which has no room around the box to overshoot */
-  var POSE = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.1, ay: 0.3 };
+  var POSE = { phi: 0.6, alpha: 0.52, spin: 0.3, ax: -0.1, ay: 0.25 };
   function fitZoom(fig, span, room) {
     var e = extent(fig);
     return Math.min(span / e.span, (room || Infinity) / e.reach);
@@ -391,12 +391,12 @@
     });
   }
   function init() {
-    document.querySelectorAll("pre[data-nts-ascii]").forEach(function (pre) { mount(pre, pre.getAttribute("data-nts-ascii"), +pre.getAttribute("data-cols") || 64, false); });
+    document.querySelectorAll("pre[data-nts-ascii]").forEach(function (pre) { mount(pre, pre.getAttribute("data-nts-ascii"), +pre.getAttribute("data-cols") || 52, false); });
     document.querySelectorAll("[data-nts-fragment='intersect']").forEach(function (host) {
       var pre = host.querySelector("pre");
       if (!pre) { pre = document.createElement("pre"); pre.setAttribute("aria-hidden", "true"); host.appendChild(pre); }
       host.classList.add("is-live");
-      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 37, true);
+      mount(pre, host.getAttribute("data-figure") || "tetra", +host.getAttribute("data-cols") || 52, true);
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

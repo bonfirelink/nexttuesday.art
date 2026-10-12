@@ -551,7 +551,7 @@ INTERSECT (`worlds/intersect.css`, `worlds/ascii.js`). The world sets IM
 Fell as the body and heading face and the mono for labels; the title is
 IM Fell behind a mono `>` prompt. Classes: `.corr` (the correspondence
 table), `.intersect-grain` (a grain div, first in body).
-The entity is `<pre data-nts-ascii="tetra" data-cols="64" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
+The entity is `<pre data-nts-ascii="tetra" data-cols="52" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
 figures: `tetra`, `heptagram`, `seed`. Live, `ascii.js` moves the baked
 still into a hidden `span.ascii-still` and draws the glyphs on a canvas
 over the pre's box, one `fillText` per line, in the pre's computed face,
@@ -568,7 +568,7 @@ The size comes from `fit()`: the solid's mean silhouette span over every
 pose a turn or a drag reaches (`SPAN.hero`, 0.97 of the ring, geometric;
 the glyphs add about 5%) or its fragment's (`SPAN.fragment`), capped so
 its furthest reach, a bound over all rotations, keeps a glyph clear of the
-canvas. The page's canvas reaches 17% past the pre on every side
+canvas. The page's canvas reaches 15.8% past the pre across and 17.6% down
 (`intersect.css`), so the widest poses overshoot the ring as the other
 worlds' figures do; `main` clips sideways overflow on that page. The
 canvas sets a small face on whole-pixel advances, so the text is scaled
@@ -578,8 +578,8 @@ the still's grid span the box as the live glyphs do. The overshooting tip
 of a wide pose can't be grabbed: the canvas is `pointer-events: none` and
 a press counts only on the pre. The solid is drawn by its edges: its faces
 write depth but no glyph (0.05 further back, so a front edge wins against
-its own faces), which hides the edges behind. 64 columns on the page, 37
-in a fragment.
+its own faces), which hides the edges behind. 52 columns on the page and in a fragment (the same frame,
+smaller).
 
 A press grabs a figure only on the figure, in all three worlds
 (`NTS.grab` in `nts.js`): the world gives a test of a point against the

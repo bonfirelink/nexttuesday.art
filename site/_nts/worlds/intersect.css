@@ -56,11 +56,11 @@ html[data-bleed-state="in"] .intersect-grain { z-index: 3; }
 pre[data-nts-ascii] {
   display: block; margin: calc((100% - var(--ring)) / 2) auto;
   width: var(--ring); aspect-ratio: 1; overflow: hidden;
-  /* the baked still's glyphs at the live glyphs' size: data-cols (64)
+  /* the baked still's glyphs at the live glyphs' size: data-cols (52)
      cells of the mono's 0.6em advance span the ring. --ring's 100% means
      a font size here, so its formula is repeated on the entity's width
      (100cqi); the L3 still test in tests/layout/ascii.spec.mjs checks it */
-  font-family: var(--font-mono); font-weight: 700; line-height: 1; font-size: calc((min(100cqi, 92svh) - 2.6rem) / 38.4);
+  font-family: var(--font-mono); font-weight: 700; line-height: 1; font-size: calc((min(100cqi, 92svh) - 2.6rem) / 31.2);
   color: var(--w-fg); white-space: pre; user-select: none; -webkit-user-select: none;
   touch-action: pan-y;
 }
@@ -79,9 +79,9 @@ html[data-bleed-state="before"] pre[data-nts-ascii].is-live, html[data-bleed-sta
    worlds' figures do: its canvas reaches past the pre, which ascii.js
    reads. It is what the fit uses and no more (its area is drawn every
    frame): the solid's furthest reach plus a cell and a half on each side,
-   82 columns across and 51 rows down at 64 columns of a 0.6em face */
+   68 columns across and 42 rows down at 52 columns of a 0.6em face */
 pre[data-nts-ascii].is-live { overflow: visible; }
-pre[data-nts-ascii] > canvas { inset: -16.6% -14.3%; width: 128.6%; max-width: none; height: 133.2%; }
+pre[data-nts-ascii] > canvas { inset: -17.6% -15.8%; width: 131.6%; max-width: none; height: 135.2%; }
 /* the canvas's empty margin may pass the screen's edge on a phone (the
    glyphs stay inside it): the page clips what would scroll sideways, at
    the screen's edge rather than the hero's, which is inside the gutters */
@@ -97,6 +97,6 @@ body[data-world="intersect"] > main { overflow-x: clip; }
 /* the fragment */
 [data-nts-fragment="intersect"] { container-type: inline-size; position: relative; aspect-ratio: 1; width: 100%; background: var(--frag-bg, #0a0a0a); color: #e9e2cf; overflow: hidden; border-radius: inherit; display: grid; place-items: center; padding: 4%; }
 [data-nts-fragment="intersect"] .still { width: 100%; height: 100%; display: grid; place-items: center; }
-[data-nts-fragment="intersect"] pre { margin: 0; width: 100%; aspect-ratio: 1; font-family: var(--font-mono); font-weight: 700; line-height: 1; white-space: pre; overflow: hidden; font-size: calc(100cqi / 22.2); }
-/* as the page's: 37 cells (ascii.js's fragment default) of 0.6em span the box */
+[data-nts-fragment="intersect"] pre { margin: 0; width: 100%; aspect-ratio: 1; font-family: var(--font-mono); font-weight: 700; line-height: 1; white-space: pre; overflow: hidden; font-size: calc(100cqi / 31.2); }
+/* as the page's: 52 cells (ascii.js's fragment default) of 0.6em span the box */
 [data-nts-fragment="intersect"] pre.is-live { text-shadow: 0 0 5px rgba(233, 226, 207, .35); }

@@ -49,8 +49,8 @@ test.describe("L3b ASCII solid fits the ring", () => {
   test("the fit holds over every pose a turn or a drag reaches (node)", () => {
     const fig = ascii.figure("tetra");
     expect(typeof ascii.fit, "ascii.fit").toBe("function");
-    // the fragment: its 37-column box, no overhang; mean glyph span over the pose torus
-    const cols = 37, rows = Math.round(cols * 0.6), zoom = ascii.fit(fig, ascii.SPAN.fragment), spans = [];
+    // the fragment: its 52-column box, no overhang; mean glyph span over the pose torus
+    const cols = 52, rows = Math.round(cols * 0.6), zoom = ascii.fit(fig, ascii.SPAN.fragment), spans = [];
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
       const ls = ascii.lines(fig, cols, rows, 0.6, { ax: (i / 16) * 2 * Math.PI, ay: (j / 16) * 2 * Math.PI }, zoom);
       let x0 = cols, x1 = 0, y0 = rows, y1 = 0;
@@ -61,13 +61,13 @@ test.describe("L3b ASCII solid fits the ring", () => {
     expect(mean, "fragment's mean span over its box").toBeGreaterThanOrEqual(FRAG_MIN);
     expect(mean, "fragment's mean span over its box").toBeLessThanOrEqual(FRAG_MAX);
     // the hero: no pose reaches past the room it is given
-    // the page's canvas over its pre (intersect.css: 128.6% across, 133.2% down), as cells
-    // of a 0.6em face at 64 columns, and the room fit() gets from them (ascii.js)
-    const ratio = 0.6, C = Math.floor(1.286 * 64), R = Math.floor(1.332 * 64 * ratio);
-    const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / ratio) / 64);
+    // the page's canvas over its pre (intersect.css: 131.6% across, 135.2% down), as cells
+    // of a 0.6em face at 52 columns, and the room fit() gets from them (ascii.js)
+    const ratio = 0.6, C = Math.floor(1.316 * 52), R = Math.floor(1.352 * 52 * ratio);
+    const hz = ascii.fit(fig, ascii.SPAN.hero, Math.min(C - 3, (R - 3) / ratio) / 52);
     expect(hz * 0.95, "the room does not cut the hero's size (zoom, unclamped vs clamped)").toBeCloseTo(ascii.fit(fig, ascii.SPAN.hero) * 0.95, 3);
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
-      const ls = ascii.lines(fig, C, R, ratio, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 64);
+      const ls = ascii.lines(fig, C, R, ratio, { ax: (i / 16) * 2 * Math.PI + 0.1, ay: (j / 16) * 2 * Math.PI + 0.2 }, hz, 52);
       expect(ls[0].trim() + ls[R - 1].trim(), `pose ${i},${j}: top and bottom rows of the grid`).toBe("");
       expect(Math.max(...ls.map((l) => l.length)), `pose ${i},${j}: rightmost glyph`).toBeLessThan(C);
       expect(Math.min(...ls.filter((l) => l.trim()).map((l) => l.search(/\S/))), `pose ${i},${j}: leftmost glyph`).toBeGreaterThan(0);

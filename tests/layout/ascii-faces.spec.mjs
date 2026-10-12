@@ -7,7 +7,7 @@ const module = { exports: {} };
 new Function("module", readFileSync(new URL("../../site/_nts/worlds/ascii.js", import.meta.url), "utf8"))(module);
 const ascii = module.exports;
 const fig = ascii.figure("tetra");
-const COLS = 64, ROWS = Math.round(COLS * 0.6), ASPECT = 0.6;
+const COLS = 52, ROWS = Math.round(COLS * 0.6), ASPECT = 0.6;
 // Share of the samples along an edge that may miss a glyph in front (rounding at cell edges).
 const FRONT_MISS = 0.2;
 // Samples this close to an edge's ends or to the centre (where the front edge crosses
