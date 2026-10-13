@@ -541,8 +541,7 @@ and strokes each colour as one path of chained polylines.
 NOT NOT PHILO (`worlds/philo.css`, `worlds/penrose.js`, `worlds/philo.js`).
 Classes: `.philo-bar` (the red label with the misregistered charcoal plate;
 `.sm`, `.caps`), `.philo-key` (the red extra-bold key word),
-`.philo-strip` (the italic strip), `.philo-rings` (engraved rings behind a
-block), `.volumes`/`.volume`, `.fig`. The entity is
+`.philo-strip` (the italic strip), `.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
 `<div class="nts-penrose" role="img" aria-label="…"><!-- nts:still philo --><!-- /nts:still --></div>`;
 philo.js appends a canvas and hides the still. Colours from
 `--penrose-ink`, `--penrose-cut`, `--penrose-ground`.
