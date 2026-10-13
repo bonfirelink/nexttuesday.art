@@ -21,7 +21,7 @@
 set -euo pipefail
 
 BASE=${NTS_BRANCH:-main}
-# This machine's DNS cannot resolve the domain: pin it to a GitHub Pages IP.
+# The domain may not resolve on a dev host: pin it to a GitHub Pages IP.
 RESOLVE=nexttuesday.art:443:185.199.108.153
 # the home and every initiative's page, from the registry (site.json)
 REG=$(node -e 'for (const i of require(process.argv[1]).initiatives) console.log("/" + i.slug + "/")' "$(git rev-parse --show-toplevel)/site/_nts/content/site.json") || { echo "publish: cannot read the initiatives from site.json" >&2; exit 1; }

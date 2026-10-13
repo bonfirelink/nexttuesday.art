@@ -8,7 +8,6 @@ from the working branch (`main`). How the code fits:
 
 - `nexttuesday-art-preview-sheet`: before/after screenshot sheets of a visual change, for review on a phone.
 - `nexttuesday-art-perf`: measuring smoothness (frame pacing, paints/layouts per frame) of a change, before vs after.
-- `nexttuesday-art-publish`: publishing to `site`, only when a publish is explicitly requested.
 
 ## Branches and worktrees
 
@@ -33,7 +32,7 @@ from the working branch (`main`). How the code fits:
 - Previews: `http://<name>.nexttuesday-art.localhost:18000/`, reached through the SSH tunnel from Brave or Chrome. Safari does not resolve `*.localhost`.
 - WebKit cannot be tested on this machine: list what to check on an iPhone.
 - A WebKit-only fix is checked on the live site from an iPhone (iOS 27 cannot reach `*.localhost` previews), so such a fix is published to be checked, only when a publish is requested.
-- This machine cannot resolve nexttuesday.art: `curl --resolve nexttuesday.art:443:185.199.108.153 https://nexttuesday.art/`.
+- Live checks of nexttuesday.art need an address pin: see INTERNALS.md "Publishing".
 
 ## Agents
 

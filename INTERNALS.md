@@ -721,7 +721,25 @@ fast-forward push and the live check; it runs no test suite of its own, so the
 suite (`npm run test:publish`) is run on the commit beforehand. The live check
 (`--live-only`, also run after the push) passes once GitHub's latest Pages
 build is `built` for the commit `origin/site` points at and every page answers
-200. Push `site` only when a publish is requested.
+200.
+
+`tools/publish.sh` is the only way `site` moves, fast-forward only, never with
+`--force`. The branch it splits is `main`; `NTS_BRANCH` overrides it.
+`--dry-run` prints the split SHA without pushing, and `git diff origin/site
+<split sha>` (after `git fetch origin site`) is what a publish would change.
+An unchanged `site/` exits 0 with "nothing to publish". The split goes through
+a temporary local branch `site-publish`, deleted at the start and end of each
+run, so that name is not used for anything else.
+
+The script refuses a dirty working branch, the working branch (`main` or
+`NTS_BRANCH`) not checked out in any worktree, that branch moving during the
+checks, `site` checked out in a worktree, a diverged `site` and a failed sync
+check. `site` is never edited directly; fix the cause on the working branch.
+
+The post-push poll retries 10 times, 30 s apart, because the Pages build can
+lag; `--live-only` is one pass, so rerun it before a timeout counts as failed.
+The domain may not resolve on a dev host: the script pins the address; any
+other live curl needs `--resolve nexttuesday.art:443:185.199.108.153`.
 
 ## Checks before a change lands
 
