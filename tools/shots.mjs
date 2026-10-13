@@ -10,7 +10,7 @@
 //   --settle MS            wait after fonts are ready, before the first frame (default 1500)
 //   --clip x,y,w,h         crop each shot to this rectangle (CSS px, viewport coordinates)
 // Writes DIR/<label>/<view>/<path>-<position>.png and DIR/manifest.json (read by sheet.mjs).
-// The URL pairs with $NTS_BRANCH: a preview is http://<name>.nexttuesday-art.localhost:18000/.
+// A URL is a preview: the site served from a checkout (the working branch's, or the change's).
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -33,7 +33,7 @@ const { values: o } = parseArgs({
 });
 
 if (!process.env.CHROMIUM) {
-  console.error("$CHROMIUM unset; run inside the dev shell");
+  console.error("$CHROMIUM unset; set it to a Chromium binary");
   process.exit(2);
 }
 const usage = (msg) => {
@@ -83,7 +83,7 @@ try {
         try {
           await page.goto(new URL(p, url).href, { waitUntil: "load" });
         } catch (e) {
-          throw new Error(`${e.message}\nis the preview up (\`devshell status\`)?`);
+          throw new Error(`${e.message}\nis that preview being served?`);
         }
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(+o.settle);

@@ -5,7 +5,7 @@
 //   node tools/bench.mjs before=<url> after=<url> [paths=/,/embers/] [views=phone,desktop]
 //        [throttle=4] [runs=3] [speed=1.2] [--json] [--trace[=<absolute dir>]]
 //
-// Run it inside the dev shell (it exports $CHROMIUM). Each number is the median over `runs`.
+// Needs a Chromium ($CHROMIUM). Each number is the median over `runs`.
 // --trace writes one trace per run, by default into a fresh directory under the OS temp dir;
 // a dir given must be absolute, so traces never land in the repo by accident.
 import fs from "node:fs";
@@ -26,7 +26,7 @@ const MAX_SCROLL_MS = 60_000; // a page this long is scrolled partway
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((a) => a.startsWith("--") && !a.includes("=")));
 const opt = Object.fromEntries(args.filter((a) => a.includes("=") && !a.startsWith("--")).map((a) => [a.slice(0, a.indexOf("=")), a.slice(a.indexOf("=") + 1)]));
-if (!process.env.CHROMIUM) { console.error("$CHROMIUM unset; run inside the dev shell"); process.exit(2); }
+if (!process.env.CHROMIUM) { console.error("$CHROMIUM unset; set it to a Chromium binary"); process.exit(2); }
 const traceArg = args.find((a) => a.startsWith("--trace="))?.slice(8);
 if (traceArg !== undefined && !path.isAbsolute(traceArg)) { console.error("--trace needs an absolute directory (outside the repo)"); process.exit(2); }
 const traceDir = traceArg || (flags.has("--trace") ? fs.mkdtempSync(path.join(os.tmpdir(), "nts-bench-")) : "");
@@ -90,7 +90,7 @@ async function once(browser, label, base, urlPath, viewName, outFile) {
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => m.type() === "error" && !m.text().startsWith("Failed to load resource") && errors.push(m.text()));
     const res = await page.goto(new URL(urlPath, base).href, { waitUntil: "load" });
-    if (!res?.ok()) throw new Error(`${label} ${urlPath}: HTTP ${res?.status()}; is the preview up (devshell status)?`);
+    if (!res?.ok()) throw new Error(`${label} ${urlPath}: HTTP ${res?.status()}; is that preview being served?`);
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(SETTLE_MS);
     const cdp = await context.newCDPSession(page);

@@ -15,7 +15,7 @@ const { values: o, positionals: [dir] } = parseArgs({
   options: { "per-page": { type: "boolean", default: false }, title: { type: "string", default: "" }, scale: { type: "string", default: "1" } },
 });
 if (!process.env.CHROMIUM) {
-  console.error("$CHROMIUM unset; run inside the dev shell");
+  console.error("$CHROMIUM unset; set it to a Chromium binary");
   process.exit(2);
 }
 if (!dir) {

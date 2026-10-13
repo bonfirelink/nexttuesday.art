@@ -8,7 +8,7 @@ function chromiumPath() {
   } catch {
     throw new Error(
       "No Chromium found: $CHROMIUM is unset and `chromium` is not on PATH. " +
-        "Run the tests inside the project's dev shell (it exports CHROMIUM)."
+        "Install Chromium or point CHROMIUM at a binary."
     );
   }
 }

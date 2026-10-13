@@ -29,9 +29,9 @@ from the working branch (`main`). How the code fits:
 
 ## Previews and checks
 
-- Previews: `http://<name>.nexttuesday-art.localhost:18000/`, reached through the SSH tunnel from Brave or Chrome. Safari does not resolve `*.localhost`.
-- WebKit cannot be tested on this machine: list what to check on an iPhone.
-- A WebKit-only fix is checked on the live site from an iPhone (iOS 27 cannot reach `*.localhost` previews), so such a fix is published to be checked, only when a publish is requested.
+- Previews: each checkout's preview is the site served from it; compare the working branch's preview with the change's.
+- The test suite runs Chromium only: list what to check on an iPhone.
+- A WebKit-only fix is checked on the live site from an iPhone, so such a fix is published to be checked, only when a publish is requested.
 - Live checks of nexttuesday.art need an address pin: see INTERNALS.md "Publishing".
 
 ## Agents

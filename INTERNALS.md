@@ -745,7 +745,7 @@ other live curl needs `--resolve nexttuesday.art:443:185.199.108.153`.
 
 `npm ci` once per checkout. Tiers are tags in test titles
 (`playwright.config.mjs`); each spec file belongs to one project, and each
-runs against the dev shell's Chrome headless shell and an offline copy of the
+runs against a headless Chromium (`$CHROMIUM`) and an offline copy of the
 fonts.
 
 - `npm test`: the static and fast tiers, everything but `@slow`, `@perf` and
@@ -768,7 +768,7 @@ horizontal overflow, and a clean console with no 404s (the page walk in
 hero, figure and card geometry (`tests/layout`). Still by hand: the
 contrast audit over every text node (all AA, nothing under 11px, settled
 on every page), and looking at screenshots from the preview
-(`devshell up`, `devshell url`).
+(the site served from the checkout).
 
 Tests that open a fresh browser context use `coldPage`
 (`tests/helpers/cold.mjs`); the font cache and the external-request block
