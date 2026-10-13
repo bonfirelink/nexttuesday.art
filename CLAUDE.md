@@ -6,8 +6,8 @@ from the working branch (`main`). How the code fits:
 
 ## Skills
 
-- `nexttuesday-art-preview-sheet`: before/after screenshot sheets of a visual change, for review on a phone.
-- `nexttuesday-art-perf`: measuring smoothness (frame pacing, paints/layouts per frame) of a change, before vs after.
+- `nexttuesday-art-preview-sheet`: judging a visual change by eye with before/after screenshot sheets.
+- `nexttuesday-art-perf`: reading smoothness numbers (frame pacing, paints/layouts per frame) of a change, before vs after.
 
 ## Branches and worktrees
 
