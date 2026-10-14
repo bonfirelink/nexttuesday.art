@@ -306,13 +306,6 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 }
 @keyframes bead-pulse { 0% { transform: scale(.59); opacity: 0; } 1.8% { opacity: .6; } 8%, 100% { transform: scale(1); opacity: 0; } }
 
-/* arrival: the beads pop in */
-.js .bead .face { animation: bead-pop 500ms var(--ease-out) backwards; }
-.js .o-philo .face { animation-delay: 80ms; }
-.js .o-intersect .face { animation-delay: 160ms; }
-.js .o-star .face { animation-delay: 240ms; }
-@keyframes bead-pop { from { transform: scale(.5); } to { transform: none; } }
-
 /* the name, under the sky on phones, beside it from 900px */
 .intro { display: grid; justify-items: center; text-align: center; gap: clamp(.7rem, 2vh, 1.1rem); }
 .intro h1 { font-size: clamp(2.6rem, 11.5vw, 5.5rem); line-height: .92; max-width: 9ch; }
@@ -449,7 +442,6 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
 @media (prefers-reduced-motion: reduce) {
   .pivot, .pivot > * { animation: none !important; }
-  .js .bead .face { animation: none; }
   .world::before, .world .prose { animation: none !important; }
   .world::before { clip-path: none; }
   .bead:hover .face, .bead:focus-visible .face { transform: none; }

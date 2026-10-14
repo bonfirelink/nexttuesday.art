@@ -688,7 +688,7 @@ worlds, bodies and code tokens (`tests/helpers/registry.mjs`).
    the orrery (`.pivot.orbit.o-<body>`), the window (`section.world` with
    its `.orb`), an orbit the emblem draws (`ORBITS` and `STARS` in
    `gen-emblem.mjs`), the stop pose (`STOP_BODY` beside `STOP_DOTS` in
-   `orrery.js` and `emblem.spec.mjs`), the bead pulse and pop-in stagger
+   `orrery.js` and `emblem.spec.mjs`), the bead pulse stagger
    in `orrery.css` (the 18 s cycle is cut for four bodies), the window's
    heading voice (`.world[data-world="<world>"] h2` in `orrery.css`), and
    the bead on the events page's small orrery (its `.mini-ring`, `.pivot.oN`
