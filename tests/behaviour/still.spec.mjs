@@ -1,5 +1,5 @@
 // B4 the home portals don't scale on scroll, B5 the top emblem doesn't shrink or dim,
-// and the emblem keeps its original size rather than the world ring's.
+// and the home emblem keeps its original size on desktop, and on a phone is sized to the trace ring.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open, scrollTo } from "../helpers/behaviour.mjs";
 
@@ -9,10 +9,10 @@ const ORB_FRACS = [0.7, 0.6, 0.5, 0.4, 0.3]; // where the orb's top sits, as a s
 const ORB_ENTRY_K = [0.25, 0.5, 0.75]; // the share of its own height the orb has entered by
 const TOP_TRIES = 4; // scrolls tried to land the orb on a target
 const TOP_TOL = 1; // px: how closely a scroll must land on its target
-// The emblem's original box in CSS px, as recorded from the live site; on a phone it is sized so
-// its outer orbit lands on the gutter ((390 - 2 * 19.5) / .9572). A variant sized to the world
-// ring (559 px at 1440) differs by more than the tolerance.
-const EMBLEM_WIDTH = { 390: 366.69, 1440: 565.72 };
+// The emblem's box in CSS px: at 1440 the original, as recorded from the live site (a variant sized to
+// the world ring, 559 px, differs by more than the tolerance); at 390 computed, since a phone sizes it
+// so its outer orbit is the trace ring: (390 - 2 * 19.5 - 41.6) / .9545.
+const EMBLEM_WIDTH = { 390: 324.14, 1440: 565.72 };
 
 // Everything the aperture parts add (the opening disc and its inverse) is left out.
 const APERTURE_PART = ".ecl-disc, .ecl-in";
@@ -108,7 +108,7 @@ for (const vp of VIEWPORTS) {
       }
     });
 
-    test("the home emblem keeps its original size, not the world ring's", async ({ page }) => {
+    test("the home emblem keeps its original size on desktop and is sized to the trace ring on a phone", async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await open(page);
       const size = await page.evaluate(() => {

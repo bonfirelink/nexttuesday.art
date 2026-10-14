@@ -1,6 +1,7 @@
 // The home's sky on a phone and what hints at the beads.
-// S1 the emblem keeps a margin: its outer orbit stays MARGIN px inside the
-// screen's sides and below the header, and the events star is never clipped;
+// S1 on a phone the emblem's outer orbit is the world pages' trace ring, the
+// same diameter and the same centre on screen, and the events star is never
+// clipped;
 // S3 the header is balanced: the destinations spread from the sigil to the
 // gutter, the sigil-to-first gap like the gaps between them, one centre line;
 // S4 no key under the emblem: the name is the next thing after it;
@@ -12,10 +13,12 @@ import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
 import { BODIES as BEADS } from "../helpers/registry.mjs";
 
-const MARGIN = 16; // px between the outer orbit and the screen's side, at least
-const ORBIT_R = (96.4 + 0.55 / 2) / 202; // the outer orbit's outer edge, in emblem widths
+const TOL = 1; // px: how closely the orbit must match the trace ring
+const ORBIT_R = 96.4 / 202; // the outer orbit's centreline, in emblem widths
 const STAR_AT_3 = 62500; // ms: the events star turns 15deg -> 90deg (300 s a turn)
-const PHONES = [360, 375, 390, 430];
+// Phones as the suite has them (portrait, 844 high), the widths where the world ring's caps start to
+// bite (the entity's 30rem; 599 is the widest phone), and a short landscape phone (the 92svh cap).
+const PHONES = [[360, 844], [375, 844], [390, 844], [430, 844], [520, 844], [540, 900], [599, 900], [568, 320]];
 
 // The outer orbit's box, from the emblem's box (the orbit layer turns, so its own box is a turned square).
 const orbitBox = (page) =>
@@ -25,18 +28,33 @@ const orbitBox = (page) =>
     return { cx, cy, r, left: cx - r, right: cx + r, top: cy - r, bottom: cy + r, vw: innerWidth };
   }, ORBIT_R);
 
-for (const width of PHONES) {
-  test.describe(`at ${width}`, () => {
-    test.use({ viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
+for (const [width, height] of PHONES) {
+  test.describe(`at ${width}x${height}`, () => {
+    test.use({ viewport: { width, height }, isMobile: true, hasTouch: true });
 
-    test(`S1 the outer orbit sits at least ${MARGIN} px inside the screen and below the header, the star unclipped`, async ({ page, freeze }) => {
+    test("S1 the outer orbit is the world pages' trace ring, the star unclipped", async ({ page, freeze }) => {
+      // the worlds whose entity is the square the ring is centred in; EMBERS' hearth is at most 70svh
+      // high, so it is square (and its ring level with the others') only while 70svh holds the column
+      const column = Math.min(width - 2 * Math.max(16, Math.min(48, width * 0.05)), 480);
+      const worlds = ["/not-not-philo/", "/intersect/"];
+      if (height * 0.7 >= column) worlds.push("/embers/");
+      const rings = [];
+      for (const world of worlds) {
+        await open(page, world);
+        rings.push(await page.evaluate(() => {
+          const r = document.querySelector(".trace").getBoundingClientRect();
+          return { world: location.pathname, d: r.width, cx: r.left + r.width / 2, cy: r.top + r.height / 2 + scrollY };
+        }));
+      }
       await open(page);
       await freeze(page, STAR_AT_3);
       const b = await orbitBox(page);
-      expect(b.left, "left margin").toBeGreaterThanOrEqual(MARGIN);
-      expect(b.vw - b.right, "right margin").toBeGreaterThanOrEqual(MARGIN);
-      const bar = await page.evaluate(() => document.querySelector(".nts-header").getBoundingClientRect().bottom);
-      expect(b.top - bar, "gap under the header").toBeGreaterThanOrEqual(MARGIN);
+      const y = await page.evaluate(() => scrollY);
+      for (const ring of rings) {
+        expect(Math.abs(2 * b.r - ring.d), `diameter, against ${ring.world}`).toBeLessThanOrEqual(TOL);
+        expect(Math.abs(b.cx - ring.cx), `centre x, against ${ring.world}`).toBeLessThanOrEqual(TOL);
+        expect(Math.abs(b.cy + y - ring.cy), `centre y, against ${ring.world}`).toBeLessThanOrEqual(TOL);
+      }
       // the star at three o'clock: every box that clips it holds its sigil whole
       const clipped = await page.evaluate(() => {
         const s = document.querySelector('.bead[data-body="star"] .nts-sigil').getBoundingClientRect();

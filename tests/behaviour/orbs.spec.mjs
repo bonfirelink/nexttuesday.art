@@ -374,7 +374,8 @@ test.describe("O8", () => {
             for (let k = 0; k < rays; k++) {
               out.outside.push(at(cssR + 1.5, k));
               out.edge.push(at(cssR + 0.25, k)); 
-              out.ring.push(at(cssR - 3.6, k));
+              // the ring is a device px or two wide and the bead's centre lands between device pixels: take the pixels across it
+              out.ring.push([-0.5, -0.25, 0, 0.25, 0.5].map((d) => at(cssR - 3.6 + d, k)));
             }
             return out;
           }, [png.toString("base64"), RAYS, w / 2, m, 4]);
@@ -382,7 +383,7 @@ test.describe("O8", () => {
             // the cast of a lifted bead darkens the ground below it; the fringe is judged at rest
             if (!hover) expect(offLine(found.edge[k], g.ground, g.face), `${what}: ray ${k}, no fringe at the face's edge (${found.edge[k]}, between ${g.ground} and ${g.face})`).toBeLessThanOrEqual(EDGE_TOL);
             if (!hover) expect(gap(found.outside[k], g.ground), `${what}: ray ${k}, the ground just outside the face (${found.outside[k]} against ${g.ground})`).toBeLessThanOrEqual(GROUND_TOL);
-            expect(gap(found.ring[k], hover ? g.sigil : g.ring), `${what}: ray ${k}, the ring inside the face (${found.ring[k]} against ${hover ? g.sigil + ', lit' : g.ring})`).toBeLessThanOrEqual(RING_TOL);
+            expect(Math.min(...found.ring[k].map((c) => gap(c, hover ? g.sigil : g.ring))), `${what}: ray ${k}, the ring inside the face (${found.ring[k].join(" | ")} against ${hover ? g.sigil + ', lit' : g.ring})`).toBeLessThanOrEqual(RING_TOL);
           }
         }
       }

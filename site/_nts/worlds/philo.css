@@ -90,10 +90,10 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
    The hero is full-bleed so the plate spans the screen; its content box stays
    the .wrap one. The orbit's centre (--cx, --cy) is worked out from the hero
    grid in pages.css (its padding, column gap and the 1.1fr/1fr columns, or the
-   stacked entity of width min(100%, 30rem), measured in vw because a vertical
+   stacked entity of width min(100%, var(--entity-w)), measured in vw because a vertical
    percentage would be of the hero's height): keep them in step; the layout
    test checks the plate is centred on the orbit. */
-.philo-rings { position: relative; isolation: isolate; --pt: clamp(1.5rem, 4vw, 3rem); --pb: clamp(2rem, 5vw, 3.5rem); --gap: clamp(2rem, 5vw, 5rem); --pad: max(var(--gutter), (100% - var(--wrap)) / 2); --wc: calc(100% - 2 * var(--pad)); --cx: 50%; --cy: calc(var(--pt) + min(100vw - 2 * max(var(--gutter), (100vw - var(--wrap)) / 2), 30rem) / 2); }
+.philo-rings { position: relative; isolation: isolate; --pt: clamp(var(--hero-top), 4vw, 3rem); --pb: clamp(2rem, 5vw, 3.5rem); --gap: clamp(2rem, 5vw, 5rem); --pad: max(var(--gutter), (100% - var(--wrap)) / 2); --wc: calc(100% - 2 * var(--pad)); --cx: 50%; --cy: calc(var(--pt) + min(100vw - 2 * max(var(--gutter), (100vw - var(--wrap)) / 2), var(--entity-w)) / 2); }
 .hero.philo-rings { width: auto; margin-inline: 0; padding-inline: var(--pad); overflow: clip; }
 @media (min-width: 900px) { .philo-rings { --cx: calc(100% - var(--pad) - (var(--wc) - var(--gap)) / 4.2); --cy: calc(var(--pt) + (100% - var(--pt) - var(--pb)) / 2); } }
 .philo-rings::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; opacity: var(--plate); background: repeating-radial-gradient(circle at var(--cx) var(--cy), var(--w-fg) 0 1px, transparent 1px 9px); mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); -webkit-mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); }

@@ -321,11 +321,15 @@ three worlds and the events star ride its orbits
 (`.pivot` is a static zero-size point; its child carries one animated transform, `orbit`, which turns around the point and counter-rotates so the `.bead` stays upright).
 No key names the bodies: the name follows the emblem, and a quiet pulse
 (below, paused while the machine is stopped) is the only hint that a bead opens. On a phone the emblem is sized
-so its outer orbit lands on the gutter, with the same margin under the
-header, and `.sky` runs to the screen's edges and does the clipping, so a
-body riding past the emblem's box (the events star at three o'clock) is
-never cut by the box; S1 in `tests/behaviour/sky.spec.mjs` holds the
-margin. Scrolling travels to each world: `section.world`
+so its outer orbit is the world pages' trace ring: the same diameter and centre
+on screen, on every phone viewport, portrait or landscape (the ring's caps
+`--ring-cap` and `--entity-w`, and `--ring-inset`, `--hero-top` and
+`--orbit-share`, are in `orrery.css`). `.sky` runs to the screen's edges
+and does the clipping, so a body riding past the emblem's box (the events
+star at three o'clock) is never cut by the box; S1 in
+`tests/behaviour/sky.spec.mjs` holds the match. One known exception: EMBERS'
+`max-height: 70svh` (`embers.css`) makes its entity shorter in short landscape,
+so its ring sits higher than the other worlds'. Scrolling travels to each world: `section.world`
 with `data-world`, its orb (`.orb`, holding the
 world's live fragment) and its words. The orb is a portal, not a card: hover, keyboard
 focus and a press open it into the disc and never lift it or cast a shadow

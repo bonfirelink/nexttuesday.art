@@ -25,7 +25,7 @@ from the working branch (`main`). How the code fits:
 - The three worlds (EMBERS, NOT NOT PHILO, INTERSECT) behave and look the same.
 - A figure overshooting its circle reads as a portal: wanted.
 - Scroll-linked motion that means nothing goes.
-- The home emblem keeps its original size and position.
+- On desktop, the home emblem keeps its original size and position; on a phone its outer orbit is the world pages' trace.
 
 ## Previews and checks
 

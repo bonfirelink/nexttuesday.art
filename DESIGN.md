@@ -208,7 +208,8 @@ Beside the emblem, type takes ink and muted on the beige.
 The emblem sits on a plate. On a phone the plate runs to the screen's edges,
 as the orbits do; from 600px it is a card inset 10px, with rounded corners.
 From 900px the name sits beside the emblem. The emblem keeps its size and
-position on every ground.
+position on every ground. On a phone it is smaller: its outer orbit is the
+trace ring of the world pages, the same size and centre.
 
 The emblem is a 202-unit square centred on its middle; every radius below
 is in those units.
@@ -307,4 +308,4 @@ pointer's hover. One dot pulses now and then.
 - **Don't** use the reserve green for an initiative.
 - **Don't** thicken the pyramid's outline, the eye's border or the dots'
   rings past the fine tier.
-- **Don't** change the emblem's size or position.
+- **Don't** change the emblem's size or position, on desktop.

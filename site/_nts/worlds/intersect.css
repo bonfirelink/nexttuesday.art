@@ -60,7 +60,7 @@ pre[data-nts-ascii] {
      cells of the mono's 0.6em advance span the ring. --ring's 100% means
      a font size here, so its formula is repeated on the entity's width
      (100cqi); the L3 still test in tests/layout/ascii.spec.mjs checks it */
-  font-family: var(--font-mono); font-weight: 700; line-height: 1; font-size: calc((min(100cqi, 92svh) - 2.6rem) / 31.2);
+  font-family: var(--font-mono); font-weight: 700; line-height: 1; font-size: calc((min(100cqi, 92svh) - var(--ring-inset)) / 31.2);
   color: var(--w-fg); white-space: pre; user-select: none; -webkit-user-select: none;
   touch-action: pan-y;
 }

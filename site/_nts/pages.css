@@ -46,7 +46,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 #words :focus-visible { outline-color: var(--w-fg); }
 
 /* ---------- world pages: the hero ---------- */
-.hero { padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }
+.hero { padding: clamp(var(--hero-top), 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }
 .hero .label { color: var(--w-muted); margin: 0 0 .6rem; }
 .hero .lede, .hero .incant { max-width: 26ch; }
 .hero-text { display: grid; gap: .6rem; }
@@ -57,7 +57,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 }
 /* one entity column for every world: the same width and place, so the orbit
    trace and the figure in it sit in the same spot on each page */
-.hero .entity { width: min(100%, 30rem); margin-inline: auto; }
+.hero .entity { width: min(100%, var(--entity-w)); margin-inline: auto; }
 
 /* EMBERS */
 @media (min-width: 900px) { .embers-hero .hero-text { container-type: inline-size; } .embers-hero h1.embers-display { font-size: min(7rem, 16cqi); } }
