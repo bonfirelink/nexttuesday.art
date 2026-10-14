@@ -108,7 +108,7 @@ for (const [name, view] of Object.entries(VIEWS)) {
           // One viewport tall enough for every orb to be in view at once, so they share one idle window.
           await page.setViewportSize({ width: view.viewport.width, height: ALL_ORBS_HEIGHT });
           await page.mouse.move(1, 1);
-          await page.evaluate(() => { document.querySelector(".orb").scrollIntoView({ block: "start" }); });
+          await page.evaluate(() => { document.querySelector(".orb").scrollIntoView({ block: "start", behavior: "instant" }); });
           await page.waitForTimeout(SETTLE_MS);
           const inView = await page.evaluate((ss) => ss.map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }), sels);
           expect(inView, "every orb inside the viewport").toEqual(bodies.map(() => true));
