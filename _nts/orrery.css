@@ -413,9 +413,9 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
 
 /* ---------- the trace of the orbit on the world pages ---------- */
-/* a dashed ring inside the entity's box */
+/* a dashed ring inside the entity's box, painted under the figure (the hero is a stacking context, so -2 stays in it) */
 .hero .entity { position: relative; --ring: calc(min(100%, 92svh) - var(--ring-inset)); }
-.trace { position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; }
+.trace { z-index: -2; position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; }
 .trace .trace-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--w-line-strong); }
 .events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
