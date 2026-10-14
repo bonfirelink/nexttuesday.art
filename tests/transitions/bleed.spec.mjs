@@ -122,6 +122,34 @@ function bleedTests(label, viewport, deviceScaleFactor, tag) {
   });
 }
 
+// The disc is complete while the world's name is still whole on screen,
+// below the sticky header.
+for (const [label, viewport] of [["1800x1080", { width: 1800, height: 1080 }], ["390x844", { width: 390, height: 844 }]]) {
+  test.describe(`bleed completes before the title meets the header ${label}`, () => {
+    test.use({ viewport, deviceScaleFactor: 1 });
+    for (const world of WORLDS) {
+      test(`T3 ${world}: the bleed is complete with the title below the header, ${label}`, async ({ page }) => {
+        await arrive(page, world, "flag");
+        const end = Math.ceil(await bleedEnd(page));
+        const bounds = await page.evaluate(() => {
+          const h = document.querySelector("main .hero").getBoundingClientRect();
+          return { half: h.top + scrollY + h.height / 2, floor: 0.1 * innerHeight };
+        });
+        expect(end, "never later than half the hero").toBeLessThanOrEqual(bounds.half + 1);
+        expect(end, "not before a tenth of the viewport").toBeGreaterThanOrEqual(bounds.floor - 1);
+        await scrollToY(page, end);
+        await expect.poll(() => bleedState(page), "complete at the end point").toBe("world");
+        const r = await page.evaluate(() => {
+          const t = document.querySelector("main .hero h1").getBoundingClientRect();
+          return { top: t.top, bottom: t.bottom, bar: document.querySelector(".nts-header").getBoundingClientRect().bottom };
+        });
+        expect(r.top, "title top below the header's foot").toBeGreaterThanOrEqual(r.bar);
+        expect(r.bottom, "title inside the viewport").toBeLessThanOrEqual(viewport.height);
+      });
+    }
+  });
+}
+
 bleedTests("390 scale 1", { width: 390, height: 844 }, 1, "");
 bleedTests("1440 scale 1", { width: 1440, height: 900 }, 1, "");
 bleedTests("390 scale 2", { width: 390, height: 844 }, 2, "@slow");

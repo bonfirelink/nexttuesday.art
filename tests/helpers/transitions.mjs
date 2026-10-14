@@ -110,7 +110,9 @@ export const bleedState = (page) => page.evaluate(() => document.documentElement
 export const bleedEnd = (page) =>
   page.evaluate(() => {
     const r = document.querySelector("main .hero").getBoundingClientRect();
-    return Math.max(r.top + scrollY + r.height / 2, innerHeight * 0.25);
+    const t = document.querySelector("main .hero h1").getBoundingClientRect();
+    const bar = document.querySelector(".nts-header").getBoundingClientRect().height;
+    return Math.max(Math.min(r.top + scrollY + r.height / 2, t.top + scrollY - bar - Math.round(innerHeight * 0.02)), innerHeight * 0.1);
   });
 
 // Instant scroll (the page may set smooth scrolling) and two frames for observers.

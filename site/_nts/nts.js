@@ -6,7 +6,8 @@
      bleed      on html[data-bleed-state="before"] (nts-head.js: a world
                 page reached from home), the world's night opens over the
                 hero as a disc from its entity, driven by the scroll, and
-                settles once the hero is half gone; see the block below.
+                settles once the hero is half gone, or sooner when the world's
+                name would otherwise reach the header; see the block below.
                 Links to a world page set the sessionStorage flag that
                 nts-head.js reads, on every page but a world page whose
                 bleed has settled
@@ -220,12 +221,19 @@
        the disc's centre and full radius, the scroll at which it is complete,
        and for each part outside the hero the scroll at which the disc
        covers it */
-    var g = { end: 1 }, at = [], anims = [];
+    var g = { end: 1 }, at = [], anims = [], title = hero.querySelector("h1") || entity;
     var measure = function () {
       var sy = scrollY, hr = hero.getBoundingClientRect(), er = entity.getBoundingClientRect();
       var W = d.clientWidth, top = hr.top + sy, bottom = hr.bottom + sy;
       var cx = er.left + er.width / 2, cy = er.top + er.height / 2 + sy;
-      var end = Math.max(top + hr.height / 2, innerHeight * 0.25);
+      /* the disc is complete by half the hero, and a little before the
+         world's name (the hero's title) would reach the foot of the sticky
+         header, whichever comes first, so the name is still whole on screen
+         when the colour has filled; never before a tenth of the viewport,
+         so a nudge doesn't flash it */
+      var tr = title.getBoundingClientRect();
+      var bar = header ? header.getBoundingClientRect().height : 0;
+      var end = Math.max(Math.min(top + hr.height / 2, tr.top + sy - bar - Math.round(innerHeight * 0.02)), innerHeight * 0.1);
       /* complete: every corner of what is in view of the hero at "end" */
       var R = Math.ceil(Math.max(Math.hypot(cx, bottom - cy), Math.hypot(W - cx, bottom - cy), Math.hypot(cx, end - cy), Math.hypot(W - cx, end - cy))) + 2;
       g = { end: end };
@@ -291,7 +299,7 @@
     var resized = 0;
     var resize = function () { if (!resized) resized = requestAnimationFrame(function () { resized = 0; if (!settled) { measure(); update(); } }); };
     var ro = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
-    if (ro) ro.observe(hero);
+    if (ro) { ro.observe(hero); ro.observe(title); }
     var settle = function () {
       settled = true;
       removeEventListener("scroll", schedule); removeEventListener("resize", resize);

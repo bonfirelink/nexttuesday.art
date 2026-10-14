@@ -450,8 +450,9 @@ behave the same.
   hero once it is complete, scaled from 0 to 1, with the copy inside it
   (`.nts-night-in`) scaled by the inverse around the same centre so it
   stays in place. Both are Web Animations on a `ScrollTimeline` over the
-  root, from the top to the scroll where the hero is half gone (at least
-  a quarter of the viewport), smoothstepped through the keyframes, which
+  root, from the top to the scroll where the hero is half gone or, if sooner,
+  a little before the world's name (the hero's h1) would reach the foot
+  of the sticky header (at least a tenth of the viewport), smoothstepped through the keyframes, which
   are dense enough (every 4% of scale) that the two linear
   interpolations stay each other's inverse to well under a pixel. The
   page's tokens flip to the world's at the same moment, except on the
