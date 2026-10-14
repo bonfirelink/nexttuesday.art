@@ -344,6 +344,7 @@ watched by an IntersectionObserver (a passive scroll listener where there is
 none). Falling into a world is a cross-document view transition from
 the body you tapped (`orrery.js` names it `orb`), into the world page's
 `.hero .entity`, which carries the trace of the orbit.
+A world hero is a stacking context, layered so the figure paints over the trace: the trace is at z-index -2, EMBERS' hearth canvas at -1, PHILO's ring plate at -4 and its fade at -3.
 Leaving, each side names its `orb` at `pageswap` (`orrery.js` on the home,
 `nts.js` on a world page). Arriving, the new side is named at `pagereveal`,
 the frame its snapshot is taken, which comes before the deferred scripts

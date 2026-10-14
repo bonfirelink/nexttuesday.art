@@ -98,12 +98,12 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .philo-rings { position: relative; isolation: isolate; container-type: inline-size; --pt: clamp(var(--hero-top), 4vw, 3rem); --pb: clamp(2rem, 5vw, 3.5rem); --gap: clamp(2rem, 5vw, 5rem); --pad: max(var(--gutter), (100% - var(--wrap)) / 2); --wc: calc(100% - 2 * var(--pad)); --cx: 50%; --cy: calc(var(--pt) + min(100cqw, var(--entity-w)) / 2); }
 .hero.philo-rings { width: auto; margin-inline: 0; padding-inline: var(--pad); overflow: clip; }
 @media (min-width: 900px) { .philo-rings { --cx: calc(100% - var(--pad) - (var(--wc) - var(--gap)) / 4.2); --cy: calc(var(--pt) + (100% - var(--pt) - var(--pb)) / 2); } }
-.philo-rings::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; opacity: var(--plate); background: repeating-radial-gradient(circle at var(--cx) var(--cy), var(--w-fg) 0 1px, transparent 1px 9px); mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); -webkit-mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); }
+.philo-rings::before { content: ""; position: absolute; inset: 0; z-index: -4; pointer-events: none; opacity: var(--plate); background: repeating-radial-gradient(circle at var(--cx) var(--cy), var(--w-fg) 0 1px, transparent 1px 9px); mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); -webkit-mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); }
 /* Circles can't end on a straight edge: the hero's ground fades back over them
    toward its top and bottom. The top is short because the header already
    covers most of it; the bottom is long because the next section's open ground
    starts there. */
-.philo-rings::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, var(--w-bg), transparent 5rem, transparent calc(100% - 12rem), var(--w-bg)); }
+.philo-rings::after { content: ""; position: absolute; inset: 0; z-index: -3; pointer-events: none; background: linear-gradient(to bottom, var(--w-bg), transparent 5rem, transparent calc(100% - 12rem), var(--w-bg)); }
 
 /* the volumes */
 .volumes { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
