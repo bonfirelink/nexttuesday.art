@@ -51,7 +51,7 @@ test.describe("S3: sync --check fails on a broken source", () => {
   test("a region with no close", () => { edit("site/_nts/nts.css", (s) => s.replace("/* /nts:kinds */", "")); fails(/kinds/); });
   test("a region in another file", () => { edit("site/_nts/nts.css", (s) => s.replace("/* nts:kinds */", "/* nts:dots */").replace("/* /nts:kinds */", "/* /nts:dots */")); fails(/dots.*nts\.css|nts\.css.*dots/); });
   test("a world without its colours", () => {
-    edit("site/_nts/content/site.json", (s) => { const j = JSON.parse(s); delete j.initiatives[1].colours.face.text; return JSON.stringify(j, null, 2); });
-    fails(/not-not-philo.*colours\.face\.text/);
+    edit("site/_nts/content/site.json", (s) => { const j = JSON.parse(s); delete j.initiatives[1].colours.face.sigil; return JSON.stringify(j, null, 2); });
+    fails(/not-not-philo.*colours\.face\.sigil/);
   });
 });

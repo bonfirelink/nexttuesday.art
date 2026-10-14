@@ -290,16 +290,11 @@ from the world's fixed tokens, never from `--w-*`, which the bleed swaps
 (which token is which comes from the initiative's `colours.face`, through sync). The
 face draws its own edge, a ring in the sigil's colour as a radial gradient
 (not a second inset shadow: that leaves a fringe outside the face); the moat
-is a box-shadow spread of `--ground`, set on `main` and `.trace` and, for a
+is a box-shadow spread of `--ground`, set on `main` and, for a
 ring on a seam, to `--ecl-out`. Each place sets only the size; the sigil is 58%
-of the face. Places: the home emblem's beads, the home windows' rings, the hero
-trace, the events' small orrery and the rings of the bands.
+of the face. Places: the home emblem's beads, the home windows' rings, the
+events' small orrery and the rings of the bands.
 
-- **Tone lift.** On its own world's ground (the hero trace) the face steps
-  10% toward the world's text colour (`--of-text`, a fixed token: `--w-fg`
-  changes with the bleed). Only while the ground is the world's: not in the
-  light (`html[data-bleed-state="before"]`, or the hero copy that carries
-  `.nts-bleed-old` while the night opens), not on the home or /events/.
 - **Rings on a seam.** A ring on a seam is the band it opens: its face is
   `--ecl-bg`, its sigil and seal the world's (nts/events: `--ecl-fg`,
   `--code-events`). The EMBERS summon ring is the exception: its band is the
@@ -311,7 +306,7 @@ trace, the events' small orrery and the rings of the bands.
   `#yet-to-come`, the /events/ ledger) follow the same rule: sigil and seal
   `--ecl-fg` (events: `--code-events`).
 
-The Events star and the /events/ sun are not beads. O1, O8, O11 and O12 hold
+The Events star and the /events/ sun are not beads. O1, O8, O11, O12 and O13 hold
 all of this.
 
 ## The home (`orrery.css`, `orrery.js`) and the apertures (`apertures.css`)
@@ -658,7 +653,7 @@ files are kept in step by S2 in `tests/static/sync.spec.mjs`:
 | `worlds` | `nts-head.js` | `BODY` (page to the home's body) and `PATHS` (`NTS.world`) |
 | `orbits` | `orrery.css` | each body's start angle, period, direction |
 | `riders` | `orrery.css` | each body on its orbit (`--r` from `r` of the emblem's 202) |
-| `faces` | `orrery.css` | a world's bead face, sigil and text tokens |
+| `faces` | `orrery.css` | a world's bead face and sigil tokens |
 | `sigils` | `nts.css` | a world's sigil colour |
 | `kinds` | `nts.css` | a world's ledger tag |
 | `dots` | `apertures.css` | a world's code dot on the black ledger |

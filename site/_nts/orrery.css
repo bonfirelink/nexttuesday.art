@@ -209,47 +209,38 @@
 }
 .pivot > * { position: absolute; left: 0; top: 0; transform: var(--pose); animation: orbit var(--p, 80s) linear infinite; animation-direction: var(--d, normal); }
 @keyframes orbit { from { transform: var(--pose); } to { transform: var(--pose-end); } }
-/* The bead: one build wherever a world is worn as a round body (the
-   orrery's, the trace on a world's page, the events' small orrery, the
-   rings of the bands). WHO it is comes from fixed tokens, never from --w-*,
-   which a page's bleed swaps: a face reading those turns beige in the
-   bleed's light state. WHERE it sits is --ground, set where the bead is
-   placed; the moat is a spread of it. The face owns its edge: a ring in the
-   sigil's colour drawn inside the face as a gradient (a second inset shadow
-   reaching the edge leaves a fringe outside it). Each place sets only the
-   size. On its own world's ground (the hero's trace) the
-   face steps 10% toward the world's text colour, so it reads as a body and
-   not a hole; before the bleed, and on every other ground, it is the plain
-   face. Under the pointer or the keyboard the link lifts and the seal turns
-   full sigil colour and doubles its weight, a layer that fades in (opacity
-   only); no ring is drawn at the face's edge. The rings that open NTS's own
-   bands (nts, events) are the bead of the band they open: its ground the
-   face, its marks the sigil and seal. */
+/* The bead: one build wherever a world is worn as a round body (the orrery's,
+   the events' small orrery, the rings of the bands). WHO it is comes from
+   fixed tokens, never from --w-*, which a page's bleed swaps: a face
+   reading those turns beige in the bleed's light state. WHERE it sits is
+   --ground, set where the bead is placed; the moat is a spread of it. The
+   face owns its edge: a ring in the sigil's colour drawn inside the face as
+   a gradient (a second inset shadow reaching the edge leaves a fringe
+   outside it). Each place sets only the size. Under the pointer or the
+   keyboard the link lifts and the seal turns full sigil colour and doubles
+   its weight, a layer that fades in (opacity only); no ring is drawn at the
+   face's edge. The rings that open NTS's own bands (nts, events) are the
+   bead of the band they open: its ground the face, its marks the sigil and
+   seal. */
 /* nts:faces */
-.bead-face[data-of="embers"] { --of-base: var(--embers-night); --of-sigil: var(--embers-fire); --of-text: var(--embers-cream); }
-.bead-face[data-of="philo"] { --of-base: var(--philo-ground); --of-sigil: var(--philo-red); --of-text: var(--philo-ink); }
-.bead-face[data-of="intersect"] { --of-base: var(--intersect-black); --of-sigil: var(--intersect-phosphor); --of-text: var(--intersect-phosphor); }
+.bead-face[data-of="embers"] { --of-base: var(--embers-night); --of-sigil: var(--embers-fire); }
+.bead-face[data-of="philo"] { --of-base: var(--philo-ground); --of-sigil: var(--philo-red); }
+.bead-face[data-of="intersect"] { --of-base: var(--intersect-black); --of-sigil: var(--intersect-phosphor); }
 /* /nts:faces */
-.bead-face[data-of="nts"] { --of-base: var(--ecl-bg); --of-sigil: var(--ecl-fg); --of-text: var(--ecl-fg); }
-.bead-face[data-of="events"] { --of-base: var(--ecl-bg); --of-sigil: var(--code-events); --of-text: var(--ecl-fg); }
+.bead-face[data-of="nts"] { --of-base: var(--ecl-bg); --of-sigil: var(--ecl-fg); }
+.bead-face[data-of="events"] { --of-base: var(--ecl-bg); --of-sigil: var(--code-events); }
 /* a ring on a seam is the band it opens: its face is the band's ground. The
    EMBERS summon ring is the exception: its band is the sigil's own colour, so
    it keeps its world's face. */
 .ecl:not(.world, .embers-summon) > .ecl-ring.bead-face { --of-base: var(--ecl-bg); }
-/* the lift belongs to the world's own ground: the hero's trace. While the
-   hero is still in the light (before the bleed, and the hero copy
-   that carries .nts-bleed-old while the night opens over it) the ground under
-   it is the page's, and so is its moat: no lift. */
-.trace .bead-face { --of-lift: 10%; }
-html[data-bleed-state="before"] .bead-face, html[data-bleed-state="in"] .nts-bleed-old .bead-face { --of-lift: 0%; }
-main, .trace { --ground: var(--w-bg); }
+main { --ground: var(--w-bg); }
 .bead-face {
-  --moat: 3px; --of-face: color-mix(in srgb, var(--of-text) var(--of-lift, 0%), var(--of-base));
+  --moat: 3px;
   border-radius: 50%; display: grid; place-items: center; color: var(--of-sigil);
   background: radial-gradient(circle closest-side,
-    var(--of-face) calc(100% - 4.5px),
-    color-mix(in srgb, var(--of-sigil) 72%, var(--of-face)) calc(100% - 4px) calc(100% - 3.25px),
-    var(--of-face) calc(100% - 2.75px));
+    var(--of-base) calc(100% - 4.5px),
+    color-mix(in srgb, var(--of-sigil) 72%, var(--of-base)) calc(100% - 4px) calc(100% - 3.25px),
+    var(--of-base) calc(100% - 2.75px));
   box-shadow: 0 0 0 var(--moat) var(--ground);
 }
 .bead-face .nts-sigil { width: 58%; height: 58%; aspect-ratio: 1; color: inherit; }
@@ -264,7 +255,6 @@ main, .trace { --ground: var(--w-bg); }
 }
 a:is(:hover, :focus-visible) > .bead-face::after, a.bead-face:is(:hover, :focus-visible)::after { opacity: 1; }
 a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5px; }
-.trace-bead { width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; }
 /* each body rides its orbit in the emblem: the registry's r, of the emblem's 202 */
 /* nts:riders */
 .orrery .o-embers { --r: 32.67cqi; --a: var(--a-embers); --p: var(--p-embers); --d: var(--d-embers); }
@@ -423,11 +413,10 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 @keyframes arrive { from { opacity: 0; transform: translateY(16px); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
 
 /* ---------- the trace of the orbit on the world pages ---------- */
-/* a dashed ring inside the entity's box, the page's sigil riding it */
+/* a dashed ring inside the entity's box */
 .hero .entity { position: relative; --ring: calc(min(100%, 92svh) - var(--ring-inset)); }
-.trace { position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; container-type: inline-size; }
+.trace { position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; }
 .trace .trace-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--w-line-strong); }
-.embers-hero .trace-orbit { --a: 215deg; }
 .events-hero { padding-bottom: 0; }
 .events-hero .entity { display: grid; place-items: center; }
 .events-hero .mini-orrery { position: relative; width: min(64%, 13rem); aspect-ratio: 1; display: grid; place-items: center; margin: 1.5rem auto 2.5rem; container-type: inline-size; }

@@ -14,7 +14,7 @@
       "orbit": { "r": 66, "a": "205deg", "p": "120s", "d": "reverse" },
       "colours": {
         "sigil": "--embers-fire",
-        "face": { "base": "--embers-night", "sigil": "--embers-fire", "text": "--embers-cream" },
+        "face": { "base": "--embers-night", "sigil": "--embers-fire" },
         "kind": { "bg": "--embers-fire", "fg": "#fff" }
       }
     },
@@ -23,7 +23,7 @@
       "orbit": { "r": 78.4, "a": "330deg", "p": "170s", "d": "reverse" },
       "colours": {
         "sigil": "--philo-red",
-        "face": { "base": "--philo-ground", "sigil": "--philo-red", "text": "--philo-ink" },
+        "face": { "base": "--philo-ground", "sigil": "--philo-red" },
         "kind": { "bg": "--philo-red", "fg": "#fff" }
       }
     },
@@ -32,7 +32,7 @@
       "orbit": { "r": 84, "a": "80deg", "p": "230s", "d": "reverse" },
       "colours": {
         "sigil": "--intersect-fire-text",
-        "face": { "base": "--intersect-black", "sigil": "--intersect-phosphor", "text": "--intersect-phosphor" },
+        "face": { "base": "--intersect-black", "sigil": "--intersect-phosphor" },
         "kind": { "bg": "--intersect-black", "fg": "--intersect-phosphor" }
       }
     },

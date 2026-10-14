@@ -7,7 +7,8 @@
 // figure shows through is as wide as it was before the lid: the lid rides a
 // ring outside it; O6 at rest the figure is exactly as on a plain disc: no
 // transform and no clip but the disc's own round edge, so a live figure
-// costs no more to composite than before the lid.
+// costs no more to composite than before the lid; O13 a world's hero
+// trace is the dashed ring alone, with no body riding it.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open } from "../helpers/behaviour.mjs";
 import { BODIES } from "../helpers/registry.mjs";
@@ -27,14 +28,13 @@ const WORLDS = [
 ];
 
 // The look of a bead: its face, edge and sigil; the moat's colour is the
-// ground it sits on, which differs, so only its shape is compared; the face is
-// compared apart, since it is lifted on the world's own ground.
+// ground it sits on, which differs, so only its shape is compared.
 const bead = (s) => {
   const el = document.querySelector(s);
   if (!el) return null;
   const cs = getComputedStyle(el), sig = el.querySelector(".nts-sigil");
   const shape = (v) => v.replace(/(rgba?|color)\([^)]*\)/g, "C");
-  // a colour at 8 bits, however it computed (rgb(), or color(srgb …) from a color-mix())
+  // a colour at 8 bits, however it computed
   const rgb8 = (c) => { const x = new OffscreenCanvas(1, 1).getContext("2d"); x.fillStyle = c; x.fillRect(0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; return `rgb(${d[0]}, ${d[1]}, ${d[2]})`; };
   const sc = getComputedStyle(sig);
   return {
@@ -47,12 +47,11 @@ const bead = (s) => {
 
 // The fixed colours of each world's bead, whatever the page's ground.
 const FACE = { embers: "rgb(11, 7, 9)", philo: "rgb(230, 230, 232)", intersect: "rgb(10, 10, 10)" };
-const TEXT = { embers: "#ffe9d0", philo: "#2b2d3e", intersect: "#e9e2cf" }; // the world's own text colour
 const SIGIL = { embers: "rgb(229, 29, 71)", philo: "rgb(229, 23, 74)", intersect: "rgb(233, 226, 207)" };
 const BAND = { embers: ".embers-summon .ecl-ring", philo: ".philo-volumes .ecl-ring", intersect: ".intersect-corr .ecl-ring" };
 
 for (const { body, path } of WORLDS) {
-  test(`O1 the ${body} bead is one build in every place: emblem, window, hero (night and before), events, band`, async ({ page }) => {
+  test(`O1 the ${body} bead is one build in every place: emblem, window, events, band`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(() => { try { sessionStorage.removeItem("nts:from"); } catch {} });
     await open(page, "/");
@@ -73,7 +72,6 @@ for (const { body, path } of WORLDS) {
     await open(page, "/events/");
     const events = await page.evaluate(bead, `.mini-orrery a.trace-bead.bead-face[data-of="${body}"]`);
     await open(page, path);
-    const night = await page.evaluate(bead, `.trace .trace-bead.bead-face[data-of="${body}"]`);
     const band = await page.evaluate(bead, `${BAND[body]}.bead-face[data-of="${body}"]`);
     const groundOf = (sel) => page.evaluate((q) => {
       const ring = document.querySelector(q), probe = document.createElement("i");
@@ -90,7 +88,7 @@ for (const { body, path } of WORLDS) {
     const bands = { embers: [band], philo: [band, await page.evaluate(bead, `.philo-next .ecl-ring.bead-face[data-of="philo"]`)], intersect: [band] }[body];
     const arrived = await page.context().newPage();
     // the light state lasts only until the bleed-in starts: read the bead at DOMContentLoaded
-    const sels = [`.trace .trace-bead.bead-face[data-of="${body}"]`, ...bands.map((_, i) => (i ? ".philo-next" : BAND[body].split(" ")[0]) + " .ecl-ring.bead-face")];
+    const sels = bands.map((_, i) => (i ? ".philo-next" : BAND[body].split(" ")[0]) + " .ecl-ring.bead-face");
     await arrived.addInitScript(({ src, sels }) => {
       try { sessionStorage.setItem("nts:from", "home"); } catch {}
       document.addEventListener("DOMContentLoaded", () => {
@@ -98,46 +96,22 @@ for (const { body, path } of WORLDS) {
       });
     }, { src: bead.toString(), sels });
     await open(arrived, path);
-    const { state, looks } = await arrived.evaluate(() => window.__before);
-    const [before, ...bandsBefore] = looks;
+    const { state, looks: bandsBefore } = await arrived.evaluate(() => window.__before);
     expect(state, "arrived in the light state").toBe("before");
-    // what a visitor sees: the bleed is "in" at once, the hero light under the night's opening disc
-    await expect.poll(() => arrived.evaluate(() => document.documentElement.dataset.bleedState)).toBe("in");
-    await arrived.evaluate(() => window.scrollTo(0, 0));
-    await arrived.waitForTimeout(1500);
-    const light = await arrived.evaluate(bead, `main .hero .nts-bleed-old .trace .trace-bead.bead-face, main .hero.nts-bleed-old .trace .trace-bead.bead-face`);
-    const nightCopy = await arrived.evaluate(bead, `.nts-night .trace .trace-bead.bead-face`);
     await arrived.close();
 
     // the same bead in every place, but for its face
-    const places = { win, events, night, before, ...Object.fromEntries(bandsBefore.map((b, i) => ["bandBefore" + i, b])), ...Object.fromEntries(bands.map((b, i) => ["band" + i, b])) };
+    const places = { win, events, ...Object.fromEntries(bandsBefore.map((b, i) => ["bandBefore" + i, b])), ...Object.fromEntries(bands.map((b, i) => ["band" + i, b])) };
     const { face: baseFace, bg: _bg, ...rest } = emblem;
-    const lifted = await page.evaluate(([t, f]) => {
-      const p = document.createElement("i");
-      p.style.backgroundImage = `radial-gradient(color-mix(in srgb, ${t} 10%, ${f}), red)`;
-      document.body.appendChild(p);
-      const c = getComputedStyle(p).backgroundImage.match(/(rgba?|color)\([^)]*\)/)[0];
-      p.remove();
-      const x = new OffscreenCanvas(1, 1).getContext("2d"); x.fillStyle = c; x.fillRect(0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data;
-      return `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
-    }, [TEXT[body], FACE[body]]);
-    expect(lifted, "the lift is a step, not nothing").not.toBe(baseFace);
-    // the base face on the beige, the home and /events/ and before the bleed; lifted on the world's own ground
-    expect(light, "the light hero's bead").not.toBeNull();
-    expect(nightCopy, "the night copy's bead").not.toBeNull();
-    expect(light.face, "bleed in: the hero is still light, so its bead is the plain face, as its moat").toBe(baseFace);
-    expect(nightCopy.face, "bleed in: the night copy is the world's ground, so its bead is lifted").toBe(lifted);
-    // the face: lifted on the hero's own ground (the night copy, the direct landing), plain in the light,
-    // and on a band ring (a seam inside a world page) the band it opens, --ecl-bg. The EMBERS summon
+    // the face: plain, and on a band ring (a seam inside a world page) the band it opens, --ecl-bg. The EMBERS summon
     // ring is the exception: its band is the sigil's own colour, so the ring keeps its world's plain face.
     const SUMMON = body === "embers";
-    const bandNames = bands.map((_, i) => "band" + i);
     for (const [place, l] of Object.entries(places)) {
       expect(l, `${place} is a bead`).not.toBeNull();
       const { face, bg, ...r } = l;
       expect(r, place).toEqual(rest);
       const isBand = /^band(Before)?\d$/.test(place);
-      const want = isBand && !SUMMON ? l.bg : place === "night" ? lifted : baseFace;
+      const want = isBand && !SUMMON ? l.bg : baseFace;
       expect(face, `${place}: face`).toBe(want);
     }
     // and in its world's fixed colours: the face in the gradient's centre, the sigil in its own
@@ -338,14 +312,14 @@ test.describe("O8", () => {
             const el = document.querySelector(s + " .bead-face"), cs = getComputedStyle(el);
             const r = el.getBoundingClientRect();
             const probe = document.createElement("i");
-            probe.style.color = `color-mix(in srgb, ${cs.color} 72%, ${cs.getPropertyValue("--of-face")})`;
+            probe.style.color = `color-mix(in srgb, ${cs.color} 72%, ${cs.getPropertyValue("--of-base")})`;
             document.body.appendChild(probe);
             const ring = getComputedStyle(probe).color;
             probe.remove();
             const px = (c) => { const x = new OffscreenCanvas(1, 1).getContext("2d"); x.fillStyle = c; x.fillRect(0, 0, 1, 1); return [...x.getImageData(0, 0, 1, 1).data].slice(0, 3); };
             return {
               image: cs.backgroundImage, shadow: cs.boxShadow, border: cs.borderTopWidth, radius: cs.borderTopLeftRadius,
-              face: px(cs.getPropertyValue("--of-face")), ring: px(ring), sigil: px(cs.color), ground: px(cs.boxShadow.match(/rgba?\([^)]*\)/g).pop()), // the moat is the last shadow
+              face: px(cs.getPropertyValue("--of-base")), ring: px(ring), sigil: px(cs.color), ground: px(cs.boxShadow.match(/rgba?\([^)]*\)/g).pop()), // the moat is the last shadow
               rect: { x: r.left, y: r.top, w: r.width, h: r.height },
             };
           }, sel);
@@ -502,3 +476,19 @@ test("O12 a bead lights its seal on hover and takes an outline on focus", async 
   const o = await page.evaluate((s) => { const c = getComputedStyle(document.querySelector(s + " .bead-face")); return { style: c.outlineStyle, w: c.outlineWidth, off: c.outlineOffset }; }, sel);
   expect(o).toEqual({ style: "solid", w: "2px", off: "5px" });
 });
+
+// O13 the trace on a world's hero is the ring alone: nothing orbits on it.
+for (const { body, path } of WORLDS) {
+  test(`O13 the ${body} hero's trace holds the ring and no bead`, async ({ page }) => {
+    await open(page, path);
+    const t = await page.evaluate(() => {
+      const trace = document.querySelector(".hero .trace");
+      return {
+        kids: [...trace.children].map((c) => c.className),
+        beads: document.querySelectorAll(".hero .bead-face, .hero .trace .pivot").length,
+      };
+    });
+    expect(t.kids, "the trace's only child is the ring").toEqual(["trace-ring"]);
+    expect(t.beads, "no bead or pivot in the hero").toBe(0);
+  });
+}

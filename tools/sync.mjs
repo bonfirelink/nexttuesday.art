@@ -31,7 +31,7 @@
      nts:worlds   nts-head.js: BODY (page to the home's body) and PATHS
      nts:orbits   orrery.css: each body's start angle, period, direction
      nts:riders   orrery.css: each body on its orbit (r of the emblem's 202)
-     nts:faces    orrery.css: a world's bead face, sigil and text tokens
+     nts:faces    orrery.css: a world's bead face and sigil tokens
      nts:sigils   nts.css: a world's sigil colour
      nts:kinds    nts.css: a world's ledger tag
      nts:dots     apertures.css: a world's code dot on the black ledger
@@ -73,7 +73,7 @@ const fail = (msg) => { console.error(`sync: ${msg}`); process.exit(1); };
 const at = (o, k) => k.split('.').reduce((v, p) => (v == null ? v : v[p]), o);
 const INITIATIVES = Array.isArray(SITE.initiatives) ? SITE.initiatives : fail('site.json has no `initiatives` list');
 const NEEDS = ['slug', 'world', 'name', 'body', 'orbit.r', 'orbit.a', 'orbit.p', 'orbit.d'];
-const WORLD_NEEDS = ['colours.sigil', 'colours.face.base', 'colours.face.sigil', 'colours.face.text', 'colours.kind.bg', 'colours.kind.fg'];
+const WORLD_NEEDS = ['colours.sigil', 'colours.face.base', 'colours.face.sigil', 'colours.kind.bg', 'colours.kind.fg'];
 INITIATIVES.forEach((i, n) => {
   for (const k of [...NEEDS, ...(i.world === 'nts' ? [] : WORLD_NEEDS)]) if (at(i, k) === undefined) fail(`site.json initiatives[${n}] (${i.slug ?? 'no slug'}): missing ${k}`);
 });
@@ -87,7 +87,7 @@ const REGIONS = {
     `var PATHS = /\\/(${INITIATIVES.map((i) => i.slug).join('|')})\\/(index\\.html)?$/;`]],
   orbits: ['orrery.css', () => INITIATIVES.map(({ body: b, orbit: o }) => `--a-${b}: ${o.a}; --p-${b}: ${o.p}; --d-${b}: ${o.d};`)],
   riders: ['orrery.css', () => INITIATIVES.map(({ body: b, orbit: o }) => `.orrery .o-${b} { --r: ${(o.r * 100 / 202).toFixed(2)}cqi; --a: var(--a-${b}); --p: var(--p-${b}); --d: var(--d-${b}); }`)],
-  faces: ['orrery.css', () => WORLDS.map(({ world: w, colours: { face: f } }) => `.bead-face[data-of="${w}"] { --of-base: ${token(f.base)}; --of-sigil: ${token(f.sigil)}; --of-text: ${token(f.text)}; }`)],
+  faces: ['orrery.css', () => WORLDS.map(({ world: w, colours: { face: f } }) => `.bead-face[data-of="${w}"] { --of-base: ${token(f.base)}; --of-sigil: ${token(f.sigil)}; }`)],
   sigils: ['nts.css', () => WORLDS.map(({ world: w, colours: c }) => `.sigil-${w} { color: ${token(c.sigil)}; }`)],
   kinds: ['nts.css', () => WORLDS.map(({ world: w, colours: { kind: k } }) => `.ledger li[data-of="${w}"] { --kind-bg: ${token(k.bg)}; --kind-fg: ${token(k.fg)}; }`)],
   dots: ['apertures.css', () => WORLDS.map(({ world: w }) => `.ledger-ap li[data-of="${w}"] { --kind-dot: var(--code-${w}); }`)],

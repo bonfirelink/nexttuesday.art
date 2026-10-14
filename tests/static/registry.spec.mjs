@@ -23,7 +23,7 @@ test("R0: the registry lists the initiatives", () => {
   expect(LIST.length, "site.json has an `initiatives` list").toBeGreaterThan(0);
   for (const i of LIST) {
     for (const k of ["slug", "world", "name", "body", "orbit.r", "orbit.a", "orbit.p", "orbit.d"]) expect(at(i, k), `${i.slug}: ${k}`).toBeDefined();
-    if (i.world !== "nts") for (const k of ["colours.sigil", "colours.face.base", "colours.face.sigil", "colours.face.text", "colours.kind.bg", "colours.kind.fg"]) expect(at(i, k), `${i.slug}: ${k}`).toBeDefined();
+    if (i.world !== "nts") for (const k of ["colours.sigil", "colours.face.base", "colours.face.sigil", "colours.kind.bg", "colours.kind.fg"]) expect(at(i, k), `${i.slug}: ${k}`).toBeDefined();
     // the slug goes into a path regex (nts-head.js) and a URL as is
     expect(i.slug).toMatch(/^[a-z0-9-]+$/);
   }
