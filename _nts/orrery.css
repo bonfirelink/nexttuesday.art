@@ -28,19 +28,29 @@
   --a-star: 15deg; --p-star: 300s; --d-star: reverse;
   /* /nts:orbits */
   --bead: max(44px, 11cqi);
+  /* the world pages' trace ring: it sits --ring-inset inside the entity, which is at most --ring-cap
+     across (the entity column's --entity-w, and 92svh of a short screen), and the hero's top padding on a
+     phone is --hero-top. The home's outer orbit is sized to it on a phone. */
+  --ring-inset: 2.6rem; --entity-w: 30rem; --ring-cap: min(var(--entity-w), 92svh); --hero-top: 1.5rem;
+  --orbit-share: .9545; /* the outer orbit's diameter (192.8) of the emblem's box (202) */
 }
 
 /* ---------- the opener: the orrery ---------- */
 .threshold { display: grid; gap: clamp(1rem, 3vw, 2rem); padding: 0 0 clamp(2.5rem, 6vw, 4rem); align-items: center; }
 /* On a phone the sky runs to the screen's edges and clips there, so a body
    riding past the emblem's box is cut by the screen, never by the box. The
-   emblem is sized so its outer orbit (96.675 of 202 across: .9572 of the
-   box) lands on the gutter, and the sky's top pads it to the same margin
-   below the header (2.237% of the column is the box's own .0214 margin). */
-.sky { display: grid; justify-items: center; margin-inline: calc(-1 * var(--gutter)); padding-top: calc(var(--gutter) - 2.237%); overflow-x: clip; }
+   emblem is sized so its outer orbit (the outermost one, 96.4 of 101 out from the
+   middle: --orbit-share of the box across) is the trace ring of the world
+   pages (see "the trace"): the entity column or less, capped as the ring's
+   caps are, less --ring-inset. The sky's top padding puts its centre on the
+   ring's: the ring is centred in the square entity, which starts --hero-top
+   under the header, and stays at the entity's middle when 92svh shrinks the
+   ring. The padding's % is of the column; the width's is of the screen. */
+.sky { display: grid; justify-items: center; margin-inline: calc(-1 * var(--gutter)); overflow-x: clip;
+  padding-top: calc(var(--hero-top) + min(100%, var(--entity-w)) / 2 - (min(100%, var(--ring-cap)) - var(--ring-inset)) / (2 * var(--orbit-share))); }
 .orrery {
   position: relative; aspect-ratio: 1; container-type: inline-size;
-  width: calc((100% - 2 * var(--gutter)) / .9572);
+  width: calc((min(100% - 2 * var(--gutter), var(--ring-cap)) - var(--ring-inset)) / var(--orbit-share));
   touch-action: pan-y;
 }
 @media (min-width: 600px) { .sky { margin-inline: 0; padding-top: 0; overflow-x: visible; } .orrery { width: min(100%, 34rem); margin-inline: auto; } }
@@ -414,7 +424,7 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 
 /* ---------- the trace of the orbit on the world pages ---------- */
 /* a dashed ring inside the entity's box, the page's sigil riding it */
-.hero .entity { position: relative; --ring: calc(min(100%, 92svh) - 2.6rem); }
+.hero .entity { position: relative; --ring: calc(min(100%, 92svh) - var(--ring-inset)); }
 .trace { position: absolute; left: 50%; top: 50%; width: var(--ring); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; container-type: inline-size; }
 .trace .trace-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed var(--w-line-strong); }
 .embers-hero .trace-orbit { --a: 215deg; }
