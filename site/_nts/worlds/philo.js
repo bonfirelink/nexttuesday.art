@@ -13,7 +13,7 @@
   "use strict";
   const P = window.NTS && window.NTS.penrose, G = window.NTS && window.NTS.grab;
   if (!P || !G) return;
-  const { frame, CLOSED } = P;
+  const { frame, CLOSED, REACH, REST: REST_BY_HOST } = P;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 
   function mount(host, lite) {
@@ -22,8 +22,8 @@
     host.appendChild(canvas);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30, REST = lite ? 0.982 : 0.952;
-    let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0, reach = 0;
+    const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30, REST = lite ? REST_BY_HOST.fragment : REST_BY_HOST.page;
+    let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0;
     let col = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
     function read(el) {
       const cs = getComputedStyle(el);
@@ -35,7 +35,6 @@
     }
     function colours() { col = read(host); }
     function measure() {
-      if (!reach) for (const f of frame(CLOSED)) for (const [x, y] of f.poly) reach = Math.max(reach, Math.abs(x), Math.abs(y));
       /* layout sizes, not getBoundingClientRect: a rect includes the scale
          of a transformed ancestor (the home's windows as they open, an orb
          as it opens), and the drawing is in the canvas's own units */
@@ -52,7 +51,7 @@
          at REST of the host's half-size. A tilted pose reaches further and
          overshoots, as the others do at their circle's edge. */
       const host0 = Math.min(host.clientWidth, host.clientHeight);
-      scale = (host0 * REST) / (2 * reach);
+      scale = (host0 * REST) / (2 * REACH);
       cx = w / 2; cy = h / 2;
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */

@@ -154,7 +154,15 @@
     centre = add(add(centre, RIGHT, a), UP, b);
     PIECES = pieces();
   })();
-  const api = { frame, CLOSED, EXTENT: 2.6 };
+  /* REACH: the closed pose's furthest point from the centre along either
+     axis. REST: how far that point sits from the centre of the figure's
+     box, as a share of the box's half-size, on the page entity and in the
+     home's fragment. The live canvas and the baked stills both size the
+     rest pose from these, so the still and the first live frame match. */
+  let REACH = 0;
+  for (const f of frame(CLOSED)) for (const [x, y] of f.poly) REACH = Math.max(REACH, Math.abs(x), Math.abs(y));
+  const REST = { page: 0.952, fragment: 0.982 };
+  const api = { frame, CLOSED, REACH, REST };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.penrose = api; }
 })();

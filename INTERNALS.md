@@ -699,7 +699,10 @@ worlds, bodies and code tokens (`tests/helpers/registry.mjs`).
 Generated files, and how to regenerate them: `sigils.svg` from
 `tools/gen-sigils.mjs`; `parts/emblem-*` from `tools/gen-emblem.mjs`; `parts/still-*` from `tools/gen-stills.mjs` (it
 requires `penrose.js` and `ascii.js` through node, which is why both
-export `module.exports`).
+export `module.exports`). PHILO's stills are the live canvas's first frame as well: `penrose.REACH` and
+`penrose.REST` (page and fragment) size both `philo.js` and the bake, `still-philo.svg` for the page and
+`still-philo-sm.svg` for the home's fragment (sync picks `<world>-sm` for a fragment when it exists), and the
+fragment's `.still` fills the host as the canvas does (`tests/layout/philo-still.spec.mjs`).
 
 ## Redirects
 

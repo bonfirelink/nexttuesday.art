@@ -16,6 +16,7 @@
      <!-- nts:events upcoming -->, <!-- nts:events past -->, <!-- nts:events world=embers -->,
      <!-- nts:events upcoming limit=3 heading=none -->  subsets (same close marker; heading=h2|h3|none)
      <!-- nts:still embers|philo|intersect -->…<!-- /nts:still -->  a still frame
+   A fragment takes the still named <world>-sm when there is one (philo-sm), else <world>.
    Attributes:
      data-nts-copy="key"      the element's inner HTML becomes copy.json[key]
      data-nts-fragment="w"    the element's inner HTML becomes the world's still
@@ -61,6 +62,7 @@ const EMBLEM = { core: read(join(nts, 'parts', 'emblem-core.html')).trim(), orbi
 const STILLS = {
   embers: read(join(nts, 'parts', 'still-embers.svg')).trim(),
   philo: read(join(nts, 'parts', 'still-philo.svg')).trim(),
+  'philo-sm': read(join(nts, 'parts', 'still-philo-sm.svg')).trim(),
   // the parser drops a newline right after <pre>: this one, not the still's blank first row
   intersect: `<pre aria-hidden="true">\n${esc(read(join(nts, 'parts', 'still-intersect-sm.txt')))}</pre>`,
   'intersect-lg': esc(read(join(nts, 'parts', 'still-intersect.txt'))),
@@ -226,7 +228,12 @@ function sync(file) {
     if (v === undefined) return undefined;
     return tag === 'title' ? v.replace(/<[^>]+>/g, '') : v;
   });
-  html = replaceInner(html, 'data-nts-fragment', (w) => STILLS[w] === undefined ? undefined : `<div class="still">${STILLS[w]}</div>`);
+  html = replaceInner(html, 'data-nts-fragment', (w) => {
+    // a fragment's still may be baked at its own zoom: <world>-sm. INTERSECT's plain key is
+    // already its fragment still (its page still is intersect-lg), so it has no -sm.
+    const still = STILLS[`${w}-sm`] ?? STILLS[w];
+    return still === undefined ? undefined : `<div class="still">${still}</div>`;
+  });
   // only a top-level page (site/<slug>/index.html) can be an initiative's
   const own = rel.length === 2 && INITIATIVES.find((i) => i.slug === rel[0]);
   html = html.replace(/<script src="\/_nts\/nts-head\.js"(?: data-bleed="[^"]*")?><\/script>/, `<script src="/_nts/nts-head.js"${own && own.bleed ? ' data-bleed="scroll"' : ''}></script>`);

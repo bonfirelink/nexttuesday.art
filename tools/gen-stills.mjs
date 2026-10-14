@@ -1,7 +1,8 @@
 /* Bakes the still frames the pages show with scripts off. Run from anywhere:
      node tools/gen-stills.mjs
    Writes, in site/_nts/parts/:
-     still-philo.svg          the impossible triangle at its closed pose
+     still-philo.svg          the impossible triangle at its closed pose, at the page's rest zoom
+     still-philo-sm.svg       the same at the fragment's rest zoom
      still-intersect.txt      the ASCII tetrahedron, 52 columns
      still-intersect-sm.txt   the same at 52 columns, for fragments (the same frame, smaller)
    The SVG uses the --penrose-* custom properties with fallbacks, so the
@@ -42,8 +43,10 @@ function clipSegment(p, q, poly) {
   return [[p[0] + t0 * d[0], p[1] + t0 * d[1]], [p[0] + t1 * d[0], p[1] + t1 * d[1]]];
 }
 
-function philoStill() {
-  const size = 600, scale = size / (2 * penrose.EXTENT), cx = size / 2, cy = size / 2;
+/* The live canvas's first frame: the closed pose at the host's rest zoom
+   (penrose.REST), for the page and, larger in its box, the home's fragment. */
+function philoStill(rest) {
+  const size = 600, scale = (size * rest) / (2 * penrose.REACH), cx = size / 2, cy = size / 2;
   const X = (x) => cx + x * scale, Y = (y) => cy - y * scale;
   let body = '';
   for (const f of penrose.frame(penrose.CLOSED)) {
@@ -64,15 +67,19 @@ const tetra = ascii.figure('tetra');
    cell grid of its box (the page's CSS sizes the still's glyphs so the grid
    spans the box, as the live glyphs do). */
 const still = (cols, span) => ascii.render(tetra, cols, Math.round(cols * 0.6), 0.6, ascii.POSE, ascii.fit(tetra, span));
-const out = {
-  'still-philo.svg': philoStill(),
+/* what a run writes, by file name; importing this module writes nothing */
+export const out = {
+  'still-philo.svg': philoStill(penrose.REST.page),
+  'still-philo-sm.svg': philoStill(penrose.REST.fragment),
   /* sync writes the page's still after a newline of its own, which the pre
      shows as the first row: the baked first row (always blank, the pose
      keeps a glyph clear of the edge) goes */
   'still-intersect.txt': still(52, ascii.SPAN.hero).replace(/^[^\n]*\n/, ''),
   'still-intersect-sm.txt': still(52, ascii.SPAN.fragment),
 };
-for (const [name, text] of Object.entries(out)) {
-  writeFileSync(join(parts, name), text);
-  console.log(name, (text.length / 1024).toFixed(1) + 'K');
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  for (const [name, text] of Object.entries(out)) {
+    writeFileSync(join(parts, name), text);
+    console.log(name, (text.length / 1024).toFixed(1) + 'K');
+  }
 }
