@@ -76,7 +76,7 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .philo-hero .hero-text, .philo-hero .fig { position: relative; z-index: 1; }
 .philo-hero .fig { position: absolute; }
 .nts-penrose.is-live img, .nts-penrose.is-live > svg { display: none; }
-.fig { position: absolute; top: 100%; left: 0; right: 0; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: .95rem; color: var(--w-muted); margin: .5rem 0 0; }
+.fig { position: absolute; top: 100%; left: 0; right: 0; text-align: center; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: .95rem; color: var(--w-muted); margin: .5rem 0 0; }
 .fig b { font-style: normal; font-weight: 400; }
 
 /* the fragment */
