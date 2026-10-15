@@ -1,9 +1,9 @@
 // The NOT NOT PHILO hero title is the logotype NOT² PHILO (a charcoal exponent 2 with a red plate);
-// the name stays NOT NOT PHILO to assistive tech and in the page's meta, and the hero has no eyebrow.
+// the name stays NOT NOT PHILO to assistive tech and in the page's meta, and the hero's lines under it are plain text, not plates.
 import { test, expect } from "../helpers/fixtures.mjs";
 
 for (const width of [360, 390, 1440]) {
-  test(`P2 philo hero: logotype with an exponent 2, no eyebrow, at ${width}`, async ({ page }) => {
+  test(`P2 philo hero: logotype with an exponent 2, no plate label, at ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.goto(process.env.NTS_BASE + "/not-not-philo/");
     const h1 = page.locator("h1#title");
@@ -19,7 +19,6 @@ for (const width of [360, 390, 1440]) {
     const size = await two.evaluate((e) => parseFloat(getComputedStyle(e).fontSize) / parseFloat(getComputedStyle(e.parentElement).fontSize));
     expect(size).toBeGreaterThanOrEqual(0.7);
     expect(await page.locator(".hero-text .philo-bar").count()).toBe(0);
-    expect(await page.locator("[data-nts-copy='philo.eyebrow']").count()).toBe(0);
     expect(await page.locator("meta[property='og:title']").getAttribute("content")).toBe("NOT NOT PHILO");
     expect(await page.title()).toMatch(/NOT NOT PHILO/);
     // the plate and the raised 2 stay inside the viewport

@@ -81,6 +81,10 @@ each world as you scroll, falling into a satellite, the
 EMBERS tetrahedron at its size and its section rhythm, NOT NOT PHILO's
 rings and triangle.
 
+The one exception to AA contrast: the EMBERS hero label band, cream on
+`--embers-fire` at 3.87:1. It stays in the brand's fire red, the same red as
+the bar beside it, rather than a darker one that would pass.
+
 ## Page skeleton
 
 ```html
@@ -183,6 +187,8 @@ Sizes of the main levels: `h1` clamp(2.6rem, 10vw, 5.5rem) (the home title
 clamp(2.6rem, 11.5vw, 5.5rem)), `h2` clamp(1.9rem, 5.5vw, 3rem), `h3`
 clamp(1.3rem, 3.4vw, 1.65rem), `.incant` clamp(1.25rem, 3.4vw, 1.75rem),
 `.lede` clamp(1.15rem, 2.6vw, 1.35rem), body 1.0625rem, `.label` .72rem.
+The three world heroes override the h1, `.incant` and label sizes: see
+World hero text.
 Each page's Google Fonts link carries only the families it uses: the home
 loads all five; EMBERS and NOT NOT PHILO load Fraunces, Instrument Sans,
 Archivo and the mono; INTERSECT Fraunces (the wordmark), Instrument Sans,
@@ -517,9 +523,44 @@ behave the same.
 
 ## World kits
 
+### World hero text
+
+The hero's three lines (the name, the label, the punchline) are in
+`.hero-text`, in `pages.css`; each world's lines differ in colour and face,
+not in how they are laid out. The same fact in each world's paragraph below
+points here.
+
+- `.hero-text` of the three worlds is an inline-size container. Every size
+  is `min(the role's size, var(--fit))`, with `--fit` in `cqi`: the
+  container's width divided by the text's width in em, so the line just fills
+  the column at any width and never wraps (`white-space: nowrap`). Each
+  `--fit` sits beside its text in `pages.css` and was measured on the copy and
+  the face as they are: measure it again when either changes.
+- The grid has one `max-content` track, so the title sets the width of the
+  column. The punchline would widen it, so it is `width: 0; min-width: 100%`:
+  as wide as the track, not wider, and its text may run past it.
+- The label is a solid band as wide as the title, its text spread across it
+  (`text-align-last: justify`). EMBERS: cream on `--embers-fire`; INTERSECT:
+  `--w-bg` on `--w-fg` (reverse video); NOT NOT PHILO: white on
+  `--philo-red` with the charcoal plate printed off register (`::before`,
+  z-index -1, which relies on `.philo-hero .hero-text` being a stacking
+  context).
+- The label has two spans: `.label-long` (`<world>.eyebrow`) and
+  `.label-short` (`<world>.eyebrow.short`, "<X> series · NTS" with an
+  `abbr`). `@container (width < 30rem)` (the text column, not the viewport)
+  swaps them, sets the short one from the left (not spread) and gives the
+  label its narrow `--fit`. `tests/layout/hero-lines.spec.mjs` (L7) reads that
+  threshold from the page's root font size.
+- INTERSECT: the label and the punchline start under the I, not the prompt:
+  `margin-left: calc(.815 * var(--title))`, the prompt's width plus its space
+  in em of the title (measured as the `--fit` factors are).
+- NOT NOT PHILO's punchline is in the display cut of Fraunces
+  (`"opsz" 144, "SOFT" 100, "WONK" 1`).
+
 EMBERS (`worlds/embers.css`, `worlds/embers.js`). Classes: `.embers-display`
 (the flyer's extended caps, with the glow at night), `.hollow`,
-`.embers-label`, `.embers-bar` (the red bar: a band on phones, vertical on
+`.embers-label` (the hero's label band, see World hero text),
+`.embers-bar` (the red bar: a band on phones, vertical on
 the right from 900px inside `.embers-hero`), `.genres`. The entity is
 `<canvas class="nts-hearth" tabindex="0" aria-label="…">` inside a
 `.hearth-stage`, with a `.hearth-still` for scripts off (`<!-- nts:still embers -->`).
@@ -539,17 +580,18 @@ backing-store budget that lowers the resolution below the DPR on large
 screens; the hearth also ray-tests only inside the solid's circumcircle
 and strokes each colour as one path of chained polylines.
 
-NOT NOT PHILO (`worlds/philo.css`, `worlds/penrose.js`, `worlds/philo.js`).
+NOT NOT PHILO (`worlds/philo.css`, `worlds/penrose.js`, `worlds/philo.js`);
+its hero lines are laid out as World hero text says.
 Classes: `.philo-bar` (the red label with the misregistered charcoal plate;
 `.sm`, `.caps`), `.philo-key` (the red extra-bold key word),
-`.philo-strip` (the italic strip), `.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
+`.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
 `<div class="nts-penrose" role="img" aria-label="…"><!-- nts:still philo --><!-- /nts:still --></div>`;
 philo.js appends a canvas and hides the still. Colours from
 `--penrose-ink`, `--penrose-cut`, `--penrose-ground`.
 
 INTERSECT (`worlds/intersect.css`, `worlds/ascii.js`). The world sets IM
 Fell as the body and heading face and the mono for labels; the title is
-IM Fell behind a mono `>` prompt. Classes: `.corr` (the correspondence
+IM Fell behind a mono `>` prompt (the hero lines: World hero text). Classes: `.corr` (the correspondence
 table), `.intersect-grain` (a grain div, first in body).
 The entity is `<pre data-nts-ascii="tetra" data-cols="52" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
 figures: `tetra`, `heptagram`, `seed`. Live, `ascii.js` moves the baked
