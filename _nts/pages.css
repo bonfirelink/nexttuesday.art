@@ -47,10 +47,23 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 
 /* ---------- world pages: the hero ---------- */
 .hero { padding: clamp(var(--hero-top), 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); display: grid; gap: 1.5rem; }
-.hero .label { color: var(--w-muted); margin: 0 0 .6rem; }
-.hero .lede, .hero .incant { max-width: 26ch; }
+/* the hero's lines each sit on one line at every width: their sizes are the
+   role's size, capped to fit the text column (a size container, so cqi is its
+   width). One track as wide as the title, so the label's band under it is too;
+   the punchline may be wider and does not widen it. Each text's `--fit` is the
+   container's width divided by the text's width in em, so the text just fills
+   the column: measured on the copy and the face as they are, and to be
+   measured again when either changes. */
 .hero-text { display: grid; gap: .6rem; }
 .hero-text p { margin: 0; }
+:is(.embers-hero, .philo-hero, .intersect-hero) .hero-text { container-type: inline-size; grid-template-columns: max-content; }
+:is(.embers-hero, .philo-hero, .intersect-hero) .hero-text > * { white-space: nowrap; }
+:is(.embers-hero, .philo-hero, .intersect-hero) .hero-text > .incant { width: 0; min-width: 100%; }
+/* the label: a solid band the width of the title, its text spread across it;
+   narrow, the container query below swaps it for the short form */
+.embers-hero .embers-label, .intersect-hero .label, .philo-hero .label { justify-self: stretch; padding: .3em .6em; line-height: 1.2; text-align-last: justify; font-size: min(.85rem, var(--fit)); }
+.label-short { display: none; }
+.label-short abbr { text-decoration: none; }
 @media (min-width: 900px) {
   .hero { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; min-height: calc(100svh - var(--bar-h)); column-gap: clamp(2rem, 5vw, 5rem); }
   .hero .entity { order: 2; }
@@ -60,7 +73,9 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .hero .entity { width: min(100%, var(--entity-w)); margin-inline: auto; }
 
 /* EMBERS */
-@media (min-width: 900px) { .embers-hero .hero-text { container-type: inline-size; } .embers-hero h1.embers-display { font-size: min(7rem, 16cqi); } }
+.embers-hero h1.embers-display { --fit: 16cqi; font-size: min(7rem, var(--fit)); }
+.embers-hero .embers-label { background: var(--embers-fire); color: var(--w-fg); --fit: 2.49cqi; }
+.embers-hero .incant { --fit: 6.91cqi; font-size: min(clamp(1.25rem, 3.4vw, 1.75rem), var(--fit)); }
 /* the landing is the hearth's field: its lines fill the whole hero, edge to
    edge, while the solid keeps the stage's place and size (the canvas's
    data-anchor), in the same entity column and ring as the other worlds. The
@@ -78,8 +93,13 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .embers-venues .prose p { font-size: 1.1rem; }
 
 /* NOT NOT PHILO */
-.philo-hero .stack { display: grid; gap: .5rem; justify-items: start; }
-.philo-hero h1 { margin: .4rem 0 .6rem; }
+.philo-hero .stack { display: grid; justify-items: start; }
+.philo-hero h1 { margin: .4rem 0 0; }
+.philo-hero .philo-key { --fit: 15.4cqi; font-size: min(5.5rem, var(--fit)); }
+.philo-hero .label { position: relative; background: var(--philo-red); color: #fff; letter-spacing: .2em; --fit: 2.96cqi; }
+/* the poster's charcoal plate, printed off register (as .philo-bar) */
+.philo-hero .label::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--philo-shadow); transform: translate(calc(-1 * var(--philo-off)), calc(-1 * var(--philo-off))); }
+.philo-hero .incant { font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; --fit: 5.49cqi; font-size: min(1.75rem, var(--fit)); }
 /* the figure's caption hangs below the entity box, out of flow, so the ring
    centres on the figure as in the other worlds; stacked, its room is reserved */
 @media (max-width: 899px) { .philo-hero .entity { margin-bottom: 4rem; } }
@@ -93,9 +113,24 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 /* INTERSECT */
 .intersect-hero { text-align: left; }
 /* the title is IM Fell, the one place it lives; the prompt before it stays mono */
-.intersect-hero h1 { text-transform: uppercase; letter-spacing: .02em; font-size: clamp(2.4rem, 10vw, 5rem); line-height: .95; }
+.intersect-hero .hero-text { --fit: 14.1cqi; --title: min(5rem, var(--fit)); }
+.intersect-hero h1 { text-transform: uppercase; letter-spacing: .02em; font-size: var(--title); line-height: .95; }
 .intersect-hero h1 .x { font-family: var(--font-mono); font-weight: 500; color: var(--intersect-fire-key); }
-.intersect-hero .incant { font-size: clamp(1.4rem, 4vw, 2rem); }
+.intersect-hero .label { background: var(--w-fg); color: var(--w-bg); letter-spacing: .22em; --fit: 2.52cqi; }
+.intersect-hero .incant { --fit: 5.63cqi; font-size: min(2rem, var(--fit)); }
+/* label and punchline start under the I, not the prompt: .815 is the prompt's
+   width plus its space, in em of the title (measured, like the --fit factors) */
+.intersect-hero .label, .intersect-hero .incant { margin-left: calc(.815 * var(--title)); }
+/* narrow, the label gives way to the short form, set from the left, and its text is fitted again;
+   after the worlds' rules so its --fit wins */
+@container (width < 30rem) {
+  .label-long { display: none; }
+  .label-short { display: inline; }
+  .embers-hero .embers-label, .intersect-hero .label, .philo-hero .label { text-align-last: auto; }
+  .embers-hero .embers-label { --fit: 4.44cqi; }
+  .intersect-hero .label { --fit: 4.42cqi; }
+  .philo-hero .label { --fit: 5.18cqi; }
+}
 .intersect-body .prose p { font-size: 1.15rem; }
 .intersect-whisper { font-family: var(--font-intersect); font-style: italic; color: var(--w-muted); font-size: 1.25rem; margin: 1.5rem 0 0; }
 .intersect-link { font-family: var(--font-mono); font-size: .9rem; margin-top: 1rem; }

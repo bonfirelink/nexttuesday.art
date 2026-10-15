@@ -51,7 +51,7 @@ html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in
   -webkit-text-stroke: 1.5px var(--w-accent);
   text-shadow: none;
 }
-.embers-label { font-family: var(--font-flyer); font-variation-settings: "wdth" 112; font-weight: 600; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--w-accent-text); }
+.embers-label { font-family: var(--font-flyer); font-variation-settings: "wdth" 112; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; }
 
 /* the red bar, vertical on wide screens, a band on phones */
 .embers-bar {
