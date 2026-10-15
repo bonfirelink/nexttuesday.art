@@ -5,7 +5,7 @@
    <div data-nts-fragment="philo"> (small, slower,
    not interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
-   host's computed --penrose-ink, --penrose-cut and --penrose-ground. While
+   host's computed --penrose-top, -side, -dark and -ground. While
    a world bleed-in's disc opens, the world's set goes to the canvas's twin
    in the disc's copy (NTS.bleed.twin) and the NTS set stays here, each
    drawn only while some of it is in view. 30 fps, 15 for the
@@ -24,12 +24,14 @@
     if (!ctx) return;
     const FPS = lite ? 15 : 30, REST = lite ? B.REST.fragment : B.REST.page;
     let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0;
-    let col = { ink: "#2b2d3e", cut: "#e81e4c", ground: "#e6e6e8" };
+    /* the fallback tones are the PHILO world's tones in philo.css; tests/static/philo-tokens.spec.mjs keeps them in step */
+    let col = { top: "#f5f5f7", side: "#a6a7b2", dark: "#53566b", ground: "#e6e6e8" };
     function read(el) {
       const cs = getComputedStyle(el);
       return {
-        ink: cs.getPropertyValue("--penrose-ink").trim() || col.ink,
-        cut: cs.getPropertyValue("--penrose-cut").trim() || col.cut,
+        top: cs.getPropertyValue("--penrose-top").trim() || col.top,
+        side: cs.getPropertyValue("--penrose-side").trim() || col.side,
+        dark: cs.getPropertyValue("--penrose-dark").trim() || col.dark,
         ground: cs.getPropertyValue("--penrose-ground").trim() || col.ground,
       };
     }
@@ -42,13 +44,13 @@
       w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
-      /* the model's pivot is the closed triangle's centre (cubes.js), so it
+      /* the model's pivot is the closed picture's centre (cubes.js), so it
          goes on the canvas's centre, which is the host's. The size is set
          from the host (the canvas outgrows it on the page entity) and the
          rest pose, so that the rest pose is as large against its circle as
          the other worlds' figures, which fill theirs (widest side about 1.0
          of the ring, 0.92 of the orb): the rest pose's furthest point sits
-         at REST of the host's half-size. A tilted pose reaches further and
+         at REST of the host's half-size. A turned pose reaches further and
          overshoots, as the others do at their circle's edge. */
       const host0 = Math.min(host.clientWidth, host.clientHeight);
       scale = (host0 * REST) / (2 * B.REACH);
