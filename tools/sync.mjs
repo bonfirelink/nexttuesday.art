@@ -19,6 +19,8 @@
    A fragment takes the still named <world>-sm when there is one (philo-sm), else <world>.
    Attributes:
      data-nts-copy="key"      the element's inner HTML becomes copy.json[key]
+     data-nts-xi              with data-nts-copy: each E of the copy is wrapped in
+                              <span class="xi">E</span> (the EMBERS wordmark's Ξ)
      data-nts-fragment="w"    the element's inner HTML becomes the world's still
      <script src="/_nts/nts-head.js">  carries data-bleed="scroll" on the page
                               of an initiative marked bleed, nothing elsewhere
@@ -201,7 +203,7 @@ function replaceInner(html, attr, resolve) {
       if (depth === 0) { close = c.index; break; }
     }
     if (close < 0) continue;
-    const v = resolve(value, tag);
+    const v = resolve(value, tag, attrs);
     out += html.slice(last, start);
     if (v === undefined) { console.warn(`  no value for ${attr}="${value}"`); out += html.slice(start, close); }
     else out += v;
@@ -223,9 +225,12 @@ function sync(file) {
   html = region(html, 'emblem', (args) => EMBLEM[args.trim()] || '');
   html = region(html, 'events', (args) => ledger(prefix, parseOpts(args)));
   html = region(html, 'still', (args) => STILLS[args.trim()] || '');
-  html = replaceInner(html, 'data-nts-copy', (k, tag) => {
-    const v = COPY[k];
+  html = replaceInner(html, 'data-nts-copy', (k, tag, attrs) => {
+    let v = COPY[k];
     if (v === undefined) return undefined;
+    // the wordmark's Es are drawn as Ξ by .xi (Archivo has no Greek); the copy stays plain text,
+    // with no markup, since every E in it is wrapped
+    if (/\sdata-nts-xi(?=[\s=>]|$)/.test(attrs)) v = v.replace(/E/g, '<span class="xi">E</span>');
     return tag === 'title' ? v.replace(/<[^>]+>/g, '') : v;
   });
   html = replaceInner(html, 'data-nts-fragment', (w) => {

@@ -55,3 +55,50 @@ test.describe("S3: sync --check fails on a broken source", () => {
     fails(/not-not-philo.*colours\.face\.sigil/);
   });
 });
+
+// S4 the EMBERS wordmark: the copy holds plain "EMBERS" and sync wraps each E
+// of a data-nts-xi element in <span class="xi">, so editing the copy cannot
+// lose the Ξ. Only the marked elements are touched.
+test.describe("S4: the wordmark's Es are wrapped by sync", () => {
+  const XI = '<span class="xi">E</span>MB<span class="xi">E</span>RS';
+  const pages = [["site/embers/index.html", "embers.title"], ["site/index.html", "home.embers.label"]];
+  let dir;
+  test.beforeEach(() => { dir = mkdtempSync(path.join(tmpdir(), "nts-sync-")); cpSync(path.join(root, "site"), path.join(dir, "site"), { recursive: true }); });
+  test.afterEach(() => rmSync(dir, { recursive: true, force: true }));
+  const sync = (flags) => spawnSync(process.execPath, [path.join(root, "tools/sync.mjs"), ...flags], { cwd: dir, encoding: "utf8", env: { ...process.env, NTS_SYNC_ROOT: dir } });
+  const dropSpans = (file) => { const p = path.join(dir, file); writeFileSync(p, readFileSync(p, "utf8").replaceAll(XI, "EMBERS")); return p; };
+
+  test("the copy holds plain EMBERS", () => {
+    const copy = JSON.parse(readFileSync(path.join(nts, "content/copy.json"), "utf8"));
+    for (const [, key] of pages) expect(copy[key]).toBe("EMBERS");
+  });
+  for (const [file, key] of pages) {
+    test(`${key}: sync yields exactly the two spans`, () => {
+      const p = dropSpans(file);
+      expect(sync([]).status).toBe(0);
+      const html = readFileSync(p, "utf8");
+      expect(html).toContain("data-nts-xi");
+      expect(html.match(/<span class="xi">E<\/span>/g)).toHaveLength(2);
+      expect(html).toContain(XI);
+    });
+    test(`${key}: --check reports a hand-edit that drops the spans`, () => {
+      dropSpans(file);
+      const r = sync(["--check"]);
+      expect(r.status).toBe(1);
+      expect(r.stdout).toContain(`would change ${file}`);
+    });
+  }
+  test("only a data-nts-xi element is wrapped", () => {
+    const p = path.join(dir, "site/embers/index.html");
+    const marked = '<span data-nts-copy="embers.title" data-nts-xi>';
+    const html = readFileSync(p, "utf8");
+    expect(html).toContain(marked);
+    const plain = (attr) => `<span data-nts-copy="embers.title"${attr}>EMBERS</span>`;
+    const stale = (attr) => `<span data-nts-copy="embers.title"${attr}>`;
+    writeFileSync(p, html.replace(marked, stale("") + "x</span>" + stale(" data-nts-xiph") + "x</span>" + marked));
+    expect(sync([]).status).toBe(0);
+    const out = readFileSync(p, "utf8");
+    expect(out).toContain(plain(""));
+    expect(out).toContain(plain(" data-nts-xiph"));
+  });
+});
