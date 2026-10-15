@@ -25,11 +25,13 @@
   --w-cast: rgba(0, 0, 0, 0.7);
   --w-deep: #040102;
   --embers-glow: 0 0 .12em rgba(255, 200, 140, .55), 0 0 .5em rgba(242, 89, 27, .45), 0 0 1.4em rgba(229, 29, 71, .3);
+  --embers-glow-fx: drop-shadow(0 0 .06em rgba(255, 200, 140, .5)) drop-shadow(0 0 .25em rgba(242, 89, 27, .4)) drop-shadow(0 0 .7em rgba(229, 29, 71, .25));
   --hearth-base: rgba(229, 29, 71, 0.3);
   color-scheme: dark;
 }
 html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in"] .nts-bleed-old {
   --embers-glow: none;
+  --embers-glow-fx: none;
   /* the ink (--pal-ink) at 22%, as a plain colour: a canvas reads it */
   --hearth-base: rgba(20, 19, 18, 0.22);
 }
@@ -45,6 +47,28 @@ html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in
   font-size: clamp(2.6rem, 12vw, 7rem);
   text-shadow: var(--embers-glow);
   color: var(--w-fg);
+}
+/* The wordmark's Ξ: Archivo has no Greek, so each E of EMBERS is kept as text (find, copy,
+   readers) and painted transparent while three bars are drawn in its box. Metrics are
+   Archivo's E at wdth 125, weight 700: cap height .6875em, stroke .1375em, ink .71em wide
+   from .0925em in; the middle bar is shorter than Archivo's own middle arm (.6425em). */
+.xi { position: relative; color: transparent; -webkit-text-fill-color: transparent; text-shadow: none; }
+/* every ::selection rule sets a colour; :is() outranks .world ::selection */
+:is(h1, h2) .xi::selection { color: transparent; -webkit-text-fill-color: transparent; }
+.xi::before {
+  --xi-bar: var(--w-fg);
+  content: ""; position: absolute; left: .0925em; top: .189em; width: .71em; height: .6875em;
+  background:
+    linear-gradient(var(--xi-bar), var(--xi-bar)) 0 0 / 100% .1375em no-repeat,
+    linear-gradient(var(--xi-bar), var(--xi-bar)) 50% 50% / 78% .1375em no-repeat,
+    linear-gradient(var(--xi-bar), var(--xi-bar)) 0 100% / 100% .1375em no-repeat;
+  filter: var(--embers-glow-fx, none);
+  pointer-events: none;
+}
+/* print and forced colours drop the bars: the title is a plain E */
+@media print, (forced-colors: active) {
+  .xi { color: inherit; -webkit-text-fill-color: currentColor; }
+  .xi::before { display: none; }
 }
 .embers-display .hollow {
   color: transparent;

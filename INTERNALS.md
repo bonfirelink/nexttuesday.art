@@ -678,6 +678,13 @@ world, place, line, status, link). To change copy or add an event, edit
 the JSON, run `node tools/sync.mjs`, commit both. The text is also in the
 HTML, so pages stay readable and greppable; the JSON wins on conflict.
 
+A copy value may hold markup (tags are stripped only for `<meta>`). The EMBERS
+wordmark does: `embers.title` and `home.embers.label` wrap each E in
+`<span class="xi">`, because Archivo has no Greek and a real Ξ would fall back to
+another font. The E stays text for search, readers and copy; `.xi` paints it
+transparent and draws the Ξ bars in its box (`worlds/embers.css`). The link preview
+needs plain characters, so `embers.og.title` holds a real Ξ (U+039E).
+
 Regions sync fills: `nts:sprite`, `nts:header`, `nts:footer`,
 `nts:emblem core|orbits`, `nts:events` (with options), `nts:still <name>`, plus
 the `data-nts-copy` and `data-nts-fragment` attributes, and `data-bleed` on
