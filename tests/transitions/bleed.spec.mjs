@@ -191,11 +191,14 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
           const d = disc && disc.getBoundingClientRect();
           return {
             heroBottom: hero.bottom,
+            gutter: document.querySelector("main .hero .hero-text").getBoundingClientRect().left - 2, // 2px short of the text column, clear of its edge
             disc: d && { cx: d.left + d.width / 2, cy: d.top + d.height / 2, r: d.width / 2 },
           };
         });
         const regions = (m) => [
-          { x: 0, y: 60, w: viewport.width, h: Math.max(0, m.heroBottom - 60), disc: m.disc && { cx: m.disc.cx, cy: m.disc.cy, r: m.disc.r - 4 } },
+          // Stacked (below the hero's two-column breakpoint, 900px in pages.css), the figure and the hero text fill most of the disc, so the sample is the strip left of the text column: the ground and its rings.
+          // Side by side, the disc is mostly ground and the whole width is sampled.
+          { x: 0, y: 60, w: viewport.width < 900 ? m.gutter : viewport.width, h: Math.max(0, m.heroBottom - 60), disc: m.disc && { cx: m.disc.cx, cy: m.disc.cy, r: m.disc.r - 4 } },
           { x: 0, y: m.heroBottom + 4, w: viewport.width, h: Math.max(0, viewport.height - m.heroBottom - 4) },
         ];
         const y = Math.round(0.5 * end);
