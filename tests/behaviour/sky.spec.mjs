@@ -176,9 +176,12 @@ test("S5b the pulse rings stop with the machine and resume with it, keeping thei
     return a ? { body: b.dataset.body, state: a.playState, at: a.currentTime } : { body: b.dataset.body, state: "none" };
   }));
   const running = (xs) => xs.filter((x) => x.state === "running").length;
+  // a paused animation keeps its time until the compositor applies the pause (its `ready`)
+  const settled = () => page.evaluate(() => Promise.all([...document.querySelectorAll(".orrery .bead")].flatMap((b) => b.getAnimations({ subtree: true }).map((x) => x.ready))));
   expect(running(await state()), "running at first").toBe(4);
   await page.locator(".orrery .e-stop").click();
   await expect(page.locator(".threshold")).toHaveClass(/is-stopped/);
+  await settled();
   const a = await state();
   expect(running(a), "none runs while stopped").toBe(0);
   await page.waitForTimeout(400);
