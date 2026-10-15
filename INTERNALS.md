@@ -634,6 +634,18 @@ in front of place 0: that is what closes the loop.
   Straight on only the nine are drawn, so the closed picture is the same at
   every rest pose.
 
+The page figure is turned by drag only (no arrow keys, and the host is not
+focusable), and its cubes keep moving while it is pressed or dragged. Turned,
+the screw's lower turns dissolve through a CSS `mask-image` on the hero
+canvas (`--screw-mask` in `philo.css`, a radial-gradient smoothstep), in
+addition to the per-cube thinning toward the ground that `cubes.js` does.
+The mask starts just beyond the rest figure's reach and is on only while
+the figure is turned (`philo.js` sets `.is-turned` when the pose leaves the
+straight view and clears it when the pose is exactly back): masking costs
+compositing time and at rest would mask nothing. The home fragment's canvas
+has none. `tests/static/philo-tokens.spec.mjs` (K3, K4) checks which
+canvases are masked, when, and that the fade starts beyond the rest figure.
+
 philo.js repaints only when the drawing would change: a frame repaints when
 the motion's phase or the turn has changed, or while a bleed-in twin is open;
 anything else that invalidates the canvas (a resize, new colours, a restart
@@ -689,7 +701,7 @@ last frame's glyphs, from the ends of each row), with `NTS.grab.SLACK`
 `.is-grab` (hover over the figure, mouse and pen) and `.is-grabbing` on the
 host, which the stylesheets turn into the cursors. A press elsewhere starts
 nothing and captures nothing, so scrolling and clicks go through. The test
-runs on pointer events only; the keyboard is unchanged.
+runs on pointer events only; keys are per world, and PHILO has none.
 
 ## Fragments (for the home page)
 

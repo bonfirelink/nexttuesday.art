@@ -1,9 +1,9 @@
 /* NOT NOT PHILO's entity on canvas. Needs cubes.js loaded first.
    Mounts on every <div class="nts-penrose"> (the page entity: the nine
-   cubes go round, seen straight on; a drag, pressed on the figure, or the
-   arrow keys turn it to show the screw, and it settles back) and on every
-   <div data-nts-fragment="philo"> (small, slower,
-   not interactive). The host keeps its still <img>/<svg> for scripts off;
+   cubes go round, seen straight on; a drag, pressed on the figure, turns it
+   to show the screw, and it settles back; the cubes keep moving meanwhile)
+   and on every <div data-nts-fragment="philo"> (small, slower, not
+   interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
    host's computed --penrose-top, -side, -dark and -ground. While
    a world bleed-in's disc opens, the world's set goes to the canvas's twin
@@ -62,8 +62,13 @@
        rest) and the turn; a frame that would show the same is skipped */
     let drawn = "";
     const shows = (pose) => `${B.phase(pose.t)} ${pose.yaw} ${pose.pitch}`;
+    /* .is-turned is on while the pose is off the straight view (see philo.css);
+       toggled only when that changes */
+    let turned = false;
     function draw(pose) {
       drawn = shows(pose);
+      const off = pose.yaw !== 0 || pose.pitch !== 0;
+      if (off !== turned) { turned = off; host.classList.toggle("is-turned", off); }
       if (!twin) { paint(ctx, col, pose); return; }
       const q = window.NTS.bleed.progress();
       if (q < 1) paint(ctx, col, pose);
@@ -84,9 +89,8 @@
     function tick(now) {
       raf = 0;
       if (!visible || hidden || held) return;
-      /* a pressed figure holds its pose and only the drag moves it, as in the other worlds */
       const dt = prev ? Math.min(0.1, (now - prev) / 1000) : 0;
-      if (!hand.active) clock += dt;
+      clock += dt;
       prev = now;
       /* the bleed-in's twin changes under the figure, so it is drawn every frame */
       if (now - last >= 1000 / FPS) { last = now; const p = pose(); if (twin || shows(p) !== drawn) draw(p); }
@@ -146,12 +150,6 @@
       const release = () => { hand.active = false; hand.released = performance.now(); grab.up(); };
       host.addEventListener("pointerup", release);
       host.addEventListener("pointercancel", release);
-      host.addEventListener("keydown", (e) => {
-        const d = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0, v = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0;
-        if (!d && !v) return;
-        e.preventDefault();
-        hand.yaw += d * 0.15; hand.pitch += v * 0.15; hand.released = performance.now(); if (!raf) redraw();
-      });
     }
   }
   document.querySelectorAll(".nts-penrose").forEach((h) => mount(h, false));

@@ -31,3 +31,18 @@ export async function putTop(page, settle, selector, frac) {
 
 // Parse a computed `scale` ("none" is 1).
 export const scaleOf = (s) => (s === "none" ? 1 : parseFloat(s));
+
+// The PHILO figure's tip cube, which a cube always fills at rest: centred, this share of the host's height down.
+export const TIP_Y = 0.17;
+
+// Records the yaw and pitch of every paint of the PHILO figure from now on in
+// window.__paints; assumes one PHILO figure on the page (the module's paint(ctx, col, t, yaw, pitch, …)).
+export const recordPaints = (page) => page.evaluate(() => {
+  const B = window.NTS.cubes, paint = B.paint;
+  window.__paints = [];
+  if (!B.__wrapped) {
+    B.__wrapped = true;
+    B.paint = (...a) => { window.__paints.push({ yaw: a[3], pitch: a[4] }); return paint(...a); };
+  }
+});
+export const paints = (page) => page.evaluate(() => window.__paints);

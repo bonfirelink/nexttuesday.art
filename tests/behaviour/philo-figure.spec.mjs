@@ -1,4 +1,4 @@
-// F1-F8. The PHILO figure as drawn in the browser (site/_nts/worlds/cubes.js on a
+// F1-F9. The PHILO figure as drawn in the browser (site/_nts/worlds/cubes.js on a
 // canvas): the rest pose is the same at every tick, the cube on top at every
 // overlap is the one the order says, nothing jumps through a tick or a turn,
 // reduced motion draws the rest pose, turning the figure shows the screw,
@@ -7,6 +7,7 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
 import { restAt, midAt } from "../helpers/cubes.mjs";
+import { TIP_Y, recordPaints, paints } from "../helpers/behaviour.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
@@ -26,6 +27,19 @@ const STEP_S = 0.004, STEP_RAD = 0.004;
 const SCREW_REACH = 0.1;
 // Turned, the top turn and at least two turns below it are drawn (the deepest fade out).
 const SCREW_MIN_CUBES = 27;
+
+// Drags the figure by its tip cube, dx and dy css px (0.011 rad a px), and lets go.
+async function drag(page, host, dx, dy) {
+  const box = await host.boundingBox();
+  const x = box.x + box.width / 2, y = box.y + box.height * TIP_Y;
+  await page.mouse.move(x, y);
+  await page.mouse.move(x + 1, y);
+  await page.waitForTimeout(100);
+  await page.mouse.down();
+  expect(await host.evaluate((h) => h.classList.contains("is-grabbing")), "the press grabbed the figure").toBe(true);
+  await page.mouse.move(x + dx, y + dy, { steps: 8 });
+  await page.mouse.up();
+}
 
 // The module, drawing on a canvas of its own in the page, 400 css px at 1x.
 async function lab(page) {
@@ -160,9 +174,7 @@ test("F5 turning the figure shows the screw going down past the closed picture",
   await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
   await host.scrollIntoViewIfNeeded();
   const closed = await canvasInk(page, ".hero .nts-penrose canvas");
-  await host.focus();
-  for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowRight");
-  await page.keyboard.press("ArrowUp");
+  await drag(page, host, 55, -14);
   await page.waitForTimeout(150);
   const turned = await canvasInk(page, ".hero .nts-penrose canvas");
   // the turns below reach out past the closed picture's box (the canvas outgrows the host)
@@ -235,8 +247,8 @@ test("F7 while the cubes rest and nothing turns them, the figure is not repainte
   expect(p.all, "paints in 3 s (30 a second would be 90)").toBeLessThanOrEqual(MAX_PAINTS);
 });
 
-// After a key turns the figure it is held 1.2 s, then settles back (0.7 s to 1/e) and snaps
-// straight within half a pixel: about 4.2 s for a key's turn. Then paints stop again.
+// After a drag lets go the turn is held 1.2 s, then settles back (0.7 s to 1/e) and snaps
+// straight within half a pixel: about 4.2 s for a small drag. Then paints stop again.
 const SETTLE_MS = 5000;
 
 test("F8 once a turned figure has settled back, it is no longer repainted at rest", async ({ page }) => {
@@ -244,10 +256,33 @@ test("F8 once a turned figure has settled back, it is no longer repainted at res
   await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
   const host = page.locator(".hero .nts-penrose");
   await host.scrollIntoViewIfNeeded();
-  await host.focus();
-  await page.keyboard.press("ArrowRight");
+  await recordPaints(page);
+  await drag(page, host, 14, 0);
+  await page.waitForTimeout(100);
+  expect((await paints(page)).some((p) => p.yaw !== 0), "the drag turned the figure").toBe(true);
   await page.waitForTimeout(SETTLE_MS);
   const p = await watchPaints(page);
   expect(p.atRest, "paints while the cubes rest after settling, besides each tick's landing").toBeLessThanOrEqual(LANDINGS);
   expect(p.all, "paints in 3 s after settling (30 a second would be 90)").toBeLessThanOrEqual(MAX_PAINTS);
+});
+
+test("F9 the figure turns by drag only: it is not focusable and the arrow keys never turn it", async ({ page }) => {
+  await page.goto(process.env.NTS_BASE + "/not-not-philo/");
+  await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
+  const host = page.locator(".hero .nts-penrose");
+  await host.scrollIntoViewIfNeeded();
+  await host.focus();
+  expect(await page.evaluate(() => document.activeElement === document.querySelector(".hero .nts-penrose")), "the host takes focus").toBe(false);
+  expect(await host.getAttribute("tabindex"), "no tabindex").toBeNull();
+  await recordPaints(page);
+  await page.evaluate(() => {
+    const h = document.querySelector(".hero .nts-penrose");
+    const key = (k) => h.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+    for (let i = 0; i < 4; i++) key("ArrowRight");
+    key("ArrowUp");
+  });
+  await page.waitForTimeout(3500); // a whole tick, so the cubes glide in it
+  const after = await paints(page);
+  expect(after.length, "the cubes kept being painted").toBeGreaterThan(0);
+  expect(after.every((p) => p.yaw === 0 && p.pitch === 0), "every paint after the keys is straight on").toBe(true);
 });

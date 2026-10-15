@@ -23,6 +23,8 @@ const WORLDS = {
     path: "/not-not-philo/", host: ".nts-penrose", ready: ".nts-penrose.is-live",
     // the cubes rest between steps, one every 3 s: watch for longer than a tick
     beat: 3200,
+    // a pressed figure keeps ticking (philo-hold.spec.mjs)
+    keepsMoving: true,
     snap: () => document.querySelector(".nts-penrose canvas").toDataURL(),
     points: (pixelPoints) => pixelPoints(document.querySelector(".nts-penrose canvas"), document.querySelector(".nts-penrose")),
   },
@@ -81,12 +83,13 @@ for (const [name, W] of Object.entries(WORLDS)) {
     }, [x, y, W.host]);
     const cursor = (page, [x, y]) => page.evaluate(([x, y]) => getComputedStyle(document.elementFromPoint(x, y)).cursor, [x, y]);
 
-    test("a press on the figure grabs it: held still, pointer captured", async ({ page }) => {
+    test("a press on the figure grabs it: pointer captured, held still unless the world keeps moving", async ({ page }) => {
       await page.mouse.move(...pts.fig);
       await page.mouse.down();
       await page.mouse.move(pts.fig[0] + 6, pts.fig[1] + 2, { steps: 3 });
       expect(await captured(page, pts.fig), "pointer captured").toBe(true);
-      expect(await still(page), "figure holds its pose").toBe(true);
+      // keepsMoving: a press does not hold this world's figure, so it is not still
+      expect(await still(page), W.keepsMoving ? "figure keeps moving" : "figure holds its pose").toBe(!W.keepsMoving);
       await page.mouse.up();
     });
 

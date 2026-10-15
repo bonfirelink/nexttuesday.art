@@ -1,5 +1,6 @@
-// The philo figure holds still under a pressed pointer, as the other worlds' figures do.
+// The philo figure keeps ticking under a pressed pointer, unlike the other worlds' figures.
 import { test, expect } from "../helpers/fixtures.mjs";
+import { TIP_Y, recordPaints, paints } from "../helpers/behaviour.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
@@ -17,44 +18,45 @@ async function changes(page, first) {
   }
   return false;
 }
-// The tip cube, which a cube always fills at rest: centred, this share of the host's height down.
-const TIP_Y = 0.17;
 
-test("H1 philo figure: still while pressed, a drag still repaints", async ({ page }) => {
+async function open(page) {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
   await page.waitForFunction(() => document.querySelector(".nts-penrose")?.classList.contains("is-live"));
   const host = page.locator(".nts-penrose");
   await host.scrollIntoViewIfNeeded();
   const box = await host.boundingBox();
-  const x = box.x + box.width / 2, y = box.y + box.height * TIP_Y;
+  return { x: box.x + box.width / 2, y: box.y + box.height * TIP_Y };
+}
 
+test("H1 philo figure: the cubes keep moving while the pointer is down after a drag", async ({ page }) => {
+  const { x, y } = await open(page);
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x + 20, y + 6, { steps: 4 });
   await wait(page, 200);
-  const a = await grab(page);
-  expect(await changes(page, a), "pose while held").toBe(false);
-  const b = await grab(page);
+  // the pointer rests, still down: any change is the cubes' tick
+  expect(await changes(page, await grab(page)), "pose while held").toBe(true);
 
-  // a drag while held still shows
+  // and a drag while held still turns it: the latest paint's yaw follows the pointer
+  await recordPaints(page);
+  await page.mouse.move(x + 1, y + 6);
+  await wait(page, 200);
+  const yawBefore = (await paints(page)).at(-1)?.yaw ?? 0;
   await page.mouse.move(x + 60, y + 6, { steps: 4 });
-  await wait(page, 100);
-  expect(await grab(page), "drag repaints").not.toBe(b);
-
+  await wait(page, 200);
+  const turned = await paints(page);
+  expect(turned.length, "paints after the drag").toBeGreaterThan(0);
+  // 40 px more at 0.011 rad a px
+  expect(turned.at(-1).yaw - yawBefore, "the second drag turns it").toBeGreaterThan(0.3);
   await page.mouse.up();
 });
 
-test("H2 philo figure: a press without a turn holds it, and the cubes move again after release", async ({ page }) => {
-  await page.goto(process.env.NTS_BASE + "/not-not-philo/");
-  await page.waitForFunction(() => document.querySelector(".nts-penrose")?.classList.contains("is-live"));
-  const host = page.locator(".nts-penrose");
-  await host.scrollIntoViewIfNeeded();
-  const box = await host.boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height * TIP_Y);
+test("H2 philo figure: a press without a turn does not hold the cubes", async ({ page }) => {
+  const { x, y } = await open(page);
+  await page.mouse.move(x, y);
   await page.mouse.down();
   await wait(page, 200);
-  expect(await changes(page, await grab(page)), "held, not turned").toBe(false);
+  expect(await page.evaluate(() => document.querySelector(".nts-penrose").classList.contains("is-grabbing")), "the press grabbed").toBe(true);
+  expect(await changes(page, await grab(page)), "pressed, not turned").toBe(true);
   await page.mouse.up();
-  // no turn to settle back: any change is the cubes' tick
-  expect(await changes(page, await grab(page)), "moves after release").toBe(true);
 });
