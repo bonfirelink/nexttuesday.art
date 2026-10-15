@@ -1,7 +1,8 @@
-/* NOT NOT PHILO's entity on canvas. Needs penrose.js loaded first.
-   Mounts on every <div class="nts-penrose"> (the page entity: rests closed,
-   tilts slowly open on an axis that drifts, closes again; a drag tilts it
-   by hand, pressed on the figure) and on every <div data-nts-fragment="philo"> (small, slower,
+/* NOT NOT PHILO's entity on canvas. Needs cubes.js loaded first.
+   Mounts on every <div class="nts-penrose"> (the page entity: the nine
+   cubes go round, seen straight on; a drag, pressed on the figure, or the
+   arrow keys turn it to show the screw, and it settles back) and on every
+   <div data-nts-fragment="philo"> (small, slower,
    not interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
    host's computed --penrose-ink, --penrose-cut and --penrose-ground. While
@@ -11,9 +12,8 @@
    fragment; one closed frame under prefers-reduced-motion. */
 (() => {
   "use strict";
-  const P = window.NTS && window.NTS.penrose, G = window.NTS && window.NTS.grab;
-  if (!P || !G) return;
-  const { frame, CLOSED, REACH, REST: REST_BY_HOST } = P;
+  const B = window.NTS && window.NTS.cubes, G = window.NTS && window.NTS.grab;
+  if (!B || !G) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 
   function mount(host, lite) {
@@ -22,9 +22,9 @@
     host.appendChild(canvas);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const TILT = lite ? 0.55 : 0.72, PERIOD = lite ? 16 : 22, DRIFT = (2 * Math.PI) / 95, FPS = lite ? 15 : 30, REST = lite ? REST_BY_HOST.fragment : REST_BY_HOST.page;
+    const FPS = lite ? 15 : 30, REST = lite ? B.REST.fragment : B.REST.page;
     let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0;
-    let col = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
+    let col = { ink: "#2b2d3e", cut: "#e81e4c", ground: "#e6e6e8" };
     function read(el) {
       const cs = getComputedStyle(el);
       return {
@@ -42,7 +42,7 @@
       w = canvas.clientWidth; h = canvas.clientHeight;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       if (twin) { twin.width = canvas.width; twin.height = canvas.height; }
-      /* the model's pivot is the closed triangle's centre (penrose.js), so it
+      /* the model's pivot is the closed triangle's centre (cubes.js), so it
          goes on the canvas's centre, which is the host's. The size is set
          from the host (the canvas outgrows it on the page entity) and the
          rest pose, so that the rest pose is as large against its circle as
@@ -51,12 +51,17 @@
          at REST of the host's half-size. A tilted pose reaches further and
          overshoots, as the others do at their circle's edge. */
       const host0 = Math.min(host.clientWidth, host.clientHeight);
-      scale = (host0 * REST) / (2 * REACH);
+      scale = (host0 * REST) / (2 * B.REACH);
       cx = w / 2; cy = h / 2;
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */
     let twin = null, tctx = null, night = null;
+    /* what the last frame showed: the motion's phase (whole while the cubes
+       rest) and the turn; a frame that would show the same is skipped */
+    let drawn = "";
+    const shows = (pose) => `${B.phase(pose.t)} ${pose.yaw} ${pose.pitch}`;
     function draw(pose) {
+      drawn = shows(pose);
       if (!twin) { paint(ctx, col, pose); return; }
       const q = window.NTS.bleed.progress();
       if (q < 1) paint(ctx, col, pose);
@@ -67,48 +72,42 @@
     function paint(ctx, col, pose) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      ctx.lineCap = "butt";
-      shown = frame(pose);
-      for (const f of shown) {
-        ctx.beginPath();
-        f.poly.forEach(([x, y], i) => ctx[i ? "lineTo" : "moveTo"](cx + x * scale, cy - y * scale));
-        ctx.closePath();
-        ctx.fillStyle = col.ground; ctx.fill();
-        ctx.save(); ctx.clip();
-        ctx.strokeStyle = f.role === "cut" ? col.cut : col.ink;
-        ctx.lineWidth = Math.max(0.5, f.width * scale);
-        ctx.beginPath();
-        for (const [x1, y1, x2, y2] of f.lines) { ctx.moveTo(cx + x1 * scale, cy - y1 * scale); ctx.lineTo(cx + x2 * scale, cy - y2 * scale); }
-        ctx.stroke(); ctx.restore();
-      }
+      shown = B.paint(ctx, col, pose.t, pose.yaw, pose.pitch, cx, cy, scale);
     }
     /* the figure's own clock runs only while it animates, so a figure held
        still (off screen, or by NTS.live) resumes from the frame it shows */
     let clock = 0, prev = 0, last = 0, raf = 0, visible = true, hidden = document.hidden, held = false;
-    const hand = { active: false, x: 0, y: 0, dTheta: 0, dPsi: 0 };
-    function pose() {
-      const t = clock, s = Math.sin((2 * Math.PI * t) / PERIOD);
-      return { theta: TILT * s * s * s + hand.dTheta, psi: DRIFT * t + hand.dPsi, phi: CLOSED.phi };
-    }
+    const hand = { active: false, x: 0, y: 0, yaw: 0, pitch: 0, released: -1e9 };
+    function pose() { return { t: clock, yaw: hand.yaw, pitch: hand.pitch }; }
     function tick(now) {
       raf = 0;
       if (!visible || hidden || held) return;
       /* a pressed figure holds its pose and only the drag moves it, as in the other worlds */
-      if (!hand.active) clock += prev ? Math.min(0.1, (now - prev) / 1000) : 0;
+      const dt = prev ? Math.min(0.1, (now - prev) / 1000) : 0;
+      if (!hand.active) clock += dt;
       prev = now;
-      if (now - last >= 1000 / FPS) { last = now; draw(pose()); }
-      if (!hand.active) hand.dTheta *= 0.985;
+      /* the bleed-in's twin changes under the figure, so it is drawn every frame */
+      if (now - last >= 1000 / FPS) { last = now; const p = pose(); if (twin || shows(p) !== drawn) draw(p); }
+      /* a turned figure settles back to the straight view, 0.7 s to 1/e */
+      if (!hand.active && now - hand.released > 1200 && (hand.yaw || hand.pitch)) {
+        const k = Math.exp(-dt / 0.7);
+        hand.yaw *= k; hand.pitch *= k;
+        /* 2e-3 rad is under half a pixel at the figure's reach */
+        if (Math.abs(hand.yaw) < 2e-3 && Math.abs(hand.pitch) < 2e-3) hand.yaw = hand.pitch = 0;
+      }
       raf = requestAnimationFrame(tick);
     }
-    function start() { if (!raf && visible && !hidden && !held && !reduce.matches) { prev = 0; raf = requestAnimationFrame(tick); } }
-    function redraw() { draw(reduce.matches ? CLOSED : pose()); }
+    /* a stopped figure's canvas may have been discarded (a hidden tab, memory
+       pressure), so the first frame after a start always paints */
+    function start() { if (!raf && visible && !hidden && !held && !reduce.matches) { prev = 0; drawn = ""; raf = requestAnimationFrame(tick); } }
+    function redraw() { draw(reduce.matches ? { t: 0, yaw: hand.yaw, pitch: hand.pitch } : pose()); }
 
     /* in an aperture (the home's windows), NTS.live says when it may animate */
     held = !(window.NTS && window.NTS.live ? window.NTS.live.join(host, (on) => { held = !on; if (on) start(); }) : true);
     colours(); measure();
     host.classList.add("is-live");
     redraw(); start();
-    reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; draw(CLOSED); } else start(); });
+    reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; hand.yaw = hand.pitch = 0; draw({ t: 0, yaw: 0, pitch: 0 }); } else start(); });
     /* without IntersectionObserver the host counts as always visible */
     if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
     document.addEventListener("visibilitychange", () => { hidden = document.hidden; if (!hidden) start(); });
@@ -138,19 +137,18 @@
       host.addEventListener("pointerdown", (e) => { if (!grab.down(e)) return; hand.active = true; hand.x = e.clientX; hand.y = e.clientY; host.setPointerCapture(e.pointerId); });
       host.addEventListener("pointermove", (e) => {
         if (!hand.active) return;
-        hand.dTheta += (e.clientX - hand.x) / 140; hand.dPsi += (e.clientY - hand.y) / 400;
+        hand.yaw += (e.clientX - hand.x) * 0.011; hand.pitch += (e.clientY - hand.y) * 0.011;
         hand.x = e.clientX; hand.y = e.clientY;
-        if (reduce.matches) draw({ ...CLOSED, theta: hand.dTheta, psi: hand.dPsi });
+        if (reduce.matches) redraw();
       });
-      const release = () => { hand.active = false; grab.up(); };
+      const release = () => { hand.active = false; hand.released = performance.now(); grab.up(); };
       host.addEventListener("pointerup", release);
       host.addEventListener("pointercancel", release);
       host.addEventListener("keydown", (e) => {
         const d = e.key === "ArrowLeft" ? -1 : e.key === "ArrowRight" ? 1 : 0, v = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0;
         if (!d && !v) return;
         e.preventDefault();
-        hand.dTheta += d * 0.35; hand.dPsi += v * 0.3;
-        if (reduce.matches) draw({ ...CLOSED, theta: hand.dTheta, psi: hand.dPsi });
+        hand.yaw += d * 0.15; hand.pitch += v * 0.15; hand.released = performance.now(); if (!raf) redraw();
       });
     }
   }

@@ -27,14 +27,13 @@
   --philo-shadow: #2b2d3e;
   --philo-off: 4px;
   --penrose-ink: #2b2d3e;
-  --penrose-cut: #e5174a;
+  --penrose-cut: var(--philo-red-key);
   --penrose-ground: #e6e6e8;
   --plate: .16;
   color-scheme: light;
 }
 html[data-bleed-state="before"] [data-world="philo"], html[data-bleed-state="in"] .nts-bleed-old {
   --penrose-ink: var(--pal-ink);
-  --penrose-cut: var(--pal-voice);
   --penrose-ground: var(--pal-beige);
 }
 
@@ -67,10 +66,11 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .nts-penrose.is-grabbing { cursor: grabbing; }
 .nts-penrose img, .nts-penrose > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .nts-penrose canvas { position: absolute; inset: -35%; width: 170%; max-width: none; height: 170%; pointer-events: none; }
-/* The rest pose is drawn as large as the other worlds' figures, so the
-   tilted poses (up to 1.7x its reach) outgrow the host: the canvas is
-   bigger than the host on every side, and the hero keeps text above it and
-   clips what would scroll sideways. */
+/* The rest pose is drawn as large as the other worlds' figures, so turned,
+   the screw's turns below outgrow the host: the canvas is bigger than the
+   host on every side (1.7x across), the deeper turns are cut at its edge
+   as they fade, and the hero keeps text above it and clips what would
+   scroll sideways. */
 .philo-hero .hero-text, .philo-hero .fig { position: relative; z-index: 1; }
 .philo-hero .fig { position: absolute; }
 .nts-penrose.is-live img, .nts-penrose.is-live > svg { display: none; }
