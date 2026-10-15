@@ -68,11 +68,17 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .nts-penrose.is-grab { cursor: grab; }
 .nts-penrose.is-grabbing { cursor: grabbing; }
 .nts-penrose img, .nts-penrose > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.nts-penrose canvas { position: absolute; inset: -35%; width: 170%; max-width: none; height: 170%; pointer-events: none; }
+/* The turned screw's lower turns dissolve into the page before the canvas's
+   edge: a smoothstep mask that starts just beyond the rest figure's reach.
+   It is on only while the figure is turned (philo.js sets .is-turned): masking
+   costs compositing time, and at rest it would mask nothing, so the rest pose
+   is drawn unmasked. */
+.nts-penrose canvas { position: absolute; inset: -35%; width: 170%; max-width: none; height: 170%; pointer-events: none; --screw-mask: radial-gradient(closest-side, #000 58%, rgba(0,0,0,0.957) 60.75%, rgba(0,0,0,0.844) 63.5%, rgba(0,0,0,0.684) 66.25%, rgba(0,0,0,0.5) 69%, rgba(0,0,0,0.316) 71.75%, rgba(0,0,0,0.156) 74.5%, rgba(0,0,0,0.043) 77.25%, transparent 80%); }
+.nts-penrose.is-turned canvas { -webkit-mask-image: var(--screw-mask); mask-image: var(--screw-mask); }
 /* The rest pose is drawn as large as the other worlds' figures, so turned,
    the screw's turns below outgrow the host: the canvas is bigger than the
-   host on every side (1.7x across), the deeper turns are cut at its edge
-   as they fade, and the hero keeps text above it and clips what would
+   host on every side (1.7x across), the mask above fades the deeper turns
+   out before that edge, and the hero keeps text above it and clips what would
    scroll sideways. */
 .philo-hero .hero-text, .philo-hero .fig { position: relative; z-index: 1; }
 .philo-hero .fig { position: absolute; }
