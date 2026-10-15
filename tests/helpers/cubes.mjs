@@ -9,7 +9,8 @@ new Function("module", readFileSync(new URL("../../site/_nts/worlds/cubes.js", i
 export const cubes = module.exports;
 
 // Any colours will do for the model's checks; the drawing passes them through.
-export const COL = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
+// Three distinct tones, so a face can be told by its fill.
+export const COL = { top: "#f5f5f7", side: "#a6a7b2", dark: "#53566b", ground: "#e6e6e8" };
 // A frame laid out at this centre and scale, in px.
 export const CX = 300, CY = 300, SC = 100;
 // The clock at rest in tick k: the cubes move only in a tick's last GLIDE seconds.

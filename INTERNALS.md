@@ -119,9 +119,9 @@ a world; the ledger rows use `data-of` for that reason.
 Worlds: EMBERS night `#0b0709`, fire `#e51d47`, ember
 `#f2591b`, cream `#ffe9d0`; NOT NOT PHILO ground `#e6e6e8`, ink `#2b2d3e`,
 red `#e5174a`, key red `#e81e4c` (`--philo-red-key`, for `.philo-key` and
-the figure's red, `--penrose-cut`: 3:1 on the grey and on the word's own
-charcoal plate; `--philo-red` stays, since white on the bar needs it that
-dark); INTERSECT black `#0a0a0a`,
+the title's red, 3:1 on the grey and on the word's own charcoal plate;
+`--philo-red` stays, since white on the bar needs it that dark; the figure
+has no red); INTERSECT black `#0a0a0a`,
 phosphor `#e9e2cf`, fire-hi `#ff3b63`.
 
 The colour code, `--pal-*` by role and `--code-*` by meaning;
@@ -432,7 +432,7 @@ behave the same.
 - The before state is CSS: `html[data-bleed-state="before"] [data-world]`
   reads the NTS `--w-*` tokens (section 11 of `nts.css`), and each kit
   undoes what else its world brings (`--embers-glow`, `--hearth-base`, the
-  penrose ink and ground (its red stays the title's), `--grain`). The same
+  penrose tones and ground, `--grain`). The same
   rules apply to `.nts-bleed-old` while the state is `in` (not the grain,
   below). The root itself
   (`html`) reads the NTS set while the state is `before` or `in`: its ground
@@ -589,10 +589,11 @@ Classes: `.philo-bar` (the red label with the misregistered charcoal plate;
 `.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
 `<div class="nts-penrose" role="img" aria-label="…"><!-- nts:still philo --><!-- /nts:still --></div>`;
 philo.js appends a canvas and hides the still. Colours from
-`--penrose-ink`, `--penrose-cut` (the title's red, `--philo-red-key`, on
-arrival from the home too), `--penrose-ground`. The host class and these
-tokens keep the names they had for the bar triangle: they are internal, and
-renaming them would touch every page copy and palette test.
+`--penrose-top`, `--penrose-side`, `--penrose-dark` (`#f5f5f7`, `#a6a7b2`,
+`#53566b`) and `--penrose-ground`; before the bleed-in from the home they are
+`#f7f1e4`, `#b9b1a3`, `#67625a` on the beige. The host class and the
+ground token keep the names they had for the bar triangle: they are
+internal, and renaming them would touch every page copy and palette test.
 
 The figure (`cubes.js`) is Reutersvärd's impossible triangle of nine
 cubes, going round. The model is a staircase of unit steps along x, y and
@@ -605,14 +606,20 @@ in front of place 0: that is what closes the loop.
   each corner the cube after it covers the one before). No back-to-front
   order paints a cycle, so the compositor breaks it at the cube nearest the
   tip, clips any cube painted after one that should cover it at that cube's
-  edge, and draws the covering cube's outline again on top (not over cubes
-  already painted that cover it). Because all nine move together, no pair's
-  order changes during a tick, so nothing pops.
-- **The motion.** Every 1.5 s all nine step one place together (the last
-  0.42 s of a tick); straight on, the cube crossing from place 8 to the tip
-  goes straight to place 0. Cubes 0, 3 and 6 each carry one red face for
-  good (top, dark, left), so the red rides round and every ninth tick is
-  the starting picture again.
+  edge. Because all nine move together, no pair's order changes during a
+  tick, so nothing pops.
+- **The motion.** Every 3 s (`TICK`) all nine step one place together, in
+  the last second of a tick (`GLIDE`) and resting for the 2 s before it;
+  straight on, the cube crossing from place 8 to the tip goes straight to
+  place 0. All nine are alike, so every tick shows the same picture.
+- **The look.** All cubes are drawn alike, flat, with no outline: each of
+  the three faces in view takes a tone by how much it faces the light (top,
+  side, dark; `shader` thins them toward the ground for the turns below).
+  Under the faces of a cube at full opacity lies a core, the cube's hull
+  inset 0.75 px in the top tone, so no hairline of the ground shows in the
+  seams; a fading cube gets none, since its faces would show the core
+  through and shift toward the top tone. `paint()` takes
+  `{ top, side, dark, ground }`.
 - **The screw, turned.** The nine are the top turn of an endless staircase
   (`TURNS` turns drawn below, fading into the ground): every cube climbs a
   place per tick, the one stepping off the top fades out by opacity, and
@@ -633,9 +640,10 @@ anything else that invalidates the canvas (a resize, new colours, a restart
 after the loop stopped) goes through `draw`/`redraw` or clears the record of
 the last frame.
 
-`paint()` returns the drawn cubes' outlines, which philo.js hit-tests a
+`paint()` returns the drawn cubes' hulls, which philo.js hit-tests a
 press against; `frame()` and `composite()` are what `tools/gen-stills.mjs`
-records into the scripts-off still. `tests/static/cubes.spec.mjs` checks
+records into the scripts-off still (flat filled paths, cut where a
+cube is clipped; `--check` says when a committed still is stale). `tests/static/cubes.spec.mjs` checks
 the model and `tests/behaviour/philo-figure.spec.mjs` the drawing.
 
 INTERSECT (`worlds/intersect.css`, `worlds/ascii.js`). The world sets IM

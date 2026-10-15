@@ -96,13 +96,13 @@ for (const path of WORLDS) {
         const cs = getComputedStyle(document.querySelector("main .hero .nts-penrose"));
         const probe = document.createElement("i"); probe.style.transition = "none"; document.body.appendChild(probe);
         const out = {};
-        for (const k of ["--penrose-ink", "--penrose-cut", "--penrose-ground"]) { probe.style.color = cs.getPropertyValue(k); out[k] = getComputedStyle(probe).color; }
+        for (const k of ["--penrose-top", "--penrose-side", "--penrose-dark", "--penrose-ground"]) { probe.style.color = cs.getPropertyValue(k); out[k] = getComputedStyle(probe).color; }
         probe.remove();
         return out;
       });
-      expect(v["--penrose-ink"], "the figure's ink").toBe(t["--pal-ink"]);
-      const key = await resolve(page, ["var(--philo-red-key)"]);
-      expect(v["--penrose-cut"], "the figure's red is the title's, also on arrival").toBe(key["var(--philo-red-key)"]);
+      expect(v["--penrose-top"], "the figure's top tone, on the beige").toBe("rgb(247, 241, 228)");
+      expect(v["--penrose-side"], "the figure's side tone").toBe("rgb(185, 177, 163)");
+      expect(v["--penrose-dark"], "the figure's dark tone").toBe("rgb(103, 98, 90)");
       expect(v["--penrose-ground"], "the figure's ground").toBe(t["--pal-beige"]);
     }
   });

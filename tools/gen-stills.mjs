@@ -27,7 +27,7 @@ const cubes = load('../site/_nts/worlds/cubes.js');
 const ascii = load('../site/_nts/worlds/ascii.js');
 const f2 = (x) => (Math.round(x * 100) / 100).toString();
 
-/* Convex polygons and segments, cut by convex polygons: for a still drawn
+/* Convex polygons, cut by convex polygons: for a still drawn
    with plain paths, no clip-path (a figure in an orb composites with none). */
 const orient = (P) => Math.sign(P.reduce((s, p, i) => { const q = P[(i + 1) % P.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0)) || 1;
 /* the side of edge a-b a point is on, positive inside polygon of orientation o */
@@ -53,26 +53,13 @@ function outside(P, C) {
   }
   return pieces;
 }
-/* the stretch [t0, t1] of segment p-q inside convex C, or null */
-function span(p, q, C) {
-  const o = orient(C);
-  let t0 = 0, t1 = 1;
-  for (let i = 0; i < C.length; i++) {
-    const a = C[i], b = C[(i + 1) % C.length], sp = side(a, b, p, o), sq = side(a, b, q, o);
-    if (sp < 0 && sq < 0) return null;
-    if (sp < 0) t0 = Math.max(t0, sp / (sp - sq));
-    else if (sq < 0) t1 = Math.min(t1, sp / (sp - sq));
-  }
-  return t0 < t1 ? [t0, t1] : null;
-}
-const at = (p, q, t) => [p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])];
 
 /* Just enough of a canvas 2D context to record cubes.js's drawing as SVG
    paths. Its clips are a convex polygon to stay inside (clip()) or to stay
-   out of (clip("evenodd") on a covering rectangle and the polygon); fills and
-   outlines are cut to them here. */
+   out of (clip("evenodd") on a covering rectangle and the polygon); fills are
+   cut to them here. */
 class SvgContext {
-  constructor() { this.sub = []; this.out = []; this.clips = [[]]; this.globalAlpha = 1; this.fillStyle = ''; this.strokeStyle = ''; this.lineWidth = 1; }
+  constructor() { this.sub = []; this.out = []; this.clips = [[]]; this.globalAlpha = 1; this.fillStyle = ''; }
   beginPath() { this.sub = []; }
   moveTo(x, y) { this.sub.push([[x, y]]); }
   lineTo(x, y) { this.sub[this.sub.length - 1].push([x, y]); }
@@ -93,21 +80,6 @@ class SvgContext {
     const d = pieces.map((P) => P.map(([x, y], i) => `${i ? 'L' : 'M'}${f2(x)} ${f2(y)}`).join('') + 'Z').join('');
     this.out.push(`<path d="${d}" fill="${this.fillStyle}"${this.alpha()}/>`);
   }
-  stroke() {
-    const P = this.sub[0];
-    let segs = P.map((p, i) => [p, P[(i + 1) % P.length]]);
-    for (const c of this.cuts) {
-      segs = segs.flatMap(([p, q]) => {
-        const s = span(p, q, c.poly);
-        if (!c.out) return s ? [[at(p, q, s[0]), at(p, q, s[1])]] : [];
-        if (!s) return [[p, q]];
-        return [[p, at(p, q, s[0])], [at(p, q, s[1]), q]].filter(([a, b]) => Math.hypot(b[0] - a[0], b[1] - a[1]) > 0.01);
-      });
-    }
-    if (!segs.length) return;
-    const d = segs.map(([a, b]) => `M${f2(a[0])} ${f2(a[1])}L${f2(b[0])} ${f2(b[1])}`).join('');
-    this.out.push(`<path d="${d}" stroke="${this.strokeStyle}" stroke-width="${f2(this.lineWidth)}"${this.alpha()}/>`);
-  }
 }
 
 /* The live canvas's first frame: the figure at rest, straight on, at the
@@ -115,11 +87,11 @@ class SvgContext {
    home's fragment. */
 function philoStill(rest) {
   const size = 600, sc = (size * rest) / (2 * cubes.REACH);
-  const col = { ink: 'var(--penrose-ink,#2b2d3e)', cut: 'var(--penrose-cut,#e81e4c)', ground: 'var(--penrose-ground,#e6e6e8)' };
+  const col = { top: 'var(--penrose-top,#f5f5f7)', side: 'var(--penrose-side,#a6a7b2)', dark: 'var(--penrose-dark,#53566b)', ground: 'var(--penrose-ground,#e6e6e8)' };
   const g = new SvgContext();
-  const { layers: [layer], lw } = cubes.frame(0, 0, 0, size / 2, size / 2, sc, col);
-  cubes.composite(g, layer, lw);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" fill="none" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${g.out.join('')}</svg>`;
+  const { layers: [layer] } = cubes.frame(0, 0, 0, size / 2, size / 2, sc, col);
+  cubes.composite(g, layer);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" aria-hidden="true">${g.out.join('')}</svg>`;
 }
 
 const tetra = ascii.figure('tetra');

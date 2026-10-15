@@ -2,18 +2,22 @@
 // canvas): the rest pose is the same at every tick, the cube on top at every
 // overlap is the one the order says, nothing jumps through a tick or a turn,
 // reduced motion draws the rest pose, turning the figure shows the screw,
-// its red is the title's, and a resting figure is not repainted, also once it has
+// its three tones are the page's tokens with no outline, and a resting figure is not repainted, also once it has
 // settled back from a turn.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
+import { restAt, midAt } from "../helpers/cubes.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 // A step changes no more pixels than the larger of its neighbours by this factor,
 // plus this many: edges sliding across pixels vary from step to step; a cube
-// appearing, vanishing or changing places in the order is a jump far above both.
+// appearing, vanishing or changing places in the order is a jump far above both
+// (a cube is thousands of pixels). The slack is wide because the glide starts and ends
+// slowly: an edge moving a fraction of a pixel a step changes few pixels one step and
+// several hundred the next.
 const JUMP_FACTOR = 1.25;
-const JUMP_SLACK = 250;
+const JUMP_SLACK = 700;
 // Pixels count as changed by more than this (sum over r, g, b).
 const CHANGED = 60;
 // The clock steps through a tick, s; a turn steps, rad.
@@ -31,8 +35,8 @@ async function lab(page) {
     const B = window.NTS.cubes, c = document.createElement("canvas");
     c.width = c.height = 400;
     const g = c.getContext("2d", { willReadFrequently: true });
-    const col = { ink: "#2b2d3e", cut: "#e5174a", ground: "#e6e6e8" };
-    const sc = (400 * 0.952) / (2 * B.REACH);
+    const col = { top: "#f5f5f7", side: "#a6a7b2", dark: "#53566b", ground: "#e6e6e8" };
+    const sc = (400 * B.REST.page) / (2 * B.REACH);
     const draw = (t, yaw = 0, pitch = 0, ids = false) => {
       g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 400, 400);
       B.paint(g, col, t, yaw, pitch, 200, 200, sc, { ids });
@@ -51,24 +55,21 @@ async function lab(page) {
     window.__lab = { B, col, sc, draw, hash, changed };
   });
 }
-const restAt = (k) => k * 1.5 + 0.3;
 
-// steps whose change jumps above both neighbours
-const jumps = (counts) => counts.filter((n, i) => i > 0 && i < counts.length - 1 && n > Math.max(counts[i - 1], counts[i + 1]) * JUMP_FACTOR + JUMP_SLACK);
+// steps whose change jumps above the two steps either side (a dissolve crossing the
+// CHANGED threshold alternates from step to step)
+const jumps = (counts) => counts.filter((n, i) => i > 1 && i < counts.length - 2 && n > Math.max(counts[i - 2], counts[i - 1], counts[i + 1], counts[i + 2]) * JUMP_FACTOR + JUMP_SLACK);
 
-test("F1 the rest pose is the same at every tick: the same shape every tick, the same picture every ninth", async ({ page }) => {
+test("F1 the rest pose is the same picture at every tick: the same cubes in the same places, tones and all", async ({ page }) => {
   await lab(page);
   const r = await page.evaluate((ts) => ts.map((t) => { const d = window.__lab.draw(t); return [window.__lab.hash(d, true), window.__lab.hash(d, false)]; }), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18].map(restAt));
   expect(new Set(r.map(([a]) => a)).size, "the same cubes in the same places at every tick").toBe(1);
-  expect(r[9][1], "tick 9 is tick 0 again, red and all").toBe(r[0][1]);
-  expect(r[11][1], "tick 18 is tick 0 again").toBe(r[0][1]);
-  expect(r[10][1], "tick 10 is tick 1 again").toBe(r[1][1]);
-  expect(r[1][1], "the red has moved between ticks").not.toBe(r[0][1]);
+  expect(new Set(r.map(([, b]) => b)).size, "the same pixels at every tick").toBe(1);
 });
 
 test("F2 at every overlap the cube drawn on top is the one in front, straight on at rest and mid-tick, and turned", async ({ page }) => {
   await lab(page);
-  for (const [t, yaw, pitch] of [[restAt(0), 0, 0], [restAt(1) + 0.98, 0, 0], [restAt(3), 0.55, -0.2], [restAt(3) + 0.98, 0.55, -0.2]]) {
+  for (const [t, yaw, pitch] of [[restAt(0), 0, 0], [midAt(0) - 0.3, 0, 0], [midAt(0) + 0.3, 0, 0], [midAt(1), 0, 0], [restAt(3), 0.55, -0.2], [midAt(3), 0.55, -0.2]]) {
     const r = await page.evaluate(([t, yaw, pitch]) => {
       const { B, col, sc, draw } = window.__lab;
       const d = draw(t, yaw, pitch, true);
@@ -100,10 +101,10 @@ test("F2 at every overlap the cube drawn on top is the one in front, straight on
 test("F3 nothing jumps: stepping 4 ms through a tick straight on and turned, and turning off the straight view in small steps", async ({ page }) => {
   await lab(page);
   const runs = {
-    "a tick, straight on": [1.0, 1.62, 0, 0, 0],
-    "a tick, turned": [1.0, 1.62, 0.55, -0.2, 0],
+    "a tick, straight on": [1.9, 3.1, 0, 0, 0],
+    "a tick, turned": [1.9, 3.1, 0.55, -0.2, 0],
     "a turn from straight on, at rest": [restAt(1), 0, 0, 0, 160],
-    "a turn from straight on, mid-tick": [restAt(1) + 0.98, 0, 0, 0, 160],
+    "a turn from straight on, mid-tick": [midAt(1), 0, 0, 0, 160],
   };
   for (const [name, [t0, t1, yaw, pitch, turnSteps]] of Object.entries(runs)) {
     const counts = await page.evaluate(([t0, t1, yaw, pitch, turnSteps, ds, dr]) => {
@@ -132,17 +133,20 @@ test.describe("reduced motion", () => {
       let h = 2166136261; for (let i = 0; i < d.length; i++) h = Math.imul(h ^ d[i], 16777619); return h >>> 0;
     });
     const a = await snap();
-    await page.waitForTimeout(1800);
-    expect(await snap(), "unchanged over a tick and more").toBe(a);
+    // sampled across more than a whole tick (3 s), since the picture is alike before and after one
+    for (let i = 0; i < 17; i++) {
+      await page.waitForTimeout(200);
+      expect(await snap(), "unchanged over a tick and more").toBe(a);
+    }
     // the same as the module's rest pose drawn as philo.js sizes it: the closed picture
-    // at the host's centre, its furthest point at 0.952 of the host's half-size
+    // at the host's centre, its furthest point at REST.page of the host's half-size
     const rest = await page.evaluate(() => {
       const host = document.querySelector(".hero .nts-penrose"), c = host.querySelector("canvas"), B = window.NTS.cubes;
       const o = document.createElement("canvas"); o.width = c.width; o.height = c.height;
       const g = o.getContext("2d"), dpr = c.width / c.clientWidth, cs = getComputedStyle(host);
-      const col = { ink: cs.getPropertyValue("--penrose-ink").trim(), cut: cs.getPropertyValue("--penrose-cut").trim(), ground: cs.getPropertyValue("--penrose-ground").trim() };
+      const col = { top: cs.getPropertyValue("--penrose-top").trim(), side: cs.getPropertyValue("--penrose-side").trim(), dark: cs.getPropertyValue("--penrose-dark").trim(), ground: cs.getPropertyValue("--penrose-ground").trim() };
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      B.paint(g, col, 0, 0, 0, c.clientWidth / 2, c.clientHeight / 2, (Math.min(host.clientWidth, host.clientHeight) * 0.952) / (2 * B.REACH));
+      B.paint(g, col, 0, 0, 0, c.clientWidth / 2, c.clientHeight / 2, (Math.min(host.clientWidth, host.clientHeight) * B.REST.page) / (2 * B.REACH));
       const d = g.getImageData(0, 0, o.width, o.height).data;
       let h = 2166136261; for (let i = 0; i < d.length; i++) h = Math.imul(h ^ d[i], 16777619); return h >>> 0;
     });
@@ -166,39 +170,51 @@ test("F5 turning the figure shows the screw going down past the closed picture",
   const [cx0, cx1, cy0, cy1] = edges(closed), [tx0, tx1, ty0, ty1] = edges(turned);
   const past = Math.max(cx0 - tx0, tx1 - cx1, cy0 - ty0, ty1 - cy1);
   expect(past, "drawn pixels beyond the closed picture's box, in css px").toBeGreaterThan(SCREW_REACH * closed.bw);
-  const count = await page.evaluate(() => window.NTS.cubes.frame(0, 0.6, -0.15, 0, 0, 100, { ink: "#000", cut: "#f00", ground: "#fff" }).layers.at(-1).items.length);
+  const count = await page.evaluate(() => window.NTS.cubes.frame(0, 0.6, -0.15, 0, 0, 100, { top: "#fff", side: "#888", dark: "#000", ground: "#fff" }).layers.at(-1).items.length);
   expect(count, "cubes drawn turned: the top turn and the turns below").toBeGreaterThanOrEqual(SCREW_MIN_CUBES);
 });
 
-// The red the figure's canvas draws most: opaque pixels well toward red, as "r,g,b".
-const canvasRed = (page) => page.evaluate(() => {
+// The figure's canvas pixels that are fully opaque, as [{ rgb: "r,g,b", n }] most frequent first,
+// and the smallest channel sum among them.
+const canvasColours = (page) => page.evaluate(() => {
   const c = document.querySelector(".hero .nts-penrose canvas"), d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data, n = new Map();
-  for (let i = 0; i < d.length; i += 4) if (d[i + 3] === 255 && d[i] > 180 && d[i + 1] < 90 && d[i + 2] < 130) { const k = `${d[i]},${d[i + 1]},${d[i + 2]}`; n.set(k, (n.get(k) || 0) + 1); }
-  return [...n].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  let darkest = 765;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] !== 255) continue;
+    const k = `${d[i]},${d[i + 1]},${d[i + 2]}`;
+    n.set(k, (n.get(k) || 0) + 1);
+    darkest = Math.min(darkest, d[i] + d[i + 1] + d[i + 2]);
+  }
+  return { top: [...n].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([rgb]) => rgb), darkest };
 });
-// The title's red, #e81e4c (--philo-red-key).
-const TITLE_RED = "232,30,76";
+// The three tones on the grey ground (top, side, dark) and, before the bleed-in, on the beige.
+const TONES = { world: ["245,245,247", "166,167,178", "83,86,107"], home: ["247,241,228", "185,177,163", "103,98,90"] };
+const sum = (rgb) => rgb.split(",").reduce((s, v) => s + +v, 0);
 
-test("F6 the figure's red is the title's red, at rest and arriving from the home page", async ({ page }) => {
+test("F6 the figure is three flat tones with no outline and no red, at rest and arriving from the home page", async ({ page }) => {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
   await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
-  expect(await page.evaluate(() => getComputedStyle(document.querySelector(".hero .philo-key")).color), "the title's red").toBe("rgb(232, 30, 76)");
-  expect(await canvasRed(page), "at rest").toBe(TITLE_RED);
+  let c = await canvasColours(page);
+  expect(c.top.slice().sort(), "at rest: the three tones of the tokens").toEqual(TONES.world.slice().sort());
+  expect(c.darkest, "no outline darker than the dark tone").toBeGreaterThanOrEqual(sum(TONES.world[2]));
 
   // arriving from the home, the page opens in the home's set (bleed "before", then "in")
   await page.addInitScript(() => { try { sessionStorage.setItem("nts:from", "home"); } catch {} });
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
   await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
   expect(await page.evaluate(() => document.documentElement.dataset.bleedState), "arriving").toMatch(/^(before|in)$/);
-  expect(await canvasRed(page), "arriving from the home").toBe(TITLE_RED);
+  c = await canvasColours(page);
+  expect(c.top.slice().sort(), "arriving from the home: the home's tones").toEqual(TONES.home.slice().sort());
+  expect(c.darkest, "no outline arriving").toBeGreaterThanOrEqual(sum(TONES.home[2]));
 });
 
-// Paints over the watched window, at most: the cubes move in 0.42 s of every 1.5 s tick,
-// at 30 frames per second, so about 13 paints a tick; at rest nothing is repainted.
+// Paints over the watched window, at most: the cubes move in 1 s of every 3 s tick,
+// at 30 frames per second, so about 30 paints a tick; at rest nothing is repainted.
 const WATCH_MS = 3000;
-const MAX_PAINTS = 40;
+const MAX_PAINTS = 45;
 // Paints at a whole phase in the window, at most: the frame that lands the cubes at the
-// end of each glide, one a tick (two ticks end in 3 s, a third at the edge).
+// end of each glide, one a tick (one tick ends in 3 s, a second at the edge, and a
+// restart's first frame).
 const LANDINGS = 3;
 
 // The figure's paints over the window: all of them, and those made while the cubes

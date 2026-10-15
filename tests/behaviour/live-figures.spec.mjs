@@ -2,25 +2,29 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import { VIEWPORTS, open, scrollTo } from "../helpers/behaviour.mjs";
 
-// The duration is the measurement: at the slowest figure's 15 fps, 600 ms is at least 4 frames.
-const WATCH_MS = 600;
-const POSITIONS = 12;
+// The duration is the measurement: the PHILO figure rests for 2 s of every 3 s tick, so a
+// figure that is moving shows a change in any 3 s (its glide is the last 1 s).
+const WATCH_MS = 3000;
+const POSITIONS = 6;
 
-// Snapshot every figure canvas, wait WATCH_MS, snapshot again; report which changed.
+// Snapshot every figure canvas, watch it for WATCH_MS; report which changed.
 async function watchCanvases(page) {
   return page.evaluate(async (ms) => {
     const frags = [...document.querySelectorAll("[data-nts-fragment]")];
     const win = (f) => f.closest(".world.ecl");
     const grab = () => frags.map((f) => [...f.querySelectorAll("canvas")].map((c) => c.toDataURL()).join("|"));
     const openBefore = frags.map((f) => win(f).classList.contains("is-open"));
-    const a = grab();
-    await new Promise((r) => setTimeout(r, ms));
-    const b = grab();
+    // every 100 ms: the PHILO cubes look alike before and after a whole tick
+    const a = grab(), changedAt = frags.map(() => false);
+    for (let t = 0; t < ms; t += 100) {
+      await new Promise((r) => setTimeout(r, 100));
+      grab().forEach((g, i) => { if (g !== a[i]) changedAt[i] = true; });
+    }
     const openAfter = frags.map((f) => win(f).classList.contains("is-open"));
     return frags.map((f, i) => ({
       world: f.getAttribute("data-nts-fragment"),
       canvases: f.querySelectorAll("canvas").length,
-      changed: a[i] !== b[i],
+      changed: changedAt[i],
       closed: !openBefore[i] && !openAfter[i],
     }));
   }, WATCH_MS);
@@ -29,6 +33,7 @@ async function watchCanvases(page) {
 for (const vp of VIEWPORTS) {
   test.describe(`live figures at ${vp.name}`, () => {
     test.use({ viewport: { width: vp.width, height: vp.height } });
+    test.setTimeout(90_000);
 
     test("B6 at most one figure moves, none before its window is open, one when it is", async ({ page, settle }) => {
       await open(page);

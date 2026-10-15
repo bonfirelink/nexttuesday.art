@@ -26,14 +26,17 @@
   --w-deep: #a6a7b2;
   --philo-shadow: #2b2d3e;
   --philo-off: 4px;
-  --penrose-ink: #2b2d3e;
-  --penrose-cut: var(--philo-red-key);
+  --penrose-top: #f5f5f7;
+  --penrose-side: #a6a7b2;
+  --penrose-dark: #53566b;
   --penrose-ground: #e6e6e8;
   --plate: .16;
   color-scheme: light;
 }
 html[data-bleed-state="before"] [data-world="philo"], html[data-bleed-state="in"] .nts-bleed-old {
-  --penrose-ink: var(--pal-ink);
+  --penrose-top: #f7f1e4;
+  --penrose-side: #b9b1a3;
+  --penrose-dark: #67625a;
   --penrose-ground: var(--pal-beige);
 }
 

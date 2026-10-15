@@ -21,8 +21,8 @@ const WORLDS = {
   },
   philo: {
     path: "/not-not-philo/", host: ".nts-penrose", ready: ".nts-penrose.is-live",
-    // the cubes rest between steps, one every 1.5 s: watch for longer than a step
-    beat: 1700,
+    // the cubes rest between steps, one every 3 s: watch for longer than a tick
+    beat: 3200,
     snap: () => document.querySelector(".nts-penrose canvas").toDataURL(),
     points: (pixelPoints) => pixelPoints(document.querySelector(".nts-penrose canvas"), document.querySelector(".nts-penrose")),
   },
@@ -67,9 +67,13 @@ for (const [name, W] of Object.entries(WORLDS)) {
     });
     const still = async (page) => {
       await wait(page, 200);
-      const a = await page.evaluate(W.snap);
-      await wait(page, W.beat || 700);
-      return a === (await page.evaluate(W.snap));
+      // every snapshot over the beat: the cubes look alike before and after a whole tick
+      const first = await page.evaluate(W.snap);
+      for (let t = 0; t < (W.beat || 700); t += 100) {
+        await wait(page, 100);
+        if ((await page.evaluate(W.snap)) !== first) return false;
+      }
+      return true;
     };
     const captured = (page, [x, y]) => page.evaluate(([x, y, sel]) => {
       const el = document.elementFromPoint(x, y).closest(sel);

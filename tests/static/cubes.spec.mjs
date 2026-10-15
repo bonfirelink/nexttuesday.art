@@ -1,8 +1,8 @@
-// G1-G6. The PHILO figure's model (site/_nts/worlds/cubes.js), in node: the order of
-// overlapping cubes straight on and turned, the red that rides with its cubes, the
-// screw, and a motion with no jumps from one tick to the next.
+// G1-G7. The PHILO figure's model (site/_nts/worlds/cubes.js), in node: the order of
+// overlapping cubes straight on and turned, the three flat tones of every cube alike,
+// the screw, a motion with no jumps from one tick to the next, and the tick's timing.
 import { test, expect } from "../helpers/fixtures.mjs";
-import { cubes, COL, CX, CY, SC, PLACES, restAt, midAt, fronts } from "../helpers/cubes.mjs";
+import { cubes, COL, CX, CY, SC, PLACES, restAt, midAt, fronts, area, overlap } from "../helpers/cubes.mjs";
 
 const mod = (a, n) => ((a % n) + n) % n;
 const layers = (t, yaw = 0, pitch = 0) => cubes.frame(t, yaw, pitch, CX, CY, SC, COL).layers;
@@ -10,8 +10,6 @@ const layers = (t, yaw = 0, pitch = 0) => cubes.frame(t, yaw, pitch, CX, CY, SC,
 const TURNED = { yaw: 0.55, pitch: -0.2 };
 // positions agree to this, in model units, across a tick's end
 const POS_TOL = 1e-6;
-// the faces as axes: x the dark face, y the left, z the top
-const FACE = ["dark", "left", "top"];
 
 test("G1 straight on, the cube further along the loop is in front: the 1934 drawing's twelve overlaps at rest", () => {
   const [L] = layers(restAt(0));
@@ -40,19 +38,25 @@ test("G3 turned, the screw is drawn in true depth: every overlap has the nearer 
   }
 });
 
-test("G4 red rides with its cube on one face for good; every ninth tick it is back on the corners as at the start", () => {
-  const redAt = (t) => cubes.cubesAt(t, false).filter((c) => c.red >= 0).map((c) => `${PLACES[Math.round(c.x) % 9]}:${FACE[c.red]}`).sort();
-  // at the start: the tip's top, the bottom right's dark face, the bottom left's left face
-  expect(redAt(restAt(0))).toEqual(["BL:left", "BR:dark", "T:top"]);
-  for (let k = 0; k < 9; k++) {
-    // tick k: the three red cubes have each moved k places, each still on its face
-    const want = [[0, "top"], [3, "dark"], [6, "left"]].map(([j, f]) => `${PLACES[(j + k) % 9]}:${f}`).sort();
-    expect(redAt(restAt(k)), `tick ${k}`).toEqual(want);
-    expect(redAt(restAt(k + 9)), `tick ${k + 9} repeats tick ${k}`).toEqual(want);
+test("G4 every cube is drawn alike: three flat tones by face (top, side, dark), none red, over a seam core in the top tone", () => {
+  const tones = [COL.top, COL.side, COL.dark];
+  for (const t of [restAt(0), restAt(4), midAt(2)]) {
+    for (const L of layers(t)) {
+      for (const it of L.items) {
+        expect(it.faces.map((f) => f.fill).sort(), `a cube's three faces at t=${t}`).toEqual([...tones].sort());
+        expect(it.coreFill, "the core under the faces").toBe(COL.top);
+        expect(it.core.length, "the core is the cube's shape drawn a hair inside").toBe(it.hull.length);
+        expect(area(it.core), "the core is smaller than the hull").toBeLessThan(area(it.hull));
+        const shared = overlap(it.hull, it.core);
+        expect(shared.length && Math.abs(area(shared) - area(it.core)) < 1e-6, "the core lies inside the hull").toBe(true);
+      }
+    }
   }
-  // mid-glide, each red face is on the cube between its two places
-  const mid = cubes.cubesAt(midAt(0), false).filter((c) => c.red >= 0).map((c) => [c.x.toFixed(2), FACE[c.red]]);
-  expect(mid.map(([x]) => x).sort(), "red cubes halfway along").toEqual(["0.50", "3.50", "6.50"]);
+  // a cube carries no mark of its own: the faces' tones depend on the view only
+  const [L] = layers(restAt(0));
+  const byFace = (it) => it.faces.map((f) => f.fill).join();
+  expect(new Set(L.items.map(byFace)).size, "the same faces on every cube").toBe(1);
+  expect(cubes.cubesAt(restAt(0), false).every((c) => !("red" in c)), "no cube is marked").toBe(true);
 });
 
 test("G5 turned, the screw goes on below: four turns under the top one, fading; straight on, only the nine", () => {
@@ -78,8 +82,43 @@ test("G6 no jumps from one tick to the next: the cubes at a tick's end are the c
         if (!d && screw && c.alpha < 1e-6) continue;
         expect(d, `${screw ? "screw" : "loop"} tick ${k}: a cube at place ${c.h.toFixed(3)} is there at the next tick`).toBeTruthy();
         expect(Math.abs(d.alpha - c.alpha), "same opacity").toBeLessThan(POS_TOL);
-        expect(d.red, "same red").toBe(c.red);
       }
     }
   }
+});
+
+test("G7 the cubes tick every 3 s: at rest for 2 s, then a 1 s glide of one place", () => {
+  expect([cubes.TICK, cubes.GLIDE]).toEqual([3, 1]);
+  for (const k of [0, 3, 8]) {
+    const at = (u) => cubes.phase(k * cubes.TICK + u);
+    expect(at(0), `tick ${k} starts at rest`).toBe(k);
+    expect(at(1.99), "still at rest 2 s in").toBe(k);
+    expect(at(2.5), "halfway through the glide, halfway along").toBeCloseTo(k + 0.5, 6);
+    expect(at(2.999), "the glide lands").toBeCloseTo(k + 1, 2);
+    expect(at(3), "the next tick starts at rest").toBe(k + 1);
+    const p = [2.1, 2.3, 2.5, 2.7, 2.9].map(at);
+    expect(p.every((v, i) => i === 0 || v > p[i - 1]), "the glide only goes forward").toBe(true);
+  }
+});
+
+test("G8 the seam core is filled under the faces of a cube at full opacity, and left out of a fading one", () => {
+  // a canvas that records its fills
+  const fills = (item) => {
+    const out = [];
+    const ctx = {
+      globalAlpha: 1, fillStyle: "", beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, rect() {}, clip() {}, save() {}, restore() {},
+      fill() { out.push({ alpha: this.globalAlpha, style: this.fillStyle }); },
+    };
+    cubes.composite(ctx, { items: [item], over: [[]] });
+    return out;
+  };
+  const [L] = layers(midAt(1), TURNED.yaw, TURNED.pitch);
+  const whole = L.items.find((it) => it.alpha === 1 && it.c.fade === 0), fading = L.items.find((it) => it.alpha < 1);
+  expect(whole && fading, "a mid-glide screw has both whole and fading cubes").toBeTruthy();
+  const a = fills(whole), b = fills(fading);
+  expect(a.length, "core and three faces").toBe(4);
+  expect(a[0].style, "the core first, in the top tone").toBe(whole.coreFill);
+  expect(b.length, "three faces and no core").toBe(3);
+  expect(b.map((f) => f.style).sort(), "the faces' own tones").toEqual(fading.faces.map((f) => f.fill).sort());
+  expect(b.every((f) => f.alpha === fading.alpha), "at the cube's opacity").toBe(true);
 });
