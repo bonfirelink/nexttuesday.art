@@ -101,7 +101,8 @@ for (const path of WORLDS) {
         return out;
       });
       expect(v["--penrose-ink"], "the figure's ink").toBe(t["--pal-ink"]);
-      expect(v["--penrose-cut"], "the figure's cut").toBe(t["--pal-voice"]);
+      const key = await resolve(page, ["var(--philo-red-key)"]);
+      expect(v["--penrose-cut"], "the figure's red is the title's, also on arrival").toBe(key["var(--philo-red-key)"]);
       expect(v["--penrose-ground"], "the figure's ground").toBe(t["--pal-beige"]);
     }
   });

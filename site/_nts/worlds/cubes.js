@@ -1,0 +1,401 @@
+/* NOT NOT PHILO's figure: Reutersvärd's impossible triangle of nine cubes,
+   going round. Every 1.5 s all nine step one place along the loop together.
+
+   Straight on, where two cubes overlap the one further along the loop is in
+   front, all the way round: a cycle no depth order can paint, so a cube
+   painted after one that should cover it is clipped at that cube's edge.
+   Cubes 0, 3 and 6 each carry one red face for good (top, dark, left); every
+   ninth tick they stand on the corners as at the start.
+
+   Turned, the nine are the top turn of an endless staircase (the screw):
+   every cube climbs one place per tick, the one stepping off the top fades
+   out, the one arriving at the tip comes up from the turn below, and the
+   turns underneath fade into the ground. Between 1° and 6° off the straight
+   view the loop's order dissolves into true depth.
+
+   The model is a world of unit steps along x, y and z, seen isometrically,
+   turned 30° so one edge is level and drawn mirrored (the 1934 drawing's way
+   round); y is up on screen. Pure geometry and painting, no DOM: the clock,
+   the size and the interaction come from outside. A classic script: in the
+   browser it sets window.NTS.cubes, and where there is a module object it
+   also fills module.exports, so node can run it. */
+(function () {
+  "use strict";
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+  const add = (a, b, k = 1) => [a[0] + k * b[0], a[1] + k * b[1], a[2] + k * b[2]];
+  const lerp = (a, b, f) => add(a, add(b, a, -1), f);
+  /* the rotation by angle t about unit axis ax */
+  const axisAngle = (ax, t) => {
+    const c = Math.cos(t), s = Math.sin(t), u = 1 - c, [x, y, z] = ax;
+    return [
+      [c + x * x * u, x * y * u - z * s, x * z * u + y * s],
+      [y * x * u + z * s, c + y * y * u, y * z * u - x * s],
+      [z * x * u - y * s, z * y * u + x * s, c + z * z * u],
+    ];
+  };
+  const mm = (A, B) => A.map((r) => [0, 1, 2].map((j) => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j]));
+  const tx = (M, p) => [dot(M[0], p), dot(M[1], p), dot(M[2], p)];
+  const clamp01 = (x) => Math.max(0, Math.min(1, x));
+  const ease = (x) => 0.5 - 0.5 * Math.cos(Math.PI * clamp01(x));
+  const smooth = (x) => { x = clamp01(x); return x * x * (3 - 2 * x); };
+  const mod = (a, n) => ((a % n) + n) % n;
+
+  /* a cube's edge, in steps of the staircase: neighbours overlap by about a third */
+  const CUBE = 0.7;
+  /* the view: isometric, turned 30°; TOWARD points at the viewer */
+  const TOWARD = norm([1, 1, 1]), UPV = norm(add([0, 0, 1], TOWARD, -TOWARD[2])), RV = cross(UPV, TOWARD);
+  const C30 = Math.cos(Math.PI / 6), S30 = Math.sin(Math.PI / 6);
+  const RIGHT = add(RV.map((v) => v * C30), UPV, -S30), UP = add(RV.map((v) => v * S30), UPV, C30);
+  const cam = (p) => [dot(p, RIGHT), dot(p, UP), dot(p, TOWARD)];
+  /* light from above in the picture: of the faces in view, the one turned most
+     down is ink, the other two the ground */
+  const LIGHT = norm([-0.15, 0.85, 0.5]);
+
+  /* The staircase: place j of the loop (0 the tip, 1-2 the right side, 3 a
+     corner, 4-5 the bottom, 6 a corner, 7-8 the left side) is one step along
+     x, y or z from the last, climbing toward the viewer. Seen straight on,
+     place 9 stands exactly in front of place 0, which closes the loop; TURN is
+     that step from 0 to 9, one whole turn of the screw. */
+  const TURN = [3, 3, 3];
+  function base(j) {
+    const leg = Math.floor(j / 3), i = j % 3;
+    return leg === 0 ? [i, 0, 0] : leg === 1 ? [3, i, 0] : leg === 2 ? [3, 3, i] : TURN;
+  }
+  /* place h on the endless staircase, any number of turns up or down */
+  function helix(h) {
+    const turns = Math.floor(h / 9), j = h - 9 * turns, i = Math.floor(j);
+    return add(lerp(base(i), base(i + 1), j - i), TURN, turns);
+  }
+  /* straight on, the cube crossing from place 8 to the tip goes straight to place 0 */
+  const loopAt = (h) => (h < 8 ? helix(h) : lerp(base(8), base(0), h - 8));
+
+  /* a cube's corners and faces (axis k, side ±1, normal, outline), in camera units */
+  const SHAPE = (() => {
+    const half = (bit) => (bit ? 0.5 : -0.5);
+    const corners = [];
+    for (let m = 0; m < 8; m++) corners.push(cam([half(m & 1), half(m & 2), half(m & 4)]));
+    const faces = [];
+    for (let k = 0; k < 3; k++) for (const side of [1, -1]) {
+      const normal = [0, 0, 0]; normal[k] = side;
+      const i1 = (k + 1) % 3, i2 = (k + 2) % 3;
+      const at = (u, v) => { const p = [0, 0, 0]; p[k] = side * 0.5; p[i1] = u; p[i2] = v; return cam(p); };
+      faces.push({ k, side, n: cam(normal), quad: [at(-0.5, -0.5), at(0.5, -0.5), at(0.5, 0.5), at(-0.5, 0.5)] });
+    }
+    return { corners, faces, axes: [[1, 0, 0], [0, 1, 0], [0, 0, 1]].map(cam) };
+  })();
+
+  /* the convex hull of points in the plane (monotone chain) */
+  function hull(pts) {
+    pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const turn = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const chain = (list) => {
+      const h = [];
+      for (const p of list) {
+        while (h.length > 1 && turn(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
+        h.push(p);
+      }
+      h.pop();
+      return h;
+    };
+    return chain(pts).concat(chain(pts.slice().reverse()));
+  }
+  /* the pivot: the closed picture's centre, halfway up the top turn; reach: its
+     furthest corner from the centre, in model units */
+  const PIVOT = (() => {
+    const pts = [];
+    for (let j = 0; j < 9; j++) {
+      const c = cam(base(j));
+      for (const q of SHAPE.corners) pts.push([c[0] + CUBE * q[0], c[1] + CUBE * q[1]]);
+    }
+    const H = hull(pts);
+    let area2 = 0, gx = 0, gy = 0;
+    H.forEach((p, i) => {
+      const q = H[(i + 1) % H.length], k = p[0] * q[1] - q[0] * p[1];
+      area2 += k; gx += (p[0] + q[0]) * k; gy += (p[1] + q[1]) * k;
+    });
+    gx /= 3 * area2; gy /= 3 * area2;
+    let reach = 0;
+    for (const p of pts) reach = Math.max(reach, Math.hypot(p[0] - gx, p[1] - gy));
+    return { g: [gx, gy, 4 / Math.sqrt(3)], reach };
+  })();
+  /* a convex polygon with every edge moved out by d (each corner along the
+     sum of its two edges' outward normals, scaled to keep the edges d out) */
+  function outset(poly, d) {
+    const n = poly.length;
+    const c = poly.reduce((s, p) => [s[0] + p[0] / n, s[1] + p[1] / n], [0, 0]);
+    const outward = (a, b) => {
+      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, e = [(b[1] - a[1]) / l, (a[0] - b[0]) / l];
+      const mid = [(a[0] + b[0]) / 2 - c[0], (a[1] + b[1]) / 2 - c[1]];
+      return e[0] * mid[0] + e[1] * mid[1] < 0 ? [-e[0], -e[1]] : e;
+    };
+    return poly.map((p, i) => {
+      const a = outward(poly[(i + n - 1) % n], p), b = outward(p, poly[(i + 1) % n]);
+      const k = d / (1 + a[0] * b[0] + a[1] * b[1]);
+      return [p[0] + k * (a[0] + b[0]), p[1] + k * (a[1] + b[1])];
+    });
+  }
+
+  /* ---------- the motion ---------- */
+  /* a tick every TICK s, all nine moving one place in its last GLIDE s */
+  const TICK = 1.5, GLIDE = 0.42;
+  /* places moved by time t: a whole number while the cubes rest */
+  function phase(t) {
+    const k = Math.floor(t / TICK), u = t - k * TICK;
+    return k + ease((u - (TICK - GLIDE)) / GLIDE);
+  }
+  /* the red face each red cube carries, by the cube's number: top, dark, left */
+  const CARRY = { 0: 2, 3: 0, 6: 1 };
+  /* turns of the screw drawn below the top one, and how fast they fade */
+  const TURNS = 4, FADE_POW = 0.8;
+
+  /* The cubes at time t. Place h runs 0 to 9 on the top turn and below 0 on
+     the turns underneath; in each tick a cube moves from h to h + 1, and at the
+     next tick places are counted again from the top. A cube's number, which
+     carries its red, stays with it. Straight on only the top turn is drawn,
+     the crossing cube on loopAt's path; turned, the screw. */
+  function cubesAt(t, screw) {
+    const p = phase(t), k = Math.floor(p), s = p - k, out = [];
+    for (let m = screw ? -9 * TURNS : 0; m <= 8; m++) {
+      const h = m + s, number = mod(m - k, 9);
+      let alpha = 1, fade = 0;
+      if (screw && h > 8) alpha = 1 - (h - 8);
+      if (h < -9 * TURNS + 1) alpha = h + 9 * TURNS;
+      if (h < 0) fade = clamp01(-h / (9 * TURNS + 1)) ** FADE_POW;
+      const red = CARRY[number] === undefined ? -1 : CARRY[number];
+      out.push({ h, x: mod(h, 9), P: screw ? helix(h) : loopAt(h), red, alpha, fade });
+    }
+    return out.filter((c) => c.alpha > 0.01 && c.fade < 0.985);
+  }
+
+  /* ---------- colours ---------- */
+  const parse = (c) => {
+    c = String(c).trim();
+    let m = /^#([0-9a-f]{6})$/i.exec(c);
+    if (m) return [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+    m = /^#([0-9a-f]{3})$/i.exec(c);
+    if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
+    m = c.match(/[\d.]+/g);
+    return m && m.length >= 3 ? m.slice(0, 3).map(Number) : null;
+  };
+  /* ink, cut (the red) and ground, thinned toward the ground in 24 steps; a
+     colour at full strength is passed on as given */
+  const palettes = new WeakMap();
+  function shader(col) {
+    let shade = palettes.get(col);
+    if (!shade) {
+      const g = parse(col.ground), cache = new Map();
+      shade = (which, f) => {
+        const q = Math.round(f * 24);
+        if (!q || !g) return col[which];
+        const key = which + q;
+        let v = cache.get(key);
+        if (!v) {
+          const a = parse(col[which]) || g;
+          v = `rgb(${a.map((x, i) => Math.round(x + ((g[i] - x) * q) / 24)).join(",")})`;
+          cache.set(key, v);
+        }
+        return v;
+      };
+      palettes.set(col, shade);
+    }
+    return shade;
+  }
+
+  /* ---------- the drawing ---------- */
+  /* which of two cubes is in front by a plane between them: 0, 1, or -1 when none parts them */
+  function apart(pa, pb, toward) {
+    for (let k = 0; k < 3; k++) {
+      if (pa[k] + CUBE / 2 <= pb[k] - CUBE / 2 + 1e-9) return toward[k] > 0 ? 1 : 0;
+      if (pb[k] + CUBE / 2 <= pa[k] - CUBE / 2 + 1e-9) return toward[k] > 0 ? 0 : 1;
+    }
+    return -1;
+  }
+  /* a polygon's bounding box, [x0, x1, y0, y1] */
+  function bounds(poly) {
+    const xs = poly.map((p) => p[0]), ys = poly.map((p) => p[1]);
+    return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  }
+  const boxesMeet = (a, b) => !(a[1] < b[0] || b[1] < a[0] || a[3] < b[2] || b[3] < a[2]);
+
+  /* The cubes in px, and for each cube the cubes drawn over it: by the loop
+     ("loop", straight on) or by depth ("depth", turned). */
+  function layout(cubes, M, cx, cy, scale, rule, shade, red) {
+    const toward = SHAPE.axes.map((e) => dot(M[2], e));
+    const corners = SHAPE.corners.map((p) => tx(M, p));
+    const normals = SHAPE.faces.map((f) => tx(M, f.n));
+    const quads = SHAPE.faces.map((f) => f.quad.map((p) => tx(M, p)));
+    /* the faces in view, lightest first; the last one is the dark one */
+    const shown = [];
+    SHAPE.faces.forEach((f, fi) => {
+      const n = normals[fi];
+      if (n[2] > 0.02) shown.push([fi, dot([-n[0], n[1], n[2]], LIGHT)]);
+    });
+    shown.sort((a, b) => b[1] - a[1]);
+    const dark = shown.length ? shown[shown.length - 1][0] : -1;
+    const items = cubes.map((c) => {
+      const v = tx(M, add(cam(c.P), PIVOT.g, -1));
+      const toPx = (p) => [cx - (v[0] + CUBE * p[0]) * scale, cy - (v[1] + CUBE * p[1]) * scale];
+      const faces = shown.map(([fi]) => {
+        const f = SHAPE.faces[fi];
+        return { poly: quads[fi].map(toPx), fill: shade(fi === dark ? "ink" : "ground", c.fade), red: red && f.side > 0 && f.k === c.red };
+      });
+      return {
+        c, z: v[2], brk: rule === "loop" ? c.x : v[2], alpha: c.alpha,
+        ink: shade("ink", c.fade), redFill: shade("cut", c.fade),
+        hull: hull(corners.map(toPx)), faces,
+      };
+    });
+    const boxes = items.map((it) => bounds(it.hull));
+    const over = items.map(() => []);
+    for (let a = 0; a < items.length; a++) for (let b = a + 1; b < items.length; b++) {
+      if (!boxesMeet(boxes[a], boxes[b])) continue;
+      let top;
+      if (rule === "loop") top = mod(cubes[b].x - cubes[a].x, 9) < 4.5 ? b : a;
+      else {
+        const o = apart(cubes[a].P, cubes[b].P, toward);
+        top = o === 0 ? a : o === 1 ? b : items[a].z > items[b].z ? a : b;
+      }
+      over[top === a ? b : a].push(top);
+    }
+    return { items, over };
+  }
+
+  /* The order to paint in: back to front where the order allows; where it goes
+     round in a loop, it is broken at the cube with the lowest brk (straight
+     on, the cube nearest the tip). */
+  function paintOrder({ items, over }) {
+    const n = items.length, under = items.map(() => []);
+    over.forEach((tops, b) => tops.forEach((t) => under[t].push(b)));
+    const done = new Uint8Array(n), order = [];
+    const lowest = (ok, key) => {
+      let pick = -1, best = Infinity;
+      for (let i = 0; i < n; i++) if (!done[i] && ok(i) && items[i][key] < best) { pick = i; best = items[i][key]; }
+      return pick;
+    };
+    while (order.length < n) {
+      let pick = lowest((i) => under[i].every((j) => done[j]), "z");
+      if (pick < 0) pick = lowest(() => true, "brk");
+      done[pick] = 1; order.push(pick);
+    }
+    return order;
+  }
+
+  /* Paints cubes over each other in paintOrder. A cube painted after one that
+     should cover it (where a loop was broken) is clipped at that cube's edge,
+     and the covering cube's outline is drawn again on top, but not over cubes
+     already painted that cover it. ids paints each cube flat in its own
+     colour, rgb(index + 1, 90, 40). */
+  function composite(ctx, layer, lw, ids) {
+    const { items, over } = layer, painted = new Uint8Array(items.length);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    const trace = (poly) => {
+      ctx.beginPath();
+      poly.forEach((p, k) => ctx[k ? "lineTo" : "moveTo"](p[0], p[1]));
+      ctx.closePath();
+    };
+    const clipOut = (poly) => {
+      ctx.beginPath();
+      ctx.rect(-1e4, -1e4, 2e4, 2e4);
+      poly.forEach((p, k) => ctx[k ? "lineTo" : "moveTo"](p[0], p[1]));
+      ctx.closePath();
+      ctx.clip("evenodd");
+    };
+    const outline = (it) => {
+      ctx.globalAlpha = it.alpha; ctx.lineWidth = lw; ctx.strokeStyle = it.ink;
+      for (const f of it.faces) { trace(f.poly); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    };
+    for (const i of paintOrder(layer)) {
+      const it = items[i], covers = over[i].filter((j) => painted[j]);
+      if (covers.length) { ctx.save(); for (const j of covers) clipOut(items[j].hull); }
+      if (ids) { trace(it.hull); ctx.fillStyle = `rgb(${i + 1},90,40)`; ctx.fill(); }
+      else {
+        ctx.globalAlpha = it.alpha;
+        for (const f of it.faces) { trace(f.poly); ctx.fillStyle = f.red ? it.redFill : f.fill; ctx.fill(); }
+        ctx.globalAlpha = 1;
+        outline(it);
+      }
+      if (covers.length) {
+        ctx.restore();
+        if (!ids) for (const j of covers) {
+          ctx.save();
+          trace(outset(it.hull, lw)); ctx.clip();
+          for (const k of over[j]) if (k !== i && painted[k]) clipOut(items[k].hull);
+          outline(items[j]);
+          ctx.restore();
+        }
+      }
+      painted[i] = 1;
+    }
+  }
+
+  /* how far the drawing has gone from the loop's order to true depth, by degrees off the straight view */
+  const handover = (deg) => smooth((deg - 1) / (6 - 1));
+  const view = (yaw, pitch) => mm(axisAngle([1, 0, 0], pitch), axisAngle([0, 1, 0], -yaw));
+  const degOff = (M) => (Math.acos(Math.min(1, Math.abs(M[2][2]))) * 180) / Math.PI;
+  /* turned, the figure draws back, so more of the screw fits around it */
+  const ZOOM = 1;
+
+  /* What paint draws at time t and a turn: the straight-on layer (the top
+     turn in the loop's order) and the turned one (the screw in depth), each
+     with its weight, and the outline's width. */
+  function frame(t, yaw, pitch, cx, cy, sc, col, opts = {}) {
+    const M = view(yaw, pitch), deg = degOff(M), w = handover(deg), shade = shader(col), red = !opts.ids;
+    const scale = sc / (1 + ZOOM * Math.sin((deg * Math.PI) / 180)), layers = [];
+    if (w < 1) layers.push({ weight: 1, ...layout(cubesAt(t, false), M, cx, cy, scale, "loop", shade, red) });
+    if (w > 0) layers.push({ weight: w, ...layout(cubesAt(t, true), M, cx, cy, scale, "depth", shade, red) });
+    return { layers, lw: Math.max(0.6, 0.028 * CUBE * scale) };
+  }
+
+  /* A second canvas per target, for the turned layer while it dissolves in;
+     emptied (0 x 0) once the dissolve is over. */
+  const spare = new WeakMap();
+  function spareFor(ctx) {
+    let s = spare.get(ctx);
+    if (!s) { s = ctx.canvas.ownerDocument.createElement("canvas").getContext("2d"); spare.set(ctx, s); }
+    if (s.canvas.width !== ctx.canvas.width || s.canvas.height !== ctx.canvas.height) {
+      s.canvas.width = ctx.canvas.width; s.canvas.height = ctx.canvas.height;
+    }
+    return s;
+  }
+  function releaseSpare(ctx) {
+    const s = spare.get(ctx);
+    if (s) { s.canvas.width = s.canvas.height = 0; spare.delete(ctx); }
+  }
+
+  /* Paints the figure at clock t (seconds), turned by yaw/pitch from the
+     straight view, with the closed picture's centre at (cx, cy) and sc px per
+     model unit, onto ctx (its current transform). col: { ink, cut, ground }.
+     Returns the hulls of the cubes drawn, in model units about the centre, y
+     up (what a press is tested against). */
+  function paint(ctx, col, t, yaw, pitch, cx, cy, sc, opts = {}) {
+    const { layers, lw } = frame(t, yaw, pitch, cx, cy, sc, col, opts);
+    const [first, second] = layers;
+    composite(ctx, first, lw, opts.ids);
+    if (second) {
+      const back = spareFor(ctx);
+      back.setTransform(1, 0, 0, 1, 0, 0);
+      back.clearRect(0, 0, back.canvas.width, back.canvas.height);
+      back.setTransform(ctx.getTransform());
+      composite(back, second, lw, opts.ids);
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = second.weight;
+      ctx.drawImage(back.canvas, 0, 0);
+      ctx.restore();
+    } else releaseSpare(ctx);
+    const top = second && second.weight >= 0.5 ? second : first;
+    return top.items.map((it) => ({ poly: it.hull.map(([x, y]) => [(x - cx) / sc, (cy - y) / sc]) }));
+  }
+
+  /* REST: where the rest pose's furthest point sits from the centre of the
+     figure's box, as a share of the box's half-size, on the page entity and in
+     the home's fragment. The live canvas and the baked stills both size the
+     rest pose from REACH and REST, so the still and the first live frame match. */
+  const REST = { page: 0.952, fragment: 0.982 };
+  const api = { paint, frame, composite, cubesAt, phase, REACH: PIVOT.reach, REST, TICK, GLIDE, TURNS };
+  if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.cubes = api; }
+  if (typeof module !== "undefined") module.exports = api;
+})();

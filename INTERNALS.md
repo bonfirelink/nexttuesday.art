@@ -41,7 +41,7 @@ site/              what GitHub Pages serves (the `site` branch, see Publishing)
                    (see Adding an initiative)
     worlds/        one kit per initiative
       embers.css   embers.js (the hearth; also the fragment)
-      philo.css    penrose.js (geometry) + philo.js (the entity; also the fragment)
+      philo.css    cubes.js (the figure) + philo.js (the entity; also the fragment)
       intersect.css ascii.js (the ASCII solid; also the fragment)
   <old>/…          redirect stubs for URLs of earlier drafts (see Redirects)
 tools/
@@ -118,9 +118,10 @@ a world; the ledger rows use `data-of` for that reason.
 
 Worlds: EMBERS night `#0b0709`, fire `#e51d47`, ember
 `#f2591b`, cream `#ffe9d0`; NOT NOT PHILO ground `#e6e6e8`, ink `#2b2d3e`,
-red `#e5174a`, key red `#e81e4c` (`--philo-red-key`, only for `.philo-key`:
-3:1 on the grey and on the word's own charcoal plate; `--philo-red` stays,
-since white on the bar needs it that dark); INTERSECT black `#0a0a0a`,
+red `#e5174a`, key red `#e81e4c` (`--philo-red-key`, for `.philo-key` and
+the figure's red, `--penrose-cut`: 3:1 on the grey and on the word's own
+charcoal plate; `--philo-red` stays, since white on the bar needs it that
+dark); INTERSECT black `#0a0a0a`,
 phosphor `#e9e2cf`, fire-hi `#ff3b63`.
 
 The colour code, `--pal-*` by role and `--code-*` by meaning;
@@ -431,8 +432,9 @@ behave the same.
 - The before state is CSS: `html[data-bleed-state="before"] [data-world]`
   reads the NTS `--w-*` tokens (section 11 of `nts.css`), and each kit
   undoes what else its world brings (`--embers-glow`, `--hearth-base`, the
-  penrose colours, `--grain`). The same rules apply to `.nts-bleed-old`
-  while the state is `in` (not the grain, below). The root itself
+  penrose ink and ground (its red stays the title's), `--grain`). The same
+  rules apply to `.nts-bleed-old` while the state is `in` (not the grain,
+  below). The root itself
   (`html`) reads the NTS set while the state is `before` or `in`: its ground
   is what the arrival's view transition lies on, and a world's dark
   there would show through any see-through moment on the whole page but the
@@ -580,14 +582,61 @@ backing-store budget that lowers the resolution below the DPR on large
 screens; the hearth also ray-tests only inside the solid's circumcircle
 and strokes each colour as one path of chained polylines.
 
-NOT NOT PHILO (`worlds/philo.css`, `worlds/penrose.js`, `worlds/philo.js`);
+NOT NOT PHILO (`worlds/philo.css`, `worlds/cubes.js`, `worlds/philo.js`);
 its hero lines are laid out as World hero text says.
 Classes: `.philo-bar` (the red label with the misregistered charcoal plate;
 `.sm`, `.caps`), `.philo-key` (the red extra-bold key word),
 `.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
 `<div class="nts-penrose" role="img" aria-label="…"><!-- nts:still philo --><!-- /nts:still --></div>`;
 philo.js appends a canvas and hides the still. Colours from
-`--penrose-ink`, `--penrose-cut`, `--penrose-ground`.
+`--penrose-ink`, `--penrose-cut` (the title's red, `--philo-red-key`, on
+arrival from the home too), `--penrose-ground`. The host class and these
+tokens keep the names they had for the bar triangle: they are internal, and
+renaming them would touch every page copy and palette test.
+
+The figure (`cubes.js`) is Reutersvärd's impossible triangle of nine
+cubes, going round. The model is a staircase of unit steps along x, y and
+z, climbing toward the viewer and seen isometrically (drawn mirrored, the
+1934 drawing's way round), so that seen straight on place 9 stands exactly
+in front of place 0: that is what closes the loop.
+
+- **The loop's order.** Straight on, where two cubes overlap the one
+  further along the loop is in front (each cube covers the next, and at
+  each corner the cube after it covers the one before). No back-to-front
+  order paints a cycle, so the compositor breaks it at the cube nearest the
+  tip, clips any cube painted after one that should cover it at that cube's
+  edge, and draws the covering cube's outline again on top (not over cubes
+  already painted that cover it). Because all nine move together, no pair's
+  order changes during a tick, so nothing pops.
+- **The motion.** Every 1.5 s all nine step one place together (the last
+  0.42 s of a tick); straight on, the cube crossing from place 8 to the tip
+  goes straight to place 0. Cubes 0, 3 and 6 each carry one red face for
+  good (top, dark, left), so the red rides round and every ninth tick is
+  the starting picture again.
+- **The screw, turned.** The nine are the top turn of an endless staircase
+  (`TURNS` turns drawn below, fading into the ground): every cube climbs a
+  place per tick, the one stepping off the top fades out by opacity, and
+  the one arriving at the tip comes up from the turn below. Places are
+  counted again from the top at each tick, so the screw itself stays put.
+  The figure draws back as it turns (scale 1 / (1 + sin θ)), so more of the
+  screw fits.
+- **The handover.** Between 1° and 6° off the straight view the turned
+  layer (the screw in true depth, by a plane between each overlapping pair)
+  is drawn over the straight one (the top turn in the loop's order) with
+  growing opacity, on a second canvas; past 6° only the screw is drawn.
+  Straight on only the nine are drawn, so the closed picture is the same at
+  every rest pose.
+
+philo.js repaints only when the drawing would change: a frame repaints when
+the motion's phase or the turn has changed, or while a bleed-in twin is open;
+anything else that invalidates the canvas (a resize, new colours, a restart
+after the loop stopped) goes through `draw`/`redraw` or clears the record of
+the last frame.
+
+`paint()` returns the drawn cubes' outlines, which philo.js hit-tests a
+press against; `frame()` and `composite()` are what `tools/gen-stills.mjs`
+records into the scripts-off still. `tests/static/cubes.spec.mjs` checks
+the model and `tests/behaviour/philo-figure.spec.mjs` the drawing.
 
 INTERSECT (`worlds/intersect.css`, `worlds/ascii.js`). The world sets IM
 Fell as the body and heading face and the mono for labels; the title is
@@ -747,11 +796,15 @@ worlds, bodies and code tokens (`tests/helpers/registry.mjs`).
 
 Generated files, and how to regenerate them: `sigils.svg` from
 `tools/gen-sigils.mjs`; `parts/emblem-*` from `tools/gen-emblem.mjs`; `parts/still-*` from `tools/gen-stills.mjs` (it
-requires `penrose.js` and `ascii.js` through node, which is why both
-export `module.exports`). PHILO's stills are the live canvas's first frame as well: `penrose.REACH` and
-`penrose.REST` (page and fragment) size both `philo.js` and the bake, `still-philo.svg` for the page and
-`still-philo-sm.svg` for the home's fragment (sync picks `<world>-sm` for a fragment when it exists), and the
-fragment's `.still` fills the host as the canvas does (`tests/layout/philo-still.spec.mjs`).
+requires `cubes.js` and `ascii.js` through node, which is why both
+export `module.exports`; it records cubes.js's canvas drawing as SVG). PHILO's
+stills are the live canvas's first frame: `cubes.REACH` and `cubes.REST`
+(page and fragment) size both `philo.js` and the bake, `still-philo.svg` for
+the page and `still-philo-sm.svg` for the home's fragment (sync picks
+`<world>-sm` for a fragment when it exists), and the fragment's `.still`
+fills the host as the canvas does (`tests/layout/philo-still.spec.mjs`).
+`node tools/gen-stills.mjs --check` exits 1 if a committed still is stale,
+which `tests/static/stills.spec.mjs` runs.
 
 ## Redirects
 

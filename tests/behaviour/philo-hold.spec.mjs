@@ -5,6 +5,10 @@ test.use({ viewport: { width: 390, height: 844 } });
 
 const grab = (page) => page.evaluate(() => document.querySelector(".nts-penrose canvas").toDataURL());
 const wait = (page, ms) => page.evaluate((ms) => new Promise((r) => setTimeout(r, ms)), ms);
+// The cubes rest between steps, one every 1.5 s: watch for longer than a step.
+const BEAT_MS = 1700;
+// The tip cube, which a cube always fills at rest: centred, this share of the host's height down.
+const TIP_Y = 0.17;
 
 test("H1 philo figure: still while pressed, moving again after release", async ({ page }) => {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
@@ -12,14 +16,14 @@ test("H1 philo figure: still while pressed, moving again after release", async (
   const host = page.locator(".nts-penrose");
   await host.scrollIntoViewIfNeeded();
   const box = await host.boundingBox();
-  const x = box.x + box.width / 2, y = box.y + box.height / 2;
+  const x = box.x + box.width / 2, y = box.y + box.height * TIP_Y;
 
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x + 20, y + 6, { steps: 4 });
   await wait(page, 200);
   const a = await grab(page);
-  await wait(page, 800);
+  await wait(page, BEAT_MS);
   const b = await grab(page);
   expect(b, "pose while held").toBe(a);
 
@@ -30,6 +34,6 @@ test("H1 philo figure: still while pressed, moving again after release", async (
 
   await page.mouse.up();
   const c = await grab(page);
-  await wait(page, 800);
+  await wait(page, BEAT_MS);
   expect(await grab(page), "moves after release").not.toBe(c);
 });

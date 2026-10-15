@@ -11,13 +11,13 @@ const FRAGMENT_CENTROID_TOL = 1.5;
 // Ratios of two measured lengths, each good to a pixel on ~300-800 px.
 const RATIO_TOL = 0.02;
 
-// The drawn bounding box's width over the ring's diameter in the approved state (c4260c1:
-// the figure's longest side about as long as the ring, as on the other worlds). The figure's
-// size comes from the hero box, which is the ring plus a fixed margin, so the ratio drifts
-// a little with the viewport; one recorded value per width.
-const HERO_RATIO = { 390: 1.03, 1024: 1.011, 1440: 0.999 };
+// The drawn bounding box's width over the ring's diameter, recorded for the nine cubes at
+// rest (the figure's longest side about as long as the ring, as on the other worlds). The
+// figure's size comes from the hero box, which is the ring plus a fixed margin, so the ratio
+// drifts a little with the viewport; one recorded value per width.
+const HERO_RATIO = { 390: 1.011, 1024: 0.989, 1440: 0.976 };
 // The same on the home orb (the other worlds' figures reach about 0.92 of it).
-const ORB_RATIO = 0.94;
+const ORB_RATIO = 0.923;
 
 test.use({ reducedMotion: "reduce" });
 

@@ -16,9 +16,11 @@ const CASES = [
 const stillSize = (sel) => {
   const host = document.querySelector(sel), hr = host.getBoundingClientRect();
   let a = 1e9, b = -1e9, t = 1e9, u = -1e9;
-  host.querySelectorAll("svg polygon").forEach((e) => {
-    const r = e.getBoundingClientRect();
-    a = Math.min(a, r.left); b = Math.max(b, r.right); t = Math.min(t, r.top); u = Math.max(u, r.bottom);
+  // the still's shapes; an outline reaches half its stroke past its path, as the canvas's does
+  host.querySelectorAll("svg path, svg polygon").forEach((e) => {
+    const r = e.getBoundingClientRect(), svg = e.ownerSVGElement;
+    const half = ((parseFloat(e.getAttribute("stroke-width")) || 0) / 2) * (svg.getBoundingClientRect().width / svg.viewBox.baseVal.width);
+    a = Math.min(a, r.left - half); b = Math.max(b, r.right + half); t = Math.min(t, r.top - half); u = Math.max(u, r.bottom + half);
   });
   const k = host.clientWidth / hr.width;
   return { w: (b - a) * k, h: (u - t) * k };
