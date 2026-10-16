@@ -30,8 +30,7 @@ from the working branch (`main`). How the code fits:
 ## Previews and checks
 
 - Previews: each checkout's preview is the site served from it; compare the working branch's preview with the change's.
-- The test suite runs Chromium only: list what to check on an iPhone.
-- A WebKit-only fix is checked on the live site from an iPhone, so such a fix is published to be checked, only when a publish is requested.
+- The test suite runs Chromium only: when a change may behave differently on a phone (WebKit rendering, touch), say what to check on an iPhone, on the change's preview.
 - Live checks of nexttuesday.art need an address pin: see INTERNALS.md "Publishing".
 
 ## Agents

@@ -658,6 +658,17 @@ records into the scripts-off still (flat filled paths, cut where a
 cube is clipped; `--check` says when a committed still is stale). `tests/static/cubes.spec.mjs` checks
 the model and `tests/behaviour/philo-figure.spec.mjs` the drawing.
 
+The draw gate runs at 30 fps on the page and in the home's fragment, with 3 ms
+of slack (`1000 / FPS - 3`): frame timestamps jitter, and a draw due a hair
+early would slip a whole frame and land at an uneven 66 or 83 ms.
+`tests/perf/philo-glide.spec.mjs` holds the cadence (even gaps in the glide, no
+draw in the hold). In the home's orb the loop is sized by `REST.fragment`
+(1.17): its widest span is about 1.09 orb widths, as large against the orb as
+the other worlds' figures, so the round edge cuts it as it cuts theirs. Behind
+it, the fragment's background is the hero's ring plate (the same 9 px pitch
+and `--plate` weight) centred on the canvas, which is the figure's centre.
+`tests/layout/home-bands.spec.mjs` checks both.
+
 INTERSECT (`worlds/intersect.css`, `worlds/ascii.js`). The world sets IM
 Fell as the body and heading face and the mono for labels; the title is
 IM Fell behind a mono `>` prompt (the hero lines: World hero text). Classes: `.corr` (the correspondence
@@ -709,7 +720,7 @@ One element per world, anywhere, any size (they are square):
 
 ```html
 <div data-nts-fragment="embers"></div>      <!-- the hearth, small, 24fps, no embers, not interactive -->
-<div data-nts-fragment="philo"></div>       <!-- the impossible triangle, 15fps -->
+<div data-nts-fragment="philo"></div>       <!-- the impossible triangle, 30fps -->
 <div data-nts-fragment="intersect"></div>   <!-- the ASCII tetrahedron, 15fps; data-cols, data-figure -->
 ```
 
@@ -810,7 +821,9 @@ worlds, bodies and code tokens (`tests/helpers/registry.mjs`).
    `gen-emblem.mjs`), the stop pose (`STOP_BODY` beside `STOP_DOTS` in
    `orrery.js` and `emblem.spec.mjs`), the bead pulse stagger
    in `orrery.css` (the 18 s cycle is cut for four bodies), the window's
-   heading voice (`.world[data-world="<world>"] h2` in `orrery.css`), and
+   title and tagline (the page's own wordmark markup and copy keys, and its
+   rules shared with the band through `:is()` in `pages.css`; EMBERS' voice is
+   `.world[data-world="embers"] h2` in `orrery.css`), and
    the bead on the events page's small orrery (its `.mini-ring`, `.pivot.oN`
    and the `.events-hero .oN, .ring-N` radius and orbit in `orrery.css`).
 5. `node tools/sync.mjs`, then `npm test`: R0 to R4 in
