@@ -87,7 +87,8 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .fig b { font-style: normal; font-weight: 400; }
 
 /* the fragment */
-[data-nts-fragment="philo"] { position: relative; aspect-ratio: 1; width: 100%; background: var(--frag-bg, #e6e6e8); overflow: hidden; border-radius: inherit; }
+/* the hero's engraved rings, at the hero's pitch, centred on the figure (the canvas's centre) and over the whole window: the way EMBERS' lines run under its hearth */
+[data-nts-fragment="philo"] { position: relative; aspect-ratio: 1; width: 100%; background: repeating-radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--w-fg) calc(var(--plate) * 100%), transparent) 0 1px, transparent 1px 9px), var(--frag-bg, #e6e6e8); overflow: hidden; border-radius: inherit; }
 [data-nts-fragment="philo"] .still { position: absolute; inset: 0; display: grid; place-items: center; }
 [data-nts-fragment="philo"] .still svg { width: 100%; height: 100%; }
 [data-nts-fragment="philo"] canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
