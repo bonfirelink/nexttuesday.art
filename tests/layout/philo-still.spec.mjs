@@ -18,8 +18,10 @@ const stillSize = (sel) => {
   let a = 1e9, b = -1e9, t = 1e9, u = -1e9;
   // the still's filled shapes
   host.querySelectorAll("svg path").forEach((e) => {
+    // the host's box cuts the figure, as the canvas's own box does: the home's loop overshoots its orb
     const r = e.getBoundingClientRect();
-    a = Math.min(a, r.left); b = Math.max(b, r.right); t = Math.min(t, r.top); u = Math.max(u, r.bottom);
+    a = Math.min(a, Math.max(r.left, hr.left)); b = Math.max(b, Math.min(r.right, hr.right));
+    t = Math.min(t, Math.max(r.top, hr.top)); u = Math.max(u, Math.min(r.bottom, hr.bottom));
   });
   const k = host.clientWidth / hr.width;
   return { w: (b - a) * k, h: (u - t) * k };
@@ -49,6 +51,7 @@ for (const c of CASES) {
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     const live = await page.evaluate(liveSize, c.host);
 
+    // in the home fragment both widths are the host's whole width (the loop overshoots it), so only the height is informative there
     expect(Math.abs(still.w - live.w), `width: still ${still.w.toFixed(1)}, live ${live.w.toFixed(1)}`).toBeLessThanOrEqual(TOL);
     expect(Math.abs(still.h - live.h), `height: still ${still.h.toFixed(1)}, live ${live.h.toFixed(1)}`).toBeLessThanOrEqual(TOL);
   });

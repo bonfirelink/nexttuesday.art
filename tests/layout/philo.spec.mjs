@@ -16,8 +16,11 @@ const RATIO_TOL = 0.02;
 // figure's size comes from the hero box, which is the ring plus a fixed margin, so the ratio
 // drifts a little with the viewport; one recorded value per width.
 const HERO_RATIO = { 390: 1.011, 1024: 0.989, 1440: 0.976 };
-// The same on the home orb (the other worlds' figures reach about 0.92 of it).
-const ORB_RATIO = 0.923;
+// On the home orb the loop overshoots (about 1.09 orb widths, see home-bands.spec.mjs), so
+// the canvas's box cuts it: the drawn width is the whole box.
+const ORB_FILL = 0.98;
+// the pivot is the triangle's centroid, so the loop's drawn box sits this share of the orb off the box's centre (measured 0.067)
+const VERTICAL_OFFSET = 0.067, VERTICAL_TOL = 0.015;
 
 test.use({ reducedMotion: "reduce" });
 
@@ -49,11 +52,9 @@ for (const [width, height] of [[390, 844], [1440, 900]]) {
     const box = await rectOf(page, ".orb[data-body=philo]");
     const ink = await canvasInk(page, "[data-nts-fragment=philo] canvas");
     expect(ink.n, "drawn pixels").toBeGreaterThan(0);
-    expect(Math.abs(ink.cx - box.cx), "centroid x vs box centre").toBeLessThanOrEqual(FRAGMENT_CENTROID_TOL);
-    expect(Math.abs(ink.cy - box.cy), "centroid y vs box centre").toBeLessThanOrEqual(FRAGMENT_CENTROID_TOL);
-    const ratio = ink.bw / box.w;
-    expect(ratio, "drawn width over orb diameter").toBeGreaterThan(ORB_RATIO * (1 - RATIO_TOL));
-    expect(ratio, "drawn width over orb diameter").toBeLessThan(ORB_RATIO * (1 + RATIO_TOL));
+    expect(Math.abs(ink.bx - box.cx), "drawn box centre x vs box centre").toBeLessThanOrEqual(FRAGMENT_CENTROID_TOL);
+    expect(ink.bw / box.w, "drawn width over orb diameter: the figure reaches the orb's edge").toBeGreaterThan(ORB_FILL);
+    expect(Math.abs(Math.abs(ink.by - box.cy) - VERTICAL_OFFSET * box.w), "drawn box centre y: its offset from the box centre").toBeLessThanOrEqual(VERTICAL_TOL * box.w);
   });
 }
 

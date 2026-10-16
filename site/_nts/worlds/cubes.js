@@ -377,7 +377,7 @@
      figure's box, as a share of the box's half-size, on the page entity and in
      the home's fragment. The live canvas and the baked stills both size the
      rest pose from REACH and REST, so the still and the first live frame match. */
-  const REST = { page: 0.952, fragment: 0.982 };
+  const REST = { page: 0.952, fragment: 1.17 };
   const api = { paint, frame, composite, cubesAt, phase, REACH: PIVOT.reach, REST, TICK, GLIDE, TURNS };
   if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.cubes = api; }
   if (typeof module !== "undefined") module.exports = api;
