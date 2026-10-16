@@ -380,9 +380,8 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 }
 .world .prose { width: 100%; }
 .world .prose h2 { margin-bottom: .8rem; }
-.world .prose .lede { margin-bottom: .6rem; }
 .world[data-world="embers"] h2 { font-family: var(--font-flyer); font-variation-settings: "wdth" 125; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; text-shadow: var(--embers-glow); }
-.world[data-world="philo"] h2 { font-family: var(--font-flyer); font-variation-settings: normal; font-weight: 800; letter-spacing: -.02em; text-transform: uppercase; color: var(--w-accent-text); }
+.world[data-world="philo"] h2 .philo-key { --philo-off: .045em; }
 .world[data-world="intersect"] { font-family: var(--font-intersect); font-size: 1.15rem; }
 .world[data-world="intersect"] .go { font-family: var(--font-mono); letter-spacing: .1em; }
 @media (min-width: 900px) { .handover { height: 4.5rem; } .tuesdays.sect { padding-bottom: calc(var(--section) * .55); } }
