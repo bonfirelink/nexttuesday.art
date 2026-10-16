@@ -8,8 +8,8 @@
    host's computed --penrose-top, -side, -dark and -ground. While
    a world bleed-in's disc opens, the world's set goes to the canvas's twin
    in the disc's copy (NTS.bleed.twin) and the NTS set stays here, each
-   drawn only while some of it is in view. 30 fps, 15 for the
-   fragment; one closed frame under prefers-reduced-motion. */
+   drawn only while some of it is in view. 30 fps, the fragment
+   too; one closed frame under prefers-reduced-motion. */
 (() => {
   "use strict";
   const B = window.NTS && window.NTS.cubes, G = window.NTS && window.NTS.grab;
@@ -22,7 +22,7 @@
     host.appendChild(canvas);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const FPS = lite ? 15 : 30, REST = lite ? B.REST.fragment : B.REST.page;
+    const FPS = 30, REST = lite ? B.REST.fragment : B.REST.page;
     let w = 0, h = 0, dpr = 1, scale = 1, cx = 0, cy = 0;
     /* the fallback tones are the PHILO world's tones in philo.css; tests/static/philo-tokens.spec.mjs keeps them in step */
     let col = { top: "#f5f5f7", side: "#a6a7b2", dark: "#53566b", ground: "#e6e6e8" };
@@ -92,8 +92,9 @@
       const dt = prev ? Math.min(0.1, (now - prev) / 1000) : 0;
       clock += dt;
       prev = now;
-      /* the bleed-in's twin changes under the figure, so it is drawn every frame */
-      if (now - last >= 1000 / FPS) { last = now; const p = pose(); if (twin || shows(p) !== drawn) draw(p); }
+      /* the bleed-in's twin changes under the figure, so it is drawn every frame; a frame's
+         timestamp jitters by a few ms, and without the slack a draw due at 33.3 ms slips a whole frame */
+      if (now - last >= 1000 / FPS - 3) { last = now; const p = pose(); if (twin || shows(p) !== drawn) draw(p); }
       /* a turned figure settles back to the straight view, 0.7 s to 1/e */
       if (!hand.active && now - hand.released > 1200 && (hand.yaw || hand.pitch)) {
         const k = Math.exp(-dt / 0.7);
