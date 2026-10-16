@@ -99,7 +99,8 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .philo-hero .label { position: relative; background: var(--philo-red); color: #fff; letter-spacing: .2em; --fit: 2.96cqi; }
 /* the poster's charcoal plate, printed off register (as .philo-bar) */
 .philo-hero .label::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--philo-shadow); transform: translate(calc(-1 * var(--philo-off)), calc(-1 * var(--philo-off))); }
-.philo-hero .incant { font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; --fit: 5.49cqi; font-size: min(1.75rem, var(--fit)); }
+:is(.philo-hero .incant, .world[data-world="philo"] .incant) { font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
+.philo-hero .incant { --fit: 5.49cqi; font-size: min(1.75rem, var(--fit)); }
 /* the figure's caption hangs below the entity box, out of flow, so the ring
    centres on the figure as in the other worlds; stacked, its room is reserved */
 @media (max-width: 899px) { .philo-hero .entity { margin-bottom: 4rem; } }
@@ -114,8 +115,9 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .intersect-hero { text-align: left; }
 /* the title is IM Fell, the one place it lives; the prompt before it stays mono */
 .intersect-hero .hero-text { --fit: 14.1cqi; --title: min(5rem, var(--fit)); }
-.intersect-hero h1 { text-transform: uppercase; letter-spacing: .02em; font-size: var(--title); line-height: .95; }
-.intersect-hero h1 .x { font-family: var(--font-mono); font-weight: 500; color: var(--intersect-fire-key); }
+:is(.intersect-hero h1, .world[data-world="intersect"] h2) { text-transform: uppercase; letter-spacing: .02em; line-height: .95; }
+.intersect-hero h1 { font-size: var(--title); }
+:is(.intersect-hero h1, .world[data-world="intersect"] h2) .x { font-family: var(--font-mono); font-weight: 500; color: var(--intersect-fire-key); }
 .intersect-hero .label { background: var(--w-fg); color: var(--w-bg); letter-spacing: .22em; --fit: 2.52cqi; }
 .intersect-hero .incant { --fit: 5.63cqi; font-size: min(2rem, var(--fit)); }
 /* label and punchline start under the I, not the prompt: .815 is the prompt's

@@ -100,19 +100,19 @@ for (const w of WORLDS) {
   }
 }
 
-test("L7 the home cards put the body before the lede", async ({ page }) => {
+test("L7 the home cards put the tagline right under the title, then the body", async ({ page }) => {
   await openPage(page, "/");
   const cards = await page.evaluate(() =>
     [...document.querySelectorAll(".world .prose")].map((p) => {
-      const lede = p.querySelector(".lede");
-      const body = p.querySelector("p:not(.lede)");
-      return { id: p.closest(".world").id, lede: lede?.textContent.trim(), before: lede && body ? !!(body.compareDocumentPosition(lede) & Node.DOCUMENT_POSITION_FOLLOWING) : false };
+      const tag = p.querySelector("h2 + p.incant");
+      const body = p.querySelector("p:not(.incant)");
+      return { id: p.closest(".world").id, tag: tag?.textContent.trim(), before: tag && body ? !!(body.compareDocumentPosition(tag) & Node.DOCUMENT_POSITION_PRECEDING) : false };
     })
   );
   const worlds = cards.filter((c) => ["embers", "not-not-philo", "field"].includes(c.id));
   expect(worlds.map((c) => c.id)).toEqual(["embers", "not-not-philo", "field"]);
-  for (const c of worlds) expect(c.before, `${c.id}: body precedes lede`).toBe(true);
-  expect(worlds.map((c) => c.lede)).toEqual([
+  for (const c of worlds) expect(c.before, `${c.id}: tagline precedes body`).toBe(true);
+  expect(worlds.map((c) => c.tag)).toEqual([
     "The floor ain't gonna dance itself",
     "On everything, nothing and anything in between",
     "An ancient tradition, a crossroads of sorts",
