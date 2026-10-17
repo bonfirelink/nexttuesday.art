@@ -11,7 +11,7 @@
 //   --clip x,y,w,h         crop each shot to this rectangle (CSS px, viewport coordinates)
 // Writes DIR/<label>/<view>/<path>-<position>.png and DIR/manifest.json (read by sheet.mjs).
 // A URL is a preview: the site served from a checkout (the working branch's, or the change's).
-import { chromium } from "@playwright/test";
+import { launch } from "./browser.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -59,10 +59,7 @@ const positions = o.moments
 const clip = o.clip && Object.fromEntries(o.clip.split(",").map((n, i) => [["x", "y", "width", "height"][i], +n]));
 const slug = (p) => p.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "home";
 
-const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM,
-  args: ["--no-sandbox"],
-});
+const browser = await launch();
 const manifest = { reduce: o.reduce, shots: [] };
 try {
 

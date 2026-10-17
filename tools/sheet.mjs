@@ -4,7 +4,7 @@
 // With one site: a single labelled cell per shot.
 // The title is followed by the view. Writes DIR/sheet-<view>.png and prints the paths. A phone sheet stays within 1600 px,
 // a desktop sheet within 1500 px, and narrower when its content is. Rendered by Chromium (an HTML page, screenshotted).
-import { chromium } from "@playwright/test";
+import { launch } from "./browser.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -35,7 +35,7 @@ const cell = (s, tag) => {
     `<img src="${pathToFileURL(path.resolve(dir, s.file))}"></figure>`;
 };
 
-const browser = await chromium.launch({ executablePath: process.env.CHROMIUM, args: ["--no-sandbox", "--allow-file-access-from-files"] });
+const browser = await launch({ args: ["--allow-file-access-from-files"] });
 const written = [];
 try {
   const slug = (p) => p.replace(/^\/|\/$/g, "").replace(/\//g, "-") || "home";

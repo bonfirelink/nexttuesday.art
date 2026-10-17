@@ -25,6 +25,8 @@ node tools/sheet.mjs <dir> --title "<change>" [--per-page]
 
 The header of `tools/shots.mjs` lists every option. Needs `$CHROMIUM`. Done when every shot line reads `no errors`. Console errors, 4xx responses and requests to an external host print as `ISSUES`: fix them, or report them with the sheet.
 
+For a one-off script, import `launch` from `tools/browser.mjs` instead of calling `chromium.launch`. Compose images with the sheet tool or node.
+
 ## Reading them
 
 - Look at each PNG: the labels are legible, the change is visible in AFTER and absent in BEFORE. Done when you can say what differs; when it is not visible, re-shoot narrower (`--paths`, `--clip`, `--scroll`).

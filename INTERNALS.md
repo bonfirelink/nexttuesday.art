@@ -49,6 +49,7 @@ tools/
   gen-sigils.mjs   writes _nts/sigils.svg
   gen-emblem.mjs   writes _nts/parts/emblem-*.html (the home emblem)
   gen-stills.mjs   writes _nts/parts/still-*.{svg,txt}
+  browser.mjs      `launch()`: a headless Chromium ($CHROMIUM) for one-off scripts
 ```
 
 ## Changing a page
@@ -1056,14 +1057,17 @@ other live curl needs `--resolve nexttuesday.art:443:185.199.108.153`.
 runs against a headless Chromium (`$CHROMIUM`) and an offline copy of the
 fonts.
 
-- `npm test`: the static and fast tiers, everything but `@slow`, `@perf` and
-  `@visual`. About 2 minutes.
-- `npm run test:publish`: all of it, adding the `@slow` sweeps, the `@visual`
-  snapshots and the `@perf` guards (frame pacing and paint counts against `tests/perf/perf-baselines.json`).
+- `npm test`: the static and fast tiers, everything but `@slow` and `@perf`.
+  About 2 minutes.
+- `npm run test:publish`: all of it, adding the `@slow` sweeps and the `@perf`
+  guards (frame pacing and paint counts against `tests/fixtures/perf-baselines.json`).
   About 7 minutes.
 - `npm run test:perf`: the `@perf` guards alone, without their setup project.
-- `npm run test:visual`: the `@visual` screenshot comparisons alone;
-  `npm run test:update-visual` rewrites their snapshots.
+
+`tests/static/lint.spec.mjs` (N1 to N3) lints `site/`: CSS transitions and
+keyframes animate only transform, opacity and custom properties (the few
+paint-property exceptions are listed in the spec with their reasons),
+figure captions end without a period, and every script parses.
 
 The npm scripts go through `tools/run-suite.mjs`. Playwright uses 4 workers
 (`--workers` overrides). The timing tests fail on a loaded machine: run one
