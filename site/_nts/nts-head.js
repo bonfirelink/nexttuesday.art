@@ -41,6 +41,32 @@
     var seen = function (el) { var r = el && el.getBoundingClientRect(); return !!r && r.bottom > 0 && r.top < innerHeight && r.width > 0; };
     return seen(bead) ? bead : seen(orb) ? orb : bead || orb;
   };
+  /* The current page's bar stretches as it travels: at half time it spans
+     both links, the leading edge on the new one, then the trailing edge
+     catches up. The UA's own keyframes for its group hold both boxes,
+     measured at the snapshots, so nothing is read from the layout here;
+     each half keeps the CSS timing function. Anything missing leaves the
+     UA's slide as it is. */
+  function stretch() {
+    var d = document.documentElement;
+    if (!d.getAnimations) return;
+    var g = d.getAnimations({ subtree: true }).filter(function (x) {
+      return x.effect && x.effect.pseudoElement === "::view-transition-group(nts-mark)";
+    })[0];
+    if (!g || !g.effect.setKeyframes) return;
+    var k = g.effect.getKeyframes(), m = /^matrix\(1, 0, 0, 1, (-?[\d.e-]+), (-?[\d.e-]+)\)$/;
+    if (k.length !== 2) return;
+    var p0 = m.exec(k[0].transform), p1 = m.exec(k[1].transform), w0 = parseFloat(k[0].width), w1 = parseFloat(k[1].width);
+    if (!p0 || !p1 || !(w0 >= 0) || !(w1 >= 0)) return;
+    var x0 = +p0[1], x1 = +p1[1], x = Math.min(x0, x1), w = Math.max(x0 + w0, x1 + w1) - x;
+    var y = (+p0[2] + +p1[2]) / 2, h = k[0].height, ease = k[0].easing;
+    /* the end is left implicit: the group's own style, which the UA keeps on
+       the new bar's live box, so the bar comes to rest where the page settles */
+    g.effect.setKeyframes([
+      { offset: 0, transform: k[0].transform, width: k[0].width, height: h, easing: ease },
+      { offset: 0.5, transform: "matrix(1, 0, 0, 1, " + x + ", " + y + ")", width: w + "px", height: h, easing: ease }
+    ]);
+  }
   /* Arriving, the new side is named at `pagereveal`, the frame its snapshot
      is taken. That can come before the deferred scripts run, so the listener
      is here; each page's <link rel="expect" blocking="render"> holds that
@@ -50,6 +76,8 @@
      crossfade (no body off the home). */
   addEventListener("pagereveal", function (e) {
     var vt = e.viewTransition, a = window.navigation && navigation.activation;
+    /* a throw in stretch, or a skipped transition, leaves the slide, quietly */
+    if (vt && vt.ready) vt.ready.then(stretch).catch(function () {});
     if (!vt || !a || !a.from) return;
     var from = NTS.world(a.from.url), el = null, st = null;
     if (from) {

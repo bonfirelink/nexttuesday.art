@@ -28,7 +28,7 @@ test("S1 /events/ takes the home's set: the small orrery a black sun, the ledger
   expect(await style(page, "body", "color"), "text").toBe(t["--pal-ink"]);
   expect(await style(page, "html", "scrollbarColor"), "scrollbar").toBe(`${m[LINE_STRONG]} ${t["--pal-beige"]}`);
   expect(await style(page, ".nts-home .nts-sigil", "color"), "header sigil").toBe(t["--pal-ink"]);
-  expect(await style(page, ".nts-nav a[aria-current] span", "backgroundColor", "::after"), "current page's bar").toBe(t["--pal-ink"]);
+  expect(await style(page, ".nts-nav a[aria-current] .nts-mark", "backgroundColor"), "current page's bar, the site's red").toBe((await resolve(page, ["var(--embers-fire)"]))["var(--embers-fire)"]);
   expect(await style(page, ".hero p", "backgroundColor", "::selection"), "selection").toBe(t["--pal-ink"]);
   expect(await style(page, ".hero p", "color", "::selection"), "selected text").toBe(t["--pal-bone"]);
   expect(await style(page, ".nts-footer .cols a", "color"), "footer link").toBe(t["--pal-ink"]);
@@ -85,7 +85,7 @@ for (const path of WORLDS) {
     expect(await style(page, ".nts-header", "backgroundColor"), "header").toBe(m["color-mix(in srgb, var(--pal-beige) 86%, transparent)"]);
     expect(await style(page, ".nts-header", "color"), "header text").toBe(t["--pal-ink"]);
     expect(await style(page, ".nts-home .nts-sigil", "color"), "header sigil").toBe(t["--pal-ink"]);
-    expect(await style(page, ".nts-nav a[aria-current] span", "backgroundColor", "::after"), "current page's bar").toBe(t["--pal-ink"]);
+    expect(await style(page, ".nts-nav a[aria-current] .nts-mark", "backgroundColor"), "current page's bar, the site's red").toBe((await resolve(page, ["var(--embers-fire)"]))["var(--embers-fire)"]);
     expect(await style(page, "main .hero", "backgroundColor"), "hero ground").toBe(t["--pal-beige"]);
     expect(await style(page, "main .hero h1", "color"), "hero title").toBe(t["--pal-ink"]);
     expect(await style(page, "main .hero .incant", "backgroundColor", "::selection"), "selection").toBe(t["--pal-ink"]);

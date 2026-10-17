@@ -125,8 +125,11 @@ const sigil = (name, cls = '') => `<svg class="nts-sigil sigil-${name}${cls ? ' 
 
 function header(prefix, page) {
   const items = INITIATIVES.map((n) => {
-    const cur = page === n.slug ? ' aria-current="page"' : '';
-    return `<li><a href="${prefix}${n.slug}/"${cur}><span>${n.name}</span></a></li>`;
+    // the current page's bar is an element of its own: a view transition can
+    // name it (not a pseudo-element), so it slides from page to page
+    const cur = page === n.slug;
+    const mark = cur ? '<i class="nts-mark" aria-hidden="true"></i>' : '';
+    return `<li><a href="${prefix}${n.slug}/"${cur ? ' aria-current="page"' : ''}><span>${n.name}${mark}</span></a></li>`;
   }).join('');
   const home = page === 'home' ? ' aria-current="page"' : '';
   return `<header class="nts-header"><div class="wrap bar">

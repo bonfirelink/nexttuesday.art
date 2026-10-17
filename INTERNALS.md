@@ -221,11 +221,17 @@ four destinations stay in one tap, spread from the sigil to the gutter
 other. It takes `--w-bar-bg`/`--w-bar-fg`, so
 its colours follow the world; its type never does: the nav is Instrument
 Sans 600 at .72rem (.7rem under 640px, .6875rem under 360px) on every page,
-and `intersect.css` leaves it alone. The current page is marked by its
-sigil before the label and a 2px bar in `--w-accent` right under the
-label, 4px below the baseline (`.nts-nav a span::after`): the marker
-belongs to the word, not to the bar's bottom edge, where it would float. Hover and focus show the same bar faintly in the text
-colour. Do not add a menu button or hide the header.
+and `intersect.css` leaves it alone. The current page is marked by a
+2px bar in the site's red (`--embers-fire`, on every page whatever the
+world's accent) right under the label, 4px below the baseline:
+the marker belongs to the word, not to the bar's bottom edge, where it
+would float. That bar is an element, `<i class="nts-mark">`, which sync
+puts in the current link only: a view transition can name an element but
+not a pseudo-element, and named `nts-mark` it travels from the old page's
+link to the new one's. Hover and focus grow the same bar from the label's
+centre, faintly in the text colour (`.nts-nav a span::after`), which the
+current link does not generate (T9 in `tests/transitions/nav-mark.spec.mjs`).
+Do not add a menu button or hide the header.
 
 Sections: `.sect` (vertical rhythm), `.sect-head` (sigil + h2), `.rule`
 (and `.rule.draw` to grow in), `.band` (a field in `--band-bg` and
@@ -463,9 +469,22 @@ behave the same.
   is what the arrival's view transition lies on, and a world's dark
   there would show through any see-through moment on the whole page but the
   header. The root pair has none: the old snapshot stays opaque (no
-  animation) and the new one fades in over it (`vt-in`, 420ms), because
+  animation) and the new one fades in over it (`vt-in`, 520ms), because
   Safari paints a dark backdrop behind a fading pair (`T7` in
-  `tests/transitions/solid-root.spec.mjs`). The
+  `tests/transitions/solid-root.spec.mjs`). Between two pages
+  the root, the header and the current bar move as one, 520ms on
+  `--ease-out`. The header is named apart (`nts-header`) and stays put,
+  and its pair crosses on that timing: its bar is see-through, so the old
+  image must fade out under the new one, or it shows through it and cuts
+  at the end. The header group's `animation: none` would hand its 0s down
+  to the pair, so the pair's timing is set on the images themselves. The
+  current bar (`nts-mark`) stretches: at `ready` `nts-head.js` gives its
+  group a middle keyframe spanning both links, built from the UA's own two
+  keyframes (no layout read), so its leading edge reaches the new link at
+  half time; its images fill the group's height, or a stretched bar would
+  scale up. To or from the home, which has no current link, it fades.
+  Without `getAnimations` or `setKeyframes` the bar slides (T10 in
+  `tests/transitions/nav-mark.spec.mjs`). The
   kits set the root's world tokens at `:root`'s weight
   (`:root:where(:has(> body[data-world=…]))`), so the arrival selectors win;
   a settled world page has its own ground on the root. Only three states exist: `before`, `in` (from

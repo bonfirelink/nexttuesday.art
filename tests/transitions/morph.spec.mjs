@@ -116,13 +116,13 @@ function held() {
 function t2(repeats, tag) {
   for (const [size, viewport] of SIZES) {
     for (const [from, to] of PAIRS) {
-      test(`T2 ${from} to ${to}: a plain crossfade, ${size}, x${repeats} ${tag}`.trim(), async ({ browser }) => {
+      test(`T2 ${from} to ${to}: no orb, the root alone, ${size}, x${repeats} ${tag}`.trim(), async ({ browser }) => {
         test.setTimeout(RUN_TIMEOUT_MS * repeats);
         for (let i = 0; i < repeats; i++) {
           const vt = await worldToWorld(browser, viewport, from, to, process.env.NTS_BASE);
           expect(vt, `run ${i + 1}: a view transition ran`).toHaveProperty("names");
           expect(vt.names.filter((n) => /\(orb\)/.test(n)), `run ${i + 1}: orb pseudo-elements`).toEqual([]);
-          expect(vt.names.some((n) => /\(root\)/.test(n)), `run ${i + 1}: root crossfade`).toBe(true);
+          expect(vt.names.some((n) => /\(root\)/.test(n)), `run ${i + 1}: root transition`).toBe(true);
           expect(vt.entity, `run ${i + 1}: the arrived entity's view-transition-name`).toBe("none");
         }
       });
