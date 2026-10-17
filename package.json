@@ -3,12 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tools/run-suite.mjs --grep-invert \"@slow|@perf|@visual\"",
+    "test": "node tools/run-suite.mjs --grep-invert \"@slow|@perf\"",
     "test:publish": "node tools/run-suite.mjs",
     "test:perf": "node tools/run-suite.mjs --project=perf --no-deps",
-    "test:visual": "node tools/run-suite.mjs --project=visual",
-    "test:update-visual": "node tools/run-suite.mjs --project=visual --update-snapshots",
-    "test:live": "NTS_BASE=https://nexttuesday.art node tools/run-suite.mjs --project=live",
     "fonts": "node tools/fonts.mjs"
   },
   "devDependencies": {

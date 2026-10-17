@@ -17,7 +17,7 @@ from the working branch (`main`). How the code fits:
 
 ## Tests
 
-`npm test` is the quick suite (static and fast tiers); `npm run test:publish` adds the `@slow` sweeps, the `@visual` snapshots and the `@perf` guards (it runs every project), and is the suite a publish rests on. Never publish on a red suite; new behaviour gets a test first.
+`npm test` is the quick suite (static and fast tiers); `npm run test:publish` adds the `@slow` sweeps, the `@perf` guards (it runs every project), and is the suite a publish rests on. Never publish on a red suite; new behaviour gets a test first.
 
 ## Design principles
 

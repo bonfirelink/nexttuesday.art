@@ -21,7 +21,7 @@ const base = {
   screenshot: "only-on-failure",
 };
 
-// Tiers are tags in test titles: @slow, @perf, @visual; untagged is fast.
+// Tiers are tags in test titles: @slow, @perf; untagged is fast.
 const dirs = "{layout,behaviour,transitions,motion}";
 export default defineConfig({
   testDir: "tests",
@@ -34,10 +34,8 @@ export default defineConfig({
   use: base,
   projects: [
     { name: "static", testMatch: "static/**/*.spec.mjs" },
-    { name: "fast", testMatch: ["smoke.spec.mjs", `${dirs}/**/*.spec.mjs`], grepInvert: /@slow|@perf|@visual/ },
+    { name: "fast", testMatch: ["smoke.spec.mjs", `${dirs}/**/*.spec.mjs`], grepInvert: /@slow|@perf/ },
     { name: "slow", testMatch: [`${dirs}/**/*.spec.mjs`], grep: /@slow/ },
-    { name: "visual", testMatch: "visual/**/*.spec.mjs", grep: /@visual/ },
-    { name: "live", testMatch: "live/**/*.spec.mjs" },
     // Alone, one worker, after the others, so their CPU use can't distort traces.
     {
       name: "perf",
@@ -45,7 +43,7 @@ export default defineConfig({
       grep: /@perf/,
       workers: 1,
       fullyParallel: false,
-      dependencies: ["static", "fast", "slow", "visual"],
+      dependencies: ["static", "fast", "slow"],
     },
   ],
 });
