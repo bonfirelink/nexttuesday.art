@@ -291,7 +291,7 @@ Header and footer come from sync (`<!-- nts:header -->`, `<!-- nts:footer -->`).
 The header is sticky, one row, 52px; on phones the wordmark hides and the
 four destinations stay in one tap, spread from the sigil to the gutter
 (the `nav` takes the free width), as far from the sigil as from each
-other. It takes `--w-bar-bg`/`--w-bar-fg`, so
+other. It takes `--w-bar-bg`/`--w-bar-fg` (INTERSECT's bar is clear until scrolled), so
 its colours follow the world; its type never does: the nav is Instrument
 Sans 600 at .72rem (.7rem under 640px, .6875rem under 360px) on every page,
 and `intersect.css` leaves it alone. The current page is marked by a
@@ -599,7 +599,8 @@ behave the same.
   `tests/transitions/header-bleed.spec.mjs`. A texture that is
   part of the world's ground is not one of those parts: INTERSECT's grain
   (`.intersect-grain`, a body-level layer under the content) is on from the
-  start of `in` (it is off only in `before`). While the state is `in` it
+  start of `in` (it is off only in `before`); the scrolled bar carries the same
+  tile as `.nts-header.is-scrolled::before` (clear at the top), from `--grain-tile` at `--grain`. While the state is `in` it
   lies over the copy (`z-index: 3`, above `.nts-night`, under the header),
   so the disc and the page below it carry one grain at one raster scale (a
   copy of it inside the scaled layer would be resampled and read as another
