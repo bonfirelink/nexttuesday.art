@@ -66,8 +66,9 @@ on earlier ones: `apertures.css` turns the home's world windows and its
 off the bloom `orrery.css` would otherwise give the windows.
 
 Hard rules for every page: static HTML that reads with JS off; Google
-Fonts only, one `<link>` per page with only the families that page uses;
-no Solstice, farm, WhatsApp, payment links or personal names; no RAVEMBER
+Fonts only, one stylesheet `<link>` per page with only the families that
+page uses, and the nav's face preloaded (see Tokens); no Solstice, farm,
+WhatsApp, payment links or personal names; no RAVEMBER
 2026 date or venue; English; copy only from `_nts/content/copy.json`;
 `<title>`, description, og:title, og:description, theme-color, the one
 favicon (the NTS sigil in ink on the beige, the same `<link rel="icon">`
@@ -91,7 +92,7 @@ the bar beside it, rather than a darker one that would pass.
 ```html
 <html lang="en">
 <head>
-  … meta, title, the one favicon, the page's Google Fonts link …
+  … meta, title, the one favicon, the nav face's preload, the page's Google Fonts link …
   <link rel="stylesheet" href="/_nts/nts.css">
   <link rel="stylesheet" href="/_nts/worlds/<world>.css">   <!-- the page's world, or all three on home -->
   <link rel="stylesheet" href="/_nts/pages.css">
@@ -196,6 +197,17 @@ loads all five; EMBERS and NOT NOT PHILO load Fraunces, Instrument Sans,
 Archivo and the mono; INTERSECT Fraunces (the wordmark), Instrument Sans,
 IM Fell and the mono; Events Fraunces, Instrument Sans and the mono. Add a
 family to a page's link if you use it there.
+Each page with the nav also preloads the nav's face, Instrument Sans
+upright in its latin subset (`<link rel="preload" as="font" crossorigin>`
+before the fonts link): the same file its Google CSS names, which the body
+text needs anyway, so no byte more. Found only at the first layout, it came
+after the first frame, and the labels and the current bar moved up to 6px
+when it swapped in (L9 in `tests/layout/nav-settle.spec.mjs`). Requested
+with the CSS, it is there for the first frame; Chromium holds that frame
+briefly (100 to 160ms measured) while a preload is in flight, then paints
+the fallback. Google versions its file URLs: after `npm run fonts`, the
+check in `tests/static/fonts.spec.mjs` names any page whose preload no
+longer matches its CSS, and the URL to put there.
 
 Space: `--gutter` (16px floor), `--wrap` 72rem, `--section`, `--bar-h`.
 Motion: `--ease-lift`/`--dur-lift`/`--lift-y` (the card lift: `ease`,
