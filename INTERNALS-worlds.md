@@ -119,9 +119,14 @@ the hero:
   two lines. At a resolution that scales to the screen by a non-integer
   factor the CSS background and the canvas are resampled differently,
   hence the snapping of the resolution itself, not just the edges. Measured,
-  it does not hold at fractional screen ratios: the seam is 12-13 of 255
-  at DPR 1.25 and 1.75 (cause not established), and 0 at 2 and 3 (4 on a
-  phone, where the live layer is scaled 2x).
+  the seam is 0 at 2 and 3 and at a real device scale factor of 1.25 or
+  1.75 (the browser launched with `--force-device-scale-factor`, so layout
+  is in device px), and 4 on a phone, where the live layer is scaled 2x. A
+  context's emulated fractional `deviceScaleFactor` shows 12-13 of 255
+  instead: Blink then snaps layout to whole css px (a `left: 0.4px` reads
+  back as 0.390625, the live rect 734.39 snaps to 734), which squeezes the
+  live canvas's rows by half a device px. A real OS scaling in Chrome is
+  assumed to match the flag; WebKit is not checked.
 - `data-max-px="3000000"` budgets what is redrawn, the live canvas at
   rest (the box), so on desktop it draws at the screen's resolution; a
   burst's wider canvas may go over it for its few seconds. On a touch

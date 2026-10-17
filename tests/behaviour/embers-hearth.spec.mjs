@@ -4,7 +4,7 @@
 // a seam. The hearth canvas keeps the pointer and the keys. At rest nothing
 // rises; a stoke throws one burst of glyphs, and only while they are in the
 // air does the live canvas reach up and out.
-import { test, expect } from "../helpers/fixtures.mjs";
+import { test, expect, installFontRoutes } from "../helpers/fixtures.mjs";
 import { clickWorldLink } from "../helpers/transitions.mjs";
 
 const DESKTOP = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
@@ -25,6 +25,16 @@ async function openHearth(page) {
     const target = b[0] <= 0 && b[0] + b[2] >= r.width - 1 ? r.left + r.width / 2 : s.left + s.width / 2;
     return Math.abs(r.left + b[0] + b[2] / 2 - target) <= 1;
   });
+}
+// The largest channel difference across the box's left edge, over rows of the box, in device px
+async function seamAtLeftEdge(page, D) {
+  await page.addStyleTag({ content: BARE });
+  const h = await hearth(page);
+  const shots = [];
+  for (let i = 0; i < 3; i++) { shots.push((await heroPixels(page)).png); await page.waitForTimeout(250); }
+  const e = Math.round(h.box[0] * D), pairs = [];
+  for (let y = Math.round(h.box[1] * D); y < Math.round((h.box[1] + h.box[3]) * D); y++) pairs.push([e - 1, y, e, y]);
+  return Math.max(...(await pixelDiff(page, shots, pairs)));
 }
 // the hearth's state, through its accessor: heat, frame-rate cap, resolution, box (css px of the hero)
 const hearth = (page) => page.evaluate(() => document.querySelector("canvas.nts-hearth").ntsHearth());
@@ -177,18 +187,34 @@ test.describe("desktop", () => {
 
   test("E12 no seam where the lines cross the box's left edge", async ({ page }) => {
     await openHearth(page);
-    await page.addStyleTag({ content: BARE });
-    const h = await hearth(page), D = DESKTOP.deviceScaleFactor;
-    const shots = [];
-    for (let i = 0; i < 3; i++) { shots.push((await heroPixels(page)).png); await page.waitForTimeout(250); }
-    const e = Math.round(h.box[0] * D), pairs = [];
-    for (let y = Math.round(h.box[1] * D); y < Math.round((h.box[1] + h.box[3]) * D); y++) pairs.push([e - 1, y, e, y]);
-    const d = await pixelDiff(page, shots, pairs);
-    expect(Math.max(...d), "largest channel difference across the edge").toBe(0);
+    expect(await seamAtLeftEdge(page, DESKTOP.deviceScaleFactor), "largest channel difference across the edge").toBe(0);
   });
 
-  // Unguarded: at a fractional screen ratio the seam is not zero (measured 12-13/255
-  // at DPR 1.25 and 1.75); the cause is not established, so there is no bound to assert.
+  // A real fractional device scale factor (the browser's own, not the context's emulated one).
+  // Under an emulated one Blink snaps layout to whole css px (a left of 0.4px reads back as
+  // 0.390625, the live rect 734.39 snaps to 734), which squeezes the live canvas's rows by half
+  // a device px: a seam of 12-13/255 at 1.25 and 1.75, so it is not asserted. Under the flag
+  // the seam is 0. A real OS scaling in Chrome is assumed to match the flag; WebKit is not checked.
+  for (const D of [1.25, 1.75]) {
+    test(`E12 no seam at a real device scale factor of ${D}`, async ({ browser }, testInfo) => {
+      const { executablePath, args = [] } = testInfo.project.use.launchOptions;
+      const real = await browser.browserType().launch({ executablePath, args: [...args, `--force-device-scale-factor=${D}`, "--window-size=1440,900"] });
+      try {
+        // viewport: null lets the window size set the viewport; the undefined factor keeps the
+        // describe's emulated one out, which a null viewport rejects
+        const context = await real.newContext({ viewport: null, deviceScaleFactor: undefined });
+        const external = [];
+        await installFontRoutes(context, { external });
+        const page = await context.newPage();
+        await openHearth(page);
+        expect(await page.evaluate(() => [innerWidth, devicePixelRatio])).toEqual([1440, D]);
+        expect(await seamAtLeftEdge(page, D), "largest channel difference across the edge").toBe(0);
+        expect(external, "requests that left for an external host").toEqual([]);
+      } finally {
+        await real.close();
+      }
+    });
+  }
 
   test("E13 under reduced motion the hearth draws one still frame", async ({ browser }) => {
     const context = await browser.newContext({ ...DESKTOP, reducedMotion: "reduce" });
