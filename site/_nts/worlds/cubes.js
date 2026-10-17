@@ -401,7 +401,7 @@
     return [Math.atan2(v[0], v[2]), Math.asin(v[1])];
   };
   /* left (the default), straight, right: by yaw. Left looks along [2,1,1], where
-     place 3 covers the place three turns' steps below it exactly; right along
+     place 3 covers place -9 (a turn and three places below) exactly; right along
      [1,3,2], where place 8 covers place 2. */
   const POSES = [along([2, 1, 1]), [0, 0], along([1, 3, 2])];
   /* Turning is a single parameter, the yaw u; the pitch follows it on a cubic
@@ -464,7 +464,7 @@
     };
     const d = [leg(0, 3), leg(3, 6), leg(6, 9)];
     /* the tip's own cube is on both legs: it takes the default, left */
-    return d[0] < d[1] && d[0] < d[2] - 1e-9 ? 2 : 0;
+    return d[0] < d[1] - 1e-9 && d[0] < d[2] - 1e-9 ? 2 : 0;
   }
   const turn = { POSES, pitchAt, soften, wheel, landing, tapPose };
 

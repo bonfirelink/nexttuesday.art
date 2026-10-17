@@ -160,12 +160,12 @@
       hand.u = T.soften(hand.raw);
       if (reduce.matches) redraw();
     }
-    function letGo() {
+    function letGo(cancelled) {
       hand.active = false;
       /* under 6 px of travel is a tap: from a turned pose back to straight, from straight to the pose
          the tap's place picks; a longer drag lands by how far it went */
       const here = T.landing(hand.from, hand.from);
-      const to = hand.travel < 6 ? (here !== 1 ? 1 : T.tapPose(hand.px, hand.py)) : T.landing(hand.from, hand.u);
+      const to = hand.travel < 6 && !cancelled ? (here !== 1 ? 1 : T.tapPose(hand.px, hand.py)) : T.landing(hand.from, hand.u);
       hand.raw = hand.u; hand.v = 0; hand.aim = to;
       if (reduce.matches) { hand.u = hand.raw = T.POSES[to][0]; hand.aim = null; redraw(); }
     }
@@ -191,9 +191,10 @@
         turnBy(e.clientX - hand.x, e.clientY - hand.y);
         hand.x = e.clientX; hand.y = e.clientY;
       });
-      const release = () => { if (hand.active) letGo(); grab.up(); };
-      host.addEventListener("pointerup", release);
-      host.addEventListener("pointercancel", release);
+      const release = (cancelled) => { if (hand.active) letGo(cancelled); grab.up(); };
+      host.addEventListener("pointerup", () => release(false));
+      /* a cancelled touch is no tap: it lands by how far it went */
+      host.addEventListener("pointercancel", () => release(true));
     }
   }
   document.querySelectorAll(".nts-penrose").forEach((h) => mount(h, false));

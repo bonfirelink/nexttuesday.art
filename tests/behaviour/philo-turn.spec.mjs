@@ -76,3 +76,35 @@ test("R4 a drag under a third of the gap to the next pose goes back, over it goe
   await stroke(page, await figurePoint(page, 7), 0, 14, 7);
   near(await lastPose(page), RIGHT);
 });
+
+test("R5 under 6 px of travel is a tap, over it a drag; the spring never passes the pose; a cancelled press is no tap", async ({ page }) => {
+  // left leg, down: a 5 px stroke is a tap (straight to left), a 7 px one a drag of 4.4 degrees (back)
+  await open(page);
+  await stroke(page, await figurePoint(page, 7), 0, 5, 5);
+  near(await lastPose(page), LEFT);
+  await open(page);
+  await stroke(page, await figurePoint(page, 7), 0, 7, 7);
+  expect((await paints(page)).every((p) => p.yaw === 0 || Math.abs(p.yaw) < 0.1), "turned a little at most").toBe(true);
+  near(await lastPose(page), STRAIGHT);
+
+  // the run to the pose is critically damped: the yaw rises to the right pose and never beyond it
+  await open(page);
+  await stroke(page, await figurePoint(page, 2));
+  const yaws = (await paints(page)).map((p) => p.yaw);
+  expect(yaws.length, "painted on the way").toBeGreaterThan(3);
+  expect(yaws.every((y, i) => i === 0 || y >= yaws[i - 1] - 1e-9), "rising").toBe(true);
+  expect(Math.max(...yaws), "not past the pose").toBeLessThanOrEqual(RIGHT[0] + 1e-9);
+
+  // a press the browser cancels after a small move does not count as a tap
+  await open(page);
+  const [x, y] = await figurePoint(page, 2);
+  await page.mouse.move(x, y);
+  await page.mouse.move(x + 0.5, y);
+  await page.waitForTimeout(80);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 2, { steps: 2 });
+  await page.evaluate(() => document.querySelector(".nts-penrose").dispatchEvent(new PointerEvent("pointercancel", { pointerId: 1, bubbles: true })));
+  await page.mouse.up();
+  await page.waitForTimeout(SETTLE_MS);
+  expect((await paints(page)).every((p) => Math.abs(p.yaw) < 0.05), "still straight").toBe(true);
+});
