@@ -1,4 +1,4 @@
-// G1-G7. The PHILO figure's model (site/_nts/worlds/cubes.js), in node: the order of
+// G1-G9. The PHILO figure's model (site/_nts/worlds/cubes.js), in node: the order of
 // overlapping cubes straight on and turned, the three flat tones of every cube alike,
 // the screw, a motion with no jumps from one tick to the next, and the tick's timing.
 import { test, expect } from "../helpers/fixtures.mjs";
@@ -97,7 +97,46 @@ test("G7 the cubes tick every 3 s: at rest for 2 s, then a 1 s glide of one plac
     expect(at(2.999), "the glide lands").toBeCloseTo(k + 1, 2);
     expect(at(3), "the next tick starts at rest").toBe(k + 1);
     const p = [2.1, 2.3, 2.5, 2.7, 2.9].map(at);
-    expect(p.every((v, i) => i === 0 || v > p[i - 1]), "the glide only goes forward").toBe(true);
+    expect(p.every((v, i) => i === 0 || v > p[i - 1]), "the clock's phase only goes forward").toBe(true);
+  }
+});
+
+test("G9 the glide runs backward: each cube steps one place down the loop, the fades stay at the ends of the screw", () => {
+  const k = 4, at = (u) => k * cubes.TICK + u;
+  const times = [2.2, 2.4, 2.6, 2.8, 2.9];
+  for (const screw of [false, true]) {
+    const lows = times.map((u) => Math.min(...cubes.cubesAt(at(u), screw).filter((c) => c.h >= 0).map((c) => c.h)));
+    expect(lows.every((h, i) => h >= 0 && h < 1 && (i === 0 || h < lows[i - 1])), `${screw ? "screw" : "loop"}: the cube nearest the tip steps back`).toBe(true);
+  }
+  // the tip's cube goes back along the crossing path toward place 8
+  const crossing = times.map((u) => cubes.cubesAt(at(u), false).find((c) => c.h > 8).h);
+  expect(crossing.every((h, i) => i === 0 || h < crossing[i - 1]), "the cube from the tip heads for place 8").toBe(true);
+  // the turn above comes in at the top, the deepest turn goes out at the bottom
+  const top = times.map((u) => cubes.cubesAt(at(u), true).find((c) => c.h > 8).alpha);
+  const bottom = times.map((u) => { const s = cubes.cubesAt(at(u), true); return s.reduce((a, c) => (c.h < a.h ? c : a)).alpha; });
+  expect(top.every((a, i) => i === 0 || a > top[i - 1]), "the arriving cube fades in at the top").toBe(true);
+  expect(bottom.every((a, i) => i === 0 || a < bottom[i - 1]), "the deepest cube fades out").toBe(true);
+  // rest is the same picture as before: cubes on the whole places 0 to 8
+  expect(cubes.cubesAt(at(0.5), false).map((c) => c.h)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+});
+
+test("G10 turned, every other turn is a shade paler: the top turn in the plain tones, the next down thinned by a third of the way again", () => {
+  const rgb = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const mix = (a, b, f) => rgb(a).map((x, i) => Math.round(x + ((rgb(b)[i] - x) * Math.round(f * 24)) / 24)).join(",");
+  const [L] = layers(restAt(1), TURNED.yaw, TURNED.pitch);
+  for (const it of L.items) {
+    const turn = Math.floor(it.c.h / 9), tone = ((turn % 2) + 2) % 2, f = 1 - (1 - it.c.fade) * (1 - 0.3 * tone);
+    const want = [COL.top, COL.side, COL.dark].map((c) => (Math.round(f * 24) ? `rgb(${mix(c, COL.ground, f)})` : c));
+    expect(it.faces.map((x) => x.fill).sort(), `the faces of the cube at place ${it.c.h}`).toEqual(want.sort());
+  }
+  expect(L.items.some((it) => Math.floor(it.c.h / 9) === -1 && it.c.fade > 0), "the turn below the top one is drawn").toBe(true);
+});
+
+test("G11 the straight-on loop is untouched by the turns' tones: every cube in the plain tones whatever the clock", () => {
+  for (const t of [restAt(0), midAt(0), midAt(3), restAt(5)]) {
+    const [L] = layers(t);
+    expect(L.items.every((it) => it.c.fade === 0 && it.faces.every((f) => [COL.top, COL.side, COL.dark].includes(f.fill))), `plain tones at t=${t}`).toBe(true);
+    expect(L.items.every((it) => it.coreFill === COL.top)).toBe(true);
   }
 });
 
