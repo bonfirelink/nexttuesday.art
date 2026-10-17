@@ -29,7 +29,6 @@ test("S1 /events/ takes the home's set: the small orrery a black sun, the ledger
   expect(await style(page, "html", "scrollbarColor"), "scrollbar").toBe(`${m[LINE_STRONG]} ${t["--pal-beige"]}`);
   expect(await style(page, ".nts-home .nts-sigil", "color"), "header sigil").toBe(t["--pal-ink"]);
   expect(await style(page, ".nts-nav a[aria-current] span", "backgroundColor", "::after"), "current page's bar").toBe(t["--pal-ink"]);
-  expect(await style(page, ".nts-nav a[aria-current] .nts-sigil", "color"), "current page's sigil").toBe(t["--pal-ink"]);
   expect(await style(page, ".hero p", "backgroundColor", "::selection"), "selection").toBe(t["--pal-ink"]);
   expect(await style(page, ".hero p", "color", "::selection"), "selected text").toBe(t["--pal-bone"]);
   expect(await style(page, ".nts-footer .cols a", "color"), "footer link").toBe(t["--pal-ink"]);

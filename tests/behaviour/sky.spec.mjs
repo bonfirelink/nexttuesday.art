@@ -9,6 +9,7 @@
 // never two at once, the ring outside the face the morph names, and none
 // runs while the machine is stopped; S6 under
 // reduced motion they do not pulse. The eye's own beam is E6 (emblem.spec).
+// S7 the nav carries no sigil and its links do not move from page to page.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { open } from "../helpers/behaviour.mjs";
 import { BODIES as BEADS } from "../helpers/registry.mjs";
@@ -204,5 +205,22 @@ test.describe("S6 under reduced motion", () => {
       return cs.content === "none" || cs.display === "none" ? 0 : parseFloat(cs.opacity);
     }));
     expect(ring, "no ring shows").toEqual([0, 0, 0, 0]);
+  });
+});
+
+// S7 the nav carries no sigil, so its links sit where they are on every page.
+test.describe("S7 the nav at desktop width", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+  test("no sigil in the nav links, and the links do not move from page to page", async ({ page }) => {
+    const xs = [];
+    for (const p of ["/", "/embers/", "/not-not-philo/", "/intersect/", "/events/"]) {
+      await open(page, p);
+      xs.push(await page.evaluate(() => ({
+        sigils: document.querySelectorAll(".nts-nav .nts-sigil").length,
+        left: [...document.querySelectorAll(".nts-nav a")].map((a) => Math.round(a.getBoundingClientRect().left * 10) / 10),
+      })));
+    }
+    for (const x of xs) expect(x.sigils, "sigils in the nav").toBe(0);
+    for (const x of xs) expect(x.left, "link x-offsets").toEqual(xs[0].left);
   });
 });

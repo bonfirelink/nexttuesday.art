@@ -927,7 +927,7 @@ worlds, bodies and code tokens (`tests/helpers/registry.mjs`).
 
 1. The colours: the world's fixed tokens (`--<world>-*`) and its
    `--code-<world>` in section 1 of `nts.css`. They stay there, not in the
-   kit, because pages that do not load the kit read them (the nav's sigils,
+   kit, because pages that do not load the kit read them (the footer's sigils,
    the ledger, the beads on `/events/`). Its sigil in `tools/gen-sigils.mjs`.
 2. The kit: `_nts/worlds/<world>.css` (its `--w-*` set on
    `[data-world="<world>"]` and what it undoes before the bleed), its

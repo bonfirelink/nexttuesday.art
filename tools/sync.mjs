@@ -126,7 +126,7 @@ const sigil = (name, cls = '') => `<svg class="nts-sigil sigil-${name}${cls ? ' 
 function header(prefix, page) {
   const items = INITIATIVES.map((n) => {
     const cur = page === n.slug ? ' aria-current="page"' : '';
-    return `<li><a href="${prefix}${n.slug}/"${cur}>${sigil(n.world)}<span>${n.name}</span></a></li>`;
+    return `<li><a href="${prefix}${n.slug}/"${cur}><span>${n.name}</span></a></li>`;
   }).join('');
   const home = page === 'home' ? ' aria-current="page"' : '';
   return `<header class="nts-header"><div class="wrap bar">
