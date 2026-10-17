@@ -86,6 +86,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
    pointer events, so a drag anywhere else turns the solid. */
 .embers-hero.wrap { position: relative; isolation: isolate; width: 100%; padding-inline: max(var(--gutter), (100% - var(--wrap)) / 2); }
 .embers-hero > .nts-hearth { position: absolute; inset: 0; z-index: -1; }
+.embers-hero > .nts-hearth-live { z-index: -1; }
 .embers-hero .entity, .embers-hero .hero-text { pointer-events: none; }
 .embers-hero .hero-text > * { pointer-events: auto; }
 .embers-body .genres { margin: 1.25rem 0; }

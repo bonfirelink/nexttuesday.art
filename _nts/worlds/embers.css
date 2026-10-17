@@ -99,6 +99,18 @@ html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in
 
 /* the hearth */
 .nts-hearth { width: 100%; height: 100%; touch-action: pan-y; }
+/* the hearth's live canvas, placed and sized by the script over the box */
+.nts-hearth-live { position: absolute; pointer-events: none; }
+/* the still lines: one line period from the script, repeated; shown over
+   the lines' rows only, less the box the live canvas covers. The mask hides
+   paint, not the pointer, so a press on the solid still reaches the canvas. */
+.nts-hearth.is-split {
+  background: var(--hearth-lines) 0 0 / var(--hearth-tile) repeat;
+  -webkit-mask: linear-gradient(#000 0 0) var(--hearth-rows) no-repeat, linear-gradient(#000 0 0) var(--hearth-box) no-repeat;
+  -webkit-mask-composite: source-out;
+  mask: linear-gradient(#000 0 0) var(--hearth-rows) no-repeat, linear-gradient(#000 0 0) var(--hearth-box) no-repeat;
+  mask-composite: subtract;
+}
 .nts-hearth.is-grab { cursor: grab; }
 .nts-hearth.is-grabbing { cursor: grabbing; }
 .hearth-stage { position: relative; width: 100%; aspect-ratio: 1; max-height: 70svh; }
