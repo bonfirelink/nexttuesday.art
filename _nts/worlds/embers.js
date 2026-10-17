@@ -2,8 +2,9 @@
    it puts into a stack of horizontal lines. Each line is cast straight into
    the turning solid; where it crosses a face it ripples, harder and hotter
    on the faces turned from the light, and calms at the edges so the outline
-   reads. Hot lines run thicker and climb a heat ramp. Stoke it and it sheds
-   embers.
+   reads. Hot lines run thicker and climb a heat ramp. At rest nothing rises;
+   stoke it and it throws a burst of embers, mono characters that cool as
+   they climb (# * + ^ ·) and hop on a character grid.
    After "Wavy Cube" by Jon Kantner (jkantner), codepen.io/jkantner/pen/bNpaQJN
    (MIT): the scan-line idea, lighting-to-amplitude mapping and edge fade are
    his; the solid, the ray test, the heat ramp, the embers and the interaction
@@ -26,13 +27,16 @@
    pixels: it takes the pointer and the keys, and shows the straight lines
    as its CSS background, one line period drawn once per size and palette,
    repeated, with the box around the solid masked off (embers.css). Over it,
-   a small live canvas covers the box, up to the top of the hero where the
-   embers rise and a little to each side (wider while a stoke's burst is in
-   the air); it is the only thing cleared and redrawn each frame. Both use a
+   a small live canvas covers the box; while a stoke's burst is in the air
+   it reaches up to the top of the hero and out to each side, where the
+   embers fly; it is the only thing cleared and redrawn each frame. Both use a
    resolution whose pixels meet the screen's on a common grid, and every
    size and edge is snapped to it, so the lines run on unbroken across the
    box's edge; its top and bottom fall between two lines. On a touch screen
    the hearth draws at 1.5x and 24fps. The fragment, all box, is one canvas.
+   Each ember is one blit from a sheet of the five glyphs, drawn once per
+   palette at the live canvas's resolution with the glow baked in (again
+   once the mono has loaded): no text and no blur per frame.
    On each line the ray test runs only inside the solid's outline. Each
    colour is one path of chained polylines, which strokes to the same union
    as separate segments with round caps, for a fraction of the rasterising.
@@ -49,11 +53,11 @@
                    that element's box instead of the canvas's, so the lines
                    can fill a larger canvas around a solid of a set size
      data-fps      frame rate cap (60; fragments 24; 24 on a touch screen),
-                   lifted to 60 while a stoke is hot
+                   lifted to 60 while a stoke is hot or its embers fly
      data-max-px   budget in device pixels for what is redrawn each frame
                    (the live canvas on the page): the resolution drops below
                    the DPR to stay within it (no budget)
-     data-embers   "off" to shed none
+     data-embers   "off": a stoke throws no embers
      data-stoke    starting heat, 0..1 (0) */
 (() => {
   "use strict";
@@ -62,11 +66,13 @@
   const FACES = [[-1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1]].map((v) => v.map((c) => c / Math.sqrt(3)));
   const INRADIUS = 1 / Math.sqrt(3), EDGE_SIN = Math.sqrt(1 - 1 / 9);
   const NIGHT = {
+    name: "night",
     ramp: ["#6e1030", "#a3163c", "#e51d47", "#f03a3c", "#f2591b", "#ff7a3d", "#ffa05a", "#ffc082", "#ffd9a8", "#ffe9d0", "#fff4e6"],
     embers: ["#fff4e6", "#ffe9d0", "#ffc082", "#ff7a3d", "#f2591b", "#e51d47", "#a3163c"],
     halo: [[242, 89, 27], [229, 29, 71]], glow: "242, 89, 27", composite: "lighter",
   };
   const DAY = {
+    name: "day",
     ramp: ["#4a1a3a", "#6e1030", "#a3163c", "#c0103a", "#e51d47", "#ef3a32", "#f2591b", "#f57a1b", "#f59a1b", "#f5b31b", "#f5c24a"],
     embers: ["#f5b31b", "#f2591b", "#e51d47", "#c0103a", "#a3163c", "#6e1030", "#4a1a3a"],
     halo: [[242, 89, 27], [229, 29, 71]], glow: "229, 29, 71", composite: "multiply",
@@ -76,9 +82,16 @@
   const COARSE = 12; // px between samples where a line is flat
   const LINE_WIDTH = 0.9; // a plain line's stroke, in the live canvas and the still lines alike
   const BOX_SLACK = 5; // px around the circumcircle and the ripple: the glow's half width and its edge
-  const EMBER_ROOM = 40, BURST_ROOM = 170; // px the live canvas reaches beyond the box at each side: resting embers drift, a burst flies wide
+  const MAX_EMBERS = 220;
+  const BURST_ROOM = 170; // px the live canvas reaches beyond the box at each side while a burst flies wide
   const BURST_FPS = 60;
   const TOUCH = { fps: 24, dpr: 1.5 };
+  /* The embers are characters that cool as they climb, one step down the
+     palette's ember ramp each (indices into it), hopping on a character grid:
+     a column per mono advance, a row per line, the baseline on the line. */
+  const GLYPHS = ["#", "*", "+", "^", "·"], GLYPH_RAMP = [0, 2, 3, 5, 6];
+  /* bold: the weight the page's bar already loads, so the glyphs add no font file */
+  const GLYPH = { size: 15, weight: 700, advance: 0.6, pad: 5, blur: 4, font: '"Red Hat Mono", ui-monospace, Menlo, monospace' };
   const G = window.NTS && window.NTS.grab;
   const theme = () => (document.documentElement.getAttribute("data-bleed-state") === "before" ? DAY : NIGHT);
   const baseColour = (el) => getComputedStyle(el).getPropertyValue("--hearth-base").trim() || "rgba(229, 29, 71, 0.3)";
@@ -186,12 +199,26 @@
     const main = surface(canvas, (liveCanvas || canvas).getContext("2d"), theme(), baseColour(host));
     let night = null;
     const embers = [], hot = [];
+    /* hot samples are kept only on a stoke's draw; the first line's height
+       is kept with the box, for the embers' rows */
+    let sampleHot = false, lineTop = 0;
+    /* the glyphs' sprite sheets, one per palette, drawn at the live layer's
+       resolution with the glow baked in; redrawn when the resolution changes
+       and once the mono has loaded (the first may be a fallback face) */
+    const glyphSheets = new Map();
+    let fontGen = 0;
+    if (o.embers && document.fonts) {
+      const loaded = () => { fontGen++; };
+      document.fonts.load(`${GLYPH.weight} ${GLYPH.size}px ${GLYPH.font}`).then(loaded, () => {});
+      document.fonts.addEventListener?.("loadingdone", loaded);
+    }
     const runs = Array.from({ length: NB + 2 }, run), baseRun = runs[NB], glowRun = runs[NB + 1];
     const nx = new Float64Array(4), ny = new Float64Array(4), nz = new Float64Array(4), vx = new Float64Array(4), vy = new Float64Array(4);
 
     const geom = () => ({ gcx: ax + o.cx * aw, gcy: ay + o.cy * ah, size: Math.min(aw, ah) * o.size / Math.sqrt(3) });
     const maxRipple = () => o.spacing * o.amp * (1 + MAX_HEAT * 0.9);
-    const frameRate = () => (stoke > o.stoke0 + 0.15 ? BURST_FPS : o.fps);
+    /* a burst runs at 60 while its glyphs are in the air, however soon the heat cools */
+    const frameRate = () => (burstRoom || stoke > o.stoke0 + 0.15 ? BURST_FPS : o.fps);
     function rows() {
       const lines = Math.max(3, Math.floor((h - 8) / o.spacing));
       return { lines, top: (h - (lines - 1) * o.spacing) / 2, end: Math.floor(w / o.step) * o.step };
@@ -213,16 +240,15 @@
       }
       placeBox(); placeLayer(); showStillLines(main); if (night) showStillLines(night); draw();
     }
-    /* the budget covers what is redrawn: on the page the live canvas, about
-       the box's width with the resting room and down from the top to the
-       box's bottom; there the resolution is snapped to the screen's grid and
-       the hero's size to whole grid steps */
+    /* the budget covers what is redrawn: on the page the live canvas at
+       rest, about the box; there the resolution is snapped to the screen's
+       grid and the hero's size to whole grid steps */
     function chooseResolution() {
       const D = window.devicePixelRatio || 1;
       let area = w * h;
       if (liveCanvas) {
-        const { gcy, size } = geom(), R = size * Math.sqrt(3) + o.step + BOX_SLACK;
-        area = Math.min(w, 2 * (R + EMBER_ROOM)) * Math.max(1, Math.min(h, gcy + R + maxRipple() + BOX_SLACK));
+        const { size } = geom(), R = size * Math.sqrt(3) + o.step + BOX_SLACK;
+        area = Math.min(w, 2 * R) * Math.max(1, Math.min(h, 2 * (R + maxRipple() + BOX_SLACK)));
       }
       dpr = Math.min(D, o.maxDpr, Math.sqrt(o.maxPx / area));
       if (!liveCanvas) return;
@@ -234,6 +260,7 @@
        sizes, inside the circumcircle's 1.73); its top and bottom fall midway
        between two lines, so no line crosses them */
     function placeBox() {
+      lineTop = rows().top;
       if (!liveCanvas) { box = { x0: 0, y0: 0, x1: w, y1: h }; return; }
       const { gcx, gcy, size } = geom(), R = size * Math.sqrt(3) + o.step + BOX_SLACK, v = maxRipple() + BOX_SLACK;
       const { top } = rows(), sp = o.spacing;
@@ -244,14 +271,14 @@
         x1: snap(gcx + R, Math.ceil, w), y1: snap(between(gcy + R + v, Math.ceil), Math.ceil, h),
       };
     }
-    /* the live canvas spans the box, up to the top for the embers' rise and
-       out to the sides for their drift */
+    /* the live canvas spans the box; while a burst is in the air, up to the
+       top for the embers' rise and out to the sides for their flight */
     function placeLayer() {
       if (!liveCanvas) { layer = { x: 0, y: 0, w, h }; return; }
       /* the burst's room can take the backing store over data-max-px, for the burst's second or two */
-      const room = burstRoom ? BURST_ROOM : EMBER_ROOM;
+      const room = burstRoom ? BURST_ROOM : 0, y = burstRoom ? 0 : box.y0;
       const x = Math.max(0, Math.floor((box.x0 - room) / unit) * unit);
-      layer = { x, y: 0, w: Math.min(w, Math.ceil((box.x1 + room) / unit) * unit) - x, h: box.y1 };
+      layer = { x, y, w: Math.min(w, Math.ceil((box.x1 + room) / unit) * unit) - x, h: box.y1 - y };
       for (const el of [liveCanvas, liveTwin]) {
         if (!el) continue;
         el.style.left = layer.x + "px"; el.style.top = layer.y + "px"; el.style.width = layer.w + "px"; el.style.height = layer.h + "px";
@@ -299,7 +326,7 @@
       if (moved) measure();
     }
     /* the lines in the box, over its width, into the runs; the hot samples
-       the embers are shed from into `hot` */
+       where a burst of embers starts, into `hot` */
     function traceLines() {
       const { gcx, gcy, size } = geom();
       const dist = INRADIUS * size, Rv = size * Math.sqrt(3);
@@ -347,8 +374,8 @@
               y += Math.sin(sxp * o.wave - t * o.speed + i * 0.7) * amp * k;
               const hk = Math.min(1, k * (0.75 + heat * 0.6) + heat * 0.2 * e);
               bucket = k < 0.03 ? -1 : Math.min(NB - 1, Math.floor(hk * (NB - 1) + 0.5));
-              /* about one hot sample in 12.5 is kept for shedding */
-              if (o.embers && hk > 0.5 && hot.length < 240 && --skip <= 0) { hot.push(sxp, y, hk); skip = 1 + ((Math.random() * 24) | 0); }
+              /* about one hot sample in 12.5 is kept, for a stoke's burst to start from */
+              if (sampleHot && hk > 0.5 && hot.length < 240 && --skip <= 0) { hot.push(sxp, y, hk); skip = 1 + ((Math.random() * 24) | 0); }
             }
           }
           if (!first) {
@@ -395,14 +422,15 @@
       if (q > 0) paint(night);
     }
 
-    function shed(count, burst) {
+    /* a stoke's burst: embers thrown up and wide from the hot samples; each
+       cools through the glyphs in 1.8 to 4.3 s (sooner if it leaves the top) */
+    function throwBurst(count) {
       if (!o.embers || hot.length < 3) return;
       const nn = hot.length / 3;
-      for (let i = 0; i < count && embers.length < 220; i++) {
+      for (let i = 0; i < count && embers.length < MAX_EMBERS; i++) {
         const j = Math.floor(Math.random() * nn) * 3;
-        const speed = burst ? 60 + Math.random() * 140 : 18 + Math.random() * 40;
-        const ang = -Math.PI / 2 + (Math.random() - 0.5) * (burst ? 1.6 : 0.7);
-        embers.push({ x: hot[j], y: hot[j + 1], vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, life: 1, decay: burst ? 0.35 + Math.random() * 0.5 : 0.18 + Math.random() * 0.25, r: 0.8 + Math.random() * (burst ? 2.2 : 1.4), ph: Math.random() * TAU, burst });
+        const speed = 60 + Math.random() * 140, ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.6;
+        embers.push({ x: hot[j], y: hot[j + 1], vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, life: 1, decay: (0.35 + Math.random() * 0.5) / 1.5, ph: Math.random() * TAU });
       }
     }
     function stepEmbers(dt) {
@@ -414,16 +442,34 @@
         e.x += e.vx * dt; e.y += e.vy * dt;
       }
     }
+    /* every size in whole grid steps, so a blit lands pixel for pixel */
+    const snapU = (x) => Math.max(1, Math.round(x / unit)) * unit;
+    function glyphSheet(P) {
+      const had = glyphSheets.get(P);
+      if (had && had.dpr === dpr && had.unit === unit && had.gen === fontGen) return had;
+      const half = snapU(GLYPH.size / 2 + GLYPH.pad), cell = 2 * half, base = snapU(GLYPH.pad + GLYPH.size * 0.8), px = Math.round(cell * dpr);
+      const k = document.createElement("canvas");
+      k.width = px * GLYPHS.length; k.height = px;
+      const g = k.getContext("2d");
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.font = `${GLYPH.weight} ${GLYPH.size}px ${GLYPH.font}`; g.textAlign = "center"; g.textBaseline = "alphabetic";
+      /* the blur is in backing pixels, whatever the transform */
+      g.shadowColor = `rgba(${P.glow}, 0.75)`; g.shadowBlur = GLYPH.blur * dpr;
+      GLYPHS.forEach((ch, i) => { g.fillStyle = P.embers[GLYPH_RAMP[i]]; g.fillText(ch, i * cell + half, base); });
+      const sheet = { canvas: k, dpr, unit, gen: fontGen, half, cell, base, px, col: snapU(GLYPH.size * GLYPH.advance) };
+      glyphSheets.set(P, sheet);
+      return sheet;
+    }
+    /* each ember one blit: the glyph for how far it has cooled, on the
+       character grid, fading with its life */
     function drawEmbers(c, P) {
       if (!embers.length) return;
+      const S = glyphSheet(P), top = lineTop, sp = o.spacing, n = GLYPHS.length;
       c.save(); c.globalCompositeOperation = P.composite;
       for (const e of embers) {
-        const col = P.embers[Math.min(P.embers.length - 1, Math.floor((1 - e.life) * P.embers.length))];
-        const r = e.r * (0.4 + e.life * 0.8);
-        c.globalAlpha = Math.min(1, e.life * 1.6) * 0.3; c.fillStyle = col;
-        c.beginPath(); c.arc(e.x, e.y, r * 3, 0, TAU); c.fill();
+        const gx = Math.round(e.x / S.col) * S.col, gy = Math.round((top + Math.round((e.y - top) / sp) * sp) / unit) * unit;
         c.globalAlpha = Math.min(1, e.life * 1.6);
-        c.beginPath(); c.arc(e.x, e.y, r, 0, TAU); c.fill();
+        c.drawImage(S.canvas, Math.min(n - 1, Math.floor((1 - e.life) * n)) * S.px, 0, S.px, S.px, gx - S.half, gy - S.base, S.cell, S.cell);
       }
       c.restore();
     }
@@ -441,13 +487,13 @@
       if (!dragging) yaw = (yaw + spin * dt) % TAU;
       pitch = 0.5 + Math.sin(tilt * 0.23) * 0.35;
       stoke = o.stoke0 + (stoke - o.stoke0) * Math.exp(-dt * 1.4);
-      if (o.embers && Math.random() < dt * (1.5 + stoke * 14)) shed(1 + Math.floor(stoke * 2), false);
       stepEmbers(dt);
-      /* a resized canvas is blank: it is drawn at once */
-      if (burstRoom && !embers.some((e) => e.burst)) { setBurstRoom(false); draw(); acc = 0; }
+      /* the burst is over once its last ember is gone; a resized canvas is
+         blank, so it is drawn at once */
+      if (burstRoom && !embers.length) { setBurstRoom(false); draw(); acc = 0; }
       acc += dt;
-      /* a burst of embers after a stoke is fast; the rest of the motion is
-         slow enough for the frame cap */
+      /* a stoke's burst is fast; the rest of the motion is slow enough for
+         the frame cap */
       const fps = frameRate();
       if (acc >= 1 / fps) { acc = acc % (1 / fps); draw(); }
       schedule();
@@ -456,16 +502,21 @@
     function halt() { if (raf) cancelAnimationFrame(raf); raf = 0; last = 0; }
     function stokeIt() {
       stoke = Math.min(MAX_HEAT, stoke + 0.85);
+      /* reduced motion: the still frame takes the heat for a moment, no burst */
+      if (still.matches) { draw(); stoke = o.stoke0; return; }
       if (o.embers) setBurstRoom(true);
-      draw(); shed(26 + Math.floor(stoke * 16), true);
-      if (still.matches) { setBurstRoom(false); draw(); embers.length = 0; stoke = o.stoke0; }
+      /* this draw keeps the hot samples the burst starts from */
+      sampleHot = o.embers; draw(); sampleHot = false;
+      throwBurst(26 + Math.floor(stoke * 16));
     }
     canvas.ntsPose = () => [yaw, pitch + pitchDrag];
-    /* heat, frame-rate cap, resolution, box (x, y, w, h in css px of the
-       canvas), line spacing and the first line's height, for the tests */
+    /* heat, frame-rate cap, resolution, box and live canvas (x, y, w, h in
+       css px of the canvas), line spacing, the first line's height, embers
+       in the air and the palettes a glyph sheet was drawn for, for the tests */
     canvas.ntsHearth = () => ({
       heat: stoke, fps: frameRate(), dpr, spacing: o.spacing, firstLine: rows().top,
       box: box ? [box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0] : null,
+      layer: [layer.x, layer.y, layer.w, layer.h], embers: embers.length, glyphSheets: [...glyphSheets.keys()].map((P) => P.name),
     });
     if (o.interactive) {
       const hand = G.watch(canvas, onFigure);
