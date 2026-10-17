@@ -118,17 +118,22 @@ the hero:
   is snapped to that step; the box's top and bottom fall midway between
   two lines. At a resolution that scales to the screen by a non-integer
   factor the CSS background and the canvas are resampled differently,
-  hence the snapping of the resolution itself, not just the edges.
+  hence the snapping of the resolution itself, not just the edges. Measured,
+  it does not hold at fractional screen ratios: the seam is 12-13 of 255
+  at DPR 1.25 and 1.75 (cause not established), and 0 at 2 and 3 (4 on a
+  phone, where the live layer is scaled 2x).
 - `data-max-px="3000000"` budgets what is redrawn, the live canvas at
   rest (the box), so on desktop it draws at the screen's resolution; a
   burst's wider canvas may go over it for its few seconds. On a touch
   screen (`pointer: coarse`) the hearth draws at 1.5x and 24fps (60 again
-  while a stoke is hot or its embers are in the air, as everywhere). The ray test runs only inside the
+  while a stoke or one of its embers is hot, as everywhere; an ember is hot
+  until it reaches `^`, so the last cooled glyphs drift at the resting
+  rate while the wider canvas stays until the last one is gone). The ray test runs only inside the
   solid's outline on each line, and each colour is one path of chained
   polylines in buffers kept across frames.
 - `canvas.ntsHearth()` reports heat, frame-rate cap, resolution, box,
   the live canvas's rect, line spacing, the first line's height, the
-  embers in the air and the palettes a glyph sheet was drawn for, for the
+  embers in the air (and how many are still hot) and the palettes a glyph sheet was drawn for, for the
   tests (as `ntsPose()` reports the turn).
 
 ## NOT NOT PHILO

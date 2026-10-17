@@ -58,6 +58,19 @@ async function pixelDiff(page, pngs, pairs) {
   }, [pngs.map((p) => p.toString("base64")), pairs]);
 }
 
+// whether the four vertices of the solid, joined in face order, cross themselves in
+// a pose [yaw, pitch]: the vertex opposite a face projects to minus the turned normal
+function crosses([yaw, pitch]) {
+  const k = 1 / Math.sqrt(3), cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const P = [[-k, -k, -k], [-k, k, k], [k, -k, k], [k, k, -k]].map((v) => {
+    const x = v[0] * cy + v[2] * sy, z = -v[0] * sy + v[2] * cy;
+    return [x, v[1] * cp - z * sp];
+  });
+  const side = (a, b, c) => Math.sign((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]));
+  const cut = (a, b, c, d) => side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0;
+  return cut(P[0], P[1], P[2], P[3]) || cut(P[1], P[2], P[3], P[0]);
+}
+
 test.describe("desktop", () => {
   test.use(DESKTOP);
 
@@ -97,6 +110,40 @@ test.describe("desktop", () => {
     await page.locator("canvas.nts-hearth").focus();
     await page.keyboard.press("Enter");
     expect((await hearth(page)).heat, "heat after Enter").toBeGreaterThan(h2.heat + 0.5);
+  });
+
+  test("E9 a tap on the solid stokes it in poses where the projected faces cross themselves", async ({ page }) => {
+    await openHearth(page);
+    await page.locator("canvas.nts-hearth").focus();
+    const cool = () => page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsHearth().heat < 0.7, null, { timeout: 10_000 });
+    // the resting pitch is 0.5 + 0.35 sin(0.23 t): the face-order polygon crosses itself
+    // only below a pitch of about 0.785, so a search starts in the low half of the swing
+    const lowPitch = () => page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsPose()[1] < 0.7, null, { timeout: 20_000 });
+    const pose = () => page.evaluate(() => document.querySelector("canvas.nts-hearth").ntsPose());
+    const tap = async (label) => {
+      const h0 = await hearth(page), r = await rects(page);
+      await page.mouse.click(r.stage.x + r.stage.width / 2, r.stage.y + r.stage.height / 2);
+      expect((await hearth(page)).heat, `heat after a tap, ${label}`).toBeGreaterThan(h0.heat + 0.5);
+    };
+    await cool();
+    await tap("in the first pose");
+    // the arrow keys turn the solid in 0.2 rad steps; turn until the four vertices,
+    // joined in face order, cross themselves, and tap there. Each of the three taps
+    // is in a pose of its own: the keys first leave the previous crossing.
+    let crossing = 0, presses = 0;
+    const turn = async (until) => {
+      while (crosses(await pose()) !== until) {
+        expect(++presses, "key presses").toBeLessThan(200);
+        await page.keyboard.press("ArrowLeft");
+      }
+    };
+    while (crossing < 3) {
+      await cool();
+      await lowPitch();
+      await turn(false);
+      await turn(true);
+      await tap(`in a crossing pose (${++crossing})`);
+    }
   });
 
   test("E10 a fine pointer: the page's frame rate (30), the largest grid resolution within the budget", async ({ page }) => {
@@ -139,6 +186,9 @@ test.describe("desktop", () => {
     const d = await pixelDiff(page, shots, pairs);
     expect(Math.max(...d), "largest channel difference across the edge").toBe(0);
   });
+
+  // Unguarded: at a fractional screen ratio the seam is not zero (measured 12-13/255
+  // at DPR 1.25 and 1.75); the cause is not established, so there is no bound to assert.
 
   test("E13 under reduced motion the hearth draws one still frame", async ({ browser }) => {
     const context = await browser.newContext({ ...DESKTOP, reducedMotion: "reduce" });
@@ -234,7 +284,7 @@ test.describe("desktop: a stoke's burst", () => {
     expect(r.live.height).toBeCloseTo(h.layer[3], 1);
   });
 
-  test("E17 a tap's burst: the live canvas reaches up and out at 60fps while its glyphs are in the air, then shrinks back to the box", async ({ page }) => {
+  test("E17 a tap's burst: the live canvas reaches up and out at 60fps while a glyph is hot, then shrinks back to the box", async ({ page }) => {
     await openHearth(page);
     const rest = await hearth(page), stoke0 = await restingHeat(page);
     await tapStage(page);
@@ -244,11 +294,17 @@ test.describe("desktop: a stoke's burst", () => {
     expect(h.layer[0]).toBeLessThan(rest.layer[0]);
     expect(h.layer[0] + h.layer[2]).toBeGreaterThan(rest.layer[0] + rest.layer[2]);
     expect(h.fps).toBe(60);
-    // the heat cools before the glyphs do; the burst keeps its 60 while they fly
+    // the heat cools before the glyphs do; the burst keeps its 60 while a glyph is hot
     await page.waitForFunction((s) => document.querySelector("canvas.nts-hearth").ntsHearth().heat < s + 0.15, stoke0, { timeout: 5000 });
     const cooled = await hearth(page);
-    expect(cooled.embers, "glyphs still in the air once the heat is down").toBeGreaterThan(0);
+    expect(cooled.hot, "hot glyphs once the heat is down").toBeGreaterThan(0);
     expect(cooled.fps).toBe(60);
+    // once none is hot the rate drops to the resting one, the wide canvas stays while glyphs fly
+    await page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsHearth().hot === 0, null, { timeout: 10_000 });
+    const drifting = await hearth(page);
+    expect(drifting.fps).toBe(30);
+    // skipped when the last glyph died before the read: the layer is already back to the box
+    if (drifting.embers > 0) expect(drifting.layer, "wide while any glyph is in the air").not.toEqual(drifting.box);
     await page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsHearth().embers === 0, null, { timeout: 10_000 });
     const after = await hearth(page);
     expect(after.layer).toEqual(after.box);
@@ -308,5 +364,16 @@ test.describe("desktop: a stoke's burst", () => {
     expect(h.embers).toBe(0);
     expect(h.layer).toEqual(h.box);
     await context.close();
+  });
+
+  test("E21 reduced motion switched on mid-burst drops the glyphs and narrows the live canvas", async ({ page }) => {
+    await openHearth(page);
+    await tapStage(page);
+    expect((await hearth(page)).embers, "glyphs thrown").toBeGreaterThan(0);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.waitForTimeout(300);
+    const h = await hearth(page);
+    expect(h.embers, "glyphs left in the air").toBe(0);
+    expect(h.layer).toEqual(h.box);
   });
 });
