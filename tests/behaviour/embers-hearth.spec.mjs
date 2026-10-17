@@ -1,8 +1,11 @@
 // The EMBERS hearth on its page: a small live canvas over the box around the
 // solid is the only thing redrawn; the straight lines around it are the hearth
 // canvas's CSS background, masked off the box, and meet the live lines without
-// a seam. The hearth canvas keeps the pointer and the keys.
+// a seam. The hearth canvas keeps the pointer and the keys. At rest nothing
+// rises; a stoke throws one burst of glyphs, and only while they are in the
+// air does the live canvas reach up and out.
 import { test, expect } from "../helpers/fixtures.mjs";
+import { clickWorldLink } from "../helpers/transitions.mjs";
 
 const DESKTOP = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true };
@@ -201,5 +204,109 @@ test.describe("phone", () => {
     // the live layer at 1.5x is scaled 2x to the screen, the lines' tile too; the two
     // resamplings differ by a few levels at most
     expect(Math.max(...d), "largest channel difference between the two lines").toBeLessThanOrEqual(4);
+  });
+});
+
+// a tap on the solid's stage, as E9
+async function tapStage(page) {
+  const r = await rects(page);
+  await page.mouse.click(r.stage.x + r.stage.width / 2, r.stage.y + r.stage.height / 2);
+}
+const restingHeat = (page) => page.evaluate(() => +document.querySelector("canvas.nts-hearth").dataset.stoke || 0);
+
+test.describe("desktop: a stoke's burst", () => {
+  test.use(DESKTOP);
+
+  test("E15 at rest no embers rise", async ({ page }) => {
+    await openHearth(page);
+    await page.waitForTimeout(2500);
+    expect((await hearth(page)).embers).toBe(0);
+  });
+
+  test("E16 at rest the live canvas is the box, short of the hero's top", async ({ page }) => {
+    await openHearth(page);
+    const h = await hearth(page), r = await rects(page);
+    expect(h.layer).toEqual(h.box);
+    expect(h.layer[1], "the box's top, below the hero's").toBeGreaterThan(0);
+    // the element is where the accessor says
+    expect(r.live.x - r.canvas.x).toBeCloseTo(h.layer[0], 1);
+    expect(r.live.y - r.canvas.y).toBeCloseTo(h.layer[1], 1);
+    expect(r.live.height).toBeCloseTo(h.layer[3], 1);
+  });
+
+  test("E17 a tap's burst: the live canvas reaches up and out at 60fps while its glyphs are in the air, then shrinks back to the box", async ({ page }) => {
+    await openHearth(page);
+    const rest = await hearth(page), stoke0 = await restingHeat(page);
+    await tapStage(page);
+    const h = await hearth(page);
+    expect(h.embers, "glyphs thrown").toBeGreaterThan(0);
+    expect(h.layer[1], "up to the hero's top").toBe(0);
+    expect(h.layer[0]).toBeLessThan(rest.layer[0]);
+    expect(h.layer[0] + h.layer[2]).toBeGreaterThan(rest.layer[0] + rest.layer[2]);
+    expect(h.fps).toBe(60);
+    // the heat cools before the glyphs do; the burst keeps its 60 while they fly
+    await page.waitForFunction((s) => document.querySelector("canvas.nts-hearth").ntsHearth().heat < s + 0.15, stoke0, { timeout: 5000 });
+    const cooled = await hearth(page);
+    expect(cooled.embers, "glyphs still in the air once the heat is down").toBeGreaterThan(0);
+    expect(cooled.fps).toBe(60);
+    await page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsHearth().embers === 0, null, { timeout: 10_000 });
+    const after = await hearth(page);
+    expect(after.layer).toEqual(after.box);
+    expect(after.fps).toBe(30);
+  });
+
+  test("E18 the glyphs are blitted from a sheet drawn once: no text is drawn while they fly", async ({ page }) => {
+    await page.addInitScript(() => {
+      const ink = (window.__ink = { text: 0, liveBlits: 0 }), P = CanvasRenderingContext2D.prototype;
+      const fillText = P.fillText, drawImage = P.drawImage;
+      P.fillText = function (...a) { ink.text++; return fillText.apply(this, a); };
+      P.drawImage = function (...a) { if (this.canvas.classList.contains("nts-hearth-live")) ink.liveBlits++; return drawImage.apply(this, a); };
+    });
+    await openHearth(page);
+    await tapStage(page);
+    // the burst is in the air and its sheet drawn
+    await page.waitForFunction(() => { const h = document.querySelector("canvas.nts-hearth").ntsHearth(); return h.embers > 0 && h.glyphSheets.length === 1; });
+    await page.evaluate(() => { window.__ink.text = 0; window.__ink.liveBlits = 0; });
+    await page.waitForTimeout(500);
+    const ink = await page.evaluate(() => window.__ink), h = await hearth(page);
+    expect(ink.text, "text drawn during the burst").toBe(0);
+    expect(ink.liveBlits, "glyphs blitted to the live canvas").toBeGreaterThan(10);
+    expect(h.glyphSheets, "one sheet, the night's").toEqual(["night"]);
+  });
+
+  test("E19 through the bleed-in the glyphs take the palette of the ground under them: a sheet for the day and one for the night", async ({ page }) => {
+    await page.goto(process.env.NTS_BASE + "/");
+    await page.evaluate(() => document.fonts.ready);
+    await clickWorldLink(page, "embers");
+    await page.waitForSelector("canvas.nts-hearth.is-split");
+    // halfway through the disc's opening, both palettes are drawn
+    await page.evaluate(() => {
+      const r = document.querySelector("main .hero").getBoundingClientRect(), t = document.querySelector("main .hero h1").getBoundingClientRect();
+      const bar = document.querySelector(".nts-header").getBoundingClientRect().height;
+      const end = Math.max(Math.min(r.top + scrollY + r.height / 2, t.top + scrollY - bar - Math.round(innerHeight * 0.02)), innerHeight * 0.1);
+      scrollTo({ top: end / 2, behavior: "instant" });
+    });
+    await page.waitForFunction(() => { const q = window.NTS.bleed.progress(); return q > 0 && q < 1; });
+    // right after the navigation the view transition's pseudo-elements take the hit test
+    await page.waitForFunction(() => {
+      const s = document.querySelector(".embers-hero .hearth-stage").getBoundingClientRect();
+      return document.elementFromPoint(s.x + s.width / 2, s.y + s.height / 2) === document.querySelector("canvas.nts-hearth");
+    });
+    await tapStage(page);
+    await page.waitForFunction(() => document.querySelector("canvas.nts-hearth").ntsHearth().glyphSheets.length === 2, null, { timeout: 3000 });
+    expect((await hearth(page)).glyphSheets.sort()).toEqual(["day", "night"]);
+  });
+
+  test("E20 under reduced motion no glyphs, at rest or after a tap", async ({ browser }) => {
+    const context = await browser.newContext({ ...DESKTOP, reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await openHearth(page);
+    await page.waitForTimeout(800);
+    expect((await hearth(page)).embers).toBe(0);
+    await tapStage(page);
+    const h = await hearth(page);
+    expect(h.embers).toBe(0);
+    expect(h.layer).toEqual(h.box);
+    await context.close();
   });
 });

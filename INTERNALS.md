@@ -613,8 +613,8 @@ EMBERS (`worlds/embers.css`, `worlds/embers.js`). Classes: `.embers-display`
 the right from 900px inside `.embers-hero`), `.genres`. The entity is
 `<canvas class="nts-hearth" tabindex="0" aria-label="…">` inside a
 `.hearth-stage`, with a `.hearth-still` for scripts off (`<!-- nts:still embers -->`).
-Data attributes tune it (see the file head). Drag turns, tap stokes,
-keyboard works. It draws its day palette while the page is `before`; while
+Data attributes tune it (see the file head). Drag turns, a tap stokes it
+into a burst of glyph embers, keyboard works. It draws its day palette while the page is `before`; while
 the bleed-in's disc opens it draws the night into the twins in the copy
 and the day into itself, both from one geometry. On `/embers/` the canvas is the
 landing's field: it is the hero's first child, absolute over the whole
@@ -638,11 +638,27 @@ the hero:
   (`--hearth-box`). The mask hides paint, not the pointer: a press on the
   solid reaches the canvas.
 - `canvas.nts-hearth-live`, made by the script just after it, covers the
-  box (the circumcircle, the ripple at its hottest, the glow and halo),
-  up to the hero's top where the embers rise, and 40px to each side for
-  their drift, 170px while a stoke's burst is in the air (then it narrows
-  again). It is the only thing cleared and redrawn each frame;
-  `aria-hidden`, `pointer-events: none`.
+  box (the circumcircle, the ripple at its hottest, the glow and halo) and
+  nothing more at rest. While a stoke's embers are in the air it reaches
+  up to the hero's top and 170px to each side, then shrinks back to the
+  box once the last one is gone: one resize at the burst's start and one
+  at its end, each redrawn in the same task, so no blank frame shows. It
+  is the only thing cleared and redrawn each frame; `aria-hidden`,
+  `pointer-events: none`.
+- Embers come only from a stoke (a tap on the solid, Space or Enter):
+  nothing rises at rest. A burst throws 26 + 16 × heat of them (220 at
+  most) from the hottest ripples; each is a Red Hat Mono bold character (the weight the bar already loads) that
+  cools as it climbs, `#` `*` `+` `^` `·`, one step down the palette's
+  ember ramp each, and lives 1.8 to 4.3 s (less if it leaves the top). They hop on a character grid:
+  a column per mono advance (0.6 em of the 15px glyph), a row per line,
+  the baseline on the line, every step snapped to the resolution's grid.
+  Each is one blit from a glyph sheet, the five characters drawn once per
+  palette at the live canvas's resolution with the glow baked in, and
+  drawn again when the resolution changes or the mono finishes loading;
+  no text and no blur is drawn per frame. The sheet follows the palette
+  being painted, so through the bleed-in the day's glyphs and the night's
+  each fall on their own ground. Under reduced motion there are none: the
+  still frame takes a stoke's heat for a moment and throws nothing.
 - No seam where the lines cross the box's edge: both layers use a
   resolution whose pixels meet the screen's on a common grid (`dpr = DPR
   × m / n`, a grid step every `n / DPR` css px), and every size and edge
@@ -650,15 +666,17 @@ the hero:
   two lines. At a resolution that scales to the screen by a non-integer
   factor the CSS background and the canvas are resampled differently,
   hence the snapping of the resolution itself, not just the edges.
-- `data-max-px="3000000"` budgets what is redrawn, the live canvas, so on
-  desktop it draws at the screen's resolution. On a touch screen
-  (`pointer: coarse`) the hearth draws at 1.5x and 24fps (60 again while
-  a stoke is hot, as everywhere). The ray test runs only inside the
+- `data-max-px="3000000"` budgets what is redrawn, the live canvas at
+  rest (the box), so on desktop it draws at the screen's resolution; a
+  burst's wider canvas may go over it for its few seconds. On a touch
+  screen (`pointer: coarse`) the hearth draws at 1.5x and 24fps (60 again
+  while a stoke is hot or its embers are in the air, as everywhere). The ray test runs only inside the
   solid's outline on each line, and each colour is one path of chained
   polylines in buffers kept across frames.
 - `canvas.ntsHearth()` reports heat, frame-rate cap, resolution, box,
-  line spacing and the first line's height, for the tests (as
-  `ntsPose()` reports the turn).
+  the live canvas's rect, line spacing, the first line's height, the
+  embers in the air and the palettes a glyph sheet was drawn for, for the
+  tests (as `ntsPose()` reports the turn).
 
 NOT NOT PHILO (`worlds/philo.css`, `worlds/cubes.js`, `worlds/philo.js`);
 its hero lines are laid out as World hero text says.
