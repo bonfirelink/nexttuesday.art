@@ -319,6 +319,44 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
   .intro h1 { max-width: 8ch; }
   .turn { text-align: left; }
 }
+/* ---------- a short landscape screen: the desktop arrangement ---------- */
+/* A phone held sideways, at any width, takes the desktop arrangement on
+   every page: the words beside the figure, which is sized from the height.
+   The figure is the --stage square, --stage-pad under the header and clear
+   of the screen's foot, so the whole orbit and the title share the first
+   screen. The home's sky and every world's entity are that square, on the
+   right of the same columns and at the top of their row (so the centre
+   does not move with the words' height): the home's outer orbit stays the
+   worlds' trace ring, same diameter and centre. CSS has no named media
+   query, so the whole mode is this one block; every page loads this file
+   after the world kits and pages.css, so it wins over their rules at the
+   same weight. 480px is above every phone held sideways (430 at most); a
+   short desktop window (500 high) keeps the desktop layout and its 92svh
+   caps. */
+@media (orientation: landscape) and (max-height: 480px) {
+  :root { --stage-pad: 1rem; --stage: min(var(--entity-w), 100svh - var(--bar-h) - 2 * var(--stage-pad)); }
+  :is(.threshold, .hero) { grid-template-columns: minmax(0, 1fr) var(--stage); align-items: center; min-height: 0; column-gap: clamp(1.5rem, 5vw, 3rem); padding-top: var(--stage-pad); }
+  :is(.sky, .hero .entity) { order: 2; align-self: start; }
+  /* the home: the emblem centred in the square, its outer orbit the ring */
+  .sky { height: var(--stage); align-content: center; margin-inline: 0; padding-top: 0; overflow-x: visible; }
+  .orrery { width: calc((var(--stage) - var(--ring-inset)) / var(--orbit-share)); margin-inline: auto; }
+  .intro { justify-items: start; text-align: left; }
+  .intro h1 { max-width: 8ch; font-size: min(clamp(2.6rem, 11.5vw, 5.5rem), 13svh); }
+  .turn { text-align: left; }
+  /* the worlds: the entity is the square; EMBERS' stage is no shorter than
+     it, PHILO's caption hangs in the hero's bottom padding, and its ring
+     plate is centred on the square (philo.css has the plate's formulas) */
+  .hero .entity { width: var(--stage); }
+  .hearth-stage { max-height: none; }
+  .philo-hero .entity { margin-bottom: 0; }
+  .philo-rings { --pt: var(--stage-pad); --ew: var(--stage); --cx: calc(100% - var(--pad) - var(--stage) / 2); --cy: calc(var(--pt) + var(--stage) / 2); }
+  /* EVENTS: the entity is the square beside the words, the small orrery
+     keeps its phone size inside it at every width (the class more outweighs
+     the 900px rule below), and the title is capped by the height to fit
+     its column */
+  .events-hero .entity > .mini-orrery { width: min(64%, 13rem); }
+  .events-hero h1 { font-size: min(clamp(3rem, 14vw, 7rem), 20svh); }
+}
 
 /* ---------- the journey: handovers and worlds ---------- */
 /* The handover between two sections: a short dotted plumb line in the
