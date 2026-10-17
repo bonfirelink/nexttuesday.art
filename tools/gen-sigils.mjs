@@ -1,6 +1,7 @@
 /* Writes site/_nts/sigils.svg, the sigil sprite. Run from anywhere:
      node tools/gen-sigils.mjs
-   Every sigil is line art on a 64 x 64 box in currentColor, stroke 2.4, and
+   Every sigil is line art on a 64 x 64 box in currentColor, stroked
+   --line-sigil wide (nts.css sets it on .nts-sigil; the <use> clones inherit it), and
    every stroked path carries pathLength="1" so the draw-in behaviour can
    animate it with one dash rule. The geometry is computed here so the seven
    points of the heptagram and the impossible triangle stay exact. */
@@ -99,7 +100,7 @@ function gathering() {
 const symbols = { nts: nts(), embers: embers(), philo: philo(), intersect: intersect(), star: star(), gathering: gathering() };
 let svg = `<svg xmlns="http://www.w3.org/2000/svg" class="nts-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">\n`;
 for (const [id, body] of Object.entries(symbols)) {
-  svg += `<symbol id="sigil-${id}" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4">${body}</symbol>\n`;
+  svg += `<symbol id="sigil-${id}" viewBox="0 0 64 64" fill="none" stroke="currentColor">${body}</symbol>\n`;
 }
 svg += '</svg>\n';
 writeFileSync(out, svg);

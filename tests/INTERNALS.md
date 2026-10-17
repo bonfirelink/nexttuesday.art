@@ -17,10 +17,14 @@ fonts.
   About 7 minutes.
 - `npm run test:perf`: the `@perf` guards alone, without their setup project.
 
-`tests/static/lint.spec.mjs` (N1 to N3) lints `site/`: CSS transitions and
+`tests/static/lint.spec.mjs` (N1 to N5) lints `site/`: CSS transitions and
 keyframes animate only transform, opacity and custom properties (the few
 paint-property exceptions are listed in the spec with their reasons),
-figure captions end without a period, and every script parses.
+figure captions end without a period, every script parses, every line of
+the home emblem and of the beads takes a `--line-*` token (N4; the colour
+bands are fills drawn as wide strokes, so they are left out), and the
+lines drawn as geometry are their tokens: every band gap is `--line-keyline`,
+every mark `--line-tick*` or `--line-bezel-5` wide (N5).
 
 The npm scripts go through `tools/run-suite.mjs`. Playwright uses 4 workers
 (`--workers` overrides). The timing tests fail on a loaded machine: run one

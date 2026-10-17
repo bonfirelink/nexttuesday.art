@@ -10,9 +10,11 @@
    Units: the emblem is a 202 x 202 box centred on 0, the disc r 50; HTML
    parts sit in cqi of the box (100 / 202 a unit). Inks that change with the
    ground are currentColor on a k-* class (orrery.css sets them per ground);
-   fixed inks are written in. Every layer that turns is a whole SVG or box,
+   fixed inks are written in. Line widths are nts.css's --line-* tokens, in
+   eu (one unit of the 202 box): a stroke's is set once per layer in
+   orrery.css and inherited, so no path carries one. Every layer that turns is a whole SVG or box,
    so the compositor turns it; nothing here is drawn per frame. */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,7 +22,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const parts = join(here, '..', 'site', '_nts', 'parts');
 
 /* the palette's tokens (nts.css, section 1); SVG attributes cannot read
-   var(), so ink() moves every token ink into a style attribute */
+   var(), so ink() moves every token ink into a style attribute. The lines
+   drawn as geometry (the keylines that space the bands, the marks' filled
+   quads) read their --line-* token from nts.css as a number (N5 checks the
+   parts); stroked lines take theirs from orrery.css. */
 const C = { ink: 'var(--pal-ink)', red: 'var(--code-embers)', sky: 'var(--pal-sky)', ochre: 'var(--code-events)', grey: 'var(--code-philo)', phos: 'var(--code-intersect)', green: 'var(--pal-reserve)', etch: 'var(--pal-etch)' };
 const K = { e: C.red, p: C.grey, i: C.phos, s: C.ochre, g: C.green };
 const f = (n) => +n.toFixed(2);
@@ -32,13 +37,16 @@ const poly = (pts) => 'M' + pts.map((p) => p.join(' ')).join('L') + 'Z';
 const U = 100 / 202, cq = (x) => f(x * U) + 'cqi';
 const svg = (cls, inner) => `<svg class="${('e-ly ' + cls).trim()}" viewBox="-101 -101 202 202" aria-hidden="true" focusable="false">${inner}</svg>`;
 
-/* line weights, three tiers: KEYW for keylines (band keys, the north), FINE
-   for drawn objects (the pyramid's outline, the eye's border, the star dots'
-   borders: the live tetrahedron's ratio, 2 on 108), HAIR for hairlines */
-const KEYW = 0.9, FINE = 0.45, HAIR = 0.45;
-/* the pyramid's outline edge in the other ink, unseen at rest, which holds
-   the outline against the grey while the dial fades */
-const EDGE = 0.2;
+const NTS_CSS = readFileSync(join(here, '..', 'site', '_nts', 'nts.css'), 'utf8');
+const token = (name) => {
+  const v = Number(NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([\\d.]+)\\s*;`, 'm'))?.[1]);
+  if (!(v > 0)) throw new Error(`no positive --${name} declared in nts.css`);
+  return v;
+};
+/* the keylines' width (band keys, the north), which spaces the bands; the
+   marks' widths: minor (dial and bezel), every 5 and every 15 on the dial,
+   every 5 on the bezel */
+const KEYW = token('line-keyline'), TICK = token('line-tick'), TICK5 = token('line-tick-5'), TICK15 = token('line-tick-15'), BEZEL5 = token('line-bezel-5');
 
 /* marks as thin filled quads, so a whole scale is one path: [r0, r1, width, keep] */
 const marksD = (n, specs) => {
@@ -50,12 +58,12 @@ const minor = (i) => i % 5 !== 0, major = (i) => i % 5 === 0;
 
 /* the dial's 60 marks, longer every 5 and every 15; mark 0 is the north, a
    layer of its own that stays when the marks fade with the dial */
-const dialMarks = `<path class="k-run" fill="currentColor" d="${marksD(60, [[31.4, 34.4, HAIR, minor], [29.9, 34.4, 0.6, (i) => i % 15 !== 0 && i % 5 === 0], [28.4, 34.4, 0.8, (i) => i && i % 15 === 0]])}"/>`;
-const north = `<path d="${quad(27, 1, 35.3, 3, 0)}" fill="${C.ochre}" stroke="${C.ink}" stroke-width="${KEYW}" stroke-linejoin="round"/>`;
+const dialMarks = `<path class="k-run" fill="currentColor" d="${marksD(60, [[31.4, 34.4, TICK, minor], [29.9, 34.4, TICK5, (i) => i % 15 !== 0 && i % 5 === 0], [28.4, 34.4, TICK15, (i) => i && i % 15 === 0]])}"/>`;
+const north = `<path d="${quad(27, 1, 35.3, 3, 0)}" fill="${C.ochre}" stroke="${C.ink}" stroke-linejoin="round"/>`;
 /* the bezel: 60 marks just outside the disc, carried round with the bands */
-const bezel = `<path class="k-dot" fill="currentColor" d="${marksD(60, [[50.6, 52.4, 0.7, major], [50.6, 51.9, HAIR, minor]])}"/>`;
+const bezel = `<path class="k-dot" fill="currentColor" d="${marksD(60, [[50.6, 52.4, BEZEL5, major], [50.6, 51.9, TICK, minor]])}"/>`;
 /* the dotted ring, clear of the bezel: 132 whole dots, so the dashes close without a seam */
-const ring = `<circle class="k-dot" r="55" fill="none" stroke="currentColor" stroke-width="1.5" pathLength="132" stroke-dasharray=".004 .996" stroke-linecap="round"/>`;
+const ring = `<circle class="k-dot" r="55" fill="none" stroke="currentColor" pathLength="132" stroke-dasharray=".004 .996" stroke-linecap="round"/>`;
 
 /* the bands and their keylines: an ink ring from the dial's edge (r 35) to
    the rim (r 50), the three bands on it, so every keyline is KEYW wide */
@@ -75,7 +83,7 @@ const raysD = () => {
   }
   return d;
 };
-const geo = `<path class="e-rays" d="${raysD()}" fill="none" stroke="${C.etch}" stroke-width=".32"/>`;
+const geo = `<path class="e-rays" d="${raysD()}" fill="none" stroke="${C.etch}"/>`;
 
 /* the pyramid, drawn like the live tetrahedron: three flat faces meeting at
    the eye (phosphor lit, red, and a shadow of the Philo grey below), one
@@ -83,25 +91,28 @@ const geo = `<path class="e-rays" d="${raysD()}" fill="none" stroke="${C.etch}" 
    midpoint; under the faces, an edge in the other ink. Reduced motion uses
    a third, drawn upside down, instead of turning. */
 const TET = { apex: [0, -16.6], l: [-13.46, 8.42], r: [13.46, 8.42] }, TET_SHADE = 'var(--pal-shade)';
-const face = (pts, c) => `<path d="${poly(pts)}" fill="${c}" stroke="${c}" stroke-width=".25" stroke-linejoin="round"/>`;
+const face = (pts, c) => `<path d="${poly(pts)}" fill="${c}" stroke="${c}" stroke-linejoin="round"/>`;
+/* under the faces, the outline's edge in the other ink, unseen at rest,
+   holds the outline against the grey while the dial fades */
 const pyramid = (ink, other, down) => {
   const rim = poly([TET.apex, TET.r, TET.l]);
-  return `<g${down ? ' transform="rotate(180)"' : ''}><path class="k-${other}" d="${rim}" fill="none" stroke="currentColor" stroke-width="${f(FINE + 2 * EDGE)}" stroke-linejoin="round"/>`
+  return `<g${down ? ' transform="rotate(180)"' : ''}><path class="k-${other} edge" d="${rim}" fill="none" stroke="currentColor" stroke-linejoin="round"/>`
     + face([TET.l, TET.r, [0, 0]], TET_SHADE) + face([TET.apex, TET.r, [0, 0]], K.e) + face([TET.apex, TET.l, [0, 0]], K.i)
-    + `<path class="k-${ink}" d="${rim}" fill="none" stroke="currentColor" stroke-width="${FINE}" stroke-linejoin="round"/>`
-    + `<circle class="eye" r="2.1" stroke="${C.ink}" stroke-width="${FINE}"/></g>`;
+    + `<path class="k-${ink} rim" d="${rim}" fill="none" stroke="currentColor" stroke-linejoin="round"/>`
+    + `<circle class="eye" r="2.1" stroke="${C.ink}"/></g>`;
 };
 /* the eye's fill is set in orrery.css, which lights it on hover and focus.
    The eye's beam: a ring the CSS scales from the pyramid's incircle out past
    its outline, in the ink of what is behind it (the dial's, or the page's
-   once stopped) */
-const beam = (ink) => `<div class="e-bm ${ink}" aria-hidden="true"><span class="e-beam"><svg viewBox="-10 -10 20 20" focusable="false"><circle class="k-${ink}" r="9.8" fill="none" stroke="currentColor" stroke-width=".45"/></svg></span></div>`;
+   once stopped); its width is set in orrery.css, from eu to the beam's box */
+const beam = (ink) => `<div class="e-bm ${ink}" aria-hidden="true"><span class="e-beam"><svg viewBox="-10 -10 20 20" focusable="false"><circle class="k-${ink}" r="9.8" fill="none" stroke="currentColor"/></svg></span></div>`;
 
 /* the star on stop: the society's {7/3} star, one point at north, points at
    r 90, behind the whole emblem. Drawn by hand in chalk: each edge a few
    strokes jittered once from a seeded random (the same on every build),
    uneven widths, opacities and breaks, no filter. A pass: [offset across the
-   line, jitter, step, width, opacity, dashes [run] [gap], cap]; steps
+   line, jitter, step, opacity, dashes [run] [gap], cap, class]; the class
+   names its width, --line-chalk, -mid, -fine (orrery.css); steps
    and passes are the fewest that keep the chalk; OV runs each edge past its points. Each
    edge is a box laid along its line; it draws in with a window that slides
    along it (.win) while the drawing slides back (.pen): two transforms, so
@@ -109,8 +120,8 @@ const beam = (ink) => `<div class="e-bm ${ink}" aria-hidden="true"><span class="
    curve is set inline (--il, --id in; --ol, --od out). */
 const STAR_R = 90, OV = 1.8, EH = 4;
 const CHALK = [
-  [0, 0.25, 6, 0.55, 0.5, [[1.5, 7], [0.08, 0.35]], 'butt'], [0.18, 0.3, 5, 0.35, 0.45, [[0.5, 4], [0.1, 0.6]], 'butt'],
-  [-0.2, 0.3, 5, 0.3, 0.4, [[0.3, 2.5], [0.15, 0.8]], 'round']];
+  [0, 0.25, 6, 0.5, [[1.5, 7], [0.08, 0.35]], 'butt', 'chalk'], [0.18, 0.3, 5, 0.45, [[0.5, 4], [0.1, 0.6]], 'butt', 'chalk-mid'],
+  [-0.2, 0.3, 5, 0.4, [[0.3, 2.5], [0.15, 0.8]], 'round', 'chalk-fine']];
 /* stroke opacity: the pass's, times the star's .85, times 1.15 (its lift on
    the black, where a broken line loses more); the plywood takes the 1.15
    back with --e-star-op */
@@ -144,9 +155,9 @@ const starEdges = () => {
     const [x0, y0] = V[i], [x1, y1] = V[i + 1], th = f((Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI), rnd = rand(97 * si + 13 * i + 5);
     const a = timeAt(PEN_IN, i / 7), b = timeAt(PEN_IN, (i + 1) / 7), c = timeAt(PEN_OUT, 1 - (i + 1) / 7), d = timeAt(PEN_OUT, 1 - i / 7);
     /* the dashes are drawn from the seed before the line: that order gives the approved Chalk */
-    const strokes = CHALK.map(([dy, amp, step, w, op, dash, cap]) => {
+    const strokes = CHALK.map(([dy, amp, step, op, dash, cap, cls]) => {
       const da = `stroke-dasharray="${dashes(rnd, L + 2 * OV, ...dash)}" stroke-dashoffset="${sh(rnd() * 10)}"`;
-      return `<path d="${wobble(rnd, -OV, L + OV, dy, amp, step)}" stroke-opacity="${f(Math.min(1, op * STAR_OP))}" stroke-width="${w}" stroke-linecap="${cap}" ${da}/>`;
+      return `<path class="${cls}" d="${wobble(rnd, -OV, L + OV, dy, amp, step)}" stroke-opacity="${f(Math.min(1, op * STAR_OP))}" stroke-linecap="${cap}" ${da}/>`;
     }).join('');
     return `<div class="he" style="left:${cq(101 + x0 - OV)};top:${cq(101 + y0 - EH / 2)};width:${cq(L + 2 * OV)};height:${cq(EH)};transform-origin:${cq(OV)} 50%;transform:rotate(${th}deg);`
       + `--il:${f(PEN_AT + PEN * a)}s;--id:${f(PEN * (b - a))}s;--ol:${f(PEN * c)}s;--od:${f(PEN * (d - c))}s">`
@@ -156,10 +167,10 @@ const starEdges = () => {
 
 /* the orbits, each turned whole with its star dots on it: [class, r, stroke] */
 const ORBITS = [
-  ['e-o66', 66, 'class="k-orbit" stroke="currentColor" stroke-opacity=".5" stroke-width=".55"'],
-  ['e-o78', 78.4, 'class="k-orbit" stroke="currentColor" stroke-opacity=".7" stroke-width=".6" stroke-dasharray=".4 1.4"'],
-  ['e-o84', 84, 'class="k-orbit" stroke="currentColor" stroke-opacity=".6" stroke-width=".8" stroke-dasharray=".1 1.6"'],
-  ['e-o96', 96.4, `stroke="${C.red}" stroke-opacity=".55" stroke-width=".55" stroke-dasharray="18 3.6 1.8 3.6"`]];
+  ['e-o66', 66, `class="k-orbit" stroke="currentColor" stroke-opacity=".5"`],
+  ['e-o78', 78.4, `class="k-orbit" stroke="currentColor" stroke-opacity=".7" stroke-dasharray=".4 1.4"`],
+  ['e-o84', 84, `class="k-orbit" stroke="currentColor" stroke-opacity=".6" stroke-dasharray=".1 1.6"`],
+  ['e-o96', 96.4, `stroke="${C.red}" stroke-opacity=".55" stroke-dasharray="18 3.6 1.8 3.6"`]];
 /* the stars: the code dots, quiet marks that go nowhere until their pages
    exist. [orbit r, code, start angle] */
 const STARS = [
@@ -174,8 +185,8 @@ const PULSE = 7;
 const HIT = { 66: 14, 78.4: 11, 84: 11, 96.4: 14 };
 const star = ([r, k, deg], i) =>
   `<span class="e-pv" style="transform:rotate(${deg}deg)"><span class="st" aria-hidden="true" data-orbit="${r}" data-code="${k}" style="top:${f(-4.703 - r / 2.02)}cqi">`
-  + `<svg viewBox="-9.5 -9.5 19 19" aria-hidden="true" focusable="false"><circle class="hit" r="${HIT[r]}" fill="transparent"/><circle class="halo k-halo" r="4.6" fill="none" stroke="currentColor" stroke-width=".6"/>`
-  + `<circle r="2.3" fill="${K[k]}" stroke="${C.ink}" stroke-width="${FINE}"/></svg>${i === PULSE ? '<span class="e-pulse" aria-hidden="true"></span>' : ''}</span></span>`;
+  + `<svg viewBox="-9.5 -9.5 19 19" aria-hidden="true" focusable="false"><circle class="hit" r="${HIT[r]}" fill="transparent"/><circle class="halo k-halo" r="4.6" fill="none" stroke="currentColor"/>`
+  + `<circle r="2.3" fill="${K[k]}" stroke="${C.ink}"/></svg>${i === PULSE ? '<span class="e-pulse" aria-hidden="true"></span>' : ''}</span></span>`;
 
 const core = [
   `<div class="e-star" aria-hidden="true">\n${starEdges()}\n</div>`,

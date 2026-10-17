@@ -87,6 +87,18 @@
 .orrery .k-orbit { color: var(--e-orbit); }
 .orrery .k-halo { color: var(--e-halo); }
 .orrery .e-rays { opacity: var(--e-geo-op); }
+/* the strokes' widths (nts.css, "lines", in eu): set once on a layer and
+   inherited by its paths, so the generated paths carry none */
+.orrery .e-north { stroke-width: var(--line-keyline); }
+.orrery .e-ring { stroke-width: var(--line-ring); }
+.orrery .e-geo { stroke-width: var(--line-rays); }
+.orrery .e-tet { stroke-width: var(--line-seam); }
+.orrery .e-tet .edge { stroke-width: var(--line-outline-edge); }
+.orrery :is(.e-tet .rim, .eye, .st svg) { stroke-width: var(--line-outline); }
+.orrery .st .halo { stroke-width: var(--line-halo); }
+.orrery :is(.e-o66, .e-o96) > svg { stroke-width: var(--line-orbit); }
+.orrery .e-o78 > svg { stroke-width: var(--line-orbit-dash); }
+.orrery .e-o84 > svg { stroke-width: var(--line-orbit-dot); }
 
 /* the eye is the stop button: a clear disc over the pyramid and the
    sunburst. On hover or keyboard focus the eye lights to bone and beams;
@@ -102,6 +114,8 @@
    pyramid */
 .orrery .e-beam { position: absolute; left: 50%; top: 50%; width: 22.77cqi; height: 22.77cqi; margin: -11.385cqi 0 0 -11.385cqi; opacity: 0; transform: scale(.35); }
 .orrery .e-beam svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* eu to the beam's units (px is a user unit): the inverse of --line-beam's formula in nts.css */
+.orrery .e-beam circle { stroke-width: calc(var(--line-beam) * 20px / (22.77 * 2.02)); }
 
 /* the stars: code dots on the orbits, decorative marks (no pages yet to
    open): not focusable, hidden from assistive tech; the halo shows on a
@@ -112,7 +126,7 @@
 .orrery .st .hit { pointer-events: all; }
 .orrery .st .halo { opacity: 0; transition: opacity .2s; }
 @media (hover: hover) { .orrery .st:hover .halo { opacity: 1; } }
-.orrery .e-pulse { position: absolute; left: 50%; top: 50%; width: 2.574cqi; height: 2.574cqi; margin: -1.287cqi 0 0 -1.287cqi; border-radius: 50%; border: .2475cqi solid var(--e-halo); opacity: .55; pointer-events: none; }
+.orrery .e-pulse { position: absolute; left: 50%; top: 50%; width: 2.574cqi; height: 2.574cqi; margin: -1.287cqi 0 0 -1.287cqi; border-radius: 50%; border: calc(var(--line-pulse) * 100cqi / 202) solid var(--e-halo); opacity: .55; pointer-events: none; }
 
 /* stopping: one swap, the same both ways, inside --swap (1.6 s). The dial
    fades out, and the marks and the sunburst with it, so the beige shows
@@ -143,6 +157,10 @@
 .orrery .he .win { overflow: hidden; transform: translateX(-100%); transition: transform var(--od) linear var(--ol); }
 .orrery .he .pen { transform: translateX(100%); transition: transform var(--od) linear var(--ol); }
 .orrery .he svg { display: block; width: 100%; height: 100%; max-width: none; }
+/* the chalk's three passes, by the class the generator gives each; an edge's box is in eu */
+.orrery .he .chalk { stroke-width: var(--line-chalk); }
+.orrery .he .chalk-mid { stroke-width: var(--line-chalk-mid); }
+.orrery .he .chalk-fine { stroke-width: var(--line-chalk-fine); }
 .is-stopped .orrery .e-star { opacity: 1; transition: opacity .2s ease .3s; }
 .is-stopped .orrery .he :is(.win, .pen) { transform: none; transition: transform var(--id) linear var(--il); }
 
@@ -237,9 +255,10 @@ main { --ground: var(--w-bg); }
 .bead-face {
   --moat: 3px;
   border-radius: 50%; display: grid; place-items: center; color: var(--of-sigil);
+  /* the edge ring: --line-bead-ring wide, its outer edge 3.25px inside the face, .5px ramps */
   background: radial-gradient(circle closest-side,
-    var(--of-base) calc(100% - 4.5px),
-    color-mix(in srgb, var(--of-sigil) 72%, var(--of-base)) calc(100% - 4px) calc(100% - 3.25px),
+    var(--of-base) calc(100% - 3.75px - var(--line-bead-ring)),
+    color-mix(in srgb, var(--of-sigil) 72%, var(--of-base)) calc(100% - 3.25px - var(--line-bead-ring)) calc(100% - 3.25px),
     var(--of-base) calc(100% - 2.75px));
   box-shadow: 0 0 0 var(--moat) var(--ground);
 }
@@ -247,9 +266,10 @@ main { --ground: var(--w-bg); }
 .bead-face::after {
   content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   box-shadow: 0 7px 12px -5px var(--w-cast);
+  /* the seal: --line-bead-seal wide, its outer edge 2.75px inside the face, .25px ramps */
   background: radial-gradient(circle closest-side,
-    transparent calc(100% - 5.25px),
-    var(--of-sigil) calc(100% - 5px) calc(100% - 2.75px),
+    transparent calc(100% - 3px - var(--line-bead-seal)),
+    var(--of-sigil) calc(100% - 2.75px - var(--line-bead-seal)) calc(100% - 2.75px),
     transparent calc(100% - 2.5px));
   opacity: 0; transition: opacity var(--dur-lift) var(--ease-lift);
 }
@@ -277,9 +297,9 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 .bead:focus-visible .face { outline: 2px solid var(--pal-ink); outline-offset: 5px; }
 .bead[data-body="star"] .face { display: grid; place-items: center; }
 /* solid ochre with an ink keyline as thick as the line of the round beads' sigils:
-   2.4/64 of a glyph drawn at 58% of the bead, here on a 14-unit box at 66% (.46) */
+   --line-sigil of a 64-unit glyph at 58% of the bead, here on a 14-unit glyph at 66% */
 .bead[data-body="star"] .nts-sigil { width: 66%; height: auto; aspect-ratio: 1; }
-.bead[data-body="star"] .nts-sigil path { fill: var(--code-events); stroke: var(--pal-ink); stroke-width: .46; stroke-linejoin: round; }
+.bead[data-body="star"] .nts-sigil path { fill: var(--code-events); stroke: var(--pal-ink); stroke-width: var(--line-star-bead); stroke-linejoin: round; }
 
 /* the hint that a bead opens: now and then a thin ring grows off it and
    fades, the eye's beam in small (scale and opacity only), with a pointer
@@ -292,7 +312,7 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
    the star's own glyph size. Under reduced motion there is no ring. */
 @media (prefers-reduced-motion: no-preference) {
   .orrery .bead::after {
-    content: ""; position: absolute; z-index: -1; inset: -35%; border-radius: 50%; border: 1px solid var(--e-halo);
+    content: ""; position: absolute; z-index: -1; inset: -35%; border-radius: 50%; border: var(--line-bead-hint) solid var(--e-halo);
     opacity: 0; transform: scale(.59); pointer-events: none;
     animation: bead-pulse 18s cubic-bezier(.2, .7, .2, 1) 4.75s infinite;
   }

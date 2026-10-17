@@ -113,6 +113,38 @@
   --section: clamp(3.5rem, 9vw, 7rem);
   --bar-h: 3.25rem;
 
+  /* lines: the width of every line of the home emblem and of the beads.
+     A line scales with its figure, so it is a number in the figure's own unit:
+     eu, the emblem's (1/202 of its box, 100cqi / 202: 1.60px at 390, 2.80px at
+     1440); sigil/64, a sigil's; glyph/14, the star bead's glyph's. CSS cannot
+     divide a length by a length, and a non-scaling stroke would put the dashes
+     in px and stop the beam's growth, so none of them is a px length. Lines
+     that do not scale are px. Each comment starts with the token's unit. */
+  --line-keyline: .9;       /* eu: the band keylines and the north; the generator spaces the bands by it */
+  --line-tick: .45;         /* eu: the dial's and the bezel's minor marks, filled quads the generator draws this wide */
+  --line-tick-5: .6;        /* eu: the dial's marks every 5 */
+  --line-tick-15: .8;       /* eu: the dial's marks every 15 */
+  --line-bezel-5: .7;       /* eu: the bezel's marks every 5 */
+  --line-outline: .45;      /* eu: drawn objects, the pyramid, the eye, the star dots (the live tetrahedron's 2 on 108) */
+  --line-outline-edge: .85; /* eu: the pyramid's edge in the other ink under the faces, the outline and .2 each side */
+  --line-seam: .25;         /* eu: a face stroked in its own ink, which closes the seams between faces */
+  --line-ring: 1.5;         /* eu: the dotted ring, its dots' size */
+  --line-rays: .32;         /* eu: the sunburst */
+  --line-beam: 1.0348965;   /* eu: the eye's beam at its full size: .45 of its 20-unit box, drawn at 22.77cqi = 22.77 * 2.02 eu, so .45 * 22.77 * 2.02 / 20 */
+  --line-orbit: .55;        /* eu: the inner orbit and the red outer one */
+  --line-orbit-dash: .6;    /* eu: the dashed orbit (78.4) */
+  --line-orbit-dot: .8;     /* eu: the dotted orbit (84) */
+  --line-halo: .6;          /* eu: a star dot's hover halo */
+  --line-pulse: .5;         /* eu: the pulsing star dot's ring, a border (snaps to whole px) */
+  --line-chalk: .55;        /* eu: the star drawn on stop, its chalk's main pass */
+  --line-chalk-mid: .35;    /* eu: the chalk's second pass */
+  --line-chalk-fine: .3;    /* eu: the chalk's third pass */
+  --line-sigil: 2.4;        /* sigil/64: every sigil, everywhere; in a bead, 58% of it */
+  --line-star-bead: .46;    /* glyph/14: the star bead's keyline (its glyph is 66% of the bead), the sigil's line there rounded (exactly .4614) */
+  --line-bead-ring: .75px;  /* px: the face's edge ring, inside the face, with .5px ramps */
+  --line-bead-seal: 2.25px; /* px: the seal on hover and focus, with .25px ramps */
+  --line-bead-hint: 1px;    /* px: the ring that grows off a bead now and then */
+
   /* motion. --ease-lift/--dur-lift/--lift-y: the card lift (ease, 250ms, -4px). */
   --ease-lift: ease;
   --dur-lift: 250ms;
@@ -229,7 +261,7 @@ h1.caps { letter-spacing: -.005em; }
 .mark { color: var(--w-accent); font-family: var(--font-display); font-variation-settings: var(--fraunces-display); }
 
 /* ---------- 4. sigils ---------- */
-.nts-sigil { width: 1.5em; height: 1.5em; flex: none; color: var(--w-accent); overflow: visible; }
+.nts-sigil { width: 1.5em; height: 1.5em; flex: none; color: var(--w-accent); overflow: visible; stroke-width: var(--line-sigil); }
 .nts-sigil use { stroke-linecap: round; }
 .nts-sigil.lg { width: 3.5rem; height: 3.5rem; }
 .nts-sigil.xl { width: clamp(4.5rem, 14vw, 7rem); height: clamp(4.5rem, 14vw, 7rem); }

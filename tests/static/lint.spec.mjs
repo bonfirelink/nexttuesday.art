@@ -1,5 +1,6 @@
-// N1-N3. Source lint over site/: motion animates only what the compositor can run, figure
-// captions carry no final period, and every script parses.
+// N1-N5. Source lint over site/: motion animates only what the compositor can run, figure
+// captions carry no final period, every script parses, every line of the home emblem and
+// of the beads takes its width from a --line-* token, and the band keylines are that token.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { readFileSync, readdirSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
@@ -170,5 +171,85 @@ test("N3 every script under site/ parses", () => {
     }
   } finally {
     rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// N4's scope, the lines of the home emblem and of the beads: their markup (the emblem parts,
+// the sigil sprite, and every page's nts:sprite and nts:emblem regions sync copies them
+// into); every stroke-width in nts.css and orrery.css; the borders and gradient rings in
+// LINE_RULES; and any world kit's stroke-width on the emblem or a sigil (.orrery, .nts-sigil).
+// The worlds' own figures are not in it.
+const NTS_CSS = readFileSync(path.join(site, NTS), "utf8");
+const LINE_TOKENS = new Set([...NTS_CSS.matchAll(/(--line-[\w-]+)\s*:/g)].map((m) => m[1]));
+const LINE_MARKUP = ["_nts/sigils.svg", "_nts/parts/emblem-core.html", "_nts/parts/emblem-orbits.html"];
+const REGIONS = /<!-- nts:(sprite|emblem)\b[^>]*-->([\s\S]*?)<!-- \/nts:\1 -->/g;
+// the ink ring and the colour bands are fills drawn as wide strokes, not lines (N5 holds their keylines)
+const BANDS = /<svg class="e-ly (e-key|e-bands)"[\s\S]*?<\/svg>/g;
+// [file, selector, property]: the CSS lines that are not strokes (a border, a gradient's ring)
+const LINE_RULES = [
+  [ORRERY, ".orrery .e-pulse", "border"],
+  [ORRERY, ".orrery .bead::after", "border"],
+  [ORRERY, ".bead-face", "background"],
+  [ORRERY, ".bead-face::after", "background"],
+];
+const usesToken = (v) => {
+  const refs = [...v.matchAll(/var\((--line-[\w-]+)\)/g)].map((m) => m[1]);
+  return refs.length > 0 && refs.every((r) => LINE_TOKENS.has(r));
+};
+
+test("N4 every line of the home emblem and of the beads takes its width from a --line-* token in nts.css", () => {
+  const bad = [];
+  const sources = LINE_MARKUP.map((f) => [f, readFileSync(path.join(site, f), "utf8")]);
+  for (const f of files.filter((f) => f.endsWith(".html"))) {
+    for (const m of readFileSync(f, "utf8").matchAll(REGIONS)) sources.push([`${rel(f)} (nts:${m[1]})`, m[2]]);
+  }
+  for (const [where, text] of sources.map(([w, t]) => [w, t.replace(BANDS, "")])) {
+    for (const m of text.matchAll(/\sstroke-width="([^"]*)"/g)) bad.push(`${where}: stroke-width="${m[1]}"`);
+    for (const m of text.matchAll(/stroke-width\s*:\s*([^;"]+)/g)) if (!usesToken(m[1])) bad.push(`${where}: stroke-width:${m[1]}`);
+  }
+  for (const f of [NTS, ORRERY]) {
+    for (const { selector, props } of blocks(readFileSync(path.join(site, f), "utf8"))) {
+      for (const [name, value] of props) {
+        if (name === "stroke-width" && !usesToken(value)) bad.push(`${f} | ${selector} | stroke-width: ${value}`);
+      }
+    }
+  }
+  for (const f of files.filter((f) => /\/_nts\/worlds\/[^/]+\.css$/.test(f))) {
+    for (const { selector, props } of blocks(readFileSync(f, "utf8"))) {
+      if (!/\.orrery|\.nts-sigil/.test(selector)) continue;
+      for (const [name, value] of props) {
+        if (name === "stroke-width" && !usesToken(value)) bad.push(`${rel(f)} | ${selector} | stroke-width: ${value}`);
+      }
+    }
+  }
+  for (const [f, sel, prop] of LINE_RULES) {
+    const found = [...blocks(readFileSync(path.join(site, f), "utf8"))].filter((b) => split(b.selector).includes(sel)).flatMap((b) => b.props).filter(([n]) => n === prop);
+    expect(found.length, `${f} | ${sel} | ${prop} not found`).toBeGreaterThan(0);
+    for (const [, value] of found) if (!usesToken(value)) bad.push(`${f} | ${sel} | ${prop}: ${value}`);
+  }
+  expect(bad, "raw line widths (name the line in nts.css's Tokens, then use the token)").toEqual([]);
+});
+
+test("N5 the lines drawn as geometry are their tokens: the bands spaced by --line-keyline, the marks --line-tick* and --line-bezel-5 wide", () => {
+  const token = (name) => Number(NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([\\d.]+)\\s*;`, "m"))?.[1]);
+  const keyline = token("line-keyline");
+  expect(keyline, "--line-keyline in nts.css").toBeGreaterThan(0);
+  const core = readFileSync(path.join(site, "_nts/parts/emblem-core.html"), "utf8");
+  const layer = (cls) => core.match(new RegExp(`<svg class="e-ly ${cls}[" ][\\s\\S]*?</svg>`))?.[0] ?? "";
+  // [inner, outer] edge of each stroked ring in a layer
+  const rings = (cls) => [...layer(cls).matchAll(/<circle r="([\d.]+)"[^>]*?stroke-width="([\d.]+)"/g)].map((m) => [Number(m[1]) - Number(m[2]) / 2, Number(m[1]) + Number(m[2]) / 2]);
+  const [key] = rings("e-key"), bands = rings("e-bands");
+  expect(bands.length, "the three bands").toBe(3);
+  // the ink ring runs from the dial's edge to the rim; a keyline before, between and after the bands
+  const edges = [key[0], ...bands.flat(), key[1]];
+  for (let i = 0; i < edges.length; i += 2) expect(edges[i + 1] - edges[i], `keyline ${i / 2 + 1}`).toBeCloseTo(keyline, 2);
+  // a mark is a quad M a L b L c L d Z: its width is a to d
+  const widths = (cls) => [...layer(cls).matchAll(/M(-?[\d.]+) (-?[\d.]+)L[^L]+L[^L]+L(-?[\d.]+) (-?[\d.]+)Z/g)].map((m) => Math.hypot(m[1] - m[3], m[2] - m[4]));
+  for (const [cls, names] of [["e-marks", ["line-tick", "line-tick-5", "line-tick-15"]], ["e-bands", ["line-tick", "line-bezel-5"]]]) {
+    const want = names.map(token), got = widths(cls);
+    expect(got.length, `${cls} marks`).toBeGreaterThan(0);
+    for (const [i, w] of want.entries()) expect(w, `--${names[i]}`).toBeGreaterThan(0);
+    expect(got.filter((w) => !want.some((t) => Math.abs(w - t) < 0.02)).map((w) => w.toFixed(3)), `${cls}: marks of no token's width`).toEqual([]);
+    for (const [i, t] of want.entries()) expect(got.some((w) => Math.abs(w - t) < 0.02), `${cls}: a mark --${names[i]} wide`).toBe(true);
   }
 });

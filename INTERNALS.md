@@ -247,6 +247,30 @@ check in `tests/static/fonts.spec.mjs` names any page whose preload no
 longer matches its CSS, and the URL to put there.
 
 Space: `--gutter` (16px floor), `--wrap` 72rem, `--section`, `--bar-h`.
+
+Lines: every line of the home emblem and of the beads takes its width from
+a `--line-*` token; a new one is a token first (N4 in
+`tests/static/lint.spec.mjs` fails on a raw width). A line that scales with
+its figure is a number in the figure's own unit, since CSS cannot divide a
+length by a length, and a non-scaling stroke would put the dashes in px and
+stop the beam growing: the emblem's lines are in eu, 1/202 of the emblem's
+box (1.60px at 390, 2.80px at 1440): `--line-keyline`, `-tick`, `-tick-5`,
+`-tick-15`, `-bezel-5` (the marks), `-outline`, `-outline-edge`, `-seam`,
+`-ring`, `-rays`, `-beam`, `-orbit`, `-orbit-dash`, `-orbit-dot`, `-halo`,
+`-pulse`, `-chalk`, `-chalk-mid`, `-chalk-fine` (the star drawn on stop).
+A stroke's width is set once per layer in `orrery.css` and inherited, so
+the generated paths carry none. The sigils' line, `--line-sigil`
+(sigil/64: in a bead, the sigil is 58% of it), is set on `.nts-sigil`, and
+the `<use>` clones inherit it; the star bead's keyline, `--line-star-bead`,
+is in glyph/14, set to the sigil's line there. Each token's comment starts
+with its unit.
+The beads' rings, which do not scale, are px: `--line-bead-ring`, `-seal`,
+`-hint`. To compare two lines on screen, multiply by the unit; L10 in
+`tests/layout/lines.spec.mjs` holds every line's width in px at 390 and
+1440 (read by `tests/helpers/lines.mjs`). The lines `tools/gen-emblem.mjs`
+draws as geometry, the keylines that space the bands and the marks' filled
+quads, read their tokens from `nts.css` (and fail if one is missing); N5
+checks the parts against them.
 Motion: `--ease-lift`/`--dur-lift`/`--lift-y` (the card lift: `ease`,
 250ms, -4px), `--ease-out`, `--ease-turn`, `--dur-draw`,
 `--dur-bleed-fade` (the bleed-in's crossfade, below).
