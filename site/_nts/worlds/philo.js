@@ -179,6 +179,13 @@
         [hand.px, hand.py] = toModel(r, e.clientX, e.clientY);
         host.setPointerCapture(e.pointerId);
       });
+      /* The wheel turns by vertical motion too, which the page would take for a scroll. A touch that
+         starts on the figure is cancelled here so the page doesn't pan for it (the pointer events go
+         on); one that starts elsewhere in the box still scrolls. touch-action can't say this: it is
+         fixed per element, not per pixel. */
+      host.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1 && onFigure(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
+      }, { passive: false });
       host.addEventListener("pointermove", (e) => {
         if (!hand.active) return;
         turnBy(e.clientX - hand.x, e.clientY - hand.y);

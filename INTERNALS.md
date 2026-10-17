@@ -667,9 +667,13 @@ its rules, in rad:
   nearest (`landing`). `philo.js` runs u there on a critically damped
   spring (13 s⁻¹) and the figure stays: nothing settles it back. Reduced
   motion jumps to the pose.
-- **Touch.** The host is `touch-action: none` (the other worlds keep
-  `pan-y`): the wheel needs vertical motion, so a touch that starts anywhere
-  in the host's box scrolls nothing, and the page scrolls from outside it.
+- **Touch.** The host keeps `touch-action: pan-y`, so a touch that starts
+  off the figure scrolls the page. The wheel needs vertical motion, so
+  `philo.js` cancels a touch that starts on the figure (a non-passive
+  `touchstart` with the same on-figure test as the press, which
+  `preventDefault`s): the page doesn't pan for it and the pointer events go
+  on. `touch-action` can't do this, since it is per element and not per pixel.
+  `tests/behaviour/philo-touch.spec.mjs` drives both with touch events.
 
 Turned,
 the screw's lower turns dissolve through a CSS `mask-image` on the hero
