@@ -1,5 +1,5 @@
 /* NOT NOT PHILO's figure: Reutersvärd's impossible triangle of nine cubes,
-   going round. Every 3 s all nine glide one place along the loop together
+   going round. Every 3 s all nine glide one place back along the loop together
    (in the tick's last second) and rest the rest of the time.
 
    Straight on, where two cubes overlap the one further along the loop is in
@@ -8,10 +8,11 @@
    All nine are alike, so every tick shows the same picture.
 
    Turned, the nine are the top turn of an endless staircase (the screw):
-   every cube climbs one place per tick, the one stepping off the top fades
-   out, the one arriving at the tip comes up from the turn below, and the
-   turns underneath fade into the ground. Between 1° and 6° off the straight
-   view the loop's order dissolves into true depth.
+   every cube descends one place per tick, the one stepping off the bottom
+   fades out, the one arriving at the top comes in from the turn above, and the
+   turns underneath fade into the ground, every other turn a shade paler so
+   neighbouring turns part. Between 1° and 6° off the straight view the
+   loop's order dissolves into true depth.
 
    The model is a world of unit steps along x, y and z, seen isometrically,
    turned 30° so one edge is level and drawn mirrored (the 1934 drawing's way
@@ -149,11 +150,13 @@
   const TURNS = 4, FADE_POW = 0.8;
 
   /* The cubes at time t. Place h runs 0 to 9 on the top turn and below 0 on
-     the turns underneath; in each tick a cube moves from h to h + 1, and at the
-     next tick places are counted again from the top. Straight on only the top
-     turn is drawn, the crossing cube on loopAt's path; turned, the screw. */
+     the turns underneath; in each tick a cube moves from h to h - 1 (the glide
+     runs backward), and at the next tick places are counted again from the top.
+     Straight on only the top turn is drawn, the crossing cube on loopAt's path;
+     turned, the screw. The fades are by place, so the turn below the screw
+     fades out at the bottom and the next one comes in at the top. */
   function cubesAt(t, screw) {
-    const p = phase(t), k = Math.floor(p), s = p - k, out = [];
+    const p = -phase(t), k = Math.floor(p), s = p - k, out = [];
     for (let m = screw ? -9 * TURNS : 0; m <= 8; m++) {
       const h = m + s;
       let alpha = 1, fade = 0;
@@ -215,6 +218,16 @@
   }
   const boxesMeet = (a, b) => !(a[1] < b[0] || b[1] < a[0] || a[3] < b[2] || b[3] < a[2]);
 
+  /* The tone of place h's turn: 0 on the top turn, 1 on the next one down, and
+     so on by parity, blending over the step from the turn's place 8 to 9 so a
+     cube crossing from one turn to the next changes tone smoothly. */
+  const turnTone = (h) => {
+    const k = Math.floor(h / 9), j = h - 9 * k, par = (n) => mod(n, 2);
+    return j > 8 ? par(k) + (par(k + 1) - par(k)) * smooth(j - 8) : par(k);
+  };
+  /* a cube's fade with the turns' tones in it; the cubes past the tip keep their own */
+  const paler = (c) => (c.h > 8 ? c.fade : 1 - (1 - c.fade) * (1 - 0.3 * turnTone(c.h)));
+
   /* The cubes in px, and for each cube the cubes drawn over it: by the loop
      ("loop", straight on) or by depth ("depth", turned). */
   function layout(cubes, M, cx, cy, scale, rule, shade) {
@@ -234,13 +247,16 @@
     const items = cubes.map((c) => {
       const v = tx(M, add(cam(c.P), PIVOT.g, -1));
       const toPx = (p) => [cx - (v[0] + CUBE * p[0]) * scale, cy - (v[1] + CUBE * p[1]) * scale];
-      const faces = shown.map(([fi], r) => ({ poly: quads[fi].map(toPx), fill: shade(tone(r), c.fade) }));
+      /* turned, every other turn of the screw is a shade paler (the top turn is
+         not), so neighbouring turns part where their faces would merge */
+      const fade = rule === "depth" ? paler(c) : c.fade;
+      const faces = shown.map(([fi], r) => ({ poly: quads[fi].map(toPx), fill: shade(tone(r), fade) }));
       const h = hull(corners.map(toPx));
       return {
         c, z: v[2], brk: rule === "loop" ? c.x : v[2], alpha: c.alpha,
         /* the cube's shape a hair inside its edge, in the top tone, laid
            under the faces so no ground shows in the seams between them */
-        core: outset(h, -0.75), coreFill: shade("top", c.fade),
+        core: outset(h, -0.75), coreFill: shade("top", fade),
         hull: h, faces,
       };
     });
@@ -373,12 +389,91 @@
     return top.items.map((it) => ({ poly: it.hull.map(([x, y]) => [(x - cx) / sc, (cy - y) / sc]) }));
   }
 
+  /* ---------- the turn ---------- */
+  /* The views the figure rests in, as [yaw, pitch] in rad. Each looks along a
+     line between two cubes of the staircase, so one cube covers the other
+     exactly: the view's axis, in camera axes, is the step between them. paint's
+     M = Rx(pitch)Ry(-yaw) has the viewing axis as its third row,
+     (cos p sin y, sin p, cos p cos y), which gives yaw and pitch back. */
+  const along = (d) => {
+    let v = norm(cam(d));
+    if (v[2] < 0) v = v.map((x) => -x);
+    return [Math.atan2(v[0], v[2]), Math.asin(v[1])];
+  };
+  /* left (the default), straight, right: by yaw. Left looks along [2,1,1], where
+     place 3 covers the place three turns' steps below it exactly; right along
+     [1,3,2], where place 8 covers place 2. */
+  const POSES = [along([2, 1, 1]), [0, 0], along([1, 3, 2])];
+  /* Turning is a single parameter, the yaw u; the pitch follows it on a cubic
+     Hermite curve through the three poses (slopes from the neighbouring
+     knots), continued in a straight line past the ends. */
+  const SLOPE = POSES.map((q, i) => {
+    const a = POSES[Math.max(0, i - 1)], b = POSES[Math.min(2, i + 1)];
+    return (b[1] - a[1]) / (b[0] - a[0]);
+  });
+  function pitchAt(u) {
+    if (u <= POSES[0][0]) return POSES[0][1] + SLOPE[0] * (u - POSES[0][0]);
+    if (u >= POSES[2][0]) return POSES[2][1] + SLOPE[2] * (u - POSES[2][0]);
+    const i = u < POSES[1][0] ? 0 : 1, [x0, y0] = POSES[i], [x1, y1] = POSES[i + 1];
+    const h = x1 - x0, t = (u - x0) / h, t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * h * SLOPE[i] + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * h * SLOPE[i + 1];
+  }
+  /* A soft edge: past the end poses the figure gives at most 9° more, harder the further you pull. */
+  const SOFT = (9 * Math.PI) / 180;
+  const soften = (u) => {
+    const lo = POSES[0][0], hi = POSES[2][0];
+    return u < lo ? lo - SOFT * (1 - Math.exp((u - lo) / SOFT)) : u > hi ? hi + SOFT * (1 - Math.exp((hi - u) / SOFT)) : u;
+  };
+  /* The wheel: a drag d (px, y down) by a pointer at r from the pivot turns by
+     the part of d along the circle round the pivot, anticlockwise on screen
+     toward the right pose; 0.011 rad a px. */
+  const wheel = (r, d) => (-(r[0] * d[1] - r[1] * d[0]) / (Math.hypot(r[0], r[1]) || 1)) * 0.011;
+  /* Which pose a release lands on (an index into POSES): the one nearest where
+     the press began, or the next one in the direction moved when the drag
+     covered more than a third of the gap to it. */
+  function landing(u0, u) {
+    let i0 = 0;
+    POSES.forEach((q, i) => { if (Math.abs(q[0] - u0) < Math.abs(POSES[i0][0] - u0)) i0 = i; });
+    const i1 = Math.max(0, Math.min(2, i0 + Math.sign(u - u0))), gap = Math.abs(POSES[i1][0] - POSES[i0][0]);
+    return gap > 0 && Math.abs(u - u0) > gap / 3 ? i1 : i0;
+  }
+  /* A tap on the straight figure picks the pose it turns to: right where it is
+     on the right leg (the tip's cube to the bottom-right corner's) or on the
+     bottom's right three, left anywhere else. (x, y): model units about the
+     centre, y up, as paint's hulls. */
+  let straight = null;
+  function tapPose(x, y) {
+    if (!straight) {
+      const items = layout(cubesAt(0, false), view(0, 0), 0, 0, 1, "loop", () => "").items, at = [];
+      items.forEach((it) => {
+        const poly = it.hull.map(([a, b]) => [a, -b]), n = poly.length;
+        at[Math.round(it.c.h)] = { poly, mid: poly.reduce((m, p) => [m[0] + p[0] / n, m[1] + p[1] / n], [0, 0]) };
+      });
+      straight = at;
+    }
+    const inside = (poly) => {
+      const side = poly.map((a, i) => { const b = poly[(i + 1) % poly.length]; return (b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0]); });
+      return side.every((v) => v >= 0) || side.every((v) => v <= 0);
+    };
+    /* place 6 is drawn over place 5, so where they overlap the tap is on 6 */
+    if ([3, 4, 5].some((j) => inside(straight[j].poly)) && !inside(straight[6].poly)) return 2;
+    const leg = (a, b) => {
+      const [p, q] = [straight[a % 9].mid, straight[b % 9].mid], vx = q[0] - p[0], vy = q[1] - p[1];
+      const t = clamp01(((x - p[0]) * vx + (y - p[1]) * vy) / (vx * vx + vy * vy));
+      return Math.hypot(x - p[0] - vx * t, y - p[1] - vy * t);
+    };
+    const d = [leg(0, 3), leg(3, 6), leg(6, 9)];
+    /* the tip's own cube is on both legs: it takes the default, left */
+    return d[0] < d[1] && d[0] < d[2] - 1e-9 ? 2 : 0;
+  }
+  const turn = { POSES, pitchAt, soften, wheel, landing, tapPose };
+
   /* REST: where the rest pose's furthest point sits from the centre of the
      figure's box, as a share of the box's half-size, on the page entity and in
      the home's fragment. The live canvas and the baked stills both size the
      rest pose from REACH and REST, so the still and the first live frame match. */
   const REST = { page: 0.952, fragment: 1.17 };
-  const api = { paint, frame, composite, cubesAt, phase, REACH: PIVOT.reach, REST, TICK, GLIDE, TURNS };
+  const api = { paint, frame, composite, cubesAt, phase, turn, REACH: PIVOT.reach, REST, TICK, GLIDE, TURNS };
   if (typeof window !== "undefined") { window.NTS = window.NTS || {}; window.NTS.cubes = api; }
   if (typeof module !== "undefined") module.exports = api;
 })();
