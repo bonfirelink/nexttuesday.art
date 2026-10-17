@@ -81,8 +81,9 @@ each world as you scroll, falling into a satellite, the
 EMBERS tetrahedron at its size and its section rhythm, NOT NOT PHILO's
 rings and triangle.
 
-The one exception to AA contrast: the EMBERS hero label band, cream on
-`--embers-fire` at 3.87:1. It stays in the brand's fire red, the same red as
+The one exception to AA contrast: the EMBERS hero label band, night
+(`--embers-night`) on `--embers-fire` at 4.38:1, under the 4.5:1 for text
+this small. It stays in the brand's fire red, the same red as
 the bar beside it, rather than a darker one that would pass.
 
 ## Page skeleton
@@ -542,8 +543,8 @@ points here.
   column. The punchline would widen it, so it is `width: 0; min-width: 100%`:
   as wide as the track, not wider, and its text may run past it.
 - The label is a solid band as wide as the title, its text spread across it
-  (`text-align-last: justify`). EMBERS: cream on `--embers-fire`; INTERSECT:
-  `--w-bg` on `--w-fg` (reverse video); NOT NOT PHILO: white on
+  (`text-align-last: justify`). EMBERS: `--embers-night` on `--embers-fire`;
+  INTERSECT: `--w-bg` on `--w-fg` (reverse video); NOT NOT PHILO: white on
   `--philo-red` with the charcoal plate printed off register (`::before`,
   z-index -1, which relies on `.philo-hero .hero-text` being a stacking
   context).

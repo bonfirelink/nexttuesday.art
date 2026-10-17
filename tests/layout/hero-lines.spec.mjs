@@ -5,7 +5,7 @@ import { openPage } from "../helpers/geometry.mjs";
 test.use({ reducedMotion: "reduce" });
 
 const WORLDS = [
-  { path: "/embers/", sel: ".embers-label", label: "Nightlife series · Next Tuesday Society", incant: "The floor ain't gonna dance itself" },
+  { path: "/embers/", sel: ".embers-label", label: "Nightlife series · Next Tuesday Society", incant: "They summon you to dance in trance" },
   { path: "/not-not-philo/", sel: ".label", label: "Discussion series · Next Tuesday Society", incant: "On everything, nothing and anything in between" },
   { path: "/intersect/", sel: ".label", label: "Assembly series · Next Tuesday Society", incant: "An ancient tradition, a crossroads of sorts" },
 ];
@@ -113,7 +113,7 @@ test("L7 the home cards put the tagline right under the title, then the body", a
   expect(worlds.map((c) => c.id)).toEqual(["embers", "not-not-philo", "field"]);
   for (const c of worlds) expect(c.before, `${c.id}: tagline precedes body`).toBe(true);
   expect(worlds.map((c) => c.tag)).toEqual([
-    "The floor ain't gonna dance itself",
+    "They summon you to dance in trance",
     "On everything, nothing and anything in between",
     "An ancient tradition, a crossroads of sorts",
   ]);
