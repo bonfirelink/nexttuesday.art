@@ -45,11 +45,14 @@ html[data-bleed-state="in"] .intersect-grain { z-index: 3; }
    the ground itself. Once scrolled it is the bar colour over a blur, which
    would smooth the grain out and read darker than the ground, so it
    carries the same tile (--grain-tile) at the same opacity, under its
-   content. */
-.intersect-grain, [data-world="intersect"] .nts-header.is-scrolled::before { position: absolute; inset: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: var(--grain-tile); transition: opacity .4s ease; }
+   content. The bar's layer always exists and only its opacity changes (0 at
+   the top): a pseudo-element generated at the switch can paint once at full
+   strength before its transition starts (WebKit). */
+.intersect-grain, [data-world="intersect"] .nts-header::before { position: absolute; inset: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: var(--grain-tile); transition: opacity .4s ease; }
 .intersect-grain { z-index: 0; }
 html[data-bleed-state="world"] [data-world="intersect"] .nts-header:not(.is-scrolled) { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
-[data-world="intersect"] .nts-header.is-scrolled::before { content: ""; z-index: -1; }
+[data-world="intersect"] .nts-header::before { content: ""; z-index: -1; }
+[data-world="intersect"] .nts-header:not(.is-scrolled)::before { opacity: 0; }
 [data-world="intersect"] { position: relative; }
 /* above the grain; the header keeps its own sticky position and z-index.
    :where() keeps the specificity of the old `> *`, so page rules still win. */

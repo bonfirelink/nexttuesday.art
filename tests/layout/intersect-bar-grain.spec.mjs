@@ -90,6 +90,27 @@ test.describe("INTERSECT bar grain", () => {
     expect(await spread(page, 5, 45)).toBeGreaterThan(0.5);
   });
 
+  test("L11 the bar's grain layer exists before scrolling, so the switch only fades it", async ({ page }) => {
+    await open(page, "/intersect/");
+    await settled(page);
+    const before = await page.evaluate(() => {
+      const c = getComputedStyle(document.querySelector(".nts-header"), "::before");
+      return { content: c.content, opacity: c.opacity };
+    });
+    expect(before.content).not.toBe("none");
+    expect(before.opacity).toBe("0");
+    await page.evaluate(() => window.scrollTo({ top: 600, behavior: "instant" }));
+    await page.waitForSelector(".nts-header.is-scrolled");
+    await page.waitForTimeout(500);
+    const after = await page.evaluate(() => ({
+      content: getComputedStyle(document.querySelector(".nts-header"), "::before").content,
+      bar: getComputedStyle(document.querySelector(".nts-header"), "::before").opacity,
+      page: getComputedStyle(document.querySelector(".intersect-grain")).opacity,
+    }));
+    expect(after.content).toBe(before.content);
+    expect(after.bar).toBe(after.page);
+  });
+
   test("L11 the other worlds' bars have no grain", async ({ page }) => {
     for (const path of ["/embers/", "/not-not-philo/"]) {
       await open(page, path);

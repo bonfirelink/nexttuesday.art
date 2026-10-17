@@ -599,8 +599,11 @@ behave the same.
   `tests/transitions/header-bleed.spec.mjs`. A texture that is
   part of the world's ground is not one of those parts: INTERSECT's grain
   (`.intersect-grain`, a body-level layer under the content) is on from the
-  start of `in` (it is off only in `before`); the scrolled bar carries the same
-  tile as `.nts-header.is-scrolled::before` (clear at the top), from `--grain-tile` at `--grain`. While the state is `in` it
+  start of `in` (it is off only in `before`); the bar carries the same
+  tile as `.nts-header::before`, from `--grain-tile` at `--grain` once scrolled
+  and at opacity 0 at the top (the layer always exists, so the switch only
+  fades it; a pseudo-element generated at the switch flashes at full strength
+  in WebKit). While the state is `in` it
   lies over the copy (`z-index: 3`, above `.nts-night`, under the header),
   so the disc and the page below it carry one grain at one raster scale (a
   copy of it inside the scaled layer would be resampled and read as another
