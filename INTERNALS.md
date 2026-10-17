@@ -547,7 +547,10 @@ points here.
   INTERSECT: `--w-bg` on `--w-fg` (reverse video); NOT NOT PHILO: white on
   `--philo-red` with the charcoal plate printed off register (`::before`,
   z-index -1, which relies on `.philo-hero .hero-text` being a stacking
-  context).
+  context). The label has its own `::selection` with its colours inverted
+  (EMBERS night on cream, PHILO red on white, INTERSECT `--w-fg` on `--w-bg`),
+  on the band and its short form, because the selection colours (the world's,
+  or the beige palette's on arrival) equal the band's.
 - The label has two spans: `.label-long` (`<world>.eyebrow`) and
   `.label-short` (`<world>.eyebrow.short`, "<X> series · NTS" with an
   `abbr`). `@container (width < 30rem)` (the text column, not the viewport)

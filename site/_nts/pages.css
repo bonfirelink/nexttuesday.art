@@ -75,6 +75,8 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 /* EMBERS */
 .embers-hero h1.embers-display { --fit: 16cqi; font-size: min(7rem, var(--fit)); }
 .embers-hero .embers-label { background: var(--embers-fire); color: var(--embers-night); --fit: 2.49cqi; }
+/* each world's hero label inverts the page's selection colours (the world's, or the palette's before the world colours apply), which are the band's own; the short form is covered too */
+.embers-hero .embers-label::selection, .embers-hero .embers-label ::selection { background: var(--embers-night); color: var(--embers-cream); }
 .embers-hero .incant { --fit: 6.18cqi; font-size: min(clamp(1.25rem, 3.4vw, 1.75rem), var(--fit)); }
 /* the landing is the hearth's field: its lines fill the whole hero, edge to
    edge, while the solid keeps the stage's place and size (the canvas's
@@ -97,6 +99,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .philo-hero h1 { margin: .4rem 0 0; }
 .philo-hero .philo-key { --fit: 15.4cqi; font-size: min(5.5rem, var(--fit)); }
 .philo-hero .label { position: relative; background: var(--philo-red); color: #fff; letter-spacing: .2em; --fit: 2.96cqi; }
+.philo-hero .label::selection, .philo-hero .label ::selection { background: #fff; color: var(--philo-red); }
 /* the poster's charcoal plate, printed off register (as .philo-bar) */
 .philo-hero .label::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--philo-shadow); transform: translate(calc(-1 * var(--philo-off)), calc(-1 * var(--philo-off))); }
 :is(.philo-hero .incant, .world[data-world="philo"] .incant) { font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
@@ -119,6 +122,7 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .intersect-hero h1 { font-size: var(--title); }
 :is(.intersect-hero h1, .world[data-world="intersect"] h2) .x { font-family: var(--font-mono); font-weight: 500; color: var(--intersect-fire-key); }
 .intersect-hero .label { background: var(--w-fg); color: var(--w-bg); letter-spacing: .22em; --fit: 2.52cqi; }
+.intersect-hero .label::selection, .intersect-hero .label ::selection { background: var(--w-bg); color: var(--w-fg); }
 .intersect-hero .incant { --fit: 5.63cqi; font-size: min(2rem, var(--fit)); }
 /* label and punchline start under the I, not the prompt: .815 is the prompt's
    width plus its space, in em of the title (measured, like the --fit factors) */

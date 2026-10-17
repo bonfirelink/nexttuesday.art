@@ -89,7 +89,7 @@ for (const path of WORLDS) {
     expect(await style(page, ".nts-nav a[aria-current] span", "backgroundColor", "::after"), "current page's bar").toBe(t["--pal-ink"]);
     expect(await style(page, "main .hero", "backgroundColor"), "hero ground").toBe(t["--pal-beige"]);
     expect(await style(page, "main .hero h1", "color"), "hero title").toBe(t["--pal-ink"]);
-    expect(await style(page, "main .hero p", "backgroundColor", "::selection"), "selection").toBe(t["--pal-ink"]);
+    expect(await style(page, "main .hero .incant", "backgroundColor", "::selection"), "selection").toBe(t["--pal-ink"]);
     expect(contrast(t["--pal-ink"], t["--pal-beige"]), "ink on the beige").toBeGreaterThanOrEqual(4.5);
     if (path === "/not-not-philo/") {
       const v = await page.evaluate(() => {
