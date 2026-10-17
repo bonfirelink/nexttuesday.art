@@ -102,12 +102,24 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
    stacked entity of width min(100%, var(--entity-w)), measured in cqw: the hero is an
    inline-size container whose content width is the entity's, free of the
    scrollbar that vw includes, where a vertical percentage would be of the
-   hero's height): keep them in step; the layout
-   test checks the plate is centred on the orbit. */
-.philo-rings { position: relative; isolation: isolate; container-type: inline-size; --pt: clamp(var(--hero-top), 4vw, 3rem); --pb: clamp(2rem, 5vw, 3.5rem); --gap: clamp(2rem, 5vw, 5rem); --pad: max(var(--gutter), (100% - var(--wrap)) / 2); --wc: calc(100% - 2 * var(--pad)); --cx: 50%; --cy: calc(var(--pt) + min(100cqw, var(--entity-w)) / 2); }
+   hero's height): keep them in step; the layout tests L2 and L2b check the
+   plate is centred on the orbit and its rings' phase, pitch and cut-out
+   against the trace. */
+.philo-rings { position: relative; isolation: isolate; container-type: inline-size; --pt: clamp(var(--hero-top), 4vw, 3rem); --pb: clamp(2rem, 5vw, 3.5rem); --gap: clamp(2rem, 5vw, 5rem); --pad: max(var(--gutter), (100% - var(--wrap)) / 2); --col: calc((100cqw - var(--gap)) / 2.1); --cx: 50%; --cy: calc(var(--pt) + min(100cqw, var(--entity-w)) / 2); --ew: min(100cqw, var(--entity-w)); --tr: calc((min(var(--ew), 92svh) - var(--ring-inset)) / 2); }
+@supports (width: mod(1px, 1px)) { .philo-rings { --ph: mod(calc(var(--tr) - 1px), 9px); } }
 .hero.philo-rings { width: auto; margin-inline: 0; padding-inline: var(--pad); overflow: clip; }
-@media (min-width: 900px) { .philo-rings { --cx: calc(100% - var(--pad) - (var(--wc) - var(--gap)) / 4.2); --cy: calc(var(--pt) + (100% - var(--pt) - var(--pb)) / 2); } }
-.philo-rings::before { content: ""; position: absolute; inset: 0; z-index: -4; pointer-events: none; opacity: var(--plate); background: repeating-radial-gradient(circle at var(--cx) var(--cy), var(--w-fg) 0 1px, transparent 1px 9px); mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); -webkit-mask-image: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%); }
+@media (min-width: 900px) { .philo-rings { --cx: calc(100% - var(--pad) - var(--col) / 2); --cy: calc(var(--pt) + (100% - var(--pt) - var(--pb)) / 2); --ew: min(var(--col), var(--entity-w)); } }
+/* The rings are 1px lines on a 9px pitch, the first at --ph (a repeating
+   gradient's period is its last stop less its first, so the stops run from
+   --ph to --ph + 9px and the pitch is 9px whatever --ph is). --ph puts one
+   ring on the trace, whose outer radius is --tr; the second mask layer cuts
+   that ring out, so the dashed orbit runs over clear ground, a pitch either
+   side. Without mod(), --ph is 0 and the rings are just unaligned. --tr is
+   worked out as the trace's size is in orrery.css and pages.css (--ew is the
+   entity's width, in cqw: a % in a gradient stop is of the gradient's length),
+   and --col is the entity column the grid gives: keep them in step with
+   those, and with --cx (checked as above). */
+.philo-rings::before { content: ""; position: absolute; inset: 0; z-index: -4; pointer-events: none; opacity: var(--plate); --plate-mask: radial-gradient(circle 115vw at var(--cx) var(--cy), #000 30%, transparent 72%), radial-gradient(circle at var(--cx) var(--cy), #000 calc(var(--tr) - 5px), transparent calc(var(--tr) - 5px) calc(var(--tr) + 4px), #000 calc(var(--tr) + 4px)); background: repeating-radial-gradient(circle at var(--cx) var(--cy), var(--w-fg) var(--ph, 0px), var(--w-fg) calc(var(--ph, 0px) + 1px), transparent calc(var(--ph, 0px) + 1px), transparent calc(var(--ph, 0px) + 9px)); mask-image: var(--plate-mask); mask-composite: intersect; -webkit-mask-image: var(--plate-mask); -webkit-mask-composite: source-in; }
 /* Circles can't end on a straight edge: the hero's ground fades back over them
    toward its top and bottom. The top is short because the header already
    covers most of it; the bottom is long because the next section's open ground
