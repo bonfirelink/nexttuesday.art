@@ -375,7 +375,7 @@ watched by an IntersectionObserver (a passive scroll listener where there is
 none). Falling into a world is a cross-document view transition from
 the body you tapped (`orrery.js` names it `orb`), into the world page's
 `.hero .entity`, which carries the trace of the orbit.
-A world hero is a stacking context, layered so the figure paints over the trace: the trace is at z-index -2, EMBERS' hearth canvas at -1, PHILO's ring plate at -4 and its fade at -3.
+A world hero is a stacking context, layered so the figure paints over the trace: the trace is at z-index -2, EMBERS' hearth canvas and its live canvas at -1 (the live one after it in the DOM, so above it), PHILO's ring plate at -4 and its fade at -3.
 Leaving, each side names its `orb` at `pageswap` (`orrery.js` on the home,
 `nts.js` on a world page). Arriving, the new side is named at `pagereveal`,
 the frame its snapshot is taken, which comes before the deferred scripts
@@ -526,8 +526,9 @@ behave the same.
 - Hooks, on `window.NTS.bleed`:
   - `twin(el)`: the copy of a hero element while the copy exists, else
     `null`. A live figure draws its night into its twin and its day into
-    itself: the hearth, the triangle and the ASCII solid draw on their twin
-    canvas. Each side is drawn only
+    itself: the triangle and the ASCII solid draw on their twin canvas; the
+    hearth draws on the twin of its live canvas and gives the twin of its
+    canvas the night's still lines. Each side is drawn only
     while some of it shows (`progress()` above 0 for the night, below 1 for
     the day), at the figure's own frame rate; nothing is redrawn because
     the page scrolled.
@@ -595,19 +596,50 @@ the right from 900px inside `.embers-hero`), `.genres`. The entity is
 `.hearth-stage`, with a `.hearth-still` for scripts off (`<!-- nts:still embers -->`).
 Data attributes tune it (see the file head). Drag turns, tap stokes,
 keyboard works. It draws its day palette while the page is `before`; while
-the bleed-in's disc opens it draws the night into its twin canvas in the
-copy and the day into itself, both from one geometry. On `/embers/` the canvas is the
+the bleed-in's disc opens it draws the night into the twins in the copy
+and the day into itself, both from one geometry. On `/embers/` the canvas is the
 landing's field: it is the hero's first child, absolute over the whole
 hero (which spans the page and pads itself to the wrap), and
 `data-anchor=".embers-hero .hearth-stage"` takes the solid's centre and
 size from the stage, so the lines fill the hero (the first screen from
 900px, where every world's hero is a screen tall) while the tetrahedron
 keeps the stage's size, in the entity column and ring all three worlds
-share. Its cost is bounded by `data-fps="30"`
-(60 again while a stoke is hot) and `data-max-px="3000000"`, a
-backing-store budget that lowers the resolution below the DPR on large
-screens; the hearth also ray-tests only inside the solid's circumcircle
-and strokes each colour as one path of chained polylines.
+share.
+
+The hearth on the page is two layers, so a frame redraws a fraction of
+the hero:
+
+- `canvas.nts-hearth` keeps no pixels (a 0x0 backing store). It takes the
+  pointer, the keys and the label, and its CSS background (`.is-split` in
+  `embers.css`) is the straight lines: one line period, stroked once per
+  size and palette by the script at the live canvas's resolution and
+  handed over as a data URL (`--hearth-lines`, `--hearth-tile`), repeated.
+  A mask shows it over the lines' rows only (`--hearth-rows`: the tile
+  repeats past the first and last line) less the box around the solid
+  (`--hearth-box`). The mask hides paint, not the pointer: a press on the
+  solid reaches the canvas.
+- `canvas.nts-hearth-live`, made by the script just after it, covers the
+  box (the circumcircle, the ripple at its hottest, the glow and halo),
+  up to the hero's top where the embers rise, and 40px to each side for
+  their drift, 170px while a stoke's burst is in the air (then it narrows
+  again). It is the only thing cleared and redrawn each frame;
+  `aria-hidden`, `pointer-events: none`.
+- No seam where the lines cross the box's edge: both layers use a
+  resolution whose pixels meet the screen's on a common grid (`dpr = DPR
+  × m / n`, a grid step every `n / DPR` css px), and every size and edge
+  is snapped to that step; the box's top and bottom fall midway between
+  two lines. At a resolution that scales to the screen by a non-integer
+  factor the CSS background and the canvas are resampled differently,
+  hence the snapping of the resolution itself, not just the edges.
+- `data-max-px="3000000"` budgets what is redrawn, the live canvas, so on
+  desktop it draws at the screen's resolution. On a touch screen
+  (`pointer: coarse`) the hearth draws at 1.5x and 24fps (60 again while
+  a stoke is hot, as everywhere). The ray test runs only inside the
+  solid's outline on each line, and each colour is one path of chained
+  polylines in buffers kept across frames.
+- `canvas.ntsHearth()` reports heat, frame-rate cap, resolution, box,
+  line spacing and the first line's height, for the tests (as
+  `ntsPose()` reports the turn).
 
 NOT NOT PHILO (`worlds/philo.css`, `worlds/cubes.js`, `worlds/philo.js`);
 its hero lines are laid out as World hero text says.
@@ -806,7 +838,7 @@ runs on pointer events only; keys are per world, and PHILO has none.
 One element per world, anywhere, any size (they are square):
 
 ```html
-<div data-nts-fragment="embers"></div>      <!-- the hearth, small, 24fps, no embers, not interactive -->
+<div data-nts-fragment="embers"></div>      <!-- the hearth, small, 24fps, no embers, not interactive; one canvas, redrawn whole -->
 <div data-nts-fragment="philo"></div>       <!-- the impossible triangle, 30fps -->
 <div data-nts-fragment="intersect"></div>   <!-- the ASCII tetrahedron, 15fps; data-cols, data-figure -->
 ```

@@ -9,7 +9,7 @@ Output is numbers for the working branch (`main`) against the change, never adje
 
 ## Steps
 
-1. **Guards.** `npm run test:perf` in the change's worktree. Done when it prints pass/fail for P1-P3 at both viewports. A failure names the count that moved; read the attached `p1.json`, `p2.json`, `p3.json` (HTML report: `npx playwright show-report`; failures also under `test-results/`; `PERF_LOG=1` prints P2's per-run paint hits), then go to step 2 with the failing page.
+1. **Guards.** `npm run test:perf` in the change's worktree. Done when it prints pass/fail for every guard (P1-P3, P6, P7) at both viewports. A failure names the count that moved; read the attached `p1.json`, `p2.json`, `p3.json` (HTML report: `npx playwright show-report`; failures also under `test-results/`; `PERF_LOG=1` prints P2's per-run paint hits), then go to step 2 with the failing page.
 2. **Bench.** With both previews answering:
    ```
    node tools/bench.mjs before=<working-branch preview url> after=<change preview url> runs=3

@@ -7,7 +7,8 @@ import { test, expect } from "../helpers/fixtures.mjs";
 import { openPage } from "../helpers/geometry.mjs";
 
 const WORLDS = [
-  { name: "EMBERS", path: "/embers/", figure: ".hero canvas.nts-hearth", live: [] },
+  // the solid is drawn on the hearth's live layer (the hearth canvas under it shows the still lines)
+  { name: "EMBERS", path: "/embers/", figure: ".hero canvas.nts-hearth-live", live: [] },
   { name: "PHILO", path: "/not-not-philo/", figure: ".hero .nts-penrose", live: [".hero .nts-penrose"] },
   { name: "INTERSECT", path: "/intersect/", figure: ".hero pre[data-nts-ascii]", live: [".hero pre[data-nts-ascii]"] },
 ];

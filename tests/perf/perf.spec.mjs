@@ -20,6 +20,8 @@ const IDLE_PAINTS_PER_FRAME = 0.05; // P1: overall paint budget while idle (abou
 const ORB_IDLE_MS = 3000; // P6: the traced idle window, with every orb in view and none hovered
 const ALL_ORBS_HEIGHT = 1700; // P6: a viewport tall enough to hold the three orbs at once (about 1570 px apart at both widths)
 const INTERSECT_IDLE_LAYOUTS = 2; // P3: a one-off layout at settle is fine, one per frame is the regression
+const EMBERS_IDLE_MS = 3000; // P7: the traced idle window on /embers/
+const EMBERS_IDLE_LAYOUTS = 2; // P7: as P3
 
 const VIEWS = {
   1440: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 },
@@ -129,6 +131,21 @@ for (const [name, view] of Object.entries(VIEWS)) {
       for (const b of bodies) {
         expect(median(runs.map((r) => r.byOrb[b])), `paints of the ${b} orb's parts other than the figure's canvas: ${runs.map((r) => r.hits.filter((h) => h.startsWith(b)).join(", ")).join(" / ")}`).toBe(0);
       }
+    });
+
+    test(`P7 EMBERS: when idle nothing in the hero repaints but the hearth's live canvas, and nothing lays out @perf (${name})`, async ({ context }, testInfo) => {
+      const runs = [];
+      for (let i = 0; i < RUNS; i++) {
+        const r = await run(context, { path: "/embers/", wait: SETTLE_MS, selectors: [".embers-hero"], action: (p) => p.waitForTimeout(EMBERS_IDLE_MS) });
+        // the live layer is meant to change every frame; anything else in the hero painted
+        // more than once (its first paint may fall in the window) is the regression
+        const others = r.hitsBy.get(".embers-hero").filter((h) => !/canvas\.nts-hearth-live/.test(h));
+        runs.push({ repaints: others.reduce((n, h) => n + Math.max(0, parseInt(h, 10) - 1), 0), others, layouts: r.layouts, frames: r.frames });
+      }
+      await testInfo.attach("p7.json", { body: JSON.stringify(runs, null, 1), contentType: "application/json" });
+      if (process.env.PERF_LOG) console.log(name, "P7", JSON.stringify(runs));
+      expect(median(runs.map((r) => r.repaints)), `repaints in the hero outside the live layer: ${runs.map((r) => r.others.join(", ")).join(" / ")}`).toBe(0);
+      expect(median(runs.map((r) => r.layouts)), "main-thread layouts while idle").toBeLessThanOrEqual(EMBERS_IDLE_LAYOUTS);
     });
 
     test(`P3 INTERSECT does no layout when idle @perf (${name})`, async ({ context }, testInfo) => {
