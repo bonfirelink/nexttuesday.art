@@ -275,8 +275,6 @@ h1.caps { letter-spacing: -.005em; }
 .nts-nav a span::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% + .05em); height: 2px; border-radius: 1px; background: currentColor; opacity: 0; transform: scaleX(.4); transform-origin: left; transition: opacity 200ms, transform 300ms var(--ease-out); }
 .nts-nav a:hover span::after, .nts-nav a:focus-visible span::after { opacity: .5; transform: none; }
 .nts-nav a[aria-current="page"] span::after { opacity: 1; transform: none; background: var(--w-accent); }
-.nts-nav .nts-sigil { width: 1.1rem; height: 1.1rem; display: none; }
-.nts-nav a[aria-current="page"] .nts-sigil { display: block; }
 @media (max-width: 639px) {
   .nts-home .wordmark { display: none; }
   /* the destinations spread from the sigil to the gutter, as far from the
@@ -284,7 +282,6 @@ h1.caps { letter-spacing: -.005em; }
   .nts-header nav { flex: 1; }
   .nts-nav { justify-content: space-between; }
   .nts-nav a { font-size: .7rem; letter-spacing: .05em; }
-  .nts-nav .nts-sigil { display: none !important; }
 }
 @media (max-width: 359px) { .nts-nav a { font-size: .6875rem; letter-spacing: .01em; } .nts-nav { gap: 0 .4rem; } }
 
