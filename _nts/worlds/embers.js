@@ -36,7 +36,8 @@
    the hearth draws at 1.5x and 24fps. The fragment, all box, is one canvas.
    Each ember is one blit from a sheet of the five glyphs, drawn once per
    palette at the live canvas's resolution with the glow baked in (again
-   once the mono has loaded): no text and no blur per frame.
+   once the mono has loaded): no text and no blur per frame. The burst runs
+   at 60fps only while a glyph is still hot, before the last two of the five.
    On each line the ray test runs only inside the solid's outline. Each
    colour is one path of chained polylines, which strokes to the same union
    as separate segments with round caps, for a fraction of the rasterising.
@@ -53,7 +54,7 @@
                    that element's box instead of the canvas's, so the lines
                    can fill a larger canvas around a solid of a set size
      data-fps      frame rate cap (60; fragments 24; 24 on a touch screen),
-                   lifted to 60 while a stoke is hot or its embers fly
+                   lifted to 60 while a stoke or one of its embers is hot
      data-max-px   budget in device pixels for what is redrawn each frame
                    (the live canvas on the page): the resolution drops below
                    the DPR to stay within it (no budget)
@@ -90,6 +91,10 @@
      palette's ember ramp each (indices into it), hopping on a character grid:
      a column per mono advance, a row per line, the baseline on the line. */
   const GLYPHS = ["#", "*", "+", "^", "·"], GLYPH_RAMP = [0, 2, 3, 5, 6];
+  /* the glyph an ember of this life shows, cooling from the first to the last */
+  const glyphIndex = (life) => Math.min(GLYPHS.length - 1, Math.floor((1 - life) * GLYPHS.length));
+  /* an ember is hot until it reaches the last two glyphs (`^` and `·`) */
+  const isHot = (life) => glyphIndex(life) < GLYPHS.length - 2;
   /* bold: the weight the page's bar already loads, so the glyphs add no font file */
   const GLYPH = { size: 15, weight: 700, advance: 0.6, pad: 5, blur: 4, font: '"Red Hat Mono", ui-monospace, Menlo, monospace' };
   const G = window.NTS && window.NTS.grab;
@@ -217,8 +222,10 @@
 
     const geom = () => ({ gcx: ax + o.cx * aw, gcy: ay + o.cy * ah, size: Math.min(aw, ah) * o.size / Math.sqrt(3) });
     const maxRipple = () => o.spacing * o.amp * (1 + MAX_HEAT * 0.9);
-    /* a burst runs at 60 while its glyphs are in the air, however soon the heat cools */
-    const frameRate = () => (burstRoom || stoke > o.stoke0 + 0.15 ? BURST_FPS : o.fps);
+    /* a burst runs at 60 while any of its glyphs is hot, however soon the heat
+       cools; the cooled ones drift at the resting rate */
+    const hotEmbers = () => { let n = 0; for (const e of embers) if (isHot(e.life)) n++; return n; };
+    const frameRate = () => (stoke > o.stoke0 + 0.15 || hotEmbers() ? BURST_FPS : o.fps);
     function rows() {
       const lines = Math.max(3, Math.floor((h - 8) / o.spacing));
       return { lines, top: (h - (lines - 1) * o.spacing) / 2, end: Math.floor(w / o.step) * o.step };
@@ -317,8 +324,9 @@
       return G.near(G.hull(points), px - r.left, py - r.top);
     }
     /* the anchor can move without either observed box resizing (the hero's
-       text settling above it): a press reads it again, so the solid it aims
-       at is the one drawn */
+       text settling above it): a press refreshes the aim, so a press lands
+       on the solid it was drawn for. Until a press or a resize, the drawn
+       solid and the hover can be stale. */
     function followAnchor() {
       if (!anchor || !w) return;
       const cr = canvas.getBoundingClientRect(), a = anchor.getBoundingClientRect();
@@ -464,12 +472,12 @@
        character grid, fading with its life */
     function drawEmbers(c, P) {
       if (!embers.length) return;
-      const S = glyphSheet(P), top = lineTop, sp = o.spacing, n = GLYPHS.length;
+      const S = glyphSheet(P), top = lineTop, sp = o.spacing;
       c.save(); c.globalCompositeOperation = P.composite;
       for (const e of embers) {
         const gx = Math.round(e.x / S.col) * S.col, gy = Math.round((top + Math.round((e.y - top) / sp) * sp) / unit) * unit;
         c.globalAlpha = Math.min(1, e.life * 1.6);
-        c.drawImage(S.canvas, Math.min(n - 1, Math.floor((1 - e.life) * n)) * S.px, 0, S.px, S.px, gx - S.half, gy - S.base, S.cell, S.cell);
+        c.drawImage(S.canvas, glyphIndex(e.life) * S.px, 0, S.px, S.px, gx - S.half, gy - S.base, S.cell, S.cell);
       }
       c.restore();
     }
@@ -479,8 +487,17 @@
       burstRoom = on; placeLayer();
     }
 
+    /* reduced motion switched on: a burst in the air is dropped, so no wide
+       canvas is left with frozen glyphs. A running frame calls it too, since
+       reading `matches` there can swallow the change event. */
+    function settleStill() {
+      halt();
+      if (still.matches) { embers.length = 0; setBurstRoom(false); }
+      draw(); schedule();
+    }
     function frame(now) {
       raf = 0;
+      if (still.matches) { settleStill(); return; }
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 0);
       last = now; t += dt; if (!dragging) tilt += dt;
       if (!dragging) { spin += (o.spin - spin) * Math.min(1, dt * 1.5); pitchDrag *= Math.exp(-dt * 0.8); }
@@ -506,17 +523,17 @@
       if (still.matches) { draw(); stoke = o.stoke0; return; }
       if (o.embers) setBurstRoom(true);
       /* this draw keeps the hot samples the burst starts from */
-      sampleHot = o.embers; draw(); sampleHot = false;
+      sampleHot = o.embers; try { draw(); } finally { sampleHot = false; }
       throwBurst(26 + Math.floor(stoke * 16));
     }
     canvas.ntsPose = () => [yaw, pitch + pitchDrag];
     /* heat, frame-rate cap, resolution, box and live canvas (x, y, w, h in
        css px of the canvas), line spacing, the first line's height, embers
-       in the air and the palettes a glyph sheet was drawn for, for the tests */
+       in the air, the hot ones among them, and the palettes a glyph sheet was drawn for, for the tests */
     canvas.ntsHearth = () => ({
       heat: stoke, fps: frameRate(), dpr, spacing: o.spacing, firstLine: rows().top,
       box: box ? [box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0] : null,
-      layer: [layer.x, layer.y, layer.w, layer.h], embers: embers.length, glyphSheets: [...glyphSheets.keys()].map((P) => P.name),
+      layer: [layer.x, layer.y, layer.w, layer.h], embers: embers.length, hot: hotEmbers(), glyphSheets: [...glyphSheets.keys()].map((P) => P.name),
     });
     if (o.interactive) {
       const hand = G.watch(canvas, onFigure);
@@ -549,7 +566,7 @@
       new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; visible ? schedule() : halt(); }).observe(canvas);
     } else visible = true;
     document.addEventListener("visibilitychange", () => { document.hidden ? halt() : schedule(); });
-    still.addEventListener?.("change", () => { halt(); draw(); schedule(); });
+    still.addEventListener?.("change", settleStill);
     /* the bleed-in: the night goes to the copies while the disc opens; once
        the world settles, this pair takes the night itself, at once */
     addEventListener("nts:bleed", (e) => {
@@ -563,6 +580,7 @@
           twin.width = twin.height = 0; twin.style.width = canvas.style.width; twin.style.height = canvas.style.height;
           /* the copy is made after every deferred script, so it holds the live canvas too */
           liveTwin = B.twin(liveCanvas);
+          if (!liveTwin) { twin = null; return; }
           c = liveTwin.getContext("2d");
         } else {
           twin.width = canvas.width; twin.height = canvas.height;
