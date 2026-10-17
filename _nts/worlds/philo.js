@@ -59,6 +59,8 @@
     }
     /* while the bleed-in's disc opens: the twin canvas and the world's set */
     let twin = null, tctx = null, night = null;
+    /* the bleed-in's twin host: cloned while straight, it follows host's .is-turned */
+    let twinHost = null;
     /* what the last frame showed: the motion's phase (whole while the cubes
        rest) and the turn; a frame that would show the same is skipped */
     let drawn = "";
@@ -66,10 +68,11 @@
     /* .is-turned is on while the pose is off the straight view (see philo.css);
        toggled only when that changes */
     let turned = false;
+    function markTurned(off) { turned = off; host.classList.toggle("is-turned", off); if (twinHost) twinHost.classList.toggle("is-turned", off); }
     function draw(pose) {
       drawn = shows(pose);
       const off = pose.yaw !== 0;
-      if (off !== turned) { turned = off; host.classList.toggle("is-turned", off); }
+      if (off !== turned) markTurned(off);
       if (!twin) { paint(ctx, col, pose); return; }
       const q = window.NTS.bleed.progress();
       if (q < 1) paint(ctx, col, pose);
@@ -134,10 +137,11 @@
       if (e.detail.phase === "start") {
         const th = B && B.twin(host), tc = B && B.twin(canvas);
         if (!th || !tc) return;
+        twinHost = th;
         twin = tc; tctx = twin.getContext("2d"); night = read(th);
         twin.width = canvas.width; twin.height = canvas.height;
         redraw();
-      } else if (e.detail.phase === "end") { twin = tctx = night = null; colours(); redraw(); }
+      } else if (e.detail.phase === "end") { twin = tctx = night = twinHost = null; colours(); redraw(); }
     });
     let timer = 0;
     addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { measure(); redraw(); }, 120); });
