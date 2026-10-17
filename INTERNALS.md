@@ -609,9 +609,11 @@ in front of place 0: that is what closes the loop.
   edge. Because all nine move together, no pair's order changes during a
   tick, so nothing pops.
 - **The motion.** Every 3 s (`TICK`) all nine step one place together, in
-  the last second of a tick (`GLIDE`) and resting for the 2 s before it;
-  straight on, the cube crossing from place 8 to the tip goes straight to
-  place 0. All nine are alike, so every tick shows the same picture.
+  the last second of a tick (`GLIDE`) and resting for the 2 s before it.
+  The step runs backward along the loop (`cubesAt` reads the clock's phase
+  negated; `phase` itself still counts forward): straight on, the cube at
+  the tip goes straight back to place 8 along the crossing path. All nine
+  are alike, so every tick shows the same picture.
 - **The look.** All cubes are drawn alike, flat, with no outline: each of
   the three faces in view takes a tone by how much it faces the light (top,
   side, dark; `shader` thins them toward the ground for the turns below).
@@ -621,10 +623,16 @@ in front of place 0: that is what closes the loop.
   through and shift toward the top tone. `paint()` takes
   `{ top, side, dark, ground }`.
 - **The screw, turned.** The nine are the top turn of an endless staircase
-  (`TURNS` turns drawn below, fading into the ground): every cube climbs a
-  place per tick, the one stepping off the top fades out by opacity, and
-  the one arriving at the tip comes up from the turn below. Places are
-  counted again from the top at each tick, so the screw itself stays put.
+  (`TURNS` turns drawn below, fading into the ground): every cube descends a
+  place per tick, the deepest one fades out by opacity, and a new one comes
+  in at the top from the turn above (the fades are by place, so they stay
+  at the ends whichever way the glide runs). Places are counted again from
+  the top at each tick, so the screw itself stays put. On the turned layer
+  only, every other turn is a shade paler: a cube's fade becomes
+  `1 - (1 - fade)(1 - 0.3 tone)`, tone being the parity of the turn
+  (`floor(h / 9)`) blended by a smoothstep over the step from a turn's place
+  8 to 9; it costs no extra draw, and the straight-on layer never takes
+  it.
   The figure draws back as it turns (scale 1 / (1 + sin θ)), so more of the
   screw fits.
 - **The handover.** Between 1° and 6° off the straight view the turned
@@ -634,14 +642,42 @@ in front of place 0: that is what closes the loop.
   Straight on only the nine are drawn, so the closed picture is the same at
   every rest pose.
 
-The page figure is turned by drag only (no arrow keys, and the host is not
-focusable), and its cubes keep moving while it is pressed or dragged. Turned,
+The page figure is turned by drag and tap only (no arrow keys, and the host is
+not focusable), and its cubes keep moving while it is pressed, dragged or
+turned. The turn is one number, the yaw u; `cubes.turn` (`cubes.js`) holds
+its rules, in rad:
+
+- **Poses.** Left (the default, -10.02°, -16.78°), straight, right (19.47°,
+  10.89°), derived in code from the lattice step each looks along ([2,1,1],
+  [1,3,2]): the view runs along the line between two cubes, so one covers the
+  other exactly (right: place 8 covers place 2). The pitch is a cubic
+  Hermite curve of the yaw through the three poses, linear past the ends.
+- **The wheel.** A drag turns u by the part of each move along the circle
+  round the figure's centre (the canvas centre, read once at the press),
+  0.011 rad a px: anticlockwise on screen turns toward right, so a stroke
+  down the left leg or to the right along the bottom turns right, one down
+  the right leg turns left. Past the end poses the figure gives at most 9°
+  more (`soften`).
+- **A release** under 6 px of travel is a tap: from a turned pose any tap
+  goes straight; from straight it goes right when it lands inside the hull of
+  place 3, 4 or 5 and not 6's (6 is drawn over 5) or nearest the right leg
+  (places 0 to 3), else left (`tapPose`, on the straight-on hulls computed
+  from the model). A longer drag goes to the next pose in its direction when
+  it covered over a third of the gap to it, else back to the one it began
+  nearest (`landing`). `philo.js` runs u there on a critically damped
+  spring (13 s⁻¹) and the figure stays: nothing settles it back. Reduced
+  motion jumps to the pose.
+- **Touch.** The host is `touch-action: none` (the other worlds keep
+  `pan-y`): the wheel needs vertical motion, so a touch that starts anywhere
+  in the host's box scrolls nothing, and the page scrolls from outside it.
+
+Turned,
 the screw's lower turns dissolve through a CSS `mask-image` on the hero
 canvas (`--screw-mask` in `philo.css`, a radial-gradient smoothstep), in
 addition to the per-cube thinning toward the ground that `cubes.js` does.
 The mask starts just beyond the rest figure's reach and is on only while
 the figure is turned (`philo.js` sets `.is-turned` when the pose leaves the
-straight view and clears it when the pose is exactly back): masking costs
+straight view and clears it when the pose is exactly back, at the straight pose): masking costs
 compositing time and at rest would mask nothing. The home fragment's canvas
 has none. `tests/static/philo-tokens.spec.mjs` (K3, K4) checks which
 canvases are masked, when, and that the fade starts beyond the rest figure.

@@ -63,8 +63,9 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 /* the logotype's exponent: the key's two inks swapped, raised above the caps */
 .philo-exp { position: relative; top: -.5em; font-size: .78em; line-height: 0; margin-left: .06em; letter-spacing: 0; color: var(--philo-ink); text-shadow: calc(-1 * var(--philo-off)) calc(-1 * var(--philo-off)) 0 var(--philo-red-key); }
 
-/* the entity */
-.nts-penrose { position: relative; width: 100%; aspect-ratio: 1; touch-action: pan-y; }
+/* the entity. touch-action: none, unlike the other worlds' pan-y: the wheel turns by vertical
+   motion too, so a touch that starts in this box never scrolls the page */
+.nts-penrose { position: relative; width: 100%; aspect-ratio: 1; touch-action: none; }
 .nts-penrose.is-grab { cursor: grab; }
 .nts-penrose.is-grabbing { cursor: grabbing; }
 .nts-penrose img, .nts-penrose > svg { position: absolute; inset: 0; width: 100%; height: 100%; }

@@ -37,7 +37,8 @@ test("H1 philo figure: the cubes keep moving while the pointer is down after a d
   // the pointer rests, still down: any change is the cubes' tick
   expect(await changes(page, await grab(page)), "pose while held").toBe(true);
 
-  // and a drag while held still turns it: the latest paint's yaw follows the pointer
+  // and a drag while held still turns it: the latest paint's yaw follows the pointer, like a wheel
+  // (at the tip, above the centre, a move to the right is clockwise: toward the left pose)
   await recordPaints(page);
   await page.mouse.move(x + 1, y + 6);
   await wait(page, 200);
@@ -46,8 +47,8 @@ test("H1 philo figure: the cubes keep moving while the pointer is down after a d
   await wait(page, 200);
   const turned = await paints(page);
   expect(turned.length, "paints after the drag").toBeGreaterThan(0);
-  // 40 px more at 0.011 rad a px
-  expect(turned.at(-1).yaw - yawBefore, "the second drag turns it").toBeGreaterThan(0.3);
+  // 59 px along the circle at 0.011 rad a px, less the soft edge past the left pose
+  expect(turned.at(-1).yaw - yawBefore, "the second drag turns it").toBeLessThan(-0.2);
   await page.mouse.up();
 });
 

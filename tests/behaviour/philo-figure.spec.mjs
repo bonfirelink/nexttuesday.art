@@ -3,10 +3,10 @@
 // overlap is the one the order says, nothing jumps through a tick or a turn,
 // reduced motion draws the rest pose, turning the figure shows the screw,
 // its three tones are the page's tokens with no outline, and a resting figure is not repainted, also once it has
-// settled back from a turn.
+// come to rest on a turned pose.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
-import { restAt, midAt } from "../helpers/cubes.mjs";
+import { cubes, restAt, midAt } from "../helpers/cubes.mjs";
 import { TIP_Y, recordPaints, paints } from "../helpers/behaviour.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
@@ -247,11 +247,11 @@ test("F7 while the cubes rest and nothing turns them, the figure is not repainte
   expect(p.all, "paints in 3 s (30 a second would be 90)").toBeLessThanOrEqual(MAX_PAINTS);
 });
 
-// After a drag lets go the turn is held 1.2 s, then settles back (0.7 s to 1/e) and snaps
-// straight within half a pixel: about 4.2 s for a small drag. Then paints stop again.
-const SETTLE_MS = 5000;
+// After a drag lets go the figure runs to its pose (a critically damped spring, well under a
+// second) and stays there. Then paints stop again.
+const SETTLE_MS = 2000;
 
-test("F8 once a turned figure has settled back, it is no longer repainted at rest", async ({ page }) => {
+test("F8 a turned figure stays on its pose, and once there it is no longer repainted at rest", async ({ page }) => {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
   await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
   const host = page.locator(".hero .nts-penrose");
@@ -262,8 +262,10 @@ test("F8 once a turned figure has settled back, it is no longer repainted at res
   expect((await paints(page)).some((p) => p.yaw !== 0), "the drag turned the figure").toBe(true);
   await page.waitForTimeout(SETTLE_MS);
   const p = await watchPaints(page);
-  expect(p.atRest, "paints while the cubes rest after settling, besides each tick's landing").toBeLessThanOrEqual(LANDINGS);
-  expect(p.all, "paints in 3 s after settling (30 a second would be 90)").toBeLessThanOrEqual(MAX_PAINTS);
+  expect(p.atRest, "paints while the cubes rest on the pose, besides each tick's landing").toBeLessThanOrEqual(LANDINGS);
+  expect(p.all, "paints in 3 s on the pose (30 a second would be 90)").toBeLessThanOrEqual(MAX_PAINTS);
+  const last = (await paints(page)).at(-1);
+  expect([last.yaw, last.pitch], "still on the left pose, not settled back").toEqual(cubes.turn.POSES[0]);
 });
 
 test("F9 the figure turns by drag only: it is not focusable and the arrow keys never turn it", async ({ page }) => {

@@ -46,3 +46,15 @@ export const recordPaints = (page) => page.evaluate(() => {
   }
 });
 export const paints = (page) => page.evaluate(() => window.__paints);
+
+// The client point at the centre of place `place` (0 to 8, the top turn) of the PHILO page figure
+// drawn at the pose (yaw, pitch) in rad, at rest.
+export const figurePoint = (page, place, yaw = 0, pitch = 0) => page.evaluate(([place, yaw, pitch]) => {
+  const host = document.querySelector(".nts-penrose"), r = host.querySelector("canvas").getBoundingClientRect(), B = window.NTS.cubes;
+  const sc = (Math.min(host.clientWidth, host.clientHeight) * B.REST.page) / (2 * B.REACH);
+  const L = B.frame(0.5, yaw, pitch, 0, 0, sc, { top: "#fff", side: "#888", dark: "#000", ground: "#fff" }).layers.at(-1);
+  const hull = L.items.find((it) => it.c.h === place).hull;
+  return [r.left + r.width / 2 + hull.reduce((s, p) => s + p[0], 0) / hull.length, r.top + r.height / 2 + hull.reduce((s, p) => s + p[1], 0) / hull.length];
+}, [place, yaw, pitch]);
+// The pose of the latest paint recorded by recordPaints, [yaw, pitch] in rad.
+export const lastPose = async (page) => { const p = (await paints(page)).at(-1); return [p.yaw, p.pitch]; };

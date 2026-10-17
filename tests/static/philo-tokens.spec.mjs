@@ -3,7 +3,8 @@
 // its edge, the home fragment's is not, and the mask fades only beyond the rest figure.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { readFileSync } from "node:fs";
-import { TIP_Y } from "../helpers/behaviour.mjs";
+import { TIP_Y, figurePoint } from "../helpers/behaviour.mjs";
+import { cubes } from "../helpers/cubes.mjs";
 
 const read = (f) => readFileSync(new URL(`../../site/_nts/worlds/${f}`, import.meta.url), "utf8");
 
@@ -28,11 +29,11 @@ async function turn(page) {
   await page.mouse.move(x + 40, y + 6, { steps: 6 });
   await page.mouse.up();
 }
-// Turned, held 1.2 s, then settling back: about 4.2 s for a small drag.
-const SETTLE_MS = 5000;
+// Turned, the figure runs to its pose and stays; a tap on it sends it back.
+const SETTLE_MS = 2000;
 
 // K3. Only the page figure's canvas dissolves the screw at its edge, and only while the figure
-// is turned: none at rest, the gradient while turned, none again once it has settled back.
+// is turned: none at rest, the gradient while turned, none again once a tap has sent it straight.
 test("K3 philo.css masks the page figure's canvas while it is turned, not at rest, not the home fragment's", async ({ page }) => {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");
   await page.waitForFunction(() => document.querySelector(".nts-penrose")?.classList.contains("is-live"));
@@ -41,7 +42,10 @@ test("K3 philo.css masks the page figure's canvas while it is turned, not at res
   await turn(page);
   expect(await heroMask(page), "turned").toMatch(/radial-gradient/);
   await page.waitForTimeout(SETTLE_MS);
-  expect(await heroMask(page), "settled back").toBe("none");
+  expect(await heroMask(page), "still turned on its pose").toMatch(/radial-gradient/);
+  await page.mouse.click(...(await figurePoint(page, 2, ...cubes.turn.POSES[0])));
+  await page.waitForTimeout(SETTLE_MS);
+  expect(await heroMask(page), "straight again").toBe("none");
   await page.goto(process.env.NTS_BASE + "/");
   await page.waitForFunction(() => document.querySelector("[data-nts-fragment='philo'] canvas"));
   const frag = await page.evaluate(() => getComputedStyle(document.querySelector("[data-nts-fragment='philo'] canvas")).maskImage);
