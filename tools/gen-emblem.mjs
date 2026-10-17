@@ -38,9 +38,13 @@ const U = 100 / 202, cq = (x) => f(x * U) + 'cqi';
 const svg = (cls, inner) => `<svg class="${('e-ly ' + cls).trim()}" viewBox="-101 -101 202 202" aria-hidden="true" focusable="false">${inner}</svg>`;
 
 const NTS_CSS = readFileSync(join(here, '..', 'site', '_nts', 'nts.css'), 'utf8');
+/* a token is a number or one var() of another nts.css number (a weight) */
+const declared = (name) => NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([^;]+);`, 'm'))?.[1].trim();
 const token = (name) => {
-  const v = Number(NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([\\d.]+)\\s*;`, 'm'))?.[1]);
-  if (!(v > 0)) throw new Error(`no positive --${name} declared in nts.css`);
+  const raw = declared(name);
+  const ref = raw?.match(/^var\(--([\w-]+)\)$/)?.[1];
+  const v = Number(ref ? declared(ref) : raw);
+  if (!(v > 0)) throw new Error(`--${name} in nts.css must be a positive number or one var(--name) of one`);
   return v;
 };
 /* the keylines' width (band keys, the north), which spaces the bands; the

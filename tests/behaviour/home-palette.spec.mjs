@@ -103,8 +103,8 @@ test("C6 the Events star on the outer orbit is solid ochre with an ink keyline a
   expect(await style(page, sel, "fill"), "star fill").toBe(t["--code-events"]);
   expect(await style(page, sel, "stroke"), "star keyline").toBe(t["--pal-ink"]);
   expect(await style(page, '.bead[data-body="star"] .nts-sigil', "filter"), "no filter").toBe("none");
-  // the sigils' line scaled to the star's box: 2.4/64 of a glyph at 58% of the bead, as .46/14 at 66%
-  expect(await style(page, sel, "strokeWidth"), "keyline width").toBe("0.46px");
+  // the sigils' line scaled to the star's box: 2.4/64 of a glyph at 58% of the bead, as .4614/14 at 66%
+  expect(await style(page, sel, "strokeWidth"), "keyline width").toBe("0.4614px");
 });
 
 test("C7 each window's ring is its world's bead: the sigil in the world's fixed colour, no border", async ({ page }) => {

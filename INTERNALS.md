@@ -254,7 +254,16 @@ a `--line-*` token; a new one is a token first (N4 in
 its figure is a number in the figure's own unit, since CSS cannot divide a
 length by a length, and a non-scaling stroke would put the dashes in px and
 stop the beam growing: the emblem's lines are in eu, 1/202 of the emblem's
-box (1.60px at 390, 2.80px at 1440): `--line-keyline`, `-tick`, `-tick-5`,
+box (1.60px at 390, 2.80px at 1440). They come in three weights,
+`--weight-fine` (.3), `--weight-mid` (.483) and `--weight-bold` (.9): each
+line token is a `var()` of one of them (the token names the line, the weight
+the value), so a new line picks a weight rather than a number. `.483` is
+set so the chalk star draws a bead sigil's line at 1440 (the formula is in
+the token's comment). Two keep a value of their own, for a reason that is
+not a weight: `--line-seam` (the gap it closes) and `--line-ring` (the
+dotted ring's dot size). N6 in `tests/static/lint.spec.mjs` fails on any
+other emblem line token that is not a weight; `gen-emblem.mjs` resolves one
+`var()` level. The lines: `--line-keyline`, `-tick`, `-tick-5`,
 `-tick-15`, `-bezel-5` (the marks), `-outline`, `-outline-edge`, `-seam`,
 `-ring`, `-rays`, `-beam`, `-orbit`, `-orbit-dash`, `-orbit-dot`, `-halo`,
 `-pulse`, `-chalk`, `-chalk-mid`, `-chalk-fine` (the star drawn on stop).

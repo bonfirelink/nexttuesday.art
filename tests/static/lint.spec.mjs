@@ -231,7 +231,12 @@ test("N4 every line of the home emblem and of the beads takes its width from a -
 });
 
 test("N5 the lines drawn as geometry are their tokens: the bands spaced by --line-keyline, the marks --line-tick* and --line-bezel-5 wide", () => {
-  const token = (name) => Number(NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([\\d.]+)\\s*;`, "m"))?.[1]);
+  // a token is a number or one var() of a weight
+  const token = (name) => {
+    const raw = NTS_CSS.match(new RegExp(`^\\s*--${name}:\\s*([^;]+);`, "m"))?.[1].trim();
+    const ref = raw?.match(/^var\(--([\w-]+)\)$/)?.[1];
+    return Number(ref ? NTS_CSS.match(new RegExp(`^\\s*--${ref}:\\s*([\\d.]+)\\s*;`, "m"))?.[1] : raw);
+  };
   const keyline = token("line-keyline");
   expect(keyline, "--line-keyline in nts.css").toBeGreaterThan(0);
   const core = readFileSync(path.join(site, "_nts/parts/emblem-core.html"), "utf8");
@@ -251,5 +256,30 @@ test("N5 the lines drawn as geometry are their tokens: the bands spaced by --lin
     for (const [i, w] of want.entries()) expect(w, `--${names[i]}`).toBeGreaterThan(0);
     expect(got.filter((w) => !want.some((t) => Math.abs(w - t) < 0.02)).map((w) => w.toFixed(3)), `${cls}: marks of no token's width`).toEqual([]);
     for (const [i, t] of want.entries()) expect(got.some((w) => Math.abs(w - t) < 0.02), `${cls}: a mark --${names[i]} wide`).toBe(true);
+  }
+});
+
+// The emblem's lines (the --line-* tokens in eu) come in three weights, --weight-fine, -mid and
+// -bold; a token that keeps a value of its own is listed here with its reason. The --line-*
+// tokens of other figures' units (sigil/64, glyph/14, px) are not the emblem's.
+const NOT_EMBLEM = new Set(["--line-sigil", "--line-star-bead"]);
+const OWN_WIDTH = {
+  "--line-seam": "the gap between faces it closes, not a weight",
+  "--line-ring": "the dotted ring's dot size, not a weight",
+};
+test("N6 every emblem line token is one of the three weights, except the listed few", () => {
+  const weights = Object.fromEntries(["fine", "mid", "bold"].map((w) => [`--weight-${w}`, Number(NTS_CSS.match(new RegExp(`^\\s*--weight-${w}:\\s*([\\d.]+)\\s*;`, "m"))?.[1])]));
+  for (const [name, v] of Object.entries(weights)) expect(v, `${name} in nts.css`).toBeGreaterThan(0);
+  expect(new Set(Object.values(weights)).size, "three distinct weights").toBe(3);
+  const eu = [...NTS_CSS.matchAll(/^\s*(--line-[\w-]+):\s*([^;]+);/gm)]
+    .filter((m) => !NOT_EMBLEM.has(m[1]) && !m[1].startsWith("--line-bead-"))
+    .map((m) => [m[1], m[2].trim()]);
+  expect(eu.length, "the emblem's line tokens").toBeGreaterThan(10);
+  const bad = eu.filter(([name, v]) => !(name in OWN_WIDTH) && !/^var\(--weight-(fine|mid|bold)\)$/.test(v));
+  expect(bad.map(([n, v]) => `${n}: ${v}`), "line tokens that are not var(--weight-*)").toEqual([]);
+  for (const name of Object.keys(OWN_WIDTH)) {
+    const v = eu.find(([n]) => n === name)?.[1];
+    expect(v, `${name} declared`).toBeDefined();
+    expect(Object.values(weights), `${name} equals a weight: name the weight`).not.toContain(Number(v));
   }
 });
