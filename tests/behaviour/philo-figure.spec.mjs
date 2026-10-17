@@ -3,7 +3,7 @@
 // overlap is the one the order says, nothing jumps through a tick or a turn,
 // reduced motion draws the rest pose, turning the figure shows the screw,
 // its three tones are the page's tokens with no outline, and a resting figure is not repainted, also once it has
-// come to rest on a turned pose.
+// come to rest on a turned pose. F7b: the first frame is at rest and the first glide follows soon after.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { canvasInk } from "../helpers/canvas.mjs";
 import { cubes, restAt, midAt } from "../helpers/cubes.mjs";
@@ -250,6 +250,43 @@ test("F7 while the cubes rest and nothing turns them, the figure is not repainte
 // After a drag lets go the figure runs to its pose (a critically damped spring, well under a
 // second) and stays there. Then paints stop again.
 const SETTLE_MS = 2000;
+
+// The first glide comes this long after the figure goes live (philo.js FIRST_GLIDE_IN).
+const FIRST_GLIDE_S = 0.5;
+
+test("F7b the first frame is at rest and the cubes have moved by FIRST_GLIDE + 0.3 s", async ({ page }) => {
+  // hooked before the page's scripts draw, so the first frame is seen
+  await page.addInitScript(() => {
+    window.__frames = [];
+    const hook = (B) => {
+      const paint = B.paint;
+      B.paint = (...a) => { window.__frames.push([performance.now(), B.phase(a[2])]); return paint(...a); };
+    };
+    // NTS.cubes is set by a classic script; take it the moment it is
+    let nts;
+    Object.defineProperty(window, "NTS", {
+      configurable: true,
+      get: () => nts,
+      set(v) {
+        if (v === nts) return;
+        nts = v;
+        let c = v.cubes;
+        Object.defineProperty(v, "cubes", { configurable: true, enumerable: true, get: () => c, set(x) { c = x; hook(x); } });
+        if (c) hook(c);
+      },
+    });
+  });
+  await page.goto(process.env.NTS_BASE + "/not-not-philo/");
+  await page.waitForFunction(() => document.querySelector(".hero .nts-penrose")?.classList.contains("is-live"));
+  await page.waitForTimeout((FIRST_GLIDE_S + 0.8) * 1000);
+  const frames = await page.evaluate(() => window.__frames);
+  const first = frames.find(([, p]) => p > 0);
+  expect(frames[0][1], "the first frame is at rest").toBe(0);
+  expect(first, "the cubes move").toBeTruthy();
+  const wait = (first[0] - frames[0][0]) / 1000;
+  expect(wait, "moving by FIRST_GLIDE + 0.3 s").toBeLessThanOrEqual(FIRST_GLIDE_S + 0.3);
+  expect(wait, "not at once").toBeGreaterThanOrEqual(FIRST_GLIDE_S - 0.15);
+});
 
 test("F8 a turned figure stays on its pose, and once there it is no longer repainted at rest", async ({ page }) => {
   await page.goto(process.env.NTS_BASE + "/not-not-philo/");

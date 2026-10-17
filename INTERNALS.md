@@ -737,6 +737,10 @@ in front of place 0: that is what closes the loop.
   tick, so nothing pops.
 - **The motion.** Every 3 s (`TICK`) all nine step one place together, in
   the last second of a tick (`GLIDE`) and resting for the 2 s before it.
+  Each figure's clock (the page's and the home fragment's) starts 0.5 s
+  (`FIRST_GLIDE_IN` in `philo.js`) before the first glide, inside the rest, so
+  that glide comes about when the page transition ends (the view-transition
+  durations in `orrery.css`); later ticks are unchanged.
   The step runs backward along the loop (`cubesAt` reads the clock's phase
   negated; `phase` itself still counts forward): straight on, the cube at
   the tip goes straight back to place 8 along the crossing path. All nine

@@ -16,6 +16,11 @@
   const B = window.NTS && window.NTS.cubes, G = window.NTS && window.NTS.grab;
   if (!B || !G) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  /* The first glide comes FIRST_GLIDE_IN s after the figure goes live, not
+     after a whole rest: about when a page transition into it has ended. The
+     clock starts that far before the glide, still in the rest, so the first
+     frame is the rest pose as the stills draw it. */
+  const FIRST_GLIDE_IN = 0.5;
 
   function mount(host, lite) {
     const canvas = document.createElement("canvas");
@@ -87,7 +92,7 @@
     }
     /* the figure's own clock runs only while it animates, so a figure held
        still (off screen, or by NTS.live) resumes from the frame it shows */
-    let clock = 0, prev = 0, last = 0, raf = 0, visible = true, hidden = document.hidden, held = false;
+    let clock = B.TICK - B.GLIDE - FIRST_GLIDE_IN, prev = 0, last = 0, raf = 0, visible = true, hidden = document.hidden, held = false;
     /* The turn is one number, the yaw u (rad); the pitch follows it (cubes.js).
        raw is where the hand has taken u, shown that with the soft edge. After a
        release u runs to the pose chosen (aim), a critically damped spring. */
