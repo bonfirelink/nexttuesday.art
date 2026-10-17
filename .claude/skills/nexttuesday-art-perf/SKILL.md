@@ -25,4 +25,4 @@ Output is numbers for the working branch (`main`) against the change, never adje
 
 ## Limits
 
-Absolute p50/p95 are inflated by tracing and throttle: compare before against after, never against a target. Real iPhone and Android GPUs, Safari and Firefox are not measured; throttled desktop Chromium stands in for a slow phone. State that in the report and list the pages to scroll on a phone.
+Absolute p50/p95 are inflated by tracing and throttle: compare before against after, never against a target. Real iPhone and Android GPUs, Safari and Firefox are not measured; throttled desktop Chromium stands in for a slow phone. State that in the report; list the pages to scroll on a phone only when a specific one may differ there.

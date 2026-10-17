@@ -32,7 +32,7 @@ For a one-off script, import `launch` from `tools/browser.mjs` instead of callin
 - Look at each PNG: the labels are legible, the change is visible in AFTER and absent in BEFORE. Done when you can say what differs; when it is not visible, re-shoot narrower (`--paths`, `--clip`, `--scroll`).
 - A picture does not settle size, spacing or radius: quote the real numbers (computed font size, bounding box, radius) from `page.evaluate` or the test you wrote, in the caption.
 - Caption: one line, what to look at, then the suite's summary line (`npm test`).
-- Headless Chromium is not an iPhone: say what needs a real device (WebKit rendering, touch feel).
+- Headless Chromium is not an iPhone: say what needs a real device only when you can name it (see CLAUDE.md, Previews and checks).
 
 ## Single site
 
