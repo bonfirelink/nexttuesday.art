@@ -19,7 +19,8 @@ const WORLDS = [
 
 test.use({ reducedMotion: "reduce" });
 
-const widths = [[390, 844, ""], [1440, 900, ""], [1024, 900, " @slow"]];
+// and a phone held sideways, where the entity is a square sized from the height
+const widths = [[390, 844, ""], [1440, 900, ""], [1024, 900, " @slow"], [844, 390, ""]];
 for (const [width, height, tag] of widths) {
   test(`L1 world heroes share one centre and ring size at ${width}${tag}`, async ({ page, freeze, settle }) => {
     await page.setViewportSize({ width, height });

@@ -209,7 +209,10 @@ The emblem sits on a plate. On a phone the plate runs to the screen's edges,
 as the orbits do; from 600px it is a card inset 10px, with rounded corners.
 From 900px the name sits beside the emblem. The emblem keeps its size and
 position on every ground. On a phone it is smaller: its outer orbit is the
-trace ring of the world pages, the same size and centre.
+trace ring of the world pages, the same size and centre. A phone held
+sideways takes the desktop arrangement, the name beside the emblem, which is
+sized from the screen's height so the whole orbit fits under the header; the
+world pages' figures take the same square, so the match holds.
 
 The emblem is a 202-unit square centred on its middle; every radius below
 is in those units.

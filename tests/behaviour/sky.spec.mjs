@@ -17,8 +17,9 @@ const TOL = 1; // px: how closely the orbit must match the trace ring
 const ORBIT_R = 96.4 / 202; // the outer orbit's centreline, in emblem widths
 const STAR_AT_3 = 62500; // ms: the events star turns 15deg -> 90deg (300 s a turn)
 // Phones as the suite has them (portrait, 844 high), the widths where the world ring's caps start to
-// bite (the entity's 30rem; 599 is the widest phone), and a short landscape phone (the 92svh cap).
-const PHONES = [[360, 844], [375, 844], [390, 844], [430, 844], [520, 844], [540, 900], [599, 900], [568, 320]];
+// bite (the entity's 30rem; 599 is the widest phone), and phones held sideways, where the figure is a
+// square sized from the height beside the words (the smallest, two common ones, the widest).
+const PHONES = [[360, 844], [375, 844], [390, 844], [430, 844], [520, 844], [540, 900], [599, 900], [568, 320], [667, 375], [844, 390], [932, 430]];
 
 // The outer orbit's box, from the emblem's box (the orbit layer turns, so its own box is a turned square).
 const orbitBox = (page) =>
@@ -33,11 +34,8 @@ for (const [width, height] of PHONES) {
     test.use({ viewport: { width, height }, isMobile: true, hasTouch: true });
 
     test("S1 the outer orbit is the world pages' trace ring, the star unclipped", async ({ page, freeze }) => {
-      // the worlds whose entity is the square the ring is centred in; EMBERS' hearth is at most 70svh
-      // high, so it is square (and its ring level with the others') only while 70svh holds the column
-      const column = Math.min(width - 2 * Math.max(16, Math.min(48, width * 0.05)), 480);
-      const worlds = ["/not-not-philo/", "/intersect/"];
-      if (height * 0.7 >= column) worlds.push("/embers/");
+      // every world's entity is the square the ring is centred in
+      const worlds = ["/embers/", "/not-not-philo/", "/intersect/"];
       const rings = [];
       for (const world of worlds) {
         await open(page, world);

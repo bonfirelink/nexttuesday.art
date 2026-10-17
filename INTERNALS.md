@@ -331,8 +331,31 @@ on screen, on every phone viewport, portrait or landscape (the ring's caps
 and does the clipping, so a body riding past the emblem's box (the events
 star at three o'clock) is never cut by the box; S1 in
 `tests/behaviour/sky.spec.mjs` holds the match. One known exception: EMBERS'
-`max-height: 70svh` (`embers.css`) makes its entity shorter in short landscape,
-so its ring sits higher than the other worlds'. Scrolling travels to each world: `section.world`
+`max-height: 70svh` (`embers.css`) makes its entity shorter on a short desktop
+window (between 480 and about 686px high), so its ring sits higher than the
+other worlds' there.
+
+A phone held sideways (`(orientation: landscape) and (max-height: 480px)`,
+at any width) takes the desktop arrangement on every page, the words beside
+the figure, so the title and the whole orbit share the first screen. The
+mode is one block after the opener's desktop rules in `orrery.css` ("a short
+landscape screen"), not one per owner: CSS has no named media query, and
+every page loads `orrery.css` after the world kits and `pages.css`, so the
+block wins over their rules at the same weight. The figure is a square sized
+from the height, `--stage` (the screen less the header and `--stage-pad`
+above and below, capped at `--entity-w`). The home's `.threshold` and every
+world `.hero` take the same grid, `minmax(0, 1fr) var(--stage)`, the same top
+padding, and put the figure (`.sky`, the hero's `.entity`) on the right at
+the top of its row, so its centre does not move with the words' height:
+that is what keeps the home's outer orbit the worlds' trace ring, whereas the
+desktop grids (1fr/1.1fr on the home, 1.1fr/1fr on the worlds) are not the
+same arrangement and do not match. Inside it EMBERS' stage has no 70svh cap
+(it is the square), PHILO's ring plate takes the square's centre, and events
+shows its small orrery beside the words. 480px is above every phone held
+sideways (430 at most) and leaves a short desktop window (500 high) on the
+desktop layout and its 92svh caps. The gutter (`--gutter`, `nts.css`)
+clears the side safe areas on every page; sideways is where they are not 0. L8 in `tests/layout/landscape.spec.mjs` holds the
+first screen; S1 the match. Scrolling travels to each world: `section.world`
 with `data-world`, its orb (`.orb`, holding the
 world's live fragment) and its words. The orb is a portal, not a card: hover, keyboard
 focus and a press open it into the disc and never lift it or cast a shadow
@@ -610,7 +633,9 @@ and only the alignment is lost. `--tr` is worked out in `.philo-rings` as the
 trace is in `orrery.css` and `pages.css`: the entity width `--ew` (the grid's
 entity column `--col`, `(100cqw - gap) / 2.1`, from 900px, capped at
 `--entity-w`), capped at 92svh, less `--ring-inset`, halved; in cqw, because a
-percentage in a gradient stop is of the gradient's length. Keep these in step
+percentage in a gradient stop is of the gradient's length. A phone held
+sideways sets `--ew`, `--cx`, `--cy` and `--pt` from its `--stage` square
+(`orrery.css`, see The home). Keep these in step
 with `--cx`/`--cy` and with the trace's size; `tests/layout/philo-rings.spec.mjs`
 (L2, L2b) checks the plate's centre, the phase, the period and the cut-out band
 against the trace. The home fragment's rings have no trace and keep phase 0.
