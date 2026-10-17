@@ -105,9 +105,10 @@ html:not(.js) .turn .secret { opacity: 1; transform: none; visibility: visible; 
 .philo-hero .label::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--philo-shadow); transform: translate(calc(-1 * var(--philo-off)), calc(-1 * var(--philo-off))); }
 :is(.philo-hero .incant, .world[data-world="philo"] .incant) { font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1; }
 .philo-hero .incant { --fit: 5.49cqi; font-size: min(1.75rem, var(--fit)); }
-/* the figure's caption hangs below the entity box, out of flow, so the ring
-   centres on the figure as in the other worlds; stacked, its room is reserved */
-@media (max-width: 899px) { .philo-hero .entity { margin-bottom: 4rem; } }
+/* the figure's caption hangs out of flow, a line under the figure's lowest cube
+   (inside the entity box's lower part), so the ring centres on the figure as in
+   the other worlds; stacked, the title keeps its distance below the box */
+@media (max-width: 899px) { .philo-hero .entity { margin-bottom: 1rem; } }
 .philo-salon .prose p:first-of-type { font-size: 1.1rem; }
 .philo-next { --band-bg: var(--philo-ink); --band-fg: var(--philo-ground); padding: clamp(2.5rem, 6vw, 4rem) 0; }
 .philo-next h2 { font-family: var(--font-flyer); font-variation-settings: normal; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; font-size: clamp(2rem, 7vw, 3.6rem); margin-bottom: 1rem; }
