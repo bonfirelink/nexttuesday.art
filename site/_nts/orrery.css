@@ -344,8 +344,9 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
   .intro h1 { max-width: 8ch; font-size: min(clamp(2.6rem, 11.5vw, 5.5rem), 13svh); }
   .turn { text-align: left; }
   /* the worlds: the entity is the square; EMBERS' stage is no shorter than
-     it, PHILO's caption hangs in the hero's bottom padding, and its ring
-     plate is centred on the square (philo.css has the plate's formulas) */
+     it, PHILO's caption hangs inside the square, a line under the cubes
+     (philo.css has the rule), and its ring plate is centred on the square
+     (philo.css has the plate's formulas) */
   .hero .entity { width: var(--stage); }
   .hearth-stage { max-height: none; }
   .philo-hero .entity { margin-bottom: 0; }
