@@ -268,13 +268,19 @@ h1.caps { letter-spacing: -.005em; }
   transition: color 200ms;
 }
 /* the current page's marker: a 2px bar right under the label, on the
-   text's own line (4px below the baseline), in the world's accent. It
-   belongs to the word, not to the bar's bottom edge. Hover and focus show
-   the same bar faintly in the text colour. */
+   text's own line (4px below the baseline), in the site's red. It belongs
+   to the word, not to the bar's bottom edge. Hover and focus grow the same
+   bar faintly in the text colour, from the label's centre. The current bar
+   is an element (.nts-mark, from sync) so the page transition can move it;
+   the label's ::after is only the hover bar, and the current link has none. */
 .nts-nav a span { position: relative; }
-.nts-nav a span::after { content: ""; position: absolute; left: 0; right: 0; top: calc(100% + .05em); height: 2px; border-radius: 1px; background: currentColor; opacity: 0; transform: scaleX(.4); transform-origin: left; transition: opacity 200ms, transform 300ms var(--ease-out); }
+.nts-nav a span::after, .nts-mark { position: absolute; left: 0; right: 0; top: calc(100% + .05em); height: 2px; border-radius: 1px; }
+.nts-nav a span::after { content: ""; background: currentColor; opacity: 0; transform: scaleX(0); transform-origin: center; transition: opacity 200ms, transform 300ms var(--ease-out); }
 .nts-nav a:hover span::after, .nts-nav a:focus-visible span::after { opacity: .5; transform: none; }
-.nts-nav a[aria-current="page"] span::after { opacity: 1; transform: none; background: var(--w-accent); }
+.nts-nav a[aria-current="page"] span::after { content: none; }
+/* the site's red on every page, whatever the world's accent: the same bar
+   from page to page, so it keeps its colour as it travels */
+.nts-mark { background: var(--embers-fire); }
 @media (max-width: 639px) {
   .nts-home .wordmark { display: none; }
   /* the destinations spread from the sigil to the gutter, as far from the

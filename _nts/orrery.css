@@ -466,14 +466,29 @@ a.bead-face:focus-visible { outline: 2px solid var(--pal-ink); outline-offset: 5
 /* ---------- falling in: cross-document view transitions ---------- */
 @view-transition { navigation: auto; }
 .nts-header { view-transition-name: nts-header; }
-/* The old root snapshot stays fully opaque and the new one fades in on it: a
-   fading pair is see-through in the middle, and Safari paints a dark backdrop
-   behind it that washes the whole screen grey. */
+.nts-mark { view-transition-name: nts-mark; }
+/* The old root snapshot stays fully opaque and the new one fades in on it:
+   a fading pair is see-through in the middle, and Safari paints a dark
+   backdrop behind it that washes the whole screen grey. Root, header and the
+   current page's bar share one timing, 520ms on the site's ease-out; T10 in
+   tests/transitions/nav-mark.spec.mjs keeps them in step. */
 ::view-transition-old(root) { animation: none; }
-::view-transition-new(root) { animation: vt-in 420ms ease both; }
+::view-transition-new(root) { animation: vt-in 520ms var(--ease-out) both; }
 ::view-transition-group(orb) { animation-duration: 640ms; animation-timing-function: var(--ease-out); }
 ::view-transition-old(orb), ::view-transition-new(orb) { animation-duration: 640ms; animation-timing-function: var(--ease-out); height: 100%; object-fit: contain; }
+/* The header stays put and crosses with the root. Its bar is see-through, so
+   the old image must leave as the new one comes, or it shows through it and
+   cuts at the end; the group's `animation: none` would hand its 0s down to
+   the pair, so the pair's timing is set on the images, and the pair
+   crossfades (the UA's plus-lighter fade). The current page's bar
+   (nts-mark) travels on the same timing, stretched by nts-head.js, or fades
+   to or from a page with no current link. */
 ::view-transition-group(nts-header) { animation: none; }
+::view-transition-old(nts-header), ::view-transition-new(nts-header) { animation-duration: 520ms; animation-timing-function: var(--ease-out); animation-fill-mode: both; }
+::view-transition-group(nts-mark) { animation-duration: 520ms; animation-timing-function: var(--ease-out); }
+/* the images fill the group: at their default auto height a bar stretched
+   across two links would scale up, thick and blurred */
+::view-transition-old(nts-mark), ::view-transition-new(nts-mark) { height: 100%; }
 @keyframes vt-in { from { opacity: 0; } }
 
 /* ---------- reduced motion: the sky stands still, every world is there ---------- */
