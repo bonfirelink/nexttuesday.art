@@ -1,6 +1,7 @@
-// R1-R4. Turning the PHILO page figure by hand: a tap picks a pose (from straight by where it
+// R1-R6. Turning the PHILO page figure by hand: a tap picks a pose (from straight by where it
 // lands, from a turned pose back to straight), a drag turns it like a wheel with a soft edge
-// and lands by how far it went, and it stays on the pose it is let go on.
+// and lands by how far it went, and it stays on the pose it is let go on; the bleed-in's twin figure is
+// masked while it is turned.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { cubes } from "../helpers/cubes.mjs";
 import { recordPaints, paints, figurePoint, lastPose } from "../helpers/behaviour.mjs";
@@ -107,4 +108,26 @@ test("R5 under 6 px of travel is a tap, over it a drag; the spring never passes 
   await page.mouse.up();
   await page.waitForTimeout(SETTLE_MS);
   expect((await paints(page)).every((p) => Math.abs(p.yaw) < 0.05), "still straight").toBe(true);
+});
+
+test("R6 arriving from the home page, the bleed-in's twin figure is masked like the real one while it is turned", async ({ page }) => {
+  await page.setViewportSize({ width: 2000, height: 1245 });
+  await page.addInitScript(() => { try { sessionStorage.setItem("nts:from", "home"); } catch {} });
+  await page.goto(process.env.NTS_BASE + "/not-not-philo/");
+  await page.waitForFunction(() => document.querySelector(".nts-penrose")?.classList.contains("is-live"));
+  await recordPaints(page);
+  await page.waitForTimeout(300);
+  // the twin is cloned while the figure is straight; the turn comes after
+  await stroke(page, await figurePoint(page, 1));
+  await page.evaluate(() => { scrollTo({ top: 220, behavior: "instant" }); });
+  const twinMask = () => page.evaluate(() => {
+    const cv = document.querySelector(".nts-night .nts-penrose canvas");
+    if (!cv) return "no twin";
+    const s = getComputedStyle(cv);
+    return s.maskImage !== "none" ? s.maskImage : s.webkitMaskImage;
+  });
+  expect(await page.evaluate(() => window.NTS.bleed.progress()), "the disc is partway open").toBeGreaterThan(0);
+  await expect.poll(twinMask, "turned: the twin canvas is masked").not.toMatch(/^(none|no twin)$/);
+  await stroke(page, await figurePoint(page, 1, ...RIGHT));
+  await expect.poll(twinMask, "straight: the twin canvas is unmasked").toBe("none");
 });

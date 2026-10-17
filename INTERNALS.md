@@ -682,7 +682,9 @@ addition to the per-cube thinning toward the ground that `cubes.js` does.
 The mask starts just beyond the rest figure's reach and is on only while
 the figure is turned (`philo.js` sets `.is-turned` when the pose leaves the
 straight view and clears it when the pose is exactly straight): masking costs
-compositing time and at rest would mask nothing. The home fragment's canvas
+compositing time and at rest would mask nothing. The bleed-in's twin host is
+cloned while the figure is straight, so `philo.js` mirrors `.is-turned` onto it
+for as long as the twin exists, and the twin canvas gets the same mask. The home fragment's canvas
 has none. `tests/static/philo-tokens.spec.mjs` (K3, K4) checks which
 canvases are masked, when, and that the fade starts beyond the rest figure.
 
