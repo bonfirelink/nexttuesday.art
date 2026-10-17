@@ -587,7 +587,7 @@ NOT NOT PHILO (`worlds/philo.css`, `worlds/cubes.js`, `worlds/philo.js`);
 its hero lines are laid out as World hero text says.
 Classes: `.philo-bar` (the red label with the misregistered charcoal plate;
 `.sm`, `.caps`), `.philo-key` (the red extra-bold key word),
-`.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom), `.volumes`/`.volume`, `.fig`. The entity is
+`.philo-rings` (the hero's full-bleed plate of engraved rings, centred on the orbit by custom properties that mirror the hero grid, fading out toward the hero's top and bottom; its rings are phased and cut as described below), `.volumes`/`.volume`, `.fig`. The entity is
 `<div class="nts-penrose" role="img" aria-label="…"><!-- nts:still philo --><!-- /nts:still --></div>`;
 philo.js appends a canvas and hides the still. Colours from
 `--penrose-top`, `--penrose-side`, `--penrose-dark` (`#f5f5f7`, `#a6a7b2`,
@@ -595,6 +595,22 @@ philo.js appends a canvas and hides the still. Colours from
 `#f7f1e4`, `#b9b1a3`, `#67625a` on the beige. The host class and the
 ground token keep the names they had for the bar triangle: they are
 internal, and renaming them would touch every page copy and palette test.
+
+The ring plate and the trace. The plate's rings are 1px lines on a 9px pitch,
+the first at `--ph` (the trace's outer radius `--tr` less its 1px line, modulo
+the pitch; the gradient's stops run from `--ph` to `--ph + 9px`, so the period
+is 9px whatever the phase). One ring would fall exactly on the trace, and a
+second mask layer, intersected with the fade, cuts it out: the dashed orbit
+runs over clear ground, a pitch either side to the next ring. The phase follows
+the trace's size, so it holds at every width; without `mod()` the phase is 0
+and only the alignment is lost. `--tr` is worked out in `.philo-rings` as the
+trace is in `orrery.css` and `pages.css`: the entity width `--ew` (the grid's
+entity column `--col`, `(100cqw - gap) / 2.1`, from 900px, capped at
+`--entity-w`), capped at 92svh, less `--ring-inset`, halved; in cqw, because a
+percentage in a gradient stop is of the gradient's length. Keep these in step
+with `--cx`/`--cy` and with the trace's size; `tests/layout/philo-rings.spec.mjs`
+(L2, L2b) checks the plate's centre, the phase, the period and the cut-out band
+against the trace. The home fragment's rings have no trace and keep phase 0.
 
 The figure (`cubes.js`) is Reutersvärd's impossible triangle of nine
 cubes, going round. The model is a staircase of unit steps along x, y and
