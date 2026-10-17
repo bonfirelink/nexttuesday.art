@@ -2,7 +2,9 @@
 
 Static site. GitHub Pages serves the `site` branch, a subtree split of `site/`
 from the working branch (`main`). How the code fits:
-[INTERNALS.md](INTERNALS.md).
+[INTERNALS.md](INTERNALS.md) (it starts with "Where to look"); the worlds
+([INTERNALS-worlds.md](INTERNALS-worlds.md)) and the
+tests and publishing ([tests/INTERNALS.md](tests/INTERNALS.md)) have their own.
 
 ## Skills
 
@@ -31,7 +33,7 @@ from the working branch (`main`). How the code fits:
 
 - Previews: each checkout's preview is the site served from it; compare the working branch's preview with the change's.
 - The test suite runs Chromium only: remind to check on an iPhone, on the change's preview, only when you can name what may differ there (a WebKit quirk the change relies on, touch handling it changes, phone-only layout), and say that thing; otherwise no reminder.
-- Live checks of nexttuesday.art need an address pin: see INTERNALS.md "Publishing".
+- Live checks of nexttuesday.art need an address pin: see tests/INTERNALS.md "Publishing".
 
 ## Agents
 
