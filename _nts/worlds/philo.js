@@ -1,7 +1,8 @@
 /* NOT NOT PHILO's entity on canvas. Needs cubes.js loaded first.
    Mounts on every <div class="nts-penrose"> (the page entity: the nine
    cubes go round, seen straight on; a drag, pressed on the figure, turns it
-   to show the screw, and it settles back; the cubes keep moving meanwhile)
+   like a wheel to show the screw and it stays on the pose it is let go on,
+   a tap flips it between poses; the cubes keep moving meanwhile)
    and on every <div data-nts-fragment="philo"> (small, slower, not
    interactive). The host keeps its still <img>/<svg> for scripts off;
    the canvas is appended and the host gets .is-live. Colours come from the
@@ -67,7 +68,7 @@
     let turned = false;
     function draw(pose) {
       drawn = shows(pose);
-      const off = pose.yaw !== 0 || pose.pitch !== 0;
+      const off = pose.yaw !== 0;
       if (off !== turned) { turned = off; host.classList.toggle("is-turned", off); }
       if (!twin) { paint(ctx, col, pose); return; }
       const q = window.NTS.bleed.progress();
@@ -84,8 +85,24 @@
     /* the figure's own clock runs only while it animates, so a figure held
        still (off screen, or by NTS.live) resumes from the frame it shows */
     let clock = 0, prev = 0, last = 0, raf = 0, visible = true, hidden = document.hidden, held = false;
-    const hand = { active: false, x: 0, y: 0, yaw: 0, pitch: 0, released: -1e9 };
-    function pose() { return { t: clock, yaw: hand.yaw, pitch: hand.pitch }; }
+    /* The turn is one number, the yaw u (rad); the pitch follows it (cubes.js).
+       raw is where the hand has taken u, shown that with the soft edge. After a
+       release u runs to the pose chosen (aim), a critically damped spring. */
+    const T = B.turn;
+    const hand = { active: false, x: 0, y: 0, mx: 0, my: 0, raw: 0, u: 0, v: 0, aim: null, from: 0, travel: 0, px: 0, py: 0 };
+    function pose() { return { t: clock, yaw: hand.u, pitch: T.pitchAt(hand.u) }; }
+    const OMEGA = 13;
+    function spring(dt) {
+      const to = T.POSES[hand.aim][0];
+      for (let left = dt; left > 0; left -= 1 / 120) {
+        const h = Math.min(left, 1 / 120);
+        hand.v += (-OMEGA * OMEGA * (hand.u - to) - 2 * OMEGA * hand.v) * h;
+        hand.u += hand.v * h;
+      }
+      /* 2e-3 rad is under half a pixel at the figure's reach */
+      if (Math.abs(hand.u - to) < 2e-3 && Math.abs(hand.v) < 5e-3) { hand.u = to; hand.v = 0; hand.aim = null; }
+      hand.raw = hand.u;
+    }
     function tick(now) {
       raf = 0;
       if (!visible || hidden || held) return;
@@ -95,26 +112,20 @@
       /* the bleed-in's twin changes under the figure, so it is drawn every frame; a frame's
          timestamp jitters by a few ms, and without the slack a draw due at 33.3 ms slips a whole frame */
       if (now - last >= 1000 / FPS - 3) { last = now; const p = pose(); if (twin || shows(p) !== drawn) draw(p); }
-      /* a turned figure settles back to the straight view, 0.7 s to 1/e */
-      if (!hand.active && now - hand.released > 1200 && (hand.yaw || hand.pitch)) {
-        const k = Math.exp(-dt / 0.7);
-        hand.yaw *= k; hand.pitch *= k;
-        /* 2e-3 rad is under half a pixel at the figure's reach */
-        if (Math.abs(hand.yaw) < 2e-3 && Math.abs(hand.pitch) < 2e-3) hand.yaw = hand.pitch = 0;
-      }
+      if (hand.aim !== null) spring(dt);
       raf = requestAnimationFrame(tick);
     }
     /* a stopped figure's canvas may have been discarded (a hidden tab, memory
        pressure), so the first frame after a start always paints */
     function start() { if (!raf && visible && !hidden && !held && !reduce.matches) { prev = 0; drawn = ""; raf = requestAnimationFrame(tick); } }
-    function redraw() { draw(reduce.matches ? { t: 0, yaw: hand.yaw, pitch: hand.pitch } : pose()); }
+    function redraw() { draw(reduce.matches ? { ...pose(), t: 0 } : pose()); }
 
     /* in an aperture (the home's windows), NTS.live says when it may animate */
     held = !(window.NTS && window.NTS.live ? window.NTS.live.join(host, (on) => { held = !on; if (on) start(); }) : true);
     colours(); measure();
     host.classList.add("is-live");
     redraw(); start();
-    reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; hand.yaw = hand.pitch = 0; draw({ t: 0, yaw: 0, pitch: 0 }); } else start(); });
+    reduce.addEventListener?.("change", () => { if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; hand.u = hand.raw = hand.v = 0; hand.aim = null; draw({ t: 0, yaw: 0, pitch: 0 }); } else start(); });
     /* without IntersectionObserver the host counts as always visible */
     if ("IntersectionObserver" in window) new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: 0.05 }).observe(host);
     document.addEventListener("visibilitychange", () => { hidden = document.hidden; if (!hidden) start(); });
@@ -130,25 +141,50 @@
     });
     let timer = 0;
     addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => { measure(); redraw(); }, 120); });
+    /* a point in model units about the figure's centre, y up, from the canvas's box */
+    const toModel = (r, px, py) => { const k = w / r.width; return [((px - r.left) * k - cx) / scale, (cy - (py - r.top) * k) / scale]; };
     /* on the figure: inside one of its drawn pieces or within the slack of
        its edge, tested in model units (no per-frame work) */
     function onFigure(px, py) {
       const r = canvas.getBoundingClientRect();
       if (!r.width || !scale) return false;
-      const k = w / r.width, x = ((px - r.left) * k - cx) / scale, y = (cy - (py - r.top) * k) / scale;
-      for (const f of shown) if (G.near(f.poly, x, y, (G.SLACK * k) / scale)) return true;
+      const [x, y] = toModel(r, px, py);
+      for (const f of shown) if (G.near(f.poly, x, y, (G.SLACK * w) / r.width / scale)) return true;
       return false;
+    }
+    /* a gesture turns u like a wheel: the part of each move along the circle
+       round the figure's centre (the pivot, in client px, read once at the press) */
+    function turnBy(dx, dy) {
+      hand.travel += Math.hypot(dx, dy);
+      hand.raw += T.wheel([hand.x - hand.mx, hand.y - hand.my], [dx, dy]);
+      hand.u = T.soften(hand.raw);
+      if (reduce.matches) redraw();
+    }
+    function letGo() {
+      hand.active = false;
+      /* under 6 px of travel is a tap: from a turned pose back to straight, from straight to the pose
+         the tap's place picks; a longer drag lands by how far it went */
+      const here = T.landing(hand.from, hand.from);
+      const to = hand.travel < 6 ? (here !== 1 ? 1 : T.tapPose(hand.px, hand.py)) : T.landing(hand.from, hand.u);
+      hand.raw = hand.u; hand.v = 0; hand.aim = to;
+      if (reduce.matches) { hand.u = hand.raw = T.POSES[to][0]; hand.aim = null; redraw(); }
     }
     if (!lite) {
       const grab = G.watch(host, onFigure);
-      host.addEventListener("pointerdown", (e) => { if (!grab.down(e)) return; hand.active = true; hand.x = e.clientX; hand.y = e.clientY; host.setPointerCapture(e.pointerId); });
+      host.addEventListener("pointerdown", (e) => {
+        if (!grab.down(e)) return;
+        const r = canvas.getBoundingClientRect();
+        hand.active = true; hand.aim = null; hand.v = 0; hand.raw = hand.u; hand.from = hand.u; hand.travel = 0;
+        hand.x = e.clientX; hand.y = e.clientY; hand.mx = r.left + r.width / 2; hand.my = r.top + r.height / 2;
+        [hand.px, hand.py] = toModel(r, e.clientX, e.clientY);
+        host.setPointerCapture(e.pointerId);
+      });
       host.addEventListener("pointermove", (e) => {
         if (!hand.active) return;
-        hand.yaw += (e.clientX - hand.x) * 0.011; hand.pitch += (e.clientY - hand.y) * 0.011;
+        turnBy(e.clientX - hand.x, e.clientY - hand.y);
         hand.x = e.clientX; hand.y = e.clientY;
-        if (reduce.matches) redraw();
       });
-      const release = () => { hand.active = false; hand.released = performance.now(); grab.up(); };
+      const release = () => { if (hand.active) letGo(); grab.up(); };
       host.addEventListener("pointerup", release);
       host.addEventListener("pointercancel", release);
     }
