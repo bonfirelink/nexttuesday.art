@@ -120,30 +120,37 @@
      divide a length by a length, and a non-scaling stroke would put the dashes
      in px and stop the beam's growth, so none of them is a px length. Lines
      that do not scale are px. Each comment starts with the token's unit. */
-  --line-keyline: .9;       /* eu: the band keylines and the north; the generator spaces the bands by it */
-  --line-tick: .45;         /* eu: the dial's and the bezel's minor marks, filled quads the generator draws this wide */
-  --line-tick-5: .6;        /* eu: the dial's marks every 5 */
-  --line-tick-15: .8;       /* eu: the dial's marks every 15 */
-  --line-bezel-5: .7;       /* eu: the bezel's marks every 5 */
-  --line-outline: .45;      /* eu: drawn objects, the pyramid, the eye, the star dots (the live tetrahedron's 2 on 108) */
-  --line-outline-edge: .85; /* eu: the pyramid's edge in the other ink under the faces, the outline and .2 each side */
-  --line-seam: .25;         /* eu: a face stroked in its own ink, which closes the seams between faces */
-  --line-ring: 1.5;         /* eu: the dotted ring, its dots' size */
-  --line-rays: .32;         /* eu: the sunburst */
-  --line-beam: 1.0348965;   /* eu: the eye's beam at its full size: .45 of its 20-unit box, drawn at 22.77cqi = 22.77 * 2.02 eu, so .45 * 22.77 * 2.02 / 20 */
-  --line-orbit: .55;        /* eu: the inner orbit and the red outer one */
-  --line-orbit-dash: .6;    /* eu: the dashed orbit (78.4) */
-  --line-orbit-dot: .8;     /* eu: the dotted orbit (84) */
-  --line-halo: .6;          /* eu: a star dot's hover halo */
-  --line-pulse: .5;         /* eu: the pulsing star dot's ring, a border (snaps to whole px) */
-  --line-chalk: .55;        /* eu: the star drawn on stop, its chalk's main pass */
-  --line-chalk-mid: .35;    /* eu: the chalk's second pass */
-  --line-chalk-fine: .3;    /* eu: the chalk's third pass */
-  --line-sigil: 2.4;        /* sigil/64: every sigil, everywhere; in a bead, 58% of it */
-  --line-star-bead: .46;    /* glyph/14: the star bead's keyline (its glyph is 66% of the bead), the sigil's line there rounded (exactly .4614) */
-  --line-bead-ring: .75px;  /* px: the face's edge ring, inside the face, with .5px ramps */
-  --line-bead-seal: 2.25px; /* px: the seal on hover and focus, with .25px ramps */
-  --line-bead-hint: 1px;    /* px: the ring that grows off a bead now and then */
+  /* The emblem's lines come in three weights (eu), and every line token below
+     is one of them; the two exceptions keep their own value for their reason
+     (--line-seam, --line-ring). A weight is not a line: the token names the
+     line, the weight names the value. */
+  --weight-fine: .3;                        /* eu: the faintest lines: the dial's minor marks, the sunburst, the chalk's second and third passes */
+  --weight-mid: .483;                       /* eu: the default line. Set so the chalk star draws a bead sigil's line at 1440: 2.4 (sigil/64) * 58% of a 62.22px bead face / 64 ≈ 1.353px, over 2.8006px per eu */
+  --weight-bold: .9;                        /* eu: the emphasized lines: keylines, the major marks, the pyramid's edge, the beam, the dotted orbit */
+  --line-keyline: var(--weight-bold);       /* eu: the band keylines and the north; the generator spaces the bands by it */
+  --line-tick: var(--weight-fine);          /* eu: the dial's and the bezel's minor marks, filled quads the generator draws this wide */
+  --line-tick-5: var(--weight-mid);         /* eu: the dial's marks every 5 */
+  --line-tick-15: var(--weight-bold);       /* eu: the dial's marks every 15 */
+  --line-bezel-5: var(--weight-bold);       /* eu: the bezel's marks every 5 */
+  --line-outline: var(--weight-mid);        /* eu: drawn objects, the pyramid, the eye, the star dots (the live tetrahedron's 2 on 108) */
+  --line-outline-edge: var(--weight-bold);  /* eu: the pyramid's edge in the other ink under the faces, the outline and about .2 each side */
+  --line-seam: .25;                         /* eu: a face stroked in its own ink, which closes the seams between faces; its width is the gap it covers, not a weight */
+  --line-ring: 1.5;                         /* eu: the dotted ring, its dots' size, not a weight */
+  --line-rays: var(--weight-fine);          /* eu: the sunburst */
+  --line-beam: var(--weight-bold);          /* eu: the eye's beam at its full size (orrery.css converts it to the beam's box) */
+  --line-orbit: var(--weight-mid);          /* eu: the inner orbit and the red outer one */
+  --line-orbit-dash: var(--weight-mid);     /* eu: the dashed orbit (78.4) */
+  --line-orbit-dot: var(--weight-bold);     /* eu: the dotted orbit (84) */
+  --line-halo: var(--weight-mid);           /* eu: a star dot's hover halo */
+  --line-pulse: var(--weight-mid);          /* eu: the pulsing star dot's ring, a border (snaps to whole px) */
+  --line-chalk: var(--weight-mid);          /* eu: the star drawn on stop, its chalk's main pass */
+  --line-chalk-mid: var(--weight-fine);     /* eu: the chalk's second pass */
+  --line-chalk-fine: var(--weight-fine);    /* eu: the chalk's third pass */
+  --line-sigil: 2.4;                        /* sigil/64: every sigil, everywhere; in a bead, 58% of it */
+  --line-star-bead: .4614;                  /* glyph/14: the star bead's keyline (its glyph is 66% of the bead), the sigil's line there */
+  --line-bead-ring: .75px;                  /* px: the face's edge ring, inside the face, with .5px ramps */
+  --line-bead-seal: 2.25px;                 /* px: the seal on hover and focus, with .25px ramps */
+  --line-bead-hint: 1px;                    /* px: the ring that grows off a bead now and then */
 
   /* motion. --ease-lift/--dur-lift/--lift-y: the card lift (ease, 250ms, -4px). */
   --ease-lift: ease;

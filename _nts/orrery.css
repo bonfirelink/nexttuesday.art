@@ -114,7 +114,7 @@
    pyramid */
 .orrery .e-beam { position: absolute; left: 50%; top: 50%; width: 22.77cqi; height: 22.77cqi; margin: -11.385cqi 0 0 -11.385cqi; opacity: 0; transform: scale(.35); }
 .orrery .e-beam svg { display: block; width: 100%; height: 100%; overflow: visible; }
-/* eu to the beam's units (px is a user unit): the inverse of --line-beam's formula in nts.css */
+/* eu to the beam's 20-unit box (px is a user unit); the box is drawn at 22.77cqi = 22.77 * 2.02 eu */
 .orrery .e-beam circle { stroke-width: calc(var(--line-beam) * 20px / (22.77 * 2.02)); }
 
 /* the stars: code dots on the orbits, decorative marks (no pages yet to
