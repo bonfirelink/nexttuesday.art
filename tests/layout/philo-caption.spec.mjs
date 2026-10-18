@@ -47,3 +47,26 @@ for (const [width, height] of [[390, 844], [1440, 900], [844, 390]]) {
     expect(fig.bottom, "caption inside the hero").toBeLessThanOrEqual(fig.heroBottom);
   });
 }
+
+// The rings run under the caption, so it carries a halo in the hero's ground colour (every
+// layer of it) while its ink stays the quiet muted one.
+for (const [width, height] of [[390, 844], [1440, 900]]) {
+  test(`L2 PHILO figure caption has a halo in the ground colour at ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await openPage(page, "/not-not-philo/");
+
+    const s = await page.evaluate(() => {
+      const fig = document.querySelector(".fig");
+      const probe = document.createElement("i");
+      probe.style.cssText = "background: var(--w-bg); color: var(--w-muted)";
+      fig.parentElement.append(probe);
+      const ground = getComputedStyle(probe).backgroundColor, muted = getComputedStyle(probe).color;
+      probe.remove();
+      const cs = getComputedStyle(fig);
+      return { ground, muted, color: cs.color, layers: cs.textShadow.match(/rgba?\([^)]*\)/g) ?? [] };
+    });
+    expect(s.layers.length, "text-shadow layers").toBeGreaterThan(0);
+    expect(s.layers.filter((c) => c !== s.ground), "layers not in the ground colour").toEqual([]);
+    expect(s.color, "caption ink").toBe(s.muted);
+  });
+}
