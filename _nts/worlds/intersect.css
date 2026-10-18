@@ -7,6 +7,14 @@
    Contrast: phosphor on black 15.4:1, dim 6.6:1, fire-hi 5.6:1. */
 [data-world="intersect"], :root:where(:has(> body[data-world="intersect"])) {
   --w-bg: #0a0a0a;
+  /* The grained ground's average (#0a0a0a under the 7% screen grain,
+     measured): the colour iPhone Safari samples from the body for its status
+     strip, and the side bands WebKit paints from the sticky bar's colour (so
+     the scrolled bar is this colour too, not the ground's #0a0a0a). The
+     theme-color meta in intersect/index.html holds the same value, kept in
+     step by hand; the L11 test in tests/layout/intersect-ground.spec.mjs
+     compares them. */
+  --w-bg-mean: #131313;
   --w-bg-2: #141412;
   --w-fg: #e9e2cf;
   --w-muted: #9c9684;
@@ -17,7 +25,7 @@
   --w-line-strong: rgba(233, 226, 207, 0.38);
   --w-selection: #e51d47;
   --w-selection-fg: #0a0a0a;
-  --w-bar-bg: rgba(10, 10, 10, 0.8);
+  --w-bar-bg: color-mix(in srgb, var(--w-bg-mean) 80%, transparent);
   --w-bar-fg: #e9e2cf;
   --w-sigil: "intersect";
   --w-rim: rgba(233, 226, 207, 0.34);
@@ -28,7 +36,15 @@
   color-scheme: dark;
 }
 html[data-bleed-state="before"] [data-world="intersect"] { --grain: 0; }
-html[data-bleed-state="in"] .intersect-grain { z-index: 3; }
+/* The ground is a body::before layer, so body's own background can be the
+   grained ground's mean: iPhone Safari samples the body's background for its
+   status strip, and the mean is what the strip blends with. html (the
+   overscroll canvas) takes it too, except while the bleed-in runs (`before`,
+   `in`): the root's NTS ground is what the arrival's crossfade lies on, so
+   no frame darkens. */
+:root:where(:has(> body[data-world="intersect"])):not([data-bleed-state="before"], [data-bleed-state="in"]) { background: var(--w-bg-mean); }
+body[data-world="intersect"] { background: var(--w-bg-mean); }
+body[data-world="intersect"]::before { content: ""; position: absolute; inset: 0; z-index: 0; background: var(--w-bg); pointer-events: none; }
 [data-world="intersect"] { font-family: var(--font-intersect); font-size: 1.1875rem; }
 [data-world="intersect"] :is(h1, h2, h3, .display, .incant, .whisper, .mark, .ledger .what, details.reveal p) { font-family: var(--font-intersect); font-weight: 400; font-variation-settings: normal; letter-spacing: 0; }
 [data-world="intersect"] .label, [data-world="intersect"] .go, [data-world="intersect"] .ledger .when { font-family: var(--font-mono); font-weight: 500; }
@@ -40,19 +56,15 @@ html[data-bleed-state="in"] .intersect-grain { z-index: 3; }
    is on from the bleed-in's start, and while the disc opens it lies over the
    hero's night copy (z-index 3, above .nts-night): one layer for the disc and
    the page below it, the same tile at the same raster scale. A copy of it in
-   the scaled copy would be resampled and read as a different texture. At the
-   top the bar is clear, so the page's grain shows through it and the bar is
-   the ground itself. Once scrolled it is the bar colour over a blur, which
-   would smooth the grain out and read darker than the ground, so it
-   carries the same tile (--grain-tile) at the same opacity, under its
-   content. The bar's layer always exists and only its opacity changes (0 at
-   the top): a pseudo-element generated at the switch can paint once at full
-   strength before its transition starts (WebKit). */
-.intersect-grain, [data-world="intersect"] .nts-header::before { position: absolute; inset: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: var(--grain-tile); transition: opacity .4s ease; }
+   the scaled copy would be resampled and read as a different texture. The
+   bar has no grain layer of its own: at the top it is clear, so the page's
+   grain shows through, and once scrolled its colour is the ground's mean
+   (--w-bg-mean), which is what the eye sees of grained ground and also what
+   WebKit paints into the side bands from the bar's colour. */
+.intersect-grain { position: absolute; inset: 0; pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: var(--grain-tile); transition: opacity .4s ease; }
 .intersect-grain { z-index: 0; }
+html[data-bleed-state="in"] .intersect-grain { z-index: 3; }
 html[data-bleed-state="world"] [data-world="intersect"] .nts-header:not(.is-scrolled) { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
-[data-world="intersect"] .nts-header::before { content: ""; z-index: -1; }
-[data-world="intersect"] .nts-header:not(.is-scrolled)::before { opacity: 0; }
 [data-world="intersect"] { position: relative; }
 /* above the grain; the header keeps its own sticky position and z-index.
    :where() keeps the specificity of the old `> *`, so page rules still win. */
