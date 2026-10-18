@@ -298,7 +298,7 @@ and `--plate` weight) centred on the canvas, which is the figure's centre.
 Files: `worlds/intersect.css`, `worlds/ascii.js`. The world sets IM
 Fell as the body and heading face and the mono for labels; the title is
 IM Fell behind a mono `>` prompt (the hero lines: World hero text). Classes: `.corr` (the correspondence
-table), `.intersect-grain` (a grain div, first in body). The bar is clear at the top (the page grain shows through); scrolled, it carries the same tile as `.nts-header::before`, from `--grain-tile` at `--grain`, because its blur would hide the page's grain. That layer always exists (opacity 0 at the top), so the switch only fades it; one generated at the switch flashes at full strength in WebKit.
+table), `.intersect-grain` (a grain div, first in body). The bar is clear at the top (the page grain shows through) and has no grain layer of its own; scrolled, it is `--w-bar-bg`, the ground's mean (`--w-bg-mean`, #131313, the grained ground's measured average) at 80% over a blur. The ground is a `body::before` layer (`--w-bg`) and `body` itself is `--w-bg-mean` (so is `html`, except while the bleed-in runs, `before` and `in`): iPhone Safari samples the body's background for its status strip, and WebKit paints landscape side bands from the sticky bar's colour. The `theme-color` meta is the same value (test `L11` compares them).
 The entity is `<pre data-nts-ascii="tetra" data-cols="52" role="img" aria-label="…"><!-- nts:still intersect-lg --><!-- /nts:still --></pre>`;
 figures: `tetra`, `heptagram`, `seed`. Live, `ascii.js` moves the baked
 still into a hidden `span.ascii-still` and draws the glyphs on a canvas

@@ -300,7 +300,7 @@ Header and footer come from sync (`<!-- nts:header -->`, `<!-- nts:footer -->`).
 The header is sticky, one row, 52px; on phones the wordmark hides and the
 four destinations stay in one tap, spread from the sigil to the gutter
 (the `nav` takes the free width), as far from the sigil as from each
-other. It takes `--w-bar-bg`/`--w-bar-fg` (INTERSECT's bar is clear until scrolled), so
+other. It takes `--w-bar-bg`/`--w-bar-fg` (INTERSECT's bar is clear until scrolled, then the ground's mean), so
 its colours follow the world; its type never does: the nav is Instrument
 Sans 600 at .72rem (.7rem under 640px, .6875rem under 360px) on every page,
 and `intersect.css` leaves it alone. The current page is marked by a
@@ -608,11 +608,15 @@ behave the same.
   `tests/transitions/header-bleed.spec.mjs`. A texture that is
   part of the world's ground is not one of those parts: INTERSECT's grain
   (`.intersect-grain`, a body-level layer under the content) is on from the
-  start of `in` (it is off only in `before`); the bar carries the same
-  tile as `.nts-header::before`, from `--grain-tile` at `--grain` once scrolled
-  and at opacity 0 at the top (the layer always exists, so the switch only
-  fades it; a pseudo-element generated at the switch flashes at full strength
-  in WebKit). While the state is `in` it
+  start of `in` (it is off only in `before`); the bar has no grain layer of its own
+  (clear at the top, so the page's grain shows through; scrolled, `--w-bar-bg`
+  is `--w-bg-mean` at 80% over a blur). `--w-bg-mean` (#131313) is the grained
+  ground's measured average. The ground itself is `body::before`
+  (`--w-bg`) and `body` is `--w-bg-mean`, as is `html` once the state is `world` (it is the NTS ground in `before` and `in`),
+  because iPhone Safari samples the body's background for its status strip
+  and WebKit paints landscape side bands from the sticky bar's colour; the
+  `theme-color` meta holds the same value, kept in step by `L11`
+  (`tests/layout/intersect-ground.spec.mjs`). While the state is `in` the grain
   lies over the copy (`z-index: 3`, above `.nts-night`, under the header),
   so the disc and the page below it carry one grain at one raster scale (a
   copy of it inside the scaled layer would be resampled and read as another
