@@ -3,61 +3,116 @@ import { test, expect } from "../helpers/fixtures.mjs";
 
 const PAGES = [["/embers/", "#title"], ["/", "#h-embers"]];
 
-// Archivo has no Greek: the Es stay text (search, readers, copy) and are painted transparent
-// while a ::before draws the bars.
+// Archivo has no Greek: the Es stay text (search, readers, copy) and are set in "Nts Xi", a
+// one-glyph font whose E is three bars (tools/gen-xi.py), so colour and selection are the text's.
+// Bar centres in em from the span's left edge and from its baseline (Archivo's E at wdth 125,
+// weight 700: ink from .0925em to .8025em, stroke .1375em, cap height .6875em, ascent .878em).
+const BAR_X = 0.0925 + 0.71 / 2;
+const STEM_X = 0.12; // inside the stem of Archivo's E, between the bars of the Ξ
+const BARS = { top: 0.6875 - 0.1375 / 2, middle: 0.6875 / 2, bottom: 0.1375 / 2 };
+
 for (const [path, sel] of PAGES) {
   test(`the wordmark on ${path} is EMBERS text with two Ξ-drawn Es`, async ({ page }) => {
     await page.goto(process.env.NTS_BASE + path);
     await page.evaluate(() => document.fonts.ready);
     const w = await page.evaluate((s) => {
       const el = document.querySelector(s);
-      const px = (v) => parseFloat(v);
       return {
         text: el.textContent,
-        ink: getComputedStyle(el).color,
-        xi: [...el.querySelectorAll(".xi")].map((x) => {
-          const cs = getComputedStyle(x, "::before");
-          const r = x.getBoundingClientRect();
-          const l = px(cs.left), t = px(cs.top);
-          return {
-            text: x.textContent,
-            color: getComputedStyle(x).color,
-            bars: cs.content,
-            width: px(cs.width),
-            height: px(cs.height),
-            // the ::before box, as offsets, lies inside the span's rect
-            inside: l >= 0 && t >= 0 && l + px(cs.width) <= r.width + 0.5 && t + px(cs.height) <= r.height + 0.5,
-            barColors: cs.backgroundImage.match(/rgba?\([^)]*\)/g),
-          };
-        }),
+        xi: [...el.querySelectorAll(".xi")].map((x) => ({
+          text: x.textContent,
+          family: getComputedStyle(x).fontFamily,
+          loaded: [...document.fonts].some((f) => f.family.replace(/"/g, "") === "Nts Xi" && f.status === "loaded"),
+          width: x.getBoundingClientRect().width,
+          size: parseFloat(getComputedStyle(x).fontSize),
+          spacing: parseFloat(getComputedStyle(x).letterSpacing) || 0,
+        })),
       };
     }, sel);
     expect(w.text).toBe("EMBERS");
     expect(w.xi.map((x) => x.text)).toEqual(["E", "E"]);
     for (const x of w.xi) {
-      expect(x.color).toBe("rgba(0, 0, 0, 0)");
-      expect(x.bars).not.toBe("none");
-      expect(x.width).toBeGreaterThan(0);
-      expect(x.height).toBeGreaterThan(0);
-      expect(x.inside).toBe(true);
-      // three bars, each the heading's own colour
-      expect(x.barColors.length).toBeGreaterThanOrEqual(3);
-      for (const c of x.barColors) expect(c).toBe(w.ink);
+      expect(x.family.startsWith('"Nts Xi"')).toBe(true);
+      expect(x.loaded).toBe(true);
+      // the glyph's advance is Archivo's E (.865em), so the wordmark keeps its width
+      expect(Math.abs(x.width - (0.865 * x.size + x.spacing))).toBeLessThan(1.5);
     }
   });
 
-  test(`selecting the wordmark on ${path} keeps the real E hidden under the bars`, async ({ page }) => {
+  for (const state of ["plain", "selected"]) {
+    test(`the Ξ bars on ${path} are drawn in the text colour, ${state}`, async ({ page }) => {
+      await page.goto(process.env.NTS_BASE + path);
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator(sel).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      const info = await page.evaluate(([s, st]) => {
+        const el = document.querySelector(s);
+        el.style.textShadow = "none";
+        for (const c of el.querySelectorAll("*")) c.style.textShadow = "none";
+        if (st === "selected") {
+          const r = document.createRange();
+          r.selectNodeContents(el);
+          getSelection().removeAllRanges();
+          getSelection().addRange(r);
+        }
+        const x = el.querySelector(".xi");
+        const r = x.getBoundingClientRect();
+        const cs = getComputedStyle(x);
+        return {
+          rect: { x: r.x, y: r.y, w: r.width, h: r.height },
+          size: parseFloat(cs.fontSize),
+          color: st === "selected" ? getComputedStyle(x, "::selection").color : cs.color,
+        };
+      }, [sel, state]);
+      const { x: rx, y: ry, w: rw, h: rh } = info.rect;
+      const pad = 4;
+      const png = await page.screenshot({
+        clip: { x: Math.max(0, rx - pad), y: Math.max(0, ry - pad), width: rw + 2 * pad, height: rh + 2 * pad },
+      });
+      const origin = { x: Math.max(0, rx - pad), y: Math.max(0, ry - pad) };
+      // the span's box is the font's content area: baseline at .878em from its top
+      const base = ry + 0.878 * info.size;
+      const at = (em, xem = BAR_X) => [Math.round(rx + xem * info.size - origin.x), Math.round(base - em * info.size - origin.y)];
+      const probe = await (await page.context().newPage()).evaluate(
+        async ([b64, pts]) => {
+          const img = new Image();
+          img.src = "data:image/png;base64," + b64;
+          await img.decode();
+          const c = document.createElement("canvas");
+          c.width = img.width; c.height = img.height;
+          const g = c.getContext("2d");
+          g.drawImage(img, 0, 0);
+          return pts.map(([x, y]) => [...g.getImageData(x, y, 1, 1).data.slice(0, 3)]);
+        },
+        [png.toString("base64"), [at(BARS.top), at(BARS.middle), at(BARS.bottom), at(0.2065), at(0.2065, STEM_X), at(0.48, STEM_X)]],
+      );
+      const want = info.color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+      const near = (p) => p.every((v, i) => Math.abs(v - want[i]) <= 14);
+      const [top, mid, bottom, gap, stemLow, stemHigh] = probe;
+      expect(near(top), `top bar ${top} vs ${want}`).toBe(true);
+      expect(near(mid), `middle bar ${mid} vs ${want}`).toBe(true);
+      expect(near(bottom), `bottom bar ${bottom} vs ${want}`).toBe(true);
+      // between the bars the ground shows
+      expect(near(gap), `gap ${gap} must not be ${want}`).toBe(false);
+      // Archivo's E has a stem here, the Ξ does not
+      expect(near(stemLow), `stem ${stemLow} must not be ${want}`).toBe(false);
+      expect(near(stemHigh), `stem ${stemHigh} must not be ${want}`).toBe(false);
+    });
+  }
+
+  test(`print and forced colours set the wordmark's Es in the title's own font on ${path}`, async ({ page }) => {
     await page.goto(process.env.NTS_BASE + path);
     await page.evaluate(() => document.fonts.ready);
-    const colors = await page.evaluate((s) => {
-      const el = document.querySelector(s);
-      const r = document.createRange();
-      r.selectNodeContents(el);
-      getSelection().removeAllRanges();
-      getSelection().addRange(r);
-      return [...el.querySelectorAll(".xi")].map((x) => getComputedStyle(x, "::selection").color);
-    }, sel);
-    expect(colors).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"]);
+    const families = async () =>
+      page.evaluate((s) => {
+        const el = document.querySelector(s);
+        return [...el.querySelectorAll(".xi")].map((x) => [getComputedStyle(x).fontFamily, getComputedStyle(x.parentElement).fontFamily]);
+      }, sel);
+    for (const x of await families()) expect(x[0]).not.toBe(x[1]);
+    for (const media of [{ media: "print" }, { forcedColors: "active" }]) {
+      await page.emulateMedia(media);
+      for (const [own, parent] of await families()) expect(own).toBe(parent);
+    }
   });
 }
 

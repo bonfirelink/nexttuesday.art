@@ -83,6 +83,7 @@ tools/
   gen-sigils.mjs   writes _nts/sigils.svg
   gen-emblem.mjs   writes _nts/parts/emblem-*.html (the home emblem)
   gen-stills.mjs   writes _nts/parts/still-*.{svg,txt}
+  gen-xi.py        writes the wordmark's Ξ font into _nts/worlds/embers.css (needs fontTools, brotli)
   browser.mjs      `launch()`: a headless Chromium ($CHROMIUM) for one-off scripts
   publish.sh       moves the `site` branch (see tests/INTERNALS.md "Publishing")
   run-suite.mjs    the runner behind the npm test scripts
@@ -705,8 +706,13 @@ A copy value may hold markup (tags are stripped for `<meta>` and `<title>`). The
 wordmark's copy is plain "EMBERS": an element that also carries `data-nts-xi`
 gets each E wrapped in `<span class="xi">` by sync, because Archivo has no Greek
 and a real Ξ would fall back to another font. The E stays text for search,
-readers and copy; `.xi` paints it transparent and draws the Ξ bars in its box
-(`worlds/embers.css`). A hand-edit that drops the spans makes `--check` fail
+readers and copy; `.xi` sets it in "Nts Xi", a one-glyph font (a woff2 of a few
+hundred bytes as a data: URI in `worlds/embers.css`) whose E is the three bars at
+Archivo's E metrics, so colour, glow and `::selection` are the text's own. Rebuild it
+with `tools/gen-xi.py`: `nix shell --impure --expr 'with import <nixpkgs> {};
+python3.withPackages (p: [p.fonttools p.brotli])' --command python3
+tools/gen-xi.py` (it rewrites the data URI between the `xi-font` markers).
+Print and forced colours fall back to a plain E. A hand-edit that drops the spans makes `--check` fail
 (S4 in `tests/static/sync.spec.mjs`). The link preview needs plain characters,
 so `embers.og.title` holds a real Ξ (U+039E).
 

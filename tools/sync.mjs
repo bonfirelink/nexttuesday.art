@@ -231,7 +231,7 @@ function sync(file) {
   html = replaceInner(html, 'data-nts-copy', (k, tag, attrs) => {
     let v = COPY[k];
     if (v === undefined) return undefined;
-    // the wordmark's Es are drawn as Ξ by .xi (Archivo has no Greek); the copy stays plain text,
+    // the wordmark's Es are set as Ξ by .xi (Archivo has no Greek); the copy stays plain text,
     // with no markup, since every E in it is wrapped
     if (/\sdata-nts-xi(?=[\s=>]|$)/.test(attrs)) v = v.replace(/E/g, '<span class="xi">E</span>');
     return tag === 'title' ? v.replace(/<[^>]+>/g, '') : v;
