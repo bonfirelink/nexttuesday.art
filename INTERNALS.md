@@ -724,8 +724,8 @@ Archivo's E metrics, so colour, glow and `::selection` are the text's own. Rebui
 with `tools/gen-xi.py`: `nix shell --impure --expr 'with import <nixpkgs> {};
 python3.withPackages (p: [p.fonttools p.brotli])' --command python3
 tools/gen-xi.py` (it rewrites the data URI between the `xi-font` markers).
-Print and forced colours fall back to a plain E. A hand-edit that drops the spans makes `--check` fail
-(S4 in `tests/static/sync.spec.mjs`). The link preview needs plain characters,
+The bars are glyph outlines, so print and forced colours keep the Ξ in the
+text colour. A hand-edit that drops the spans makes `--check` fail (S4 in `tests/static/sync.spec.mjs`). The link preview needs plain characters,
 so `embers.og.title` holds a real Ξ (U+039E).
 
 Regions sync fills: `nts:sprite`, `nts:header`, `nts:footer`,

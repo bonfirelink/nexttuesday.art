@@ -48,17 +48,14 @@ html[data-bleed-state="before"] [data-world="embers"], html[data-bleed-state="in
 }
 /* The wordmark's Ξ: Archivo has no Greek, so each E of EMBERS stays text (find, copy, readers)
    and is set in a one-glyph font whose E is three bars (tools/gen-xi.py). The bars are
-   outlines, so colour, glow and selection are the text's own. Metrics are Archivo's E at
+   outlines, so colour, glow and selection are the text's own, in print and forced
+   colours too. Metrics are Archivo's E at
    wdth 125, weight 700: advance .865em, cap height .6875em, stroke .1375em, ink .71em wide
    from .0925em in; the middle bar is shorter than Archivo's own middle arm (.6425em). */
 /* xi-font */
 @font-face { font-family: "Nts Xi"; font-weight: 100 900; font-display: block; src: url(data:font/woff2;base64,d09GMgABAAAAAAEwAAoAAAAAAnwAAADoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAo0SgE2AiQDBgsGAAQgBVQHJhvXARguCuxm4oiephNmIkII+2aESs5DNfZ7e3uo5j8kCIWK158RlUr1HiiJ6dpoq1RYY8njxlsSV/nP6+IGp000iG8Pag8+D7St44C7jYFDPILibq3qQ6WLMrfKWlTiAE2NwYKF7D/y3AcAoAEKEsNSYFjVQFUFFv65zQJAARWJbvQBKiBrrV3R5xre6vPP954mnh50HQgEfx7c6PPdnvkJ7188MrdKjpWQCgjeunUxtUAAACK3sCpQdEtQAABQTQoQWhGgqFqlqB1Ct86NinajzdubxuLRcF9ounWjYdGRWRdO7SpCtHEAAA==) format("woff2"); }
 /* /xi-font */
 .xi { font-family: "Nts Xi", var(--font-flyer); }
-/* print and forced colours: the title is a plain E */
-@media print, (forced-colors: active) {
-  .xi { font-family: inherit; }
-}
 .embers-display .hollow {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--w-accent);

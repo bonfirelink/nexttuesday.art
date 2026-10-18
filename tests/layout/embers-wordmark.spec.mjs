@@ -100,18 +100,20 @@ for (const [path, sel] of PAGES) {
     });
   }
 
-  test(`print and forced colours set the wordmark's Es in the title's own font on ${path}`, async ({ page }) => {
+  test(`print and forced colours keep the wordmark's Es in "Nts Xi" on ${path}`, async ({ page }) => {
     await page.goto(process.env.NTS_BASE + path);
     await page.evaluate(() => document.fonts.ready);
-    const families = async () =>
-      page.evaluate((s) => {
-        const el = document.querySelector(s);
-        return [...el.querySelectorAll(".xi")].map((x) => [getComputedStyle(x).fontFamily, getComputedStyle(x.parentElement).fontFamily]);
-      }, sel);
-    for (const x of await families()) expect(x[0]).not.toBe(x[1]);
     for (const media of [{ media: "print" }, { forcedColors: "active" }]) {
       await page.emulateMedia(media);
-      for (const [own, parent] of await families()) expect(own).toBe(parent);
+      const xi = await page.evaluate((s) => {
+        const loaded = [...document.fonts].some((f) => f.family.replace(/"/g, "") === "Nts Xi" && f.status === "loaded");
+        return [...document.querySelector(s).querySelectorAll(".xi")].map((x) => ({ family: getComputedStyle(x).fontFamily, loaded }));
+      }, sel);
+      expect(xi).toHaveLength(2);
+      for (const x of xi) {
+        expect(x.family.startsWith('"Nts Xi"'), `${JSON.stringify(media)}: ${x.family}`).toBe(true);
+        expect(x.loaded).toBe(true);
+      }
     }
   });
 }
