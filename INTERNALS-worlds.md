@@ -67,7 +67,8 @@ the right from 900px inside `.embers-hero`), `.genres`. The entity is
 `<canvas class="nts-hearth" tabindex="0" aria-label="…">` inside a
 `.hearth-stage`, with a `.hearth-still` for scripts off (`<!-- nts:still embers -->`).
 Data attributes tune it (see the file head). Drag turns, a tap stokes it
-into a burst of glyph embers, keyboard works. It draws its day palette while the page is `before`; while
+into a burst of glyph embers, keyboard works. A cancelled touch (the browser taking it for a
+scroll) only ends the drag: no stoke, and the spin goes back to what it was at the press. It draws its day palette while the page is `before`; while
 the bleed-in's disc opens it draws the night into the twins in the copy
 and the day into itself, both from one geometry. On `/embers/` the canvas is the
 landing's field: it is the hero's first child, absolute over the whole
@@ -138,7 +139,7 @@ the hero:
   polylines in buffers kept across frames.
 - `canvas.ntsHearth()` reports heat, frame-rate cap, resolution, box,
   the live canvas's rect, line spacing, the first line's height, the
-  embers in the air (and how many are still hot) and the palettes a glyph sheet was drawn for, for the
+  embers in the air (and how many are still hot), the spin (rad/s) and the palettes a glyph sheet was drawn for, for the
   tests (as `ntsPose()` reports the turn).
 
 ## NOT NOT PHILO

@@ -253,6 +253,23 @@ test.describe("phone", () => {
     expect((await hearth(page)).fps).toBe(60);
   });
 
+  test("E22 a touch the browser takes for a scroll (pointercancel) neither stokes nor spins the hearth; a tap still stokes", async ({ page }) => {
+    await openHearth(page);
+    const r = await rects(page), x = r.stage.x + r.stage.width / 2, y = r.stage.y + r.stage.height / 2;
+    const touch = (type, dx = 0) => page.evaluate(([type, x, y]) => document.querySelector("canvas.nts-hearth").dispatchEvent(new PointerEvent(type, { pointerId: 7, pointerType: "touch", isPrimary: true, bubbles: true, clientX: x, clientY: y })), [type, x + dx, y]);
+    const h0 = await hearth(page);
+    for (const dx of [0, 5]) {
+      await touch("pointerdown");
+      if (dx) { await page.waitForTimeout(20); await touch("pointermove", dx); }
+      await touch("pointercancel", dx);
+      const h = await hearth(page);
+      expect(h.heat, `heat after a cancel (moved ${dx})`).toBeLessThan(h0.heat + 0.2);
+      expect(h.spin, `spin after a cancel (moved ${dx})`).toBeCloseTo(h0.spin, 1);
+    }
+    await touch("pointerdown"); await touch("pointerup");
+    expect((await hearth(page)).heat, "heat after a tap").toBeGreaterThan(h0.heat + 0.5);
+  });
+
   test("E11 the lines below the live layer stay put from frame to frame", async ({ page }) => {
     await openHearth(page);
     await page.addStyleTag({ content: BARE });

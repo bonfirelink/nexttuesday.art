@@ -192,7 +192,7 @@
     }
     /* while the bleed-in's disc opens: the copies the night goes to */
     let twin = null, liveTwin = null;
-    let w = 0, h = 0, dpr = 1, unit = 1, yaw = 0.6, pitch = 0.5, pitchDrag = 0, spin = o.spin;
+    let w = 0, h = 0, dpr = 1, unit = 1, yaw = 0.6, pitch = 0.5, pitchDrag = 0, spin = o.spin, spin0 = spin;
     let t = 0, tilt = 0, stoke = o.stoke0, last = 0, raf = 0, acc = 0, visible = false, skip = 1;
     let dragging = false, lastX = 0, lastY = 0, lastT = 0, moved = 0;
     /* the box (x0, y0, x1, y1) and the live canvas's rect, in css px of the
@@ -529,15 +529,15 @@
     canvas.ntsPose = () => [yaw, pitch + pitchDrag];
     /* heat, frame-rate cap, resolution, box and live canvas (x, y, w, h in
        css px of the canvas), line spacing, the first line's height, embers
-       in the air, the hot ones among them, and the palettes a glyph sheet was drawn for, for the tests */
+       in the air, the hot ones among them, the palettes a glyph sheet was drawn for, and the spin (rad/s), for the tests */
     canvas.ntsHearth = () => ({
-      heat: stoke, fps: frameRate(), dpr, spacing: o.spacing, firstLine: rows().top,
+      heat: stoke, spin, fps: frameRate(), dpr, spacing: o.spacing, firstLine: rows().top,
       box: box ? [box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0] : null,
       layer: [layer.x, layer.y, layer.w, layer.h], embers: embers.length, hot: hotEmbers(), glyphSheets: [...glyphSheets.keys()].map((P) => P.name),
     });
     if (o.interactive) {
       const hand = G.watch(canvas, onFigure);
-      canvas.addEventListener("pointerdown", (e) => { followAnchor(); if (!hand.down(e)) return; dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener("pointerdown", (e) => { followAnchor(); if (!hand.down(e)) return; dragging = true; moved = 0; spin0 = spin; lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp; canvas.setPointerCapture(e.pointerId); });
       canvas.addEventListener("pointermove", (e) => {
         if (!dragging) return;
         const dx = e.clientX - lastX, dy = e.clientY - lastY, dtm = Math.max(8, e.timeStamp - lastT);
@@ -548,9 +548,11 @@
         lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp;
         if (still.matches) draw();
       });
-      const release = () => { hand.up(); if (!dragging) return; dragging = false; if (moved < 8) stokeIt(); };
+      const endDrag = () => { hand.up(); const was = dragging; dragging = false; return was; };
+      const release = () => { if (endDrag() && moved < 8) stokeIt(); };
       canvas.addEventListener("pointerup", release);
-      canvas.addEventListener("pointercancel", release);
+      /* a cancel is the browser taking the touch for a scroll: not a tap, and no fling */
+      canvas.addEventListener("pointercancel", () => { if (endDrag()) spin = spin0; });
       canvas.addEventListener("keydown", (e) => {
         if (e.key === " " || e.key === "Enter") { e.preventDefault(); stokeIt(); }
         if (e.key === "ArrowLeft") { yaw += 0.2; if (still.matches) draw(); }
