@@ -86,8 +86,9 @@ a.philo-bar:hover::before, a.philo-bar:focus-visible::before { transform: transl
 .nts-penrose.is-live img, .nts-penrose.is-live > svg { display: none; }
 /* the caption hangs a line under the cubes' drawn bottom, inside the figure box, so the ring still centres on the
    figure; the orbit may cross it. --cubes-bottom is that bottom's share of the box (the still's lowest path, 477.84
-   of 600). Checked by the L2 caption test */
-.fig { --cubes-bottom: 79.6%; position: absolute; top: calc(var(--cubes-bottom) + 1.5rem); left: 0; right: 0; text-align: center; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: .95rem; color: var(--w-muted); margin: 0; }
+   of 600). Checked by the L2 caption test. A halo in the ground's colour clears the rings right around the
+   glyphs: they run under the caption, mostly on a phone, where it sits on the orb */
+.fig { --cubes-bottom: 79.6%; position: absolute; top: calc(var(--cubes-bottom) + 1.5rem); left: 0; right: 0; text-align: center; font-family: var(--font-display); font-style: italic; font-variation-settings: var(--fraunces-voice); font-size: .95rem; color: var(--w-muted); margin: 0; text-shadow: 1px 0 0 var(--w-bg), -1px 0 0 var(--w-bg), 0 1px 0 var(--w-bg), 0 -1px 0 var(--w-bg), 2px 2px 0 var(--w-bg), -2px 2px 0 var(--w-bg), 2px -2px 0 var(--w-bg), -2px -2px 0 var(--w-bg), 0 0 4px var(--w-bg), 0 0 4px var(--w-bg), 0 0 10px var(--w-bg), 0 0 10px var(--w-bg); }
 .fig b { font-style: normal; font-weight: 400; }
 
 /* the fragment */
