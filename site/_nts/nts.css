@@ -457,7 +457,9 @@ details.reveal p { margin: .35rem 0 0; font-family: var(--font-display); font-st
    "bleed" block there): from then on (data-bleed-state="in") the page is
    the world's except what carries .nts-bleed-old (the hero, and the header
    until the disc reaches it), which reads the same NTS tokens, and a copy
-   of the hero in the world's colours (.nts-night) opens over it as a disc. */
+   of the hero in the world's colours (.nts-night) opens over it as a disc,
+   on its own over a few seconds once the page is first scrolled, and not
+   with the scroll. */
 html:is([data-bleed-state="before"], [data-bleed-state="in"]), html[data-bleed-state="before"] [data-world], html[data-bleed-state="in"] .nts-bleed-old { color-scheme: light; }
 /* text inherits the body's colour as a value, not its token */
 html[data-bleed-state="in"] .nts-bleed-old { color: var(--w-fg); }
@@ -467,7 +469,7 @@ html:is([data-bleed-state="before"], [data-bleed-state="in"]) main .hero { backg
 /* the night: the copy of the hero on the world's ground, over the hero and
    under the header, in document px (nts.js sizes it). The disc is scaled,
    the copy in it scaled back: both transforms, on layers of their own, so
-   the scroll moves them without a paint */
+   the animation runs without a paint */
 body > .nts-night { position: absolute; left: 0; top: 0; z-index: 2; overflow: clip; pointer-events: none; user-select: none; -webkit-user-select: none; }
 .nts-night-disc { position: absolute; border-radius: 50%; overflow: hidden; transform: scale(0); will-change: transform; }
 .nts-night-in { position: absolute; background: var(--w-bg); color: var(--w-fg); will-change: transform; }

@@ -5,7 +5,7 @@
 // rises; a stoke throws one burst of glyphs, and only while they are in the
 // air does the live canvas reach up and out.
 import { test, expect, installFontRoutes } from "../helpers/fixtures.mjs";
-import { clickWorldLink } from "../helpers/transitions.mjs";
+import { clickWorldLink, holdBleed } from "../helpers/transitions.mjs";
 
 const DESKTOP = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true };
@@ -361,14 +361,8 @@ test.describe("desktop: a stoke's burst", () => {
     await page.evaluate(() => document.fonts.ready);
     await clickWorldLink(page, "embers");
     await page.waitForSelector("canvas.nts-hearth.is-split");
-    // halfway through the disc's opening, both palettes are drawn
-    await page.evaluate(() => {
-      const r = document.querySelector("main .hero").getBoundingClientRect(), t = document.querySelector("main .hero h1").getBoundingClientRect();
-      const bar = document.querySelector(".nts-header").getBoundingClientRect().height;
-      const end = Math.max(Math.min(r.top + scrollY + r.height / 2, t.top + scrollY - bar - Math.round(innerHeight * 0.02)), innerHeight * 0.1);
-      scrollTo({ top: end / 2, behavior: "instant" });
-    });
-    await page.waitForFunction(() => { const q = window.NTS.bleed.progress(); return q > 0 && q < 1; });
+    // the disc fired and held part open: both palettes are drawn
+    await holdBleed(page, 0.3);
     // right after the navigation the view transition's pseudo-elements take the hit test
     await page.waitForFunction(() => {
       const s = document.querySelector(".embers-hero .hearth-stage").getBoundingClientRect();

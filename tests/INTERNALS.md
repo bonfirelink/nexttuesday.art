@@ -35,12 +35,23 @@ suite at a time.
 
 The tests cover: phone widths 320, 360 and 390 with no
 horizontal overflow, and a clean console with no 404s (the page walk in
-`tests/static`); the bleed-in sequence on arrival, scroll and back
-(`tests/transitions`); the orb morph between pages (`tests/transitions`);
+`tests/static`); the bleed-in on arrival (no move under the scroll threshold, the timed
+burst after it, the settle; `tests/transitions`); the orb morph between pages (`tests/transitions`);
 hero, figure and card geometry (`tests/layout`). By hand: the
 contrast audit over every text node (all AA, nothing under 11px, settled
 on every page), and looking at screenshots from the preview
 (the site served from the checkout).
+
+The bleed-in is a 2000ms animation that a scroll of 20px sets off. The
+tests that need the whole run (T3, T8) wait it out in the fast tier, about 4s
+each; the ones that look at a picture mid-run freeze the disc with
+`holdBleed(page, f)` and end it with `settleBleed(page)`
+(`tests/helpers/transitions.mjs`), so they do not depend on timing. A test
+that wants the bleed open, without caring how, fires it with `fireBleed`.
+
+`BLEED_FIRE_AT` and `BLEED_MS` in that file repeat `FIRE_AT` and `DURATION`
+in `nts.js`; B1 in `tests/static/bleed-constants.spec.mjs` keeps them in
+step.
 
 Tests that open a fresh browser context use `coldPage`
 (`tests/helpers/cold.mjs`); the font cache and the external-request block

@@ -4,6 +4,7 @@
 // masked while it is turned.
 import { test, expect } from "../helpers/fixtures.mjs";
 import { cubes } from "../helpers/cubes.mjs";
+import { holdBleed } from "../helpers/transitions.mjs";
 import { recordPaints, paints, figurePoint, lastPose } from "../helpers/behaviour.mjs";
 
 test.use({ viewport: { width: 390, height: 844 } });
@@ -119,7 +120,7 @@ test("R6 arriving from the home page, the bleed-in's twin figure is masked like 
   await page.waitForTimeout(300);
   // the twin is cloned while the figure is straight; the turn comes after
   await stroke(page, await figurePoint(page, 1));
-  await page.evaluate(() => { scrollTo({ top: 220, behavior: "instant" }); });
+  await holdBleed(page, 0.3);
   const twinMask = () => page.evaluate(() => {
     const cv = document.querySelector(".nts-night .nts-penrose canvas");
     if (!cv) return "no twin";

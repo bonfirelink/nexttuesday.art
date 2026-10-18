@@ -1,11 +1,11 @@
 import { test, expect } from "../helpers/fixtures.mjs";
 import {
-  WORLDS, groundLuma, rowLuma, recordBleed, clickWorldLink, bleedState, bleedEnd, scrollToY, bleedProgress,
+  WORLDS, groundLuma, rowLuma, recordBleed, clickWorldLink, bleedState, scrollToY, bleedProgress,
+  BLEED_FIRE_AT, BLEED_MS, fireBleed, holdBleed, settleBleed,
 } from "../helpers/transitions.mjs";
 
-const UP = [0.15, 0.3, 0.45, 0.6, 0.75];
-const DOWN = [0.4, 0.1, 0];
-const ON = [0.5, 0.9, 1.05];
+// How far into its run a frozen disc is shot: well open, not yet the whole page.
+const HELD = 0.35;
 
 const arrive = async (page, world, how) => {
   await page.addInitScript(recordBleed);
@@ -22,8 +22,8 @@ const arrive = async (page, world, how) => {
 
 // Waits until the finite time-based animations and transitions have finished
 // (the grain's fade, class-toggle transitions), then two frames for the paint.
-// The disc's own animations are paused or scroll-driven, and the site's loops
-// never end: neither is waited for. A frame first, so a transition started by
+// The disc's own animation is held when a test looks at it, and the site's
+// loops never end: neither is waited for. A frame first, so a transition started by
 // the last style change exists; it repeats, as a finished one may start another.
 const animationsSettled = (page, timeout = 5000) =>
   page.evaluate(async (timeout) => {
@@ -46,7 +46,7 @@ function bleedTests(label, viewport, deviceScaleFactor, tag) {
     WORLDS.forEach((world, i) => {
       // One run per world arrives by the real click on the home page.
       const how = label.startsWith("390") ? "click" : "flag";
-      test(`T3 the ${world} bleed-in progresses, reverses and settles, ${label} ${how} ${tag}`.trim(), async ({ page }) => {
+      test(`T3 the ${world} bleed-in waits for the scroll, then runs by itself and settles, ${label} ${how} ${tag}`.trim(), async ({ page }) => {
         await arrive(page, world, how);
 
         const dcl = await page.evaluate(() => window.__bleed.dcl);
@@ -72,37 +72,50 @@ function bleedTests(label, viewport, deviceScaleFactor, tag) {
           expect(copy.ascii[1], "twin font size").toBe(copy.ascii[0]);
         }
 
-        const end = await bleedEnd(page);
+        // Before the trigger nothing moves: a nudge under the threshold fires nothing.
         expect(await bleedProgress(page)).toBe(0);
-        let last = 0;
-        for (const f of UP) {
-          await scrollToY(page, Math.round(f * end));
-          const p = await bleedProgress(page);
-          expect(p, `progress at ${f}`).toBeGreaterThan(last);
-          expect(p).toBeLessThanOrEqual(1);
-          expect(await bleedState(page), `state at ${f}`).toBe("in");
-          last = p;
+        await scrollToY(page, BLEED_FIRE_AT - 1);
+        expect(await bleedProgress(page), "progress one px under the threshold").toBe(0);
+        expect(await bleedState(page), "state one px under the threshold").toBe("in");
+        expect(await page.evaluate(() => document.getAnimations().filter((a) => a.effect?.target?.closest?.(".nts-night")).length), "disc animations after a small nudge").toBe(0);
+
+        // Past it: one animation pair on the document timeline, transform only.
+        await scrollToY(page, BLEED_FIRE_AT);
+        const run = await page.evaluate(() => {
+          const els = [document.querySelector(".nts-night-disc"), document.querySelector(".nts-night-in")];
+          const anims = els.map((e) => e.getAnimations());
+          return anims.map((l) => l.map((a) => ({
+            doc: a.timeline instanceof DocumentTimeline,
+            duration: a.effect.getTiming().duration,
+            props: [...new Set(a.effect.getKeyframes().flatMap((k) => Object.keys(k).filter((n) => !["offset", "easing", "composite", "computedOffset"].includes(n))))],
+          })));
+        });
+        expect(run.map((l) => l.length), "one animation on the disc, one on the copy").toEqual([1, 1]);
+        for (const [a] of run) {
+          expect(a.doc, "document timeline").toBe(true);
+          expect(a.duration).toBe(BLEED_MS);
+          expect(a.props, "properties animated").toEqual(["transform"]);
         }
-        for (const f of DOWN) {
-          await scrollToY(page, Math.round(f * end));
-          const p = await bleedProgress(page);
-          if (f === 0) expect(p, "progress back at the top").toBe(0);
-          else expect(p, `progress falls at ${f}`).toBeLessThan(last);
-          expect(await bleedState(page), `state at ${f}`).toBe("in");
-          last = p;
-        }
-        for (const f of ON) {
-          await scrollToY(page, Math.round(f * end));
-          const p = await bleedProgress(page);
-          if (f < 1) {
-            expect(p, `progress rises again at ${f}`).toBeGreaterThan(last);
-            expect(p).toBeLessThan(1);
-          } else expect(p, "progress at the end").toBe(1);
-          last = p;
-        }
-        await expect.poll(() => bleedState(page), "the state settles").toBe("world");
+        await expect.poll(() => bleedProgress(page), "progress rises once fired").toBeGreaterThan(0);
+
+        // Scrolling back to the top mid-run does not reverse or stop it.
+        const back = await page.evaluate(async () => {
+          const time = () => document.querySelector(".nts-night-disc")?.getAnimations()[0]?.currentTime ?? null;
+          const t1 = time();
+          scrollTo({ top: 0, behavior: "instant" });
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          return { t1, t2: time(), state: document.documentElement.getAttribute("data-bleed-state") };
+        });
+        expect(back.t1, "mid-run").not.toBeNull();
+        // a run that ended in the meantime has gone on, not back
+        if (back.t2 !== null) expect(back.t2, "the animation keeps going after a scroll back").toBeGreaterThan(back.t1);
+        else expect(back.state, "settled, not closed").toBe("world");
+
+        // With no further scroll it runs to the end and settles.
+        await expect.poll(() => bleedState(page), { message: "the state settles", timeout: BLEED_MS + 3000 }).toBe("world");
         await expect.poll(() => page.evaluate(() => window.__bleed.events)).toEqual(["start", "end"]);
 
+        expect(await bleedProgress(page), "progress once settled").toBe(1);
         await scrollToY(page, 0);
         expect(await bleedState(page), "world stays world at the top").toBe("world");
         const after = await page.evaluate(() => {
@@ -122,37 +135,48 @@ function bleedTests(label, viewport, deviceScaleFactor, tag) {
   });
 }
 
-// The disc is complete while the world's name is still whole on screen,
-// below the sticky header.
-for (const [label, viewport] of [["1800x1080", { width: 1800, height: 1080 }], ["390x844", { width: 390, height: 844 }]]) {
-  test.describe(`bleed completes before the title meets the header ${label}`, () => {
+bleedTests("390 scale 1", { width: 390, height: 844 }, 1, "");
+bleedTests("1440 scale 1", { width: 1440, height: 900 }, 1, "");
+bleedTests("390 scale 2", { width: 390, height: 844 }, 2, "@slow");
+
+// At full scale the disc's circle holds the four corners of what is in view of
+// the layer: the viewport's top to the lower of its bottom and the layer's foot.
+for (const [label, viewport] of [["390x844", { width: 390, height: 844 }], ["1440x900", { width: 1440, height: 900 }]]) {
+  test.describe(`bleed disc cover ${label}`, () => {
     test.use({ viewport, deviceScaleFactor: 1 });
     for (const world of WORLDS) {
-      test(`T3 ${world}: the bleed is complete with the title below the header, ${label}`, async ({ page }) => {
+      test(`T3 the ${world} disc at full scale covers everything in view, ${label}`, async ({ page }) => {
         await arrive(page, world, "flag");
-        const end = Math.ceil(await bleedEnd(page));
-        const bounds = await page.evaluate(() => {
-          const h = document.querySelector("main .hero").getBoundingClientRect();
-          return { half: h.top + scrollY + h.height / 2, floor: 0.1 * innerHeight };
-        });
-        expect(end, "never later than half the hero").toBeLessThanOrEqual(bounds.half + 1);
-        expect(end, "not before a tenth of the viewport").toBeGreaterThanOrEqual(bounds.floor - 1);
-        await scrollToY(page, end);
-        await expect.poll(() => bleedState(page), "complete at the end point").toBe("world");
+        await holdBleed(page, 1);
         const r = await page.evaluate(() => {
-          const t = document.querySelector("main .hero h1").getBoundingClientRect();
-          return { top: t.top, bottom: t.bottom, bar: document.querySelector(".nts-header").getBoundingClientRect().bottom };
+          const disc = document.querySelector(".nts-night-disc").getBoundingClientRect(), layer = document.querySelector(".nts-night").getBoundingClientRect();
+          const cx = disc.left + disc.width / 2, cy = disc.top + disc.height / 2, R = disc.width / 2;
+          const top = Math.max(0, layer.top), bottom = Math.min(innerHeight, layer.bottom), right = layer.right;
+          return { R, far: Math.max(...[[0, top], [right, top], [0, bottom], [right, bottom]].map(([x, y]) => Math.hypot(x - cx, y - cy))) };
         });
-        expect(r.top, "title top below the header's foot").toBeGreaterThanOrEqual(r.bar);
-        expect(r.bottom, "title inside the viewport").toBeLessThanOrEqual(viewport.height);
+        expect(r.far, `the farthest corner of the view from the disc's centre vs its radius ${r.R}`).toBeLessThanOrEqual(r.R);
       });
     }
   });
 }
 
-bleedTests("390 scale 1", { width: 390, height: 844 }, 1, "");
-bleedTests("1440 scale 1", { width: 1440, height: 900 }, 1, "");
-bleedTests("390 scale 2", { width: 390, height: 844 }, 2, "@slow");
+// A page that loads already past the threshold fires at once.
+test.describe("bleed on a page that loads scrolled", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  for (const world of WORLDS) {
+    test(`T3 the ${world} bleed fires at once on a page that loads past the threshold`, async ({ page }) => {
+      await page.addInitScript(() => {
+        // before nts.js's own DOMContentLoaded listener, which is added later
+        document.addEventListener("DOMContentLoaded", () => scrollTo({ top: 300, behavior: "instant" }));
+        // that scroll's event must not reach the bleed: only its own check at the end of cross() can fire it
+        addEventListener("scroll", (e) => e.stopImmediatePropagation(), true);
+      });
+      await arrive(page, world, "flag");
+      expect(await page.evaluate(() => scrollY), "the page loaded scrolled").toBeGreaterThan(20);
+      await expect.poll(() => page.evaluate(() => document.querySelector(".nts-night-disc")?.getAnimations().length ?? -1), "a disc animation without any scroll").toBe(1);
+    });
+  }
+});
 
 test.describe("no bleed on a direct landing or a reload", () => {
   for (const world of WORLDS) {
@@ -183,7 +207,6 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
       test(`T3 the ${world} bleed shows the settled ground in the disc and below the hero, ${label}`, async ({ page }) => {
         await arrive(page, world, "flag");
         await animationsSettled(page); // the grain's own fade, if any
-        const end = await bleedEnd(page);
         // The section's own text and figures are not the ground: the median skips them.
         const measure = () => page.evaluate(() => {
           const hero = document.querySelector("main .hero").getBoundingClientRect();
@@ -201,15 +224,12 @@ for (const [label, viewport] of [["1000x560", { width: 1000, height: 560 }], ["3
           { x: 0, y: 60, w: viewport.width < 900 ? m.gutter : viewport.width, h: Math.max(0, m.heroBottom - 60), disc: m.disc && { cx: m.disc.cx, cy: m.disc.cy, r: m.disc.r - 4 } },
           { x: 0, y: m.heroBottom + 4, w: viewport.width, h: Math.max(0, viewport.height - m.heroBottom - 4) },
         ];
-        const y = Math.round(0.5 * end);
-        await scrollToY(page, y);
+        await holdBleed(page, HELD);
         expect(await bleedState(page)).toBe("in");
         const m = await measure();
         const during = await groundLuma(page, regions(m));
-        // Settle, come back to the same scroll: the same view in the world.
-        await scrollToY(page, Math.round(end) + 5);
-        await expect.poll(() => bleedState(page)).toBe("world");
-        await scrollToY(page, y);
+        // Settle, at the same scroll: the same view in the world.
+        await settleBleed(page);
         await animationsSettled(page);
         const after = await groundLuma(page, regions(m));
         expect(during[0], "ground sampled inside the disc over the hero").not.toBeNull();
@@ -236,8 +256,6 @@ for (const scale of SEAM_SCALES) {
       test(`T3 the ${world} bleed has no seam at the hero's foot, scale ${scale}`, async ({ page }) => {
         await arrive(page, world, "flag");
         await animationsSettled(page);
-        const end = await bleedEnd(page);
-        const y = Math.round(0.5 * end);
         const rows = async () => {
           const foot = await page.evaluate(() => document.querySelector("main .hero").getBoundingClientRect().bottom);
           const dev = Math.round(foot * scale), band = 10 * scale;
@@ -246,13 +264,11 @@ for (const scale of SEAM_SCALES) {
           const ref = [...r.slice(0, 4), ...r.slice(-4)].sort((a, b) => a - b)[4];
           return { ref, worst: Math.max(...r.map((v) => Math.abs(v - ref))), r };
         };
-        await scrollToY(page, y);
+        await holdBleed(page, HELD);
         expect(await bleedState(page)).toBe("in");
         const during = await rows();
         expect(during.worst, `in: ground ${during.ref}, rows ${during.r.join(",")}`).toBeLessThanOrEqual(SEAM_TOLERANCE);
-        await scrollToY(page, Math.round(end) + 5);
-        await expect.poll(() => bleedState(page)).toBe("world");
-        await scrollToY(page, y);
+        await settleBleed(page);
         await animationsSettled(page);
         const after = await rows();
         expect(after.worst, `world: ground ${after.ref}, rows ${after.r.join(",")}`).toBeLessThanOrEqual(SEAM_TOLERANCE);
@@ -269,10 +285,7 @@ test.describe("world to world hop", () => {
     await page.goto(process.env.NTS_BASE + "/", { waitUntil: "load" });
     await clickWorldLink(page, "embers");
     await expect.poll(() => bleedState(page)).toBe("in");
-    if (settle) {
-      await scrollToY(page, Math.round(await bleedEnd(page)) + 5);
-      await expect.poll(() => bleedState(page)).toBe("world");
-    }
+    if (settle) await settleBleed(page);
     await page.locator('a[href="/not-not-philo/"]:visible').first().click();
     await page.waitForURL("**/not-not-philo/");
     return page.evaluate(() => document.documentElement.getAttribute("data-bleed-state"));

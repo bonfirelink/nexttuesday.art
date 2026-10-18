@@ -106,15 +106,6 @@ export async function followLink(page, path) {
 
 export const bleedState = (page) => page.evaluate(() => document.documentElement.getAttribute("data-bleed-state"));
 
-// Scroll position (px) where the bleed completes, as nts.js works it out.
-export const bleedEnd = (page) =>
-  page.evaluate(() => {
-    const r = document.querySelector("main .hero").getBoundingClientRect();
-    const t = document.querySelector("main .hero h1").getBoundingClientRect();
-    const bar = document.querySelector(".nts-header").getBoundingClientRect().height;
-    return Math.max(Math.min(r.top + scrollY + r.height / 2, t.top + scrollY - bar - Math.round(innerHeight * 0.02)), innerHeight * 0.1);
-  });
-
 // Instant scroll (the page may set smooth scrolling) and two frames for observers.
 export const scrollToY = (page, y) =>
   page.evaluate((y) => {
@@ -123,6 +114,43 @@ export const scrollToY = (page, y) =>
   }, y);
 
 export const bleedProgress = (page) => page.evaluate(() => window.NTS.bleed.progress());
+
+// The bleed fires on a scroll of this many px (reaching it), and runs this long
+// (the same numbers as FIRE_AT and DURATION in nts.js; B1 in
+// tests/static/bleed-constants.spec.mjs compares them).
+export const BLEED_FIRE_AT = 20;
+export const BLEED_MS = 2000;
+
+// Fires the bleed: a scroll past the threshold.
+export const fireBleed = (page) => scrollToY(page, BLEED_FIRE_AT + 4);
+
+// The disc's animations (its scale and the copy's inverse) once fired.
+const waitDiscAnimated = (page) =>
+  page.waitForFunction(() => document.querySelector(".nts-night-disc")?.getAnimations().length === 1 && document.querySelector(".nts-night-in").getAnimations().length === 1);
+
+// Fires the bleed and freezes the disc at `f` (0..1) of its run, so a
+// screenshot sees one stable state.
+export async function holdBleed(page, f) {
+  await fireBleed(page);
+  await waitDiscAnimated(page);
+  await page.evaluate(({ f, ms }) => {
+    for (const e of document.querySelectorAll(".nts-night-disc, .nts-night-in")) for (const a of e.getAnimations()) { a.pause(); a.currentTime = f * ms; }
+    return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  }, { f, ms: BLEED_MS });
+}
+
+// Fires the bleed if it has not fired, then ends its animations at once, which
+// settles it as the full run would.
+export async function settleBleed(page) {
+  if (await bleedState(page) !== "world") {
+    if (await page.evaluate(() => !document.querySelector(".nts-night-disc").getAnimations().length)) await fireBleed(page);
+    await waitDiscAnimated(page);
+    await page.evaluate(() => {
+      for (const e of document.querySelectorAll(".nts-night-disc, .nts-night-in")) for (const a of e.getAnimations()) a.finish();
+    });
+  }
+  await page.waitForFunction(() => document.documentElement.getAttribute("data-bleed-state") === "world");
+}
 
 // Median luminance (0..255) of the pixels of a viewport screenshot inside
 // each region, `{ x, y, w, h, disc? }` in CSS px at scale 1; `disc: { cx, cy, r }`

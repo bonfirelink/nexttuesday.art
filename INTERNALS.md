@@ -518,10 +518,18 @@ reduced motion) nothing is held back.
 The world bleed-in. A world page loaded with
 `<script src="/_nts/nts-head.js" data-bleed="scroll">` starts in the NTS
 colours when the visitor arrived from the home page, and its world's
-colours bleed in once, driven by the scroll. Landing directly, reloading,
-or asking for reduced motion gives the world from the first frame.
-EMBERS' bleed-in is its night-fall: paper to night. The three worlds
-behave the same.
+colours bleed in once, as a timed burst the first scroll sets off.
+Landing directly, reloading, or asking for reduced motion gives the world
+from the first frame. EMBERS' bleed-in is its night-fall: paper to night.
+The three worlds behave the same.
+
+The burst is not driven by the scroll, and must not be again. On iOS Safari a
+touch pan gives script the scroll in bursts, and any disc whose size changes
+between those bursts pops or flickers for single frames, whatever draws the
+circle: a `ScrollTimeline`, a paused animation set from `scrollY` every
+frame (with or without predicting ahead), a rounded overflow clip, a
+`clip-path` or a mask all showed it. A disc the compositor animates on its
+own, on the document timeline with no scroll input, is clean on the iPhone.
 
 - Detection, in `nts-head.js`, before paint: `nts.js` sets
   `sessionStorage["nts:from"] = "home"` when a link to a world page is
@@ -573,30 +581,39 @@ behave the same.
   a settled world page has its own ground on the root. Only three states exist: `before`, `in` (from
   `DOMContentLoaded` until the disc is complete) and `world`.
 - The crossing, in `nts.js`, only ever crosses the hero, and the
-  compositor does it: during the scroll the main thread reads no layout
-  and writes no styles beyond a class on the header. At `DOMContentLoaded`
-  (after every deferred script, so the figures are mounted) it clones the
-  hero as it is into `.nts-night`, a body-level layer in document px from
-  the top of the page to the hero's foot, over the hero and under the
-  header, on the world's ground (`data-world` on `.nts-night-in`). The
-  copy is shown through a disc: `.nts-night-disc`, a circle centred on
-  the entity whose radius reaches every corner of what is in view of the
-  hero once it is complete, scaled from 0 to 1, with the copy inside it
-  (`.nts-night-in`) scaled by the inverse around the same centre so it
-  stays in place. Both are Web Animations on a `ScrollTimeline` over the
-  root, from the top to the scroll where the hero is half gone or, if sooner,
-  a little before the world's name (the hero's h1) would reach the foot
-  of the sticky header (at least a tenth of the viewport), smoothstepped through the keyframes, which
-  are dense enough (every 4% of scale) that the two linear
+  compositor does it: once fired, the main thread reads no layout and
+  writes no styles beyond the classes of the parts outside the hero. At
+  `DOMContentLoaded` (after every deferred script, so the figures are
+  mounted) it clones the hero as it is into `.nts-night`, a body-level
+  layer in document px from the top of the page to the hero's foot, over
+  the hero and under the header, on the world's ground (`data-world` on
+  `.nts-night-in`). The copy is shown through a disc: `.nts-night-disc`, a
+  circle centred on the entity whose radius reaches the farthest corner of
+  what is in view of the layer at the moment it fires (down to the layer's
+  foot, plus 2px), with the copy inside it (`.nts-night-in`) scaled by the
+  inverse around the same centre so it stays in place. Nothing moves until
+  a scroll of 20px (`FIRE_AT`, reaching it; a smaller nudge fires nothing, and a
+  page that already sits past it fires at once). Then the geometry is
+  measured again and the disc and the copy each get one Web Animation on the
+  document timeline, 2000ms (`DURATION`), transform only. The `snap` ease is
+  in the keyframes: a short held seed (3% of the radius over the first fifth),
+  a hard open that runs to 1.08 of the radius, beyond the screen and unseen,
+  and comes back, so what is seen ends at speed. The keyframes are dense
+  enough (every 4% of scale, and at the turn) that the two linear
   interpolations stay each other's inverse to well under a pixel. The
-  page's tokens flip to the world's at the same moment, except on the
+  animation never closes and does not look at the scroll again, and a
+  resize after firing is ignored (before it, the hero's resize measures
+  again). The
+  page's tokens flip to the world's when the copy is made (state `in`,
+  at `DOMContentLoaded`), except on the
   hero itself and the header, which keep `.nts-bleed-old`; so everything
   below the hero is in the world from the start and is never crossed, and
   the hero keeps its NTS ground (`main .hero` gets a full-bleed beige
   ground, `box-shadow` clipped at its foot, while the state is `before`
   or `in`). The parts outside the hero drop `.nts-bleed-old` when the
-  disc covers them whole, their farthest corner (a scroll position worked
-  out with the geometry; a sticky header moves down with the scroll), and
+  disc covers them whole for good, their farthest corner (a timer set at
+  firing from the geometry as the page sits then; the ease runs past full
+  and back, so it is the last time the disc is short of the corner), and
   crossfade (`--dur-bleed-fade`, 200ms). Crossed at its centre, the
   full-width header went dark over the NTS ground still around the disc,
   its backdrop blur smearing the disc's edge across it. Only the part itself
@@ -625,14 +642,8 @@ behave the same.
   layer runs 2px past the hero's foot, so its scaled bottom edge never lands
   in the hero's last row and lets the paper show as a line. CSS animations in
   the copy are set in step with the original's; draw-ins in it are
-  shown. When the scroll reaches the end the world settles for good: the
-  copy goes, the classes go, the state is `world`. Scrolling back up before
-  that closes the disc. A resize of the hero (or the window) measures
-  again and rebuilds the keyframes.
-- Where `ScrollTimeline` is missing (Firefox, Safari before 26) the same
-  animations are paused and a passive scroll listener sets their
-  `currentTime` once a frame: still transforms only, no layout reads, a
-  frame behind the scroll at most.
+  shown. When the animation finishes the world settles for good: the copy
+  goes, the classes go, the state is `world`.
 - Hooks, on `window.NTS.bleed`:
   - `twin(el)`: the copy of a hero element while the copy exists, else
     `null`. A live figure draws its night into its twin and its day into
@@ -642,7 +653,8 @@ behave the same.
     while some of it shows (`progress()` above 0 for the night, below 1 for
     the day), at the figure's own frame rate; nothing is redrawn because
     the page scrolled.
-  - `progress()`: the disc's progress, 0..1, worked out from `scrollY`.
+  - `progress()`: the disc's progress, 0..1: 0 until it fires, then the ease
+    at the animation's time (1 from the moment it passes full, and settled).
   - The event `nts:bleed` on `window`, with `detail { phase: "start" |
     "end", world }`: when the copy is made (twins exist from here) and
     when it goes (each figure redraws itself at once in the world's

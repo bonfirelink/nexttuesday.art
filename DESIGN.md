@@ -181,7 +181,7 @@ NTS colours take the same tokens, by role:
 - **A world's arrival:** a world page reached from the home opens with
   its header and hero in the home's set (beige, ink type, sigil and marker,
   the voice for the figure's cut on NOT NOT PHILO), so the hand-over is
-  seamless; the world's colours bleed in as it scrolls.
+  seamless; the world's colours bleed in as a burst once it is scrolled.
 - **The scrollbar:** an ink line on the beige.
 - **The favicon:** the sigil in ink on the beige.
 
